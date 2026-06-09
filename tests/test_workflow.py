@@ -6,6 +6,7 @@ from pathlib import Path
 import pytest
 
 from context_extractor import LLMContextExtractor
+from judge import LLMComplianceJudge
 from llm_gateway import LLMGateway
 from evaluate import (
     EvaluationLabels,
@@ -19,7 +20,18 @@ from normalizer import PolicyGuidedNormalizer, normalization_schema_for_allowed_
 from policy_compiler import validate_compiler_output
 from retriever import PolicyRetriever, candidate_allowed_for_anchor, candidate_from_row
 from revision import LLMRevisionSuggester
-from schemas import Claim, ContextAnchor, CUPlanItem, LLMJudgment, PolicyCandidate, PolicyHypernymProposal, ReviewGraph, ReviewInput, Span
+from schemas import (
+    Claim,
+    ContextAnchor,
+    CUPlanItem,
+    EvidenceWindow,
+    LLMJudgment,
+    PolicyCandidate,
+    PolicyHypernymProposal,
+    ReviewGraph,
+    ReviewInput,
+    Span,
+)
 from vocabulary_governance import validate_governance_output
 from workflow import GraphComplianceCCGWorkflow
 from server import runtime_error_detail
@@ -242,6 +254,25 @@ class UnknownHypernymLLM(FakeLLM):
         return super().structured(name=name, system=system, user=user, schema=schema)
 
 
+class LeakyEvidenceLLM(FakeLLM):
+    def structured(self, *, name, system, user, schema):
+        if name == "graphcompliance_cu_judgment":
+            plan_item_id = re.search(r"'plan_item_id': '([^']+)'", user).group(1)
+            return {
+                "judgments": [
+                    {
+                        "plan_item_id": plan_item_id,
+                        "verdict": "NON_COMPLIANT",
+                        "score": 0.95,
+                        "why": "다른 claim의 확정 보장 수익 문구를 근거로 위반이라고 판단했습니다.",
+                        "evidence_span": "누구나 연 5% 확정 보장 수익을 받을 수 있는 절호의 기회입니다.",
+                        "used_policy_evidence": ["legal_chunk_1"],
+                    }
+                ]
+            }
+        return super().structured(name=name, system=system, user=user, schema=schema)
+
+
 class FakeRetriever(PolicyRetriever):
     def assert_policy_alignment_ready(self, *, workspace_id: str) -> None:
         return None
@@ -437,6 +468,63 @@ def test_revision_suggester_skips_neutral_launch_anchor_with_broad_policy_tag() 
 
     assert suggestions == []
     assert "graphcompliance_revision_suggestions" not in llm.client.calls
+
+
+def test_judge_downgrades_cross_anchor_evidence_leakage() -> None:
+    anchor = ContextAnchor(
+        anchor_id="anchor_launch",
+        anchor_type="claim_anchor",
+        claim_id="claim_launch",
+        span=Span(start=0, end=10, text="JB 특판예금 출시."),
+        facts=["JB에서 특판예금 상품 출시 가능성을 알리는 중립 문장"],
+        hypernyms=[
+            PolicyHypernymProposal(
+                proposal_id="proposal_launch",
+                source_id="claim_launch",
+                hypernym_id="policy_hypernym_ad_regulation",
+                hypernym="광고 규제",
+                support="WEAK",
+                confidence=0.62,
+                normalized_score=0.62,
+            )
+        ],
+    )
+    plan = CUPlanItem(
+        plan_item_id="plan_launch",
+        anchor_id=anchor.anchor_id,
+        cu_id="cu_false_ad",
+        principle="광고규제",
+        source_article="금소법 제22조",
+        subject="허위ㆍ과장 광고 금지",
+        condition="금융상품 광고인 경우",
+        constraint="오인 가능 표현 금지",
+        context="financial_advertising",
+        legal_evidence_ids=["legal_chunk_1"],
+        evidence_texts=["광고는 소비자를 오인하게 해서는 안 된다."],
+        retrieval_scores={"combined_score": 0.62},
+        rerank_score=0.62,
+        selection_reason="일반 광고규제 후보",
+    )
+    window = EvidenceWindow(
+        evidence_window_id="window_launch",
+        plan_item_id=plan.plan_item_id,
+        anchor_id=anchor.anchor_id,
+        facts=anchor.facts,
+        legal_evidence_ids=plan.legal_evidence_ids,
+        legal_evidence_texts=plan.evidence_texts,
+    )
+
+    judgments = LLMComplianceJudge(LeakyEvidenceLLM()).judge(
+        review_run_id="run_launch",
+        anchors=[anchor],
+        plan=[plan],
+        windows=[window],
+    )
+
+    assert judgments[0].verdict == "INSUFFICIENT"
+    assert judgments[0].score == 0.5
+    assert judgments[0].evidence_span == "JB 특판예금 출시."
+    assert "outside this anchor" in judgments[0].why
 
 
 def test_exception_override_effective_verdict_drives_output() -> None:
