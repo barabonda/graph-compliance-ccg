@@ -84,12 +84,16 @@
 
       <section class="tabs">
         <div class="tab-list" role="tablist">
-          <button class="tab-button is-active" data-tab="claims" type="button">Claim Cards</button>
+          <button class="tab-button is-active" data-tab="overall" type="button">Overall Context</button>
+          <button class="tab-button" data-tab="sentences" type="button">Sentence Map</button>
+          <button class="tab-button" data-tab="claims" type="button">Claim Cards</button>
           <button class="tab-button" data-tab="graph" type="button">Evidence Graph</button>
           <button class="tab-button" data-tab="productFacts" type="button">Product Facts</button>
           <button class="tab-button" data-tab="audit" type="button">Audit / Trace</button>
         </div>
-        <div id="claimsTab" class="tab-panel is-active"></div>
+        <div id="overallTab" class="tab-panel is-active"></div>
+        <div id="sentencesTab" class="tab-panel"></div>
+        <div id="claimsTab" class="tab-panel"></div>
         <div id="graphTab" class="tab-panel">
           <div id="graphCanvas" class="graph-canvas"></div>
         </div>

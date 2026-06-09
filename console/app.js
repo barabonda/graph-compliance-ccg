@@ -75,6 +75,8 @@ const els = {
   detail: document.getElementById("detailContent"),
   runLabel: document.getElementById("reviewRunLabel"),
   copyRun: document.getElementById("copyRunButton"),
+  overallTab: document.getElementById("overallTab"),
+  sentencesTab: document.getElementById("sentencesTab"),
   claimsTab: document.getElementById("claimsTab"),
   graphCanvas: document.getElementById("graphCanvas"),
   productFactsTab: document.getElementById("productFactsTab"),
@@ -232,6 +234,8 @@ function renderEmpty() {
   els.highlightedText.innerHTML = `<div class="empty-state">심사할 광고 원문이 여기에 표시됩니다.</div>`;
   els.conditionalNotice.textContent = "통과 후보도 완전 면책이 아니라 현재 문안 기준의 1차 검토 결과입니다.";
   els.detail.innerHTML = `<div class="empty-state">하이라이트나 Claim 카드를 선택하면 상세 판단이 표시됩니다.</div>`;
+  els.overallTab.innerHTML = "";
+  els.sentencesTab.innerHTML = "";
   els.claimsTab.innerHTML = "";
   els.graphCanvas.innerHTML = "";
   els.productFactsTab.innerHTML = "";
@@ -242,6 +246,8 @@ function renderResult() {
   renderVerdictHeader();
   renderRiskStrip();
   renderHighlights();
+  renderOverallContext();
+  renderSentenceMap();
   renderClaimCards();
   renderDetail();
   renderGraph();
@@ -338,6 +344,118 @@ function renderHighlights() {
   els.highlightedText.querySelectorAll(".hl").forEach((button) => {
     button.addEventListener("click", () => selectAnchor(button.dataset.anchorId));
   });
+}
+
+function renderOverallContext() {
+  const frame = state.result?.context_frame || {};
+  const influences = state.result?.context_influences || [];
+  if (!state.result) {
+    els.overallTab.innerHTML = `<div class="empty-state">Review를 실행하면 전체 광고 인상과 문장 영향이 여기에 표시됩니다.</div>`;
+    return;
+  }
+  els.overallTab.innerHTML = `
+    <section class="context-frame-grid">
+      <article class="detail-card context-frame-card">
+        <div class="card-top">
+          <h3>ContextFrame</h3>
+          <span class="badge ${trackBBadgeClass({ verdict: frame.overall_risk_level, misleading_risk_score: frame.overall_risk_level === "HIGH" ? 1 : frame.overall_risk_level === "MEDIUM" ? 0.55 : 0.2 })}">${escapeHtml(frame.overall_risk_level || "UNKNOWN")}</span>
+        </div>
+        <p class="evidence-text">
+          <b>요약</b><br />${escapeHtml(frame.summary || "-")}<br /><br />
+          <b>핵심 메시지</b><br />${escapeHtml(frame.primary_message || "-")}<br /><br />
+          <b>대표 소비자 인상</b><br />${escapeHtml(frame.representative_consumer_impression || "-")}
+        </p>
+      </article>
+      <article class="detail-card">
+        <h3>광고 목적 / 톤 / 위험 축</h3>
+        <div class="tag-row">
+          <span class="tag">목적 ${escapeHtml(frame.product_purpose || "-")}</span>
+          <span class="tag">톤 ${escapeHtml(frame.tone || "-")}</span>
+        </div>
+        <div class="tag-row">${(frame.risk_axes || []).map((axis) => `<span class="tag">${escapeHtml(axis)}</span>`).join("") || `<span class="tag">위험 축 없음</span>`}</div>
+        <p class="evidence-text">이 레이어는 광고 전체를 먼저 읽고, 문장별 판단이 전체 인상에 어떻게 기여하는지 judge evidence window에 전달합니다.</p>
+      </article>
+    </section>
+    <section class="detail-card">
+      <h3>ContextInfluence</h3>
+      <div class="sentence-relation-list">
+        ${influences.length ? influences.map((item) => `
+          <article class="sentence-relation-card">
+            <div class="card-top">
+              <strong>${escapeHtml(item.influence_type || "influence")}</strong>
+              <span class="tag">${escapeHtml(item.risk_delta || "NEUTRAL")} · ${Number(item.confidence || 0).toFixed(2)}</span>
+            </div>
+            <p class="evidence-text">${escapeHtml(item.effect || "-")}</p>
+          </article>
+        `).join("") : `<div class="empty-state">문장/표현이 전체 인상에 미치는 영향이 추출되지 않았습니다.</div>`}
+      </div>
+    </section>
+  `;
+}
+
+function renderSentenceMap() {
+  const sentences = state.result?.sentence_units || [];
+  const relations = state.result?.inter_sentence_relations || [];
+  if (!state.result) {
+    els.sentencesTab.innerHTML = `<div class="empty-state">Review를 실행하면 SentenceUnit과 문장 간 관계가 여기에 표시됩니다.</div>`;
+    return;
+  }
+  els.sentencesTab.innerHTML = `
+    <section class="sentence-map">
+      <article class="sentence-column">
+        <h3>SentenceUnit</h3>
+        ${sentences.length ? sentences.map(sentenceCard).join("") : `<div class="empty-state">문장 단위가 없습니다.</div>`}
+      </article>
+      <article class="sentence-column">
+        <h3>InterSentenceRelation</h3>
+        ${relations.length ? relations.map(sentenceRelationCard).join("") : `<div class="empty-state">문장 간 관계가 없습니다.</div>`}
+      </article>
+    </section>
+  `;
+  els.sentencesTab.querySelectorAll("[data-anchor-id]").forEach((button) => {
+    button.addEventListener("click", () => selectAnchor(button.dataset.anchorId));
+  });
+}
+
+function sentenceCard(sentence) {
+  const claims = claimsForSentence(sentence.sentence_id);
+  return `
+    <article class="sentence-card">
+      <div class="card-top">
+        <strong>${escapeHtml(sentence.text || "-")}</strong>
+        <span class="badge ${trackBBadgeClass({ verdict: sentence.risk_level, misleading_risk_score: sentence.risk_level === "HIGH" ? 1 : sentence.risk_level === "MEDIUM" ? 0.55 : 0.2 })}">${escapeHtml(sentence.role || "other")}</span>
+      </div>
+      <p class="evidence-text">
+        <b>문장 의미</b><br />${escapeHtml(sentence.local_meaning || "-")}<br /><br />
+        <b>전체 맥락 영향</b><br />${escapeHtml(sentence.context_effect || "-")}
+      </p>
+      <div class="tag-row">
+        ${claims.length ? claims.map((claim) => {
+          const anchor = anchorForClaim(claim.claim_id);
+          return anchor ? `<button class="tag tag-button-inline" data-anchor-id="${anchor.anchor_id}" type="button">${escapeHtml(claim.text)}</button>` : `<span class="tag">${escapeHtml(claim.text)}</span>`;
+        }).join("") : `<span class="tag">독립 Claim 없음</span>`}
+      </div>
+    </article>
+  `;
+}
+
+function sentenceRelationCard(relation) {
+  const source = sentenceById(relation.source_sentence_id);
+  const target = sentenceById(relation.target_sentence_id);
+  return `
+    <article class="sentence-relation-card">
+      <div class="card-top">
+        <strong>${escapeHtml(relation.relation_type || "OTHER")}</strong>
+        <span class="tag">문장 간 영향</span>
+      </div>
+      <p class="evidence-text">
+        <b>From</b><br />${escapeHtml(source?.text || relation.source_sentence_id || "-")}<br /><br />
+        <b>To</b><br />${escapeHtml(target?.text || relation.target_sentence_id || "-")}<br /><br />
+        <b>Why</b><br />${escapeHtml(relation.explanation || "-")}<br /><br />
+        <b>Evidence</b><br />${escapeHtml(relation.evidence || "-")}
+      </p>
+    </article>
+  `;
 }
 
 function renderClaimCards() {
@@ -762,14 +880,21 @@ function renderGraph() {
   const planItems = state.result.cu_plan.filter((item) => item.anchor_id === anchor.anchor_id).slice(0, 5);
   const claimFacts = productClaimFactsForAnchor(anchor).slice(0, 3);
   const comparisons = claimFacts.flatMap((fact) => productComparisonsForClaimFact(fact.claim_fact_id)).slice(0, 3);
+  const claim = claimById(anchor.claim_id);
+  const sentence = claim ? sentenceById(claim.sentence_id) : null;
+  const frame = state.result?.context_frame || {};
   const nodes = [
-    { id: "claim", label: "Claim", text: anchor.span.text, x: 24, y: 150 },
-    { id: "anchor", label: "ContextAnchor", text: anchor.anchor_type, x: 220, y: 150 },
-    { id: "hypernym", label: "PolicyHypernym", text: anchor.hypernyms.map((item) => item.hypernym).join(", "), x: 430, y: 150 },
+    { id: "frame", label: "ContextFrame", text: frame.primary_message || frame.summary || "전체 광고 인상", x: 24, y: 20, status: "evidence" },
+    { id: "sentence", label: "SentenceUnit", text: sentence ? `${sentence.role} · ${sentence.text}` : "문장 단위 없음", x: 24, y: 150, status: sentence?.risk_level || "evidence" },
+    { id: "claim", label: "Claim", text: anchor.span.text, x: 220, y: 150 },
+    { id: "anchor", label: "ContextAnchor", text: anchor.anchor_type, x: 430, y: 150 },
+    { id: "hypernym", label: "PolicyHypernym", text: anchor.hypernyms.map((item) => item.hypernym).join(", "), x: 640, y: 150 },
     { id: "trackb", label: "Track B", text: `${state.result?.overall_impression_judgment?.verdict || "overall impression"} · ${Number(state.result?.overall_impression_judgment?.misleading_risk_score || 0).toFixed(2)}`, x: 430, y: 300, status: trackBGraphStatus() },
     { id: "product", label: "Product", text: `${state.result?.product_context?.product_group || "auto"} · docs ${Number(state.result?.product_context?.document_count || 0)}`, x: 430, y: 20, status: "evidence" },
   ];
   const edges = [
+    ["frame", "sentence", "HAS_SENTENCE"],
+    ["sentence", "claim", "CONTAINS_CLAIM"],
     ["claim", "anchor", "HAS_ANCHOR"],
     ["anchor", "hypernym", "NORMALIZED_TO"],
     ["claim", "trackb", "MEANING_IMPLICATURE_EFFECT"],
@@ -1169,6 +1294,22 @@ function productClaimFactsForAnchor(anchor) {
 
 function claimQualifiers(claimId) {
   return (state.result?.claims || []).find((item) => item.claim_id === claimId)?.qualifiers || [];
+}
+
+function claimById(claimId) {
+  return (state.result?.claims || []).find((item) => item.claim_id === claimId);
+}
+
+function sentenceById(sentenceId) {
+  return (state.result?.sentence_units || []).find((item) => item.sentence_id === sentenceId);
+}
+
+function claimsForSentence(sentenceId) {
+  return (state.result?.claims || []).filter((item) => item.sentence_id === sentenceId);
+}
+
+function anchorForClaim(claimId) {
+  return (state.result?.context_anchors || []).find((item) => item.claim_id === claimId);
 }
 
 function productComparisonsForClaimFact(claimFactId) {

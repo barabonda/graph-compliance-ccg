@@ -5,7 +5,7 @@ from __future__ import annotations
 from typing import Any
 
 from llm_gateway import LLMGateway
-from schemas import CUPlanItem, ContextAnchor, EvidenceWindow, ExceptionReview, LLMJudgment
+from schemas import CUPlanItem, Claim, ContextAnchor, ContextFrame, ContextInfluence, EvidenceWindow, ExceptionReview, LLMJudgment, SentenceUnit
 from utils import normalize_space, stable_id, to_jsonable
 
 
@@ -59,11 +59,27 @@ class LLMComplianceJudge:
         review_run_id: str,
         anchors: list[ContextAnchor],
         plan: list[CUPlanItem],
+        claims: list[Claim] | None = None,
+        context_frame: ContextFrame | None = None,
+        sentence_units: list[SentenceUnit] | None = None,
+        context_influences: list[ContextInfluence] | None = None,
     ) -> list[EvidenceWindow]:
         anchor_by_id = {anchor.anchor_id: anchor for anchor in anchors}
+        claim_by_id = {claim.claim_id: claim for claim in claims or []}
+        sentence_by_id = {sentence.sentence_id: sentence for sentence in sentence_units or []}
         windows: list[EvidenceWindow] = []
         for item in plan:
             anchor = anchor_by_id[item.anchor_id]
+            claim = claim_by_id.get(anchor.claim_id)
+            sentence = sentence_by_id.get(claim.sentence_id) if claim and claim.sentence_id else None
+            related_influences = [
+                influence
+                for influence in context_influences or []
+                if (
+                    influence.source_id in {anchor.claim_id, claim.sentence_id if claim else ""}
+                    or influence.target_id in {anchor.claim_id, claim.sentence_id if claim else ""}
+                )
+            ]
             windows.append(
                 EvidenceWindow(
                     evidence_window_id=stable_id("evidence_window", review_run_id, item.plan_item_id),
@@ -72,6 +88,9 @@ class LLMComplianceJudge:
                     facts=anchor.facts,
                     legal_evidence_ids=item.legal_evidence_ids,
                     legal_evidence_texts=item.evidence_texts,
+                    context_frame=to_jsonable(context_frame) if context_frame else {},
+                    sentence_unit=to_jsonable(sentence) if sentence else {},
+                    context_influences=to_jsonable(related_influences),
                 )
             )
         return windows
@@ -115,8 +134,13 @@ class LLMComplianceJudge:
             schema=JUDGE_SCHEMA,
             system=(
                 "You are a Korean financial-ad compliance judge. Each judgment_items entry is an isolated "
-                "ContextAnchor, EvidenceWindow, and CUPlanItem. Judge every entry independently. Do not use "
+                "ContextAnchor, hierarchical EvidenceWindow, and CUPlanItem. Judge every entry independently. Do not use "
                 "outside law, outside facts, or another judgment_items entry's advertising claim as evidence. "
+                "Use the EvidenceWindow's ContextFrame, SentenceUnit, and ContextInfluence fields to understand "
+                "how the current claim contributes to the whole ad impression. A neutral launch_notice sentence "
+                "should not be treated as a violation merely because later sentences are risky. Conversely, "
+                "qualifiers such as '누구나', '조건 없이', '확정', and '보장' inside the same Claim can raise risk "
+                "when they reinforce an unconditional or guaranteed consumer impression. "
                 "Prioritize explicit contradiction. Strong implication is allowed. Never infer a violation "
                 "from silence. If the CU is unrelated to the anchor, return NOT_APPLICABLE. If the CU is "
                 "related but a required fact or document is missing from the window, return INSUFFICIENT. "

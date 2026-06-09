@@ -475,6 +475,42 @@ textarea:focus {
   padding: 10px;
 }
 
+.context-frame-grid,
+.sentence-map {
+  display: grid;
+  grid-template-columns: minmax(260px, 1fr) minmax(260px, 1fr);
+  gap: 12px;
+}
+
+.context-frame-card {
+  background: #fff;
+}
+
+.sentence-column,
+.sentence-relation-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+
+.sentence-card,
+.sentence-relation-card {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+  padding: 12px;
+}
+
+.tag-button-inline {
+  cursor: pointer;
+}
+
+.tag-button-inline:hover {
+  border-color: var(--blue);
+  color: var(--blue);
+}
+
 .tabs {
   overflow: hidden;
 }

@@ -73,6 +73,14 @@ adds `review_run_id`, `context_anchors`, `cu_plan`, `judgments`,
 
 JB dataset extensions add:
 
+- `context_frame`, `sentence_units`, `inter_sentence_relations`, and
+  `context_influences` — RLM-style hierarchical context graph evidence. The
+  workflow reads the full ad first, creates an overall message/consumer
+  impression frame, then decomposes the draft into ordered sentences and
+  sentence-to-sentence influence before extracting claim-level details. This
+  keeps neutral launch notices such as `JB 특판예금 출시.` separate from risky
+  benefit claims, and lets the judge see when one sentence reinforces or
+  mitigates another.
 - `claims[].qualifiers` — expression-level modeling inside each Claim. Generic
   scope/certainty/guarantee wording such as `누구나`, `조건 없이`, `확정`, and
   `보장` stays inside the parent Claim as `ClaimQualifier` evidence instead of
@@ -114,6 +122,38 @@ product documents. It resolves the reviewed product from the ad text and JB
 product metadata, reads only the selected PDF documents for that product, and
 stores the extracted `ProductFact`, `ClaimFact`, and `ComparisonResult` nodes
 under the current `review_run_id`.
+
+## Hierarchical Context Graph
+
+The context layer follows the GraphCompliance paper's context engineering idea
+and borrows the RLM pattern of recursive decomposition and aggregation:
+
+```text
+AdDraft
+-> ContextFrame
+-> SentenceUnit
+-> Claim
+-> ClaimQualifier / ClaimFact
+-> ConsumerEffect
+-> CUPlanItem / ProductFactComparison
+-> LLMJudgment
+```
+
+The implementation does not run a separate code-execution RLM loop in v1.
+Instead, one structured LLM extraction call must produce the same hierarchy:
+
+1. `extract_context_frame`: identify the full-ad message, tone, purpose,
+   representative consumer impression, and risk axes.
+2. `extract_sentence_units`: split the original text into ordered sentences,
+   classify roles such as `launch_notice`, `benefit_claim`,
+   `condition_disclosure`, and record local context effects.
+3. `extract_claim_details`: decompose each sentence into claims, entities,
+   relations, and qualifiers.
+
+Judge evidence windows include the relevant `ContextFrame`, `SentenceUnit`, and
+`ContextInfluence` for each anchor. That is what lets the system explain that
+`누구나` should be evaluated inside the parent claim `누구나 연 5% 확정 보장`
+rather than as an independent target-consumer anchor.
 
 Configure local disclosure data when it is outside the default Downloads path:
 

@@ -21,7 +21,7 @@ from revision import LLMRevisionSuggester
 from router import build_output
 from risk_context import track_c_extension_summary
 from schemas import PolicyCandidate, ReviewGraph, ReviewInput, ReviewOutput
-from utils import content_hash, stable_id
+from utils import content_hash, stable_id, to_jsonable
 
 
 class GraphComplianceCCGWorkflow:
@@ -68,16 +68,42 @@ class GraphComplianceCCGWorkflow:
         self.retriever.assert_policy_alignment_ready(workspace_id=review_input.workspace_id)
         yield workflow_event("step_completed", "Policy alignment check", review_run_id=review_run_id, summary="Policy alignment graph is ready.")
 
-        yield workflow_event("step_started", "Context extraction", review_run_id=review_run_id, summary="LLM extracts atomic claims, entities, relations, meaning, implicature, and consumer effect.")
-        claims = self.extractor.extract(review_input, review_run_id=review_run_id)
-        context_triples = build_context_triples(review_run_id=review_run_id, claims=claims)
+        yield workflow_event(
+            "step_started",
+            "Hierarchical context extraction",
+            review_run_id=review_run_id,
+            summary="LLM builds ContextFrame, SentenceUnits, sentence relations, claims, qualifiers, and context triples.",
+        )
+        extraction = self.extractor.extract_hierarchical(review_input, review_run_id=review_run_id)
+        claims = extraction.claims
+        context_triples = build_context_triples(
+            review_run_id=review_run_id,
+            claims=claims,
+            context_frame=extraction.context_frame,
+            sentence_units=extraction.sentence_units,
+            inter_sentence_relations=extraction.inter_sentence_relations,
+            context_influences=extraction.context_influences,
+        )
         yield workflow_event(
             "step_completed",
-            "Context extraction",
+            "Hierarchical context extraction",
             review_run_id=review_run_id,
-            summary=f"{len(claims)} claims · {len(context_triples)} context triples",
-            counts={"claims": len(claims), "context_triples": len(context_triples)},
+            summary=(
+                f"{len(extraction.sentence_units)} sentences · {len(claims)} claims · "
+                f"{len(extraction.inter_sentence_relations)} sentence relations · {len(context_triples)} context triples"
+            ),
+            counts={
+                "sentences": len(extraction.sentence_units),
+                "claims": len(claims),
+                "inter_sentence_relations": len(extraction.inter_sentence_relations),
+                "context_triples": len(context_triples),
+            },
             sample=[claim.text for claim in claims[:5]],
+            payload={
+                "context_frame": to_jsonable(extraction.context_frame),
+                "sentence_units": to_jsonable(extraction.sentence_units[:5]),
+                "inter_sentence_relations": to_jsonable(extraction.inter_sentence_relations[:5]),
+            },
         )
 
         yield workflow_event("step_started", "Policy context retrieval", review_run_id=review_run_id, summary="Retrieve approved PolicyHypernym vocabulary, Premise evidence, and supporting fragments.")
@@ -250,6 +276,10 @@ class GraphComplianceCCGWorkflow:
             review_run_id=review_run_id,
             anchors=anchors,
             plan=cu_plan,
+            claims=claims,
+            context_frame=extraction.context_frame,
+            sentence_units=extraction.sentence_units,
+            context_influences=extraction.context_influences,
         )
         yield workflow_event("step_completed", "Evidence window build", review_run_id=review_run_id, summary=f"{len(evidence_windows)} evidence windows", counts={"evidence_windows": len(evidence_windows)})
 
@@ -296,6 +326,10 @@ class GraphComplianceCCGWorkflow:
             review_run_id=review_run_id,
             ad_draft_id=ad_draft_id,
             content_hash=digest,
+            context_frame=to_jsonable(extraction.context_frame),
+            sentence_units=extraction.sentence_units,
+            inter_sentence_relations=extraction.inter_sentence_relations,
+            context_influences=extraction.context_influences,
             claims=claims,
             context_triples=context_triples,
             anchors=anchors,

@@ -74,6 +74,10 @@ class Neo4jReviewWriter:
                         **common,
                         "id": graph.review_run_id,
                         "overall_impression_judgment": graph.overall_impression_judgment,
+                        "context_frame": graph.context_frame,
+                        "sentence_units": graph.sentence_units,
+                        "inter_sentence_relations": graph.inter_sentence_relations,
+                        "context_influences": graph.context_influences,
                         "product_context": graph.product_context,
                         "product_fact_context": graph.product_fact_context,
                         "disclosure_requirements": graph.disclosure_requirements,
@@ -83,6 +87,7 @@ class Neo4jReviewWriter:
                 ),
             )
             self._save_claims(session, review_input, graph, common)
+            self._save_hierarchical_context(session, review_input, graph, common)
             self._save_context_triples(session, review_input, graph, common)
             self._save_anchors(session, review_input, graph, common)
             self._save_plan(session, review_input, graph, common)
@@ -185,8 +190,93 @@ class Neo4jReviewWriter:
                 ],
             )
 
+    def _save_hierarchical_context(self, session, review_input: ReviewInput, graph: ReviewGraph, common: dict[str, object]) -> None:
+        if graph.context_frame:
+            session.run(
+                """
+                MATCH (run:ReviewRun {id: $review_run_id, workspace_id: $workspace_id})
+                MERGE (frame:ContextFrame {id: $frame_id, workspace_id: $workspace_id})
+                SET frame += $frame_props
+                MERGE (run)-[:HAS_CONTEXT_FRAME {workspace_id: $workspace_id, review_run_id: $review_run_id, source: $source}]->(frame)
+                """,
+                workspace_id=review_input.workspace_id,
+                review_run_id=graph.review_run_id,
+                source=SOURCE,
+                frame_id=graph.context_frame.get("frame_id", f"context_frame_{graph.review_run_id}"),
+                frame_props=neo4j_props({**common, **graph.context_frame}),
+            )
+        for sentence in graph.sentence_units:
+            session.run(
+                """
+                MATCH (run:ReviewRun {id: $review_run_id, workspace_id: $workspace_id})
+                OPTIONAL MATCH (frame:ContextFrame {id: $frame_id, workspace_id: $workspace_id})
+                MERGE (sentence:SentenceUnit {id: $sentence_id, workspace_id: $workspace_id})
+                SET sentence += $sentence_props
+                MERGE (run)-[:HAS_SENTENCE_UNIT {workspace_id: $workspace_id, review_run_id: $review_run_id, source: $source}]->(sentence)
+                FOREACH (_ IN CASE WHEN frame IS NULL THEN [] ELSE [1] END |
+                  MERGE (frame)-[:HAS_SENTENCE {workspace_id: $workspace_id, review_run_id: $review_run_id, source: $source}]->(sentence)
+                )
+                """,
+                workspace_id=review_input.workspace_id,
+                review_run_id=graph.review_run_id,
+                source=SOURCE,
+                frame_id=graph.context_frame.get("frame_id", f"context_frame_{graph.review_run_id}") if graph.context_frame else "",
+                sentence_id=sentence.sentence_id,
+                sentence_props=neo4j_props({**common, **to_jsonable(sentence)}),
+            )
+        for claim in graph.claims:
+            if not claim.sentence_id:
+                continue
+            session.run(
+                """
+                MATCH (sentence:SentenceUnit {id: $sentence_id, workspace_id: $workspace_id})
+                MATCH (claim:Claim {id: $claim_id, workspace_id: $workspace_id})
+                MERGE (sentence)-[:CONTAINS_CLAIM {workspace_id: $workspace_id, review_run_id: $review_run_id, source: $source}]->(claim)
+                """,
+                workspace_id=review_input.workspace_id,
+                review_run_id=graph.review_run_id,
+                source=SOURCE,
+                sentence_id=claim.sentence_id,
+                claim_id=claim.claim_id,
+            )
+        for relation in graph.inter_sentence_relations:
+            session.run(
+                """
+                MATCH (source_sentence:SentenceUnit {id: $source_sentence_id, workspace_id: $workspace_id})
+                MATCH (target_sentence:SentenceUnit {id: $target_sentence_id, workspace_id: $workspace_id})
+                MERGE (relation:InterSentenceRelation {id: $relation_id, workspace_id: $workspace_id})
+                SET relation += $relation_props
+                MERGE (source_sentence)-[:HAS_INTER_SENTENCE_RELATION {workspace_id: $workspace_id, review_run_id: $review_run_id, source: $source, relation_type: $relation_type}]->(relation)
+                MERGE (relation)-[:RELATES_TO_SENTENCE {workspace_id: $workspace_id, review_run_id: $review_run_id, source: $source, relation_type: $relation_type}]->(target_sentence)
+                """,
+                workspace_id=review_input.workspace_id,
+                review_run_id=graph.review_run_id,
+                source=SOURCE,
+                source_sentence_id=relation.source_sentence_id,
+                target_sentence_id=relation.target_sentence_id,
+                relation_id=relation.relation_id,
+                relation_type=relation.relation_type,
+                relation_props=neo4j_props({**common, **to_jsonable(relation)}),
+            )
+        for influence in graph.context_influences:
+            session.run(
+                """
+                MATCH (run:ReviewRun {id: $review_run_id, workspace_id: $workspace_id})
+                MERGE (influence:ContextInfluence {id: $influence_id, workspace_id: $workspace_id})
+                SET influence += $influence_props
+                MERGE (run)-[:HAS_CONTEXT_INFLUENCE {workspace_id: $workspace_id, review_run_id: $review_run_id, source: $source}]->(influence)
+                """,
+                workspace_id=review_input.workspace_id,
+                review_run_id=graph.review_run_id,
+                source=SOURCE,
+                influence_id=influence.influence_id,
+                influence_props=neo4j_props({**common, **to_jsonable(influence)}),
+            )
+
     def _save_context_triples(self, session, review_input: ReviewInput, graph: ReviewGraph, common: dict[str, object]) -> None:
         for triple in graph.context_triples:
+            if not triple.claim_id:
+                continue
             session.run(
                 """
                 MATCH (claim:Claim {id: $claim_id, workspace_id: $workspace_id})

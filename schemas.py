@@ -58,6 +58,61 @@ class ContextTriple:
 
 
 @dataclass(frozen=True)
+class ContextFrame:
+    frame_id: str
+    summary: str
+    primary_message: str
+    product_purpose: str
+    tone: str
+    representative_consumer_impression: str
+    risk_axes: list[str]
+    overall_risk_level: str
+
+
+@dataclass(frozen=True)
+class SentenceUnit:
+    sentence_id: str
+    index: int
+    text: str
+    span: Span
+    role: str
+    local_meaning: str
+    context_effect: str
+    risk_level: str
+
+
+@dataclass(frozen=True)
+class InterSentenceRelation:
+    relation_id: str
+    source_sentence_id: str
+    target_sentence_id: str
+    relation_type: Literal[
+        "REINFORCES",
+        "QUALIFIES",
+        "CONTRADICTS",
+        "MITIGATES",
+        "AMPLIFIES_RISK",
+        "SEQUENCES",
+        "OTHER",
+    ]
+    explanation: str
+    evidence: str
+
+
+@dataclass(frozen=True)
+class ContextInfluence:
+    influence_id: str
+    source_id: str
+    source_type: str
+    target_id: str
+    target_type: str
+    influence_type: str
+    effect: str
+    risk_delta: str
+    confidence: float
+
+
+@dataclass(frozen=True)
 class ClaimQualifier:
     qualifier_id: str
     text: str
@@ -78,6 +133,7 @@ class Claim:
     consumer_effect: str
     risk_hypernym: str
     risk_severity: str
+    sentence_id: str = ""
     entities: list[ContextEntity] = field(default_factory=list)
     relations: list[ContextRelation] = field(default_factory=list)
     qualifiers: list[ClaimQualifier] = field(default_factory=list)
@@ -155,6 +211,9 @@ class EvidenceWindow:
     facts: list[str]
     legal_evidence_ids: list[str]
     legal_evidence_texts: list[str]
+    context_frame: dict[str, Any] = field(default_factory=dict)
+    sentence_unit: dict[str, Any] = field(default_factory=dict)
+    context_influences: list[dict[str, Any]] = field(default_factory=list)
 
 
 @dataclass(frozen=True)
@@ -228,6 +287,10 @@ class ReviewGraph:
     review_run_id: str
     ad_draft_id: str
     content_hash: str
+    context_frame: dict[str, Any] = field(default_factory=dict)
+    sentence_units: list[SentenceUnit] = field(default_factory=list)
+    inter_sentence_relations: list[InterSentenceRelation] = field(default_factory=list)
+    context_influences: list[ContextInfluence] = field(default_factory=list)
     claims: list[Claim] = field(default_factory=list)
     context_triples: list[ContextTriple] = field(default_factory=list)
     anchors: list[ContextAnchor] = field(default_factory=list)
@@ -253,6 +316,10 @@ class ReviewOutput:
     post_approval_required_actions: list[str]
     rationale: str
     review_run_id: str
+    context_frame: dict[str, Any]
+    sentence_units: list[dict[str, Any]]
+    inter_sentence_relations: list[dict[str, Any]]
+    context_influences: list[dict[str, Any]]
     claims: list[dict[str, Any]]
     context_triples: list[dict[str, Any]]
     context_anchors: list[dict[str, Any]]

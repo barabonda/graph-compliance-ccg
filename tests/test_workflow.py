@@ -57,8 +57,44 @@ class FakeLLM(LLMGateway):
         self.client.calls.append(name)
         if name == "graphcompliance_context_extraction":
             return {
+                "context_frame": {
+                    "summary": "ELS 성과를 근거로 중위험 투자자에게 긍정적 선택 인상을 줌",
+                    "primary_message": "과거 조기상환 성과가 투자 선택에 유리하다는 메시지",
+                    "product_purpose": "ELS 투자 권유",
+                    "tone": "긍정적 권유",
+                    "representative_consumer_impression": "중위험 투자자에게 적합한 선택처럼 보일 수 있음",
+                    "risk_axes": ["과거성과표시", "적합성판단"],
+                    "overall_risk_level": "HIGH",
+                },
+                "sentence_units": [
+                    {
+                        "index": 0,
+                        "text": "지난 3년간 조기상환 성공률이 높았던 ELS는 중위험 투자자에게 좋은 선택입니다.",
+                        "start": 0,
+                        "end": 46,
+                        "role": "benefit_claim",
+                        "local_meaning": "ELS의 과거 조기상환 성과와 투자자 적합성을 연결함",
+                        "context_effect": "과거성과가 현재 선택의 근거라는 전체 인상을 만듦",
+                        "risk_level": "HIGH",
+                    }
+                ],
+                "inter_sentence_relations": [],
+                "context_influences": [
+                    {
+                        "source_type": "sentence",
+                        "source_index": 0,
+                        "source_text": "지난 3년간 조기상환 성공률이 높았던 ELS는 중위험 투자자에게 좋은 선택입니다.",
+                        "target_type": "context_frame",
+                        "target_index": 0,
+                        "influence_type": "FRAMES_PRODUCT_AS_SUITABLE",
+                        "effect": "문장 하나가 전체 광고를 긍정적 투자권유 인상으로 만듦",
+                        "risk_delta": "RAISES_RISK",
+                        "confidence": 0.9,
+                    }
+                ],
                 "claims": [
                     {
+                        "sentence_index": 0,
                         "text": "지난 3년간 조기상환 성공률이 높았던 ELS는 중위험 투자자에게 좋은 선택입니다.",
                         "start": 0,
                         "end": 46,
@@ -206,8 +242,44 @@ class CapturingExtractionLLM(FakeLLM):
         if name == "graphcompliance_context_extraction":
             self.last_system = system
             return {
+                "context_frame": {
+                    "summary": "최고 금리를 확정 제공한다는 전체 인상",
+                    "primary_message": "조건 없는 확정 금리 제공",
+                    "product_purpose": "예금 금리 혜택 안내",
+                    "tone": "단정적",
+                    "representative_consumer_impression": "소비자는 금리가 확정된다고 이해할 수 있음",
+                    "risk_axes": ["확정표현", "조건누락"],
+                    "overall_risk_level": "HIGH",
+                },
+                "sentence_units": [
+                    {
+                        "index": 0,
+                        "text": "최고 연 5.0% 금리를 확정 제공한다.",
+                        "start": 0,
+                        "end": 22,
+                        "role": "benefit_claim",
+                        "local_meaning": "최고 금리를 단정적으로 제공한다고 표현",
+                        "context_effect": "조건 없는 확정 혜택 인상을 강화",
+                        "risk_level": "HIGH",
+                    }
+                ],
+                "inter_sentence_relations": [],
+                "context_influences": [
+                    {
+                        "source_type": "sentence",
+                        "source_index": 0,
+                        "source_text": "최고 연 5.0% 금리를 확정 제공한다.",
+                        "target_type": "context_frame",
+                        "target_index": 0,
+                        "influence_type": "AMPLIFIES_RATE_CERTAINTY",
+                        "effect": "확정이라는 표현이 전체 광고의 단정성을 높임",
+                        "risk_delta": "RAISES_RISK",
+                        "confidence": 0.9,
+                    }
+                ],
                 "claims": [
                     {
+                        "sentence_index": 0,
                         "text": "최고 연 5.0% 금리를 확정 제공한다.",
                         "start": 0,
                         "end": 22,
