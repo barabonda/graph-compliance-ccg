@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from copy import deepcopy
 from typing import Any
 
 from llm_gateway import LLMGateway
@@ -72,20 +73,33 @@ class PolicyGuidedNormalizer:
         }
         if not allowed:
             raise RuntimeError("PolicyHypernym vocabulary is empty; run the policy compiler before review.")
+        schema = normalization_schema_for_allowed_ids(allowed.keys())
+        allowed_rows = [
+            {
+                "hypernym_id": item["hypernym_id"],
+                "name": item["name"],
+                "domain": item.get("domain", ""),
+                "description": item.get("description", ""),
+            }
+            for item in policy_context.get("hypernyms", [])
+            if item.get("hypernym_id") in allowed
+        ]
         result = self.llm.structured(
             name="graphcompliance_policy_normalization",
-            schema=NORMALIZATION_SCHEMA,
+            schema=schema,
             system=(
                 "You are doing policy-guided normalization for Korean financial-ad compliance. "
                 "Create judgment anchors and map ad context entities/risks only to the provided "
-                "PolicyHypernym vocabulary. Do not invent new hypernyms. Mark support STRONG only when "
-                "a provided Premise directly supports the mapping; otherwise mark WEAK. Keep only useful anchors."
+                "PolicyHypernym vocabulary. The hypernym_id field is schema-restricted to approved ids; "
+                "choose one of those ids exactly. Do not invent new hypernyms or ids. Mark support STRONG "
+                "only when a provided Premise directly supports the mapping; otherwise mark WEAK. Keep only "
+                "useful anchors."
             ),
             user=(
                 "[claims]\n"
                 f"{to_jsonable(claims)}\n\n"
                 "[allowed_policy_hypernyms]\n"
-                f"{policy_context.get('hypernyms', [])[:200]}\n\n"
+                f"{allowed_rows}\n\n"
                 "[policy_premises]\n"
                 f"{policy_context.get('premises', [])[:80]}\n\n"
                 "[supporting_policy_fragments]\n"
@@ -136,3 +150,13 @@ class PolicyGuidedNormalizer:
                 )
             )
         return anchors
+
+
+def normalization_schema_for_allowed_ids(allowed_ids) -> dict[str, Any]:
+    schema = deepcopy(NORMALIZATION_SCHEMA)
+    ids = sorted(str(item) for item in allowed_ids)
+    hypernym_item = (
+        schema["properties"]["anchors"]["items"]["properties"]["hypernyms"]["items"]
+    )
+    hypernym_item["properties"]["hypernym_id"] = {"type": "string", "enum": ids}
+    return schema

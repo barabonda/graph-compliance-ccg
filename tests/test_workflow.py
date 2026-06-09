@@ -15,7 +15,7 @@ from evaluate import (
     review_payload_for_record,
     summarize_prediction,
 )
-from normalizer import PolicyGuidedNormalizer
+from normalizer import PolicyGuidedNormalizer, normalization_schema_for_allowed_ids
 from policy_compiler import validate_compiler_output
 from retriever import PolicyRetriever, candidate_allowed_for_anchor, candidate_from_row
 from revision import LLMRevisionSuggester
@@ -349,6 +349,18 @@ def test_context_extractor_prompt_preserves_risky_claims_separately() -> None:
     assert claims[0].risk_severity == "HIGH"
     assert "Do not collapse a risky claim into a later mitigating disclosure" in llm.last_system
     assert "최고 연 5.0% 금리를 확정 제공" in llm.last_system
+
+
+def test_policy_normalization_schema_restricts_hypernym_ids_to_approved_vocabulary() -> None:
+    schema = normalization_schema_for_allowed_ids({"policy_hypernym_a", "policy_hypernym_b"})
+    hypernym_id_schema = (
+        schema["properties"]["anchors"]["items"]["properties"]["hypernyms"]["items"]["properties"]["hypernym_id"]
+    )
+
+    assert hypernym_id_schema == {
+        "type": "string",
+        "enum": ["policy_hypernym_a", "policy_hypernym_b"],
+    }
 
 
 def test_exception_override_only_runs_for_non_compliant() -> None:
