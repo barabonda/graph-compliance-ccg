@@ -6,7 +6,7 @@ from typing import Any
 
 from llm_gateway import LLMGateway
 from schemas import CUPlanItem, ContextAnchor, EvidenceWindow, ExceptionReview, LLMJudgment
-from utils import stable_id, to_jsonable
+from utils import normalize_space, stable_id, to_jsonable
 
 
 JUDGE_SCHEMA: dict[str, Any] = {
@@ -88,56 +88,74 @@ class LLMComplianceJudge:
             return []
         anchor_by_id = {anchor.anchor_id: anchor for anchor in anchors}
         window_by_plan_id = {window.plan_item_id: window for window in windows}
+        judgment_items = []
+        item_by_plan_id: dict[str, CUPlanItem] = {}
+        anchor_by_plan_id: dict[str, ContextAnchor] = {}
         judgments: list[LLMJudgment] = []
         for item in plan:
             anchor = anchor_by_id.get(item.anchor_id)
             if not anchor:
+                # Coverage guarantee: never drop a CUPlan item silently.
+                judgments.append(missing_judgment(review_run_id, item, reason="anchor"))
                 continue
             window = window_by_plan_id.get(item.plan_item_id)
-            payload = {
-                "judgment_item": {
+            item_by_plan_id[item.plan_item_id] = item
+            anchor_by_plan_id[item.plan_item_id] = anchor
+            judgment_items.append(
+                {
                     "context_anchor": to_jsonable(anchor),
                     "cu_plan_item": to_jsonable(item),
                     "evidence_window": to_jsonable(window) if window else {},
                 }
-            }
-            result = self.llm.structured(
-                name="graphcompliance_cu_judgment",
-                schema=JUDGE_SCHEMA,
-                system=(
-                    "You are a Korean financial-ad compliance judge. Judge exactly one isolated "
-                    "ContextAnchor, EvidenceWindow, and CUPlanItem. Do not use outside law, outside facts, "
-                    "or any other advertising claim that is not inside this judgment_item. Prioritize explicit "
-                    "contradiction. Strong implication is allowed. Never infer a violation from silence. If the "
-                    "CU is unrelated to the anchor, return NOT_APPLICABLE. If the CU is related but a required "
-                    "fact or document is missing from the window, return INSUFFICIENT. Do not return "
-                    "INSUFFICIENT merely because there is no evidence of wrongdoing; that should usually be "
-                    "NOT_APPLICABLE or COMPLIANT depending on the CU. A mitigating disclosure anchor can be "
-                    "COMPLIANT for that disclosure, but it must not erase a separate risky anchor such as a "
-                    "definitive guarantee, unconditional best-rate, easy-approval, or past-performance claim. "
-                    "When the CU principle/subject is about unfair sales, sanctions, review procedure, or "
-                    "association workflow, return NOT_APPLICABLE unless the anchor itself describes that conduct. "
-                    "The evidence_span must be copied from the provided ContextAnchor span text or facts."
-                ),
-                user=f"[judgment_payload]\n{payload}",
             )
-            for row in result["judgments"]:
-                if row["plan_item_id"] != item.plan_item_id:
-                    continue
-                grounded = grounded_judgment_row(row, anchor)
-                judgments.append(
-                    LLMJudgment(
-                        judgment_id=stable_id("judgment", review_run_id, grounded["plan_item_id"]),
-                        plan_item_id=grounded["plan_item_id"],
-                        anchor_id=item.anchor_id,
-                        cu_id=item.cu_id,
-                        verdict=grounded["verdict"],
-                        score=float(grounded["score"]),
-                        why=grounded["why"],
-                        evidence_span=grounded["evidence_span"],
-                        used_policy_evidence=grounded["used_policy_evidence"],
-                    )
+        if not judgment_items:
+            return judgments
+        result = self.llm.structured(
+            name="graphcompliance_cu_judgment",
+            schema=JUDGE_SCHEMA,
+            system=(
+                "You are a Korean financial-ad compliance judge. Each judgment_items entry is an isolated "
+                "ContextAnchor, EvidenceWindow, and CUPlanItem. Judge every entry independently. Do not use "
+                "outside law, outside facts, or another judgment_items entry's advertising claim as evidence. "
+                "Prioritize explicit contradiction. Strong implication is allowed. Never infer a violation "
+                "from silence. If the CU is unrelated to the anchor, return NOT_APPLICABLE. If the CU is "
+                "related but a required fact or document is missing from the window, return INSUFFICIENT. "
+                "Do not return INSUFFICIENT merely because there is no evidence of wrongdoing; that should "
+                "usually be NOT_APPLICABLE or COMPLIANT depending on the CU. A mitigating disclosure anchor "
+                "can be COMPLIANT for that disclosure, but it must not erase a separate risky anchor such as "
+                "a definitive guarantee, unconditional best-rate, easy-approval, or past-performance claim. "
+                "When the CU principle/subject is about unfair sales, sanctions, review procedure, or "
+                "association workflow, return NOT_APPLICABLE unless the anchor itself describes that conduct. "
+                "Every evidence_span must be copied from that same entry's ContextAnchor span text or facts."
+            ),
+            user=f"[judgment_payload]\n{{'judgment_items': {judgment_items}}}",
+        )
+        seen_plan_ids: set[str] = set()
+        for row in result.get("judgments", []):
+            item = item_by_plan_id.get(row.get("plan_item_id"))
+            anchor = anchor_by_plan_id.get(row.get("plan_item_id"))
+            if not item or not anchor:
+                continue
+            seen_plan_ids.add(item.plan_item_id)
+            grounded = grounded_judgment_row(row, anchor)
+            judgments.append(
+                LLMJudgment(
+                    judgment_id=stable_id("judgment", review_run_id, item.plan_item_id),
+                    plan_item_id=item.plan_item_id,
+                    anchor_id=item.anchor_id,
+                    cu_id=item.cu_id,
+                    verdict=grounded["verdict"],
+                    score=float(grounded["score"]),
+                    why=grounded["why"],
+                    evidence_span=grounded["evidence_span"],
+                    used_policy_evidence=grounded["used_policy_evidence"],
                 )
+            )
+        for item in item_by_plan_id.values():
+            if item.plan_item_id not in seen_plan_ids:
+                # Coverage guarantee: the judge call returned no row for this
+                # CUPlan item, so backfill INSUFFICIENT instead of leaving it unjudged.
+                judgments.append(missing_judgment(review_run_id, item, reason="no_row"))
         return judgments
 
     def review_exception(
@@ -188,5 +206,30 @@ def grounded_judgment_row(row: dict[str, Any], anchor: ContextAnchor) -> dict[st
 
 
 def evidence_span_belongs_to_anchor(evidence_span: str, anchor: ContextAnchor) -> bool:
-    anchor_evidence = "\n".join([anchor.span.text, *anchor.facts])
-    return evidence_span in anchor_evidence or anchor.span.text in evidence_span
+    # Normalize whitespace so a verbatim quote with different spacing is not
+    # falsely flagged as cross-anchor leakage.
+    span = normalize_space(evidence_span)
+    if not span:
+        return True
+    anchor_evidence = normalize_space(" ".join([anchor.span.text, *anchor.facts]))
+    anchor_span = normalize_space(anchor.span.text)
+    return span in anchor_evidence or (bool(anchor_span) and anchor_span in span)
+
+
+def missing_judgment(review_run_id: str, item: CUPlanItem, *, reason: str) -> LLMJudgment:
+    """Backfill an INSUFFICIENT judgment so every CUPlan item is accounted for."""
+    note = {
+        "no_row": "LLM judge가 이 CUPlan 항목에 대한 판단을 반환하지 않아 커버리지 보강으로 INSUFFICIENT 처리했습니다.",
+        "anchor": "이 CUPlan 항목의 ContextAnchor를 찾을 수 없어 커버리지 보강으로 INSUFFICIENT 처리했습니다.",
+    }.get(reason, "커버리지 보강으로 INSUFFICIENT 처리했습니다.")
+    return LLMJudgment(
+        judgment_id=stable_id("judgment", review_run_id, item.plan_item_id),
+        plan_item_id=item.plan_item_id,
+        anchor_id=item.anchor_id,
+        cu_id=item.cu_id,
+        verdict="INSUFFICIENT",
+        score=0.0,
+        why=note,
+        evidence_span="",
+        used_policy_evidence=[],
+    )
