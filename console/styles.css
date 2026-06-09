@@ -415,7 +415,8 @@ textarea:focus {
 .claim-card,
 .judgment-card,
 .exception-card,
-.revision-card {
+.revision-card,
+.fact-card {
   border: 1px solid var(--line);
   border-radius: 8px;
   background: var(--panel-soft);
@@ -487,6 +488,47 @@ textarea:focus {
 
 #claimsTab.is-active {
   display: grid;
+}
+
+.product-facts-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+.product-facts-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(220px, 1fr));
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.fact-column {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+
+.fact-card {
+  background: #fff;
+}
+
+.fact-card.comparison.pass {
+  border-color: #86efac;
+  background: #f0fdf4;
+}
+
+.fact-card.comparison.review {
+  border-color: #fcd34d;
+  background: #fffbeb;
+}
+
+.fact-card.comparison.reject {
+  border-color: #fca5a5;
+  background: #fef2f2;
 }
 
 .claim-card {

@@ -8,7 +8,7 @@ from datetime import UTC, datetime
 from typing import Protocol
 
 from schemas import ReviewGraph, ReviewInput
-from utils import to_jsonable
+from utils import stable_id, to_jsonable
 
 
 SOURCE = "graphcompliance_ccg_review"
@@ -75,6 +75,7 @@ class Neo4jReviewWriter:
                         "id": graph.review_run_id,
                         "overall_impression_judgment": graph.overall_impression_judgment,
                         "product_context": graph.product_context,
+                        "product_fact_context": graph.product_fact_context,
                         "disclosure_requirements": graph.disclosure_requirements,
                         "track_c_summary": graph.track_c_summary,
                         "retrieval_diagnostics": graph.retrieval_diagnostics,
@@ -87,6 +88,7 @@ class Neo4jReviewWriter:
             self._save_plan(session, review_input, graph, common)
             self._save_judgments(session, review_input, graph, common)
             self._save_product_context(session, review_input, graph, common)
+            self._save_product_fact_context(session, review_input, graph, common)
 
     def _save_claims(self, session, review_input: ReviewInput, graph: ReviewGraph, common: dict[str, object]) -> None:
         for claim in graph.claims:
@@ -390,6 +392,160 @@ class Neo4jReviewWriter:
                         "metadata_source": "전북은행 상품문서 메타데이터.xlsx",
                     }
                 ),
+            )
+
+    def _save_product_fact_context(self, session, review_input: ReviewInput, graph: ReviewGraph, common: dict[str, object]) -> None:
+        context = graph.product_fact_context or {}
+        if not context:
+            return
+
+        matched_product = str(context.get("matched_product") or "")
+        product_id = f"product_{matched_product}" if matched_product else ""
+        if matched_product:
+            session.run(
+                """
+                MATCH (run:ReviewRun {id: $review_run_id, workspace_id: $workspace_id})
+                MERGE (product:Product {id: $product_id, workspace_id: $workspace_id})
+                SET product += $product_props
+                MERGE (run)-[:ABOUT_PRODUCT {workspace_id: $workspace_id, review_run_id: $review_run_id, source: $source}]->(product)
+                """,
+                workspace_id=review_input.workspace_id,
+                review_run_id=graph.review_run_id,
+                source=SOURCE,
+                product_id=product_id,
+                product_props=neo4j_props({**common, "id": product_id, "name": matched_product}),
+            )
+
+        for document in context.get("selected_documents", []) or []:
+            document_id = str(document.get("document_id") or document.get("source_id") or "")
+            if not document_id:
+                document_id = stable_id("product_document", document.get("file_name", ""), document.get("relative_path", ""))
+            session.run(
+                """
+                MATCH (run:ReviewRun {id: $review_run_id, workspace_id: $workspace_id})
+                MERGE (doc:ProductDocument {id: $document_id, workspace_id: $workspace_id})
+                SET doc += $document_props
+                MERGE (run)-[:USES_PRODUCT_DOCUMENT {workspace_id: $workspace_id, review_run_id: $review_run_id, source: $source}]->(doc)
+                WITH doc
+                OPTIONAL MATCH (product:Product {id: $product_id, workspace_id: $workspace_id})
+                FOREACH (_ IN CASE WHEN product IS NULL THEN [] ELSE [1] END |
+                  MERGE (product)-[:HAS_PRODUCT_DOCUMENT {workspace_id: $workspace_id, review_run_id: $review_run_id, source: $source}]->(doc)
+                )
+                """,
+                workspace_id=review_input.workspace_id,
+                review_run_id=graph.review_run_id,
+                source=SOURCE,
+                product_id=product_id,
+                document_id=document_id,
+                document_props=neo4j_props({**common, **document, "id": document_id}),
+            )
+
+        for fact in context.get("product_facts", []) or []:
+            fact_id = str(fact.get("fact_id") or "")
+            if not fact_id:
+                fact_id = stable_id("product_fact", matched_product, fact.get("source_document_id", ""), fact.get("fact_type", ""), fact.get("value", ""))
+            source_document_id = str(fact.get("source_document_id") or "")
+            session.run(
+                """
+                MATCH (run:ReviewRun {id: $review_run_id, workspace_id: $workspace_id})
+                MERGE (fact:ProductFact {id: $fact_id, workspace_id: $workspace_id})
+                SET fact += $fact_props
+                MERGE (run)-[:EXTRACTED_PRODUCT_FACT {workspace_id: $workspace_id, review_run_id: $review_run_id, source: $source}]->(fact)
+                WITH fact
+                OPTIONAL MATCH (doc:ProductDocument {id: $source_document_id, workspace_id: $workspace_id})
+                FOREACH (_ IN CASE WHEN doc IS NULL THEN [] ELSE [1] END |
+                  MERGE (doc)-[:CONTAINS_FACT {workspace_id: $workspace_id, review_run_id: $review_run_id, source: $source}]->(fact)
+                )
+                """,
+                workspace_id=review_input.workspace_id,
+                review_run_id=graph.review_run_id,
+                source=SOURCE,
+                fact_id=fact_id,
+                source_document_id=source_document_id,
+                fact_props=neo4j_props({**common, **fact, "id": fact_id, "matched_product": matched_product}),
+            )
+
+        claim_by_fact_id: dict[str, str] = {}
+        for claim_fact in context.get("claim_facts", []) or []:
+            claim_fact_id = str(claim_fact.get("claim_fact_id") or "")
+            if not claim_fact_id:
+                claim_fact_id = stable_id("claim_fact", claim_fact.get("claim_id", ""), claim_fact.get("fact_type", ""), claim_fact.get("value", ""))
+            claim_id = str(claim_fact.get("claim_id") or "")
+            claim_by_fact_id[claim_fact_id] = claim_id
+            session.run(
+                """
+                MATCH (run:ReviewRun {id: $review_run_id, workspace_id: $workspace_id})
+                MERGE (claimFact:ClaimFact {id: $claim_fact_id, workspace_id: $workspace_id})
+                SET claimFact += $claim_fact_props
+                MERGE (run)-[:EXTRACTED_CLAIM_FACT {workspace_id: $workspace_id, review_run_id: $review_run_id, source: $source}]->(claimFact)
+                WITH claimFact
+                OPTIONAL MATCH (claim:Claim {id: $claim_id, workspace_id: $workspace_id})
+                FOREACH (_ IN CASE WHEN claim IS NULL THEN [] ELSE [1] END |
+                  MERGE (claim)-[:ASSERTS_FACT {workspace_id: $workspace_id, review_run_id: $review_run_id, source: $source}]->(claimFact)
+                )
+                """,
+                workspace_id=review_input.workspace_id,
+                review_run_id=graph.review_run_id,
+                source=SOURCE,
+                claim_fact_id=claim_fact_id,
+                claim_id=claim_id,
+                claim_fact_props=neo4j_props({**common, **claim_fact, "id": claim_fact_id}),
+            )
+
+        for comparison in context.get("comparison_results", []) or []:
+            comparison_id = str(comparison.get("comparison_id") or "")
+            claim_fact_id = str(comparison.get("claim_fact_id") or "")
+            product_fact_id = str(comparison.get("product_fact_id") or "")
+            if not comparison_id:
+                comparison_id = stable_id("comparison", claim_fact_id, product_fact_id, comparison.get("status", ""))
+            claim_id = claim_by_fact_id.get(claim_fact_id, "")
+            source_document_id = ""
+            for fact in context.get("product_facts", []) or []:
+                if str(fact.get("fact_id") or "") == product_fact_id:
+                    source_document_id = str(fact.get("source_document_id") or "")
+                    break
+            session.run(
+                """
+                MATCH (run:ReviewRun {id: $review_run_id, workspace_id: $workspace_id})
+                MERGE (result:ComparisonResult {id: $comparison_id, workspace_id: $workspace_id})
+                SET result += $comparison_props
+                MERGE (run)-[:HAS_COMPARISON_RESULT {workspace_id: $workspace_id, review_run_id: $review_run_id, source: $source}]->(result)
+                WITH result
+                OPTIONAL MATCH (claimFact:ClaimFact {id: $claim_fact_id, workspace_id: $workspace_id})
+                FOREACH (_ IN CASE WHEN claimFact IS NULL THEN [] ELSE [1] END |
+                  MERGE (claimFact)-[:HAS_COMPARISON_RESULT {workspace_id: $workspace_id, review_run_id: $review_run_id, source: $source}]->(result)
+                )
+                FOREACH (_ IN CASE WHEN claimFact IS NULL THEN [] ELSE [1] END |
+                  MERGE (claimFact)-[:COMPARED_TO {workspace_id: $workspace_id, review_run_id: $review_run_id, source: $source}]->(result)
+                )
+                WITH result, claimFact
+                OPTIONAL MATCH (productFact:ProductFact {id: $product_fact_id, workspace_id: $workspace_id})
+                FOREACH (_ IN CASE WHEN productFact IS NULL THEN [] ELSE [1] END |
+                  MERGE (result)-[:COMPARES_TO {workspace_id: $workspace_id, review_run_id: $review_run_id, source: $source}]->(productFact)
+                )
+                FOREACH (_ IN CASE WHEN claimFact IS NULL OR productFact IS NULL THEN [] ELSE [1] END |
+                  MERGE (claimFact)-[:COMPARED_TO {workspace_id: $workspace_id, review_run_id: $review_run_id, source: $source}]->(productFact)
+                )
+                WITH result
+                OPTIONAL MATCH (doc:ProductDocument {id: $source_document_id, workspace_id: $workspace_id})
+                FOREACH (_ IN CASE WHEN doc IS NULL THEN [] ELSE [1] END |
+                  MERGE (result)-[:EVIDENCED_BY {workspace_id: $workspace_id, review_run_id: $review_run_id, source: $source}]->(doc)
+                )
+                WITH result
+                OPTIONAL MATCH (claim:Claim {id: $claim_id, workspace_id: $workspace_id})-[:HAS_ANCHOR]->(:ContextAnchor)-[:SELECTED_FOR_PLAN]->(:CUPlanItem)-[:JUDGED_AS]->(judgment:LLMJudgment)
+                FOREACH (_ IN CASE WHEN judgment IS NULL THEN [] ELSE [1] END |
+                  MERGE (result)-[:SUPPORTS_JUDGMENT {workspace_id: $workspace_id, review_run_id: $review_run_id, source: $source}]->(judgment)
+                )
+                """,
+                workspace_id=review_input.workspace_id,
+                review_run_id=graph.review_run_id,
+                source=SOURCE,
+                comparison_id=comparison_id,
+                claim_fact_id=claim_fact_id,
+                product_fact_id=product_fact_id,
+                source_document_id=source_document_id,
+                claim_id=claim_id,
+                comparison_props=neo4j_props({**common, **comparison, "id": comparison_id}),
             )
 
 

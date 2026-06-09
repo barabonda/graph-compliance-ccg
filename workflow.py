@@ -14,6 +14,7 @@ from normalizer import PolicyGuidedNormalizer
 from overall_impression import LLMOverallImpressionJudge
 from persistence import Neo4jReviewWriter, ReviewWriter
 from planner import LLMCUPlanner
+from product_facts import ProductFactAnalyzer
 from retriever import Neo4jPolicyRetriever, PolicyRetriever
 from revision import LLMRevisionSuggester
 from router import build_output
@@ -37,6 +38,7 @@ class GraphComplianceCCGWorkflow:
         self.judge = LLMComplianceJudge(self.llm)
         self.overall_impression = LLMOverallImpressionJudge(self.llm)
         self.revision = LLMRevisionSuggester(self.llm)
+        self.product_facts = ProductFactAnalyzer(self.llm)
         self.retriever = retriever or Neo4jPolicyRetriever()
         self.writer = writer or Neo4jReviewWriter()
 
@@ -135,6 +137,33 @@ class GraphComplianceCCGWorkflow:
             counts={
                 "disclosure_requirements": len(disclosure_requirements),
                 "product_documents": product_context.get("document_count", 0),
+            },
+        )
+
+        yield workflow_event("step_started", "Product fact graph", review_run_id=review_run_id, summary="Resolve product documents, extract ProductFact evidence, and compare ad ClaimFacts.")
+        product_fact_context = self.product_facts.analyze(
+            review_input=review_input,
+            claims=claims,
+            product_context=product_context,
+        )
+        yield workflow_event(
+            "step_completed",
+            "Product fact graph",
+            review_run_id=review_run_id,
+            summary=(
+                f"{product_fact_context.get('extraction_status', 'UNKNOWN')} · "
+                f"{len(product_fact_context.get('product_facts', []))} product facts · "
+                f"{len(product_fact_context.get('comparison_results', []))} comparisons"
+            ),
+            counts={
+                "product_facts": len(product_fact_context.get("product_facts", [])),
+                "claim_facts": len(product_fact_context.get("claim_facts", [])),
+                "comparison_results": len(product_fact_context.get("comparison_results", [])),
+            },
+            payload={
+                "matched_product": product_fact_context.get("matched_product", ""),
+                "extraction_status": product_fact_context.get("extraction_status", ""),
+                "reason": product_fact_context.get("reason", ""),
             },
         )
 
@@ -275,6 +304,7 @@ class GraphComplianceCCGWorkflow:
             graph_paths=graph_path_summary(cu_plan, judgments),
             retrieval_diagnostics=retrieval_diagnostics,
             product_context=product_context,
+            product_fact_context=product_fact_context,
             disclosure_requirements=disclosure_requirements,
             overall_impression_judgment=overall_impression_judgment,
             track_c_summary=track_c_extension_summary(),

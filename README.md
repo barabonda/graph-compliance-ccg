@@ -68,7 +68,8 @@ uvicorn server:app --app-dir examples/graph-compliance-ccg --port 8770
 
 The response is compatible with the `team_share_v0_3` agent output shape and
 adds `review_run_id`, `context_anchors`, `cu_plan`, `judgments`,
-`exception_reviews`, `context_triples`, `graph_paths`, and `highlight_spans`.
+`exception_reviews`, `context_triples`, `graph_paths`, `highlight_spans`, and
+`product_fact_context`.
 
 JB dataset extensions add:
 
@@ -78,6 +79,13 @@ JB dataset extensions add:
 - `product_context` — metadata grounding from the JB product disclosure manifest.
   This is not treated as extracted `DisclosureFact`; it identifies product
   groups, candidate products, and available product documents.
+- `product_fact_context` — on-demand Product Fact Graph context. When one exact
+  product name is resolved, the workflow reads the top product PDFs
+  (`상품주요내용 > 상품설명서 > 약관`), extracts `ProductFact` evidence with
+  structured LLM output, extracts advertising `ClaimFact`, and compares them as
+  `SUPPORTED`, `CONTRADICTED`, `CONDITION_MISSING`, `NO_PRODUCT_FACT`, or
+  `NEEDS_PRODUCT_SELECTION`. Ambiguous products stay in
+  `NEEDS_PRODUCT_SELECTION`; the system does not invent missing product facts.
 - `disclosure_requirements` — required-disclosure candidates from the bank ad
   review standards and financial-ad guideline, such as depositor protection,
   rate/condition basis, fees, and review-number display.
@@ -88,6 +96,27 @@ JB dataset extensions add:
 Track C expression/brand-safety risk is intentionally exposed as an extension
 slot (`track_c_summary`) until a dedicated precedent/risk-pattern dataset is
 loaded. It should not drive legal verdicts in this v1 path.
+
+## Product Fact Graph
+
+The Product Fact Graph is the demo path for fact-grounded compliance review:
+
+```text
+Claim -> ClaimFact -> Product -> ProductDocument -> ProductFact -> ComparisonResult
+```
+
+It is intentionally on-demand. The app does not pre-extract all 6,098 JB
+product documents. It resolves the reviewed product from the ad text and JB
+product metadata, reads only the selected PDF documents for that product, and
+stores the extracted `ProductFact`, `ClaimFact`, and `ComparisonResult` nodes
+under the current `review_run_id`.
+
+Configure local disclosure data when it is outside the default Downloads path:
+
+```bash
+export JB_PRODUCT_DISCLOSURE_ROOT="/path/to/jbbank_product_disclosures_20260528"
+export JB_PRODUCT_DISCLOSURE_METADATA_PATH="/path/to/jbbank_product_disclosures_metadata_20260528.csv"
+```
 
 ## Evaluation
 

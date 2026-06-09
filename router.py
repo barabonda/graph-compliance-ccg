@@ -93,6 +93,7 @@ def build_output(
         system_review_items=system_review_items,
         revision_suggestions=revision_suggestions or [],
         product_context=graph.product_context,
+        product_fact_context=graph.product_fact_context,
         disclosure_requirements=graph.disclosure_requirements,
         overall_impression_judgment=graph.overall_impression_judgment,
         track_c_summary=graph.track_c_summary,

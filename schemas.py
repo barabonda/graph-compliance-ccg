@@ -169,6 +169,48 @@ class ExceptionReview:
     closure_evidence_ids: list[str]
 
 
+@dataclass(frozen=True)
+class ProductFact:
+    fact_id: str
+    fact_type: str
+    value: str
+    unit: str
+    condition: str
+    source_document_id: str
+    page_or_chunk: str
+    evidence_text: str
+    confidence: float
+
+
+@dataclass(frozen=True)
+class ClaimFact:
+    claim_fact_id: str
+    claim_id: str
+    fact_type: str
+    value: str
+    unit: str
+    qualifier: str
+    evidence_text: str
+    confidence: float
+
+
+@dataclass(frozen=True)
+class ComparisonResult:
+    comparison_id: str
+    claim_fact_id: str
+    product_fact_id: str
+    status: Literal[
+        "SUPPORTED",
+        "CONTRADICTED",
+        "CONDITION_MISSING",
+        "NO_PRODUCT_FACT",
+        "NEEDS_PRODUCT_SELECTION",
+    ]
+    rationale: str
+    evidence_text: str
+    confidence: float
+
+
 @dataclass
 class ReviewGraph:
     review_run_id: str
@@ -184,6 +226,7 @@ class ReviewGraph:
     graph_paths: list[dict[str, Any]] = field(default_factory=list)
     retrieval_diagnostics: dict[str, dict[str, Any]] = field(default_factory=dict)
     product_context: dict[str, Any] = field(default_factory=dict)
+    product_fact_context: dict[str, Any] = field(default_factory=dict)
     disclosure_requirements: list[dict[str, Any]] = field(default_factory=list)
     overall_impression_judgment: dict[str, Any] = field(default_factory=dict)
     track_c_summary: dict[str, Any] = field(default_factory=dict)
@@ -208,6 +251,7 @@ class ReviewOutput:
     system_review_items: list[dict[str, Any]]
     revision_suggestions: list[dict[str, Any]]
     product_context: dict[str, Any]
+    product_fact_context: dict[str, Any]
     disclosure_requirements: list[dict[str, Any]]
     overall_impression_judgment: dict[str, Any]
     track_c_summary: dict[str, Any]

@@ -5,6 +5,7 @@ from pathlib import Path
 
 import pytest
 
+import product_facts as product_facts_module
 from context_extractor import LLMContextExtractor
 from judge import LLMComplianceJudge
 from llm_gateway import LLMGateway
@@ -18,6 +19,7 @@ from evaluate import (
 )
 from normalizer import PolicyGuidedNormalizer, normalization_schema_for_allowed_ids
 from policy_compiler import validate_compiler_output
+from product_facts import ProductFactAnalyzer
 from retriever import PolicyRetriever, candidate_allowed_for_anchor, candidate_from_row
 from revision import LLMRevisionSuggester
 from schemas import (
@@ -138,6 +140,23 @@ class FakeLLM(LLMGateway):
                 "grounded_claim_ids": [],
                 "why": "제공된 claim path만으로 중대한 전체 인상 오인 신호는 낮습니다.",
             }
+        if name == "graphcompliance_product_fact_extraction":
+            return {
+                "product_facts": [
+                    {
+                        "fact_type": "max_rate",
+                        "value": "5.0",
+                        "unit": "percent",
+                        "condition": "우대조건 충족 시",
+                        "source_document_id": "doc_1",
+                        "page_or_chunk": "page 1",
+                        "evidence_text": "우대조건 충족 시 최고 연 5.0%",
+                        "confidence": 0.91,
+                    }
+                ]
+            }
+        if name == "graphcompliance_claim_fact_comparison":
+            return {"claim_facts": [], "comparison_results": []}
         if name == "graphcompliance_exception_override":
             self.exception_calls += 1
             return {
@@ -222,6 +241,51 @@ class MisleadingLLM(FakeLLM):
                 "misleading_factors": ["조건 누락", "누구나 가능하다는 전체 인상"],
                 "grounded_claim_ids": [],
                 "why": "Claim의 의미와 함의가 소비자에게 승인/혜택의 제한 조건을 약하게 전달합니다.",
+            }
+        return super().structured(name=name, system=system, user=user, schema=schema)
+
+
+class ProductFactLLM(FakeLLM):
+    def structured(self, *, name, system, user, schema):
+        if name == "graphcompliance_product_fact_extraction":
+            return {
+                "product_facts": [
+                    {
+                        "fact_type": "max_rate",
+                        "value": "5.0",
+                        "unit": "percent",
+                        "condition": "가입기간 12개월 및 우대조건 충족 시",
+                        "source_document_id": "doc_1",
+                        "page_or_chunk": "page 1",
+                        "evidence_text": "최고 연 5.0%는 가입기간 12개월 및 우대조건 충족 시 적용",
+                        "confidence": 0.95,
+                    }
+                ]
+            }
+        if name == "graphcompliance_claim_fact_comparison":
+            product_fact_id = re.search(r"'fact_id': '([^']+)'", user).group(1)
+            return {
+                "claim_facts": [
+                    {
+                        "claim_id": "claim_1",
+                        "fact_type": "max_rate",
+                        "value": "5.0",
+                        "unit": "percent",
+                        "qualifier": "누구나 조건 없이 확정",
+                        "evidence_text": "누구나 조건 없이 연 5% 확정",
+                        "confidence": 0.9,
+                    }
+                ],
+                "comparison_results": [
+                    {
+                        "claim_fact_index": 0,
+                        "product_fact_id": product_fact_id,
+                        "status": "CONDITION_MISSING",
+                        "rationale": "금리 숫자는 맞지만 가입기간과 우대조건이 광고 claim에 함께 표시되지 않았습니다.",
+                        "evidence_text": "최고 연 5.0%는 가입기간 12개월 및 우대조건 충족 시 적용",
+                        "confidence": 0.88,
+                    }
+                ],
             }
         return super().structured(name=name, system=system, user=user, schema=schema)
 
@@ -581,6 +645,79 @@ def test_product_metadata_is_grounding_not_disclosure_fact() -> None:
     assert output.product_context["product_group"] == "deposit"
     assert any(item["label"] == "예금자보호 부보내용" for item in output.disclosure_requirements)
     assert "DisclosureFact" not in str(output.product_context)
+    assert "product_fact_context" in output.__dict__
+
+
+def test_product_fact_analyzer_requires_exact_product_selection() -> None:
+    llm = FakeLLM()
+    analyzer = ProductFactAnalyzer(llm)
+
+    context = analyzer.analyze(
+        review_input=ReviewInput(product_group="deposit", content_text="JB 특판예금 출시."),
+        claims=[],
+        product_context={
+            "matched_products": [
+                {"product": "JB시니어우대예금", "match_basis": "product_group_candidate"},
+                {"product": "JB다이렉트예금", "match_basis": "product_group_candidate"},
+            ]
+        },
+    )
+
+    assert context["extraction_status"] == "NEEDS_PRODUCT_SELECTION"
+    assert context["product_facts"] == []
+    assert "graphcompliance_product_fact_extraction" not in llm.client.calls
+
+
+def test_product_fact_analyzer_extracts_and_compares_exact_product(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(
+        product_facts_module,
+        "select_product_documents",
+        lambda product: [
+            {
+                "document_id": "doc_1",
+                "product": product,
+                "label": "상품주요내용",
+                "file_name": "jb_senior_summary.pdf",
+                "relative_path": "예금/jb_senior_summary.pdf",
+                "file_path": "/tmp/jb_senior_summary.pdf",
+                "exists": True,
+            }
+        ],
+    )
+    monkeypatch.setattr(
+        product_facts_module,
+        "extract_document_snippet",
+        lambda document: {
+            "source_document_id": document["document_id"],
+            "label": document["label"],
+            "file_name": document["file_name"],
+            "text": "최고 연 5.0%는 가입기간 12개월 및 우대조건 충족 시 적용됩니다.",
+        },
+    )
+    claim = Claim(
+        claim_id="claim_1",
+        text="누구나 조건 없이 연 5% 확정",
+        span=Span(start=0, end=17, text="누구나 조건 없이 연 5% 확정"),
+        meaning="조건 없는 확정 금리 주장",
+        implicature="누구나 조건 없이 최고 금리를 받을 수 있다는 인상",
+        consumer_effect="소비자가 우대조건을 확인하지 않을 수 있음",
+        risk_hypernym="조건 누락 금리 주장",
+        risk_severity="HIGH",
+    )
+
+    context = ProductFactAnalyzer(ProductFactLLM()).analyze(
+        review_input=ReviewInput(product_group="deposit", content_text="JB시니어우대예금. 누구나 조건 없이 연 5% 확정."),
+        claims=[claim],
+        product_context={"matched_products": [{"product": "JB시니어우대예금", "match_basis": "exact_product_name"}]},
+    )
+
+    assert context["extraction_status"] == "EXTRACTED"
+    assert context["matched_product"] == "JB시니어우대예금"
+    assert context["selected_documents"][0]["label"] == "상품주요내용"
+    assert context["product_facts"][0]["fact_type"] == "max_rate"
+    assert context["claim_facts"][0]["claim_id"] == "claim_1"
+    assert context["comparison_results"][0]["status"] == "CONDITION_MISSING"
+    assert context["comparison_results"][0]["product_fact_id"] == context["product_facts"][0]["fact_id"]
 
 
 def test_candidate_scoring_accepts_canonical_name_overlap() -> None:

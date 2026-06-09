@@ -174,6 +174,17 @@ def load_product_rows() -> dict[str, dict[str, Any]]:
         product_name = str(product)
         first = group.iloc[0]
         labels = sorted({str(value) for value in group["label"].dropna().tolist()})
+        documents = [
+            {
+                "source_id": str(row.get("source_id", "")),
+                "label": str(row.get("label", "")),
+                "extension": str(row.get("extension", "")),
+                "file_name": str(row.get("file_name", "")),
+                "relative_path": str(row.get("relative_path", "")),
+                "original_name": str(row.get("original_name", "")),
+            }
+            for _, row in group.head(20).iterrows()
+        ]
         rows[product_name] = {
             "product": product_name,
             "product_group": major_to_product_group(str(first.get("major", ""))),
@@ -183,6 +194,7 @@ def load_product_rows() -> dict[str, dict[str, Any]]:
             "document_count": int(len(group)),
             "document_labels": labels[:12],
             "source_ids": [str(value) for value in group["source_id"].dropna().head(8).tolist()],
+            "documents": documents,
         }
     return rows
 

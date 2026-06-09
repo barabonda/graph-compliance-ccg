@@ -77,6 +77,7 @@ const els = {
   copyRun: document.getElementById("copyRunButton"),
   claimsTab: document.getElementById("claimsTab"),
   graphCanvas: document.getElementById("graphCanvas"),
+  productFactsTab: document.getElementById("productFactsTab"),
   auditTrace: document.getElementById("auditTrace"),
 };
 
@@ -233,6 +234,7 @@ function renderEmpty() {
   els.detail.innerHTML = `<div class="empty-state">하이라이트나 Claim 카드를 선택하면 상세 판단이 표시됩니다.</div>`;
   els.claimsTab.innerHTML = "";
   els.graphCanvas.innerHTML = "";
+  els.productFactsTab.innerHTML = "";
   renderAudit([]);
 }
 
@@ -243,6 +245,7 @@ function renderResult() {
   renderClaimCards();
   renderDetail();
   renderGraph();
+  renderProductFacts();
   renderAudit(state.streamEvents.length ? state.streamEvents : buildAuditSteps());
 }
 
@@ -580,15 +583,29 @@ function overallImpressionPanel(anchor) {
 
 function productDisclosurePanel(anchor) {
   const context = state.result?.product_context || {};
+  const factContext = state.result?.product_fact_context || {};
   const requirements = state.result?.disclosure_requirements || [];
   const products = context.matched_products || [];
+  const comparisonSummary = productFactSummary(factContext);
   return `
     <article class="judgment-card">
       <div class="meta-row">
         <span class="tag">상품군 ${escapeHtml(context.product_group || "auto")}</span>
         <span class="tag">상품 ${products.length}</span>
         <span class="tag">문서 ${Number(context.document_count || 0)}</span>
+        <span class="tag">본문 fact ${escapeHtml(factContext.extraction_status || "NOT_RUN")}</span>
       </div>
+      <details open>
+        <summary>본문 fact 대조 상태</summary>
+        <div class="evidence-text">
+          <b>matched_product</b><br />${escapeHtml(factContext.matched_product || "상품 선택 필요")}<br /><br />
+          <b>comparison</b><br />
+          ${Object.entries(comparisonSummary)
+            .map(([status, count]) => `${escapeHtml(status)} ${escapeHtml(count)}`)
+            .join("<br />") || "-"}<br /><br />
+          ${escapeHtml(factContext.reason || "")}
+        </div>
+      </details>
       <details open>
         <summary>필요 고지 후보</summary>
         <div class="evidence-text">
@@ -601,7 +618,108 @@ function productDisclosurePanel(anchor) {
           ${products.map((item) => `<b>${escapeHtml(item.product)}</b><br />${escapeHtml(item.major)} / ${escapeHtml(item.subcategory)} / ${escapeHtml(item.category)}<br />문서 ${Number(item.document_count || 0)} · ${(item.document_labels || []).map(escapeHtml).join(", ")}`).join("<hr />") || "광고 문안과 직접 매칭된 상품명은 없습니다. 상품군 기준 고지 후보만 사용합니다."}
         </div>
       </details>
-      <p class="evidence-text">v1은 상품 메타데이터 기반 확인 문서와 고지 후보만 제시합니다. 실제 금리/수수료/우대조건 사실 대조는 PDF 본문 DisclosureFact 추출 후 v2에서 수행합니다.</p>
+      <p class="evidence-text">Product Fact Graph는 리뷰 대상 상품이 명확할 때 관련 PDF 본문에서 핵심 상품사실을 추출하고, 광고 ClaimFact와 비교합니다. 상품이 모호하면 사실을 추정하지 않고 상품 선택 필요 상태로 둡니다.</p>
+    </article>
+  `;
+}
+
+function renderProductFacts() {
+  const context = state.result?.product_fact_context || {};
+  const claimFacts = context.claim_facts || [];
+  const productFacts = context.product_facts || [];
+  const comparisons = context.comparison_results || [];
+  const documents = context.selected_documents || [];
+  const summary = productFactSummary(context);
+  if (!state.result) {
+    els.productFactsTab.innerHTML = `<div class="empty-state">Review를 실행하면 상품문서 fact 대조가 여기에 표시됩니다.</div>`;
+    return;
+  }
+  els.productFactsTab.innerHTML = `
+    <section class="product-facts-header">
+      <div>
+        <h3>Product Fact Graph</h3>
+        <p class="evidence-text">광고 ClaimFact와 상품문서 ProductFact를 대조해 조건 누락, 충돌, 근거 부재를 분리합니다.</p>
+      </div>
+      <div class="meta-row">
+        <span class="badge ${productFactStatusClass(context.extraction_status)}">${escapeHtml(context.extraction_status || "NOT_RUN")}</span>
+        <span class="tag">상품 ${escapeHtml(context.matched_product || "선택 필요")}</span>
+        <span class="tag">문서 ${documents.length}</span>
+        <span class="tag">ProductFact ${productFacts.length}</span>
+        <span class="tag">ClaimFact ${claimFacts.length}</span>
+      </div>
+    </section>
+    ${context.reason ? `<div class="notice-box">${escapeHtml(context.reason)}</div>` : ""}
+    <section class="product-facts-grid">
+      <article class="fact-column">
+        <h3>광고 ClaimFact</h3>
+        ${claimFacts.length ? claimFacts.map(claimFactCard).join("") : `<div class="empty-state">광고에서 대조할 fact-like assertion이 없거나 상품 선택이 필요합니다.</div>`}
+      </article>
+      <article class="fact-column">
+        <h3>상품문서 ProductFact</h3>
+        ${productFacts.length ? productFacts.map(productFactCard).join("") : `<div class="empty-state">선택 상품 PDF에서 ProductFact가 추출되지 않았습니다.</div>`}
+      </article>
+      <article class="fact-column">
+        <h3>비교 결과</h3>
+        <div class="tag-row">${Object.entries(summary).map(([status, count]) => `<span class="tag">${escapeHtml(status)} ${escapeHtml(count)}</span>`).join("") || ""}</div>
+        ${comparisons.length ? comparisons.map(comparisonCard).join("") : `<div class="empty-state">비교 결과가 없습니다.</div>`}
+      </article>
+    </section>
+    <section class="detail-card">
+      <h3>선택 문서</h3>
+      <div class="evidence-text">
+        ${documents.map((doc) => `<b>${escapeHtml(doc.label || "문서")}</b> · ${escapeHtml(doc.file_name || doc.original_name || doc.document_id)}<br />${escapeHtml(doc.relative_path || "")}<br />exists ${escapeHtml(doc.exists)}`).join("<hr />") || "상품명이 확정되지 않아 문서를 선택하지 않았습니다."}
+      </div>
+    </section>
+  `;
+}
+
+function claimFactCard(item) {
+  return `
+    <article class="fact-card">
+      <strong>${escapeHtml(item.fact_type || "fact")}</strong>
+      <div class="meta-row">
+        <span class="tag">${escapeHtml(item.value || "-")}</span>
+        <span class="tag">${escapeHtml(item.qualifier || "qualifier 없음")}</span>
+        <span class="tag">${escapeHtml(item.claim_id || "")}</span>
+      </div>
+      <p class="evidence-text">${escapeHtml(item.evidence_text || "-")}</p>
+    </article>
+  `;
+}
+
+function productFactCard(item) {
+  return `
+    <article class="fact-card">
+      <strong>${escapeHtml(item.fact_type || "fact")}</strong>
+      <div class="meta-row">
+        <span class="tag">${escapeHtml(item.value || "-")}</span>
+        <span class="tag">${escapeHtml(item.unit || "")}</span>
+        <span class="tag">${escapeHtml(item.condition || "조건 없음")}</span>
+      </div>
+      <p class="evidence-text">${escapeHtml(item.evidence_text || "-")}</p>
+      <div class="meta-row">
+        <span class="tag">${escapeHtml(item.source_document_id || "")}</span>
+        <span class="tag">${escapeHtml(item.page_or_chunk || "")}</span>
+      </div>
+    </article>
+  `;
+}
+
+function comparisonCard(item) {
+  const claimFact = claimFactById(item.claim_fact_id);
+  const productFact = productFactById(item.product_fact_id);
+  return `
+    <article class="fact-card comparison ${productFactStatusClass(item.status)}">
+      <div class="card-top">
+        <strong>${escapeHtml(item.status || "NO_PRODUCT_FACT")}</strong>
+        <span class="tag">${Number(item.confidence || 0).toFixed(2)}</span>
+      </div>
+      <p class="evidence-text">
+        <b>Claim</b><br />${escapeHtml(claimFact?.evidence_text || item.claim_fact_id || "-")}<br /><br />
+        <b>ProductFact</b><br />${escapeHtml(productFact ? `${productFact.fact_type}: ${productFact.value} ${productFact.condition}` : "대응 fact 없음")}<br /><br />
+        <b>판단</b><br />${escapeHtml(item.rationale || "-")}<br /><br />
+        <b>근거</b><br />${escapeHtml(item.evidence_text || "-")}
+      </p>
     </article>
   `;
 }
@@ -613,6 +731,8 @@ function renderGraph() {
     return;
   }
   const planItems = state.result.cu_plan.filter((item) => item.anchor_id === anchor.anchor_id).slice(0, 5);
+  const claimFacts = productClaimFactsForAnchor(anchor).slice(0, 3);
+  const comparisons = claimFacts.flatMap((fact) => productComparisonsForClaimFact(fact.claim_fact_id)).slice(0, 3);
   const nodes = [
     { id: "claim", label: "Claim", text: anchor.span.text, x: 24, y: 150 },
     { id: "anchor", label: "ContextAnchor", text: anchor.anchor_type, x: 220, y: 150 },
@@ -626,6 +746,21 @@ function renderGraph() {
     ["claim", "trackb", "MEANING_IMPLICATURE_EFFECT"],
     ["claim", "product", "ABOUT_PRODUCT_SCOPE"],
   ];
+  claimFacts.forEach((fact, index) => {
+    const y = 420 + index * 95;
+    const comparison = productComparisonsForClaimFact(fact.claim_fact_id)[0];
+    const productFact = comparison ? productFactById(comparison.product_fact_id) : null;
+    nodes.push(
+      { id: `claim_fact_${index}`, label: "ClaimFact", text: `${fact.fact_type}: ${fact.value} ${fact.qualifier || ""}`, x: 220, y, status: "plan" },
+      { id: `product_fact_${index}`, label: "ProductFact", text: productFact ? `${productFact.fact_type}: ${productFact.value} ${productFact.condition || ""}` : "대응 ProductFact 없음", x: 430, y, status: "evidence" },
+      { id: `comparison_${index}`, label: "ComparisonResult", text: `${comparison?.status || "NO_PRODUCT_FACT"} · ${comparison?.rationale || ""}`, x: 660, y, status: comparisonStatusForGraph(comparison?.status) }
+    );
+    edges.push(
+      ["claim", `claim_fact_${index}`, "ASSERTS_FACT"],
+      [`claim_fact_${index}`, `product_fact_${index}`, "COMPARED_TO"],
+      [`product_fact_${index}`, `comparison_${index}`, "EVIDENCES"]
+    );
+  });
   if (!planItems.length) {
     const display = anchorDisplay(anchor.anchor_id);
     nodes.push({ id: "failure", label: "Retrieval", text: `CUPlan 0 · ${display?.retrieval_failure_code || "정책 매칭 실패"}`, x: 650, y: 150, status: "review" });
@@ -755,6 +890,7 @@ function buildAuditSteps() {
     { name: "Exception override", ok: true, summary: `${result.exception_reviews?.length || 0} exception reviews` },
     { name: "Track B overall impression", ok: Boolean(result.overall_impression_judgment?.verdict), summary: `${result.overall_impression_judgment?.verdict || "pending"} · ${Number(result.overall_impression_judgment?.misleading_risk_score || 0).toFixed(2)}` },
     { name: "Product disclosure context", ok: Boolean(result.product_context?.product_group), summary: `${result.product_context?.product_group || "auto"} · ${(result.disclosure_requirements || []).length} required disclosures` },
+    { name: "Product fact graph", ok: Boolean(result.product_fact_context?.extraction_status), summary: `${result.product_fact_context?.extraction_status || "pending"} · ${(result.product_fact_context?.comparison_results || []).length} comparisons` },
     { name: "Track C extension slot", ok: true, summary: result.track_c_summary?.status || "extension_ready" },
     { name: "Routing", ok: result.final_verdict !== "pass_candidate" || (result.cu_plan || []).length > 0, summary: result.final_verdict || "pending" },
   ];
@@ -987,6 +1123,43 @@ function systemReviewItems(result = state.result) {
 
 function revisionSuggestion(anchorId) {
   return (state.result?.revision_suggestions || []).find((item) => item.anchor_id === anchorId);
+}
+
+function productFactSummary(context = state.result?.product_fact_context || {}) {
+  const summary = {};
+  (context.comparison_results || []).forEach((item) => {
+    const status = item.status || "UNKNOWN";
+    summary[status] = (summary[status] || 0) + 1;
+  });
+  return summary;
+}
+
+function productClaimFactsForAnchor(anchor) {
+  return (state.result?.product_fact_context?.claim_facts || []).filter((item) => item.claim_id === anchor.claim_id);
+}
+
+function productComparisonsForClaimFact(claimFactId) {
+  return (state.result?.product_fact_context?.comparison_results || []).filter((item) => item.claim_fact_id === claimFactId);
+}
+
+function claimFactById(claimFactId) {
+  return (state.result?.product_fact_context?.claim_facts || []).find((item) => item.claim_fact_id === claimFactId);
+}
+
+function productFactById(productFactId) {
+  return (state.result?.product_fact_context?.product_facts || []).find((item) => item.fact_id === productFactId);
+}
+
+function productFactStatusClass(status) {
+  if (status === "SUPPORTED" || status === "EXTRACTED") return "pass";
+  if (status === "CONTRADICTED" || status === "FACT_EXTRACTION_FAILED" || status === "TEXT_EXTRACTION_FAILED") return "reject";
+  return "review";
+}
+
+function comparisonStatusForGraph(status) {
+  if (status === "SUPPORTED") return "COMPLIANT";
+  if (status === "CONTRADICTED") return "NON_COMPLIANT";
+  return "review";
 }
 
 function unmatchedAnchors(result) {
