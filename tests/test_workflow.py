@@ -18,7 +18,8 @@ from evaluate import (
 from normalizer import PolicyGuidedNormalizer
 from policy_compiler import validate_compiler_output
 from retriever import PolicyRetriever, candidate_allowed_for_anchor, candidate_from_row
-from schemas import Claim, ContextAnchor, PolicyCandidate, ReviewGraph, ReviewInput, Span
+from revision import LLMRevisionSuggester
+from schemas import Claim, ContextAnchor, CUPlanItem, LLMJudgment, PolicyCandidate, PolicyHypernymProposal, ReviewGraph, ReviewInput, Span
 from vocabulary_governance import validate_governance_output
 from workflow import GraphComplianceCCGWorkflow
 from server import runtime_error_detail
@@ -359,6 +360,71 @@ def test_exception_override_only_runs_for_non_compliant() -> None:
     assert output.final_verdict == "needs_review"
     assert llm.exception_calls == 0
     assert output.revision_suggestions
+
+
+def test_revision_suggester_skips_neutral_launch_anchor_with_broad_policy_tag() -> None:
+    llm = FakeLLM(verdict="INSUFFICIENT")
+    anchor = ContextAnchor(
+        anchor_id="anchor_launch",
+        anchor_type="claim_anchor",
+        claim_id="claim_launch",
+        span=Span(start=0, end=10, text="JB 특판예금 출시."),
+        facts=["상품 출시를 알리는 중립 소개 문장"],
+        hypernyms=[
+            PolicyHypernymProposal(
+                proposal_id="proposal_1",
+                source_id="claim_launch",
+                hypernym_id="policy_hypernym_ad_regulation",
+                hypernym="광고 규제",
+                support="WEAK",
+                confidence=0.62,
+                normalized_score=0.62,
+            )
+        ],
+    )
+    plan = CUPlanItem(
+        plan_item_id="plan_launch",
+        anchor_id=anchor.anchor_id,
+        cu_id="cu_ad_general",
+        principle="광고규제",
+        source_article="금소법 제22조",
+        subject="광고 표시",
+        condition="금융상품 광고인 경우",
+        constraint="소비자를 오인하게 해서는 안 된다",
+        context="금융광고 일반 기준",
+        legal_evidence_ids=["legal_chunk_1"],
+        evidence_texts=["광고는 소비자를 오인하게 해서는 안 된다."],
+        retrieval_scores={"combined_score": 0.62},
+        rerank_score=0.62,
+        selection_reason="일반 광고규제 후보",
+    )
+    judgment = LLMJudgment(
+        judgment_id="judgment_launch",
+        plan_item_id=plan.plan_item_id,
+        anchor_id=anchor.anchor_id,
+        cu_id=plan.cu_id,
+        verdict="INSUFFICIENT",
+        score=0.62,
+        why="출시 문장만으로 광고 표시 기준 충족 여부를 판단하기 어렵습니다.",
+        evidence_span=anchor.span.text,
+        used_policy_evidence=["legal_chunk_1"],
+    )
+    graph = ReviewGraph(
+        review_run_id="run_launch",
+        ad_draft_id="ad_launch",
+        content_hash="hash_launch",
+        anchors=[anchor],
+        cu_plan=[plan],
+        judgments=[judgment],
+    )
+
+    suggestions = LLMRevisionSuggester(llm).suggest(
+        review_input=ReviewInput(content_text="JB 특판예금 출시. 누구나 연 5% 확정 보장 수익"),
+        graph=graph,
+    )
+
+    assert suggestions == []
+    assert "graphcompliance_revision_suggestions" not in llm.client.calls
 
 
 def test_exception_override_effective_verdict_drives_output() -> None:

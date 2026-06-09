@@ -435,10 +435,12 @@ function judgmentCard(judgment, planItem, raw) {
   return `
     <article class="judgment-card">
       <div class="card-top">
-        <strong>${escapeHtml(planItem?.principle || "ComplianceUnit")}</strong>
+        <strong>${escapeHtml(legalJudgmentTitle(planItem, judgment))}</strong>
         <span class="badge ${judgmentBadgeClass(judgment.verdict)}">${JUDGMENT_STATUS[judgment.verdict] || judgment.verdict}</span>
       </div>
       <div class="meta-row">
+        <span class="tag">${escapeHtml(planItem?.principle || "원칙 미상")}</span>
+        ${planItem?.source_article ? `<span class="tag">${escapeHtml(planItem.source_article)}</span>` : ""}
         <span class="tag">score ${Number(judgment.score || 0).toFixed(2)}</span>
         <span class="tag">${escapeHtml(judgment.cu_id)}</span>
         ${rawTag}
@@ -501,6 +503,16 @@ function revisionPanel(anchor, issues, judgments, display) {
   if (!risky.length) {
     return `<div class="empty-state">수정 제안이 필요한 위험 판단이 없습니다.</div>`;
   }
+  const nonCompliant = risky.filter((item) => item.verdict === "NON_COMPLIANT");
+  if (!nonCompliant.length) {
+    return `
+      <article class="revision-card">
+        <strong>추가 근거 확인 필요</strong>
+        <p class="evidence-text">이 anchor는 현재 위반 확정이 아니라 근거/정책 매칭/고지 충족 여부 확인 대상으로 분류됐습니다. 문구를 바로 대체하기보다 관련 상품조건, 필수고지, 조문 근거를 확인하세요.</p>
+      </article>
+      ${issues.map((issue) => `<article class="revision-card"><strong>${escapeHtml(issue.required_action || "확인 필요")}</strong><p class="evidence-text">${escapeHtml(issue.rationale || "")}</p></article>`).join("")}
+    `;
+  }
   const after = safeAlternative(anchor.span.text);
   return `
     ${issues.map((issue) => `<article class="revision-card"><strong>${escapeHtml(issue.required_action || "문안 수정 필요")}</strong><p class="evidence-text">${escapeHtml(issue.rationale || "")}</p></article>`).join("")}
@@ -509,6 +521,14 @@ function revisionPanel(anchor, issues, judgments, display) {
       <p class="evidence-text"><b>Before</b><br />${escapeHtml(anchor.span.text)}<br /><br /><b>After</b><br />${escapeHtml(after)}</p>
     </article>
   `;
+}
+
+function legalJudgmentTitle(planItem, judgment) {
+  if (!planItem) return "CU 근거 확인 필요";
+  const article = planItem.source_article || "근거 조항";
+  const subject = planItem.subject || "광고 표현";
+  const constraint = planItem.constraint || planItem.context || judgment.cu_id || "준수 여부";
+  return `${article} 근거: ${subject} · ${constraint}`;
 }
 
 function revisionSuggestionCard(suggestion) {

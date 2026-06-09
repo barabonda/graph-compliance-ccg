@@ -120,6 +120,7 @@ class CUPlanItem:
     anchor_id: str
     cu_id: str
     principle: str
+    source_article: str
     subject: str
     condition: str
     constraint: str

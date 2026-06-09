@@ -195,6 +195,7 @@ def plan_item_from_candidate(
         anchor_id=anchor_id,
         cu_id=candidate.cu_id,
         principle=candidate.principle,
+        source_article=candidate.source_article,
         subject=candidate.subject,
         condition=candidate.condition,
         constraint=candidate.constraint,

@@ -45,6 +45,10 @@ def build_output(
     detected_issues = [
         {
             "risk_code": judgment.cu_id,
+            "principle": plan_item_for_judgment(graph, judgment).principle if plan_item_for_judgment(graph, judgment) else "",
+            "source_article": plan_item_for_judgment(graph, judgment).source_article if plan_item_for_judgment(graph, judgment) else "",
+            "subject": plan_item_for_judgment(graph, judgment).subject if plan_item_for_judgment(graph, judgment) else "",
+            "constraint": plan_item_for_judgment(graph, judgment).constraint if plan_item_for_judgment(graph, judgment) else "",
             "severity": severity_from_score(judgment.score),
             "problem_span": judgment.evidence_span,
             "rationale": judgment.why,
@@ -128,6 +132,13 @@ def effective_judgments(judgments: list[LLMJudgment], reviews: list[ExceptionRev
         else:
             effective.append(judgment)
     return effective
+
+
+def plan_item_for_judgment(graph: ReviewGraph, judgment: LLMJudgment):
+    for item in graph.cu_plan:
+        if item.plan_item_id == judgment.plan_item_id:
+            return item
+    return None
 
 
 def severity_from_score(score: float) -> int:
