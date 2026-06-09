@@ -6,6 +6,7 @@ from collections.abc import Iterator
 from typing import Any
 from uuid import uuid4
 
+from claim_modeling import fold_qualifier_anchors_into_parent_claims
 from context_extractor import LLMContextExtractor, build_context_triples
 from jb_data_context import build_product_context
 from judge import LLMComplianceJudge
@@ -108,6 +109,7 @@ class GraphComplianceCCGWorkflow:
             policy_context=policy_context,
             top_n=5,
         )
+        anchors = fold_qualifier_anchors_into_parent_claims(anchors, claims)
         yield workflow_event(
             "step_completed",
             "Policy normalization",

@@ -83,6 +83,7 @@ def build_output(
         post_approval_required_actions=["assign_review_number", "insert_review_phrase_before_publication"],
         rationale=summary_rationale(final, actionable_effective),
         review_run_id=graph.review_run_id,
+        claims=to_jsonable(graph.claims),
         context_triples=to_jsonable(graph.context_triples),
         context_anchors=to_jsonable(graph.anchors),
         cu_plan=to_jsonable(graph.cu_plan),
@@ -243,6 +244,8 @@ def unmatched_anchors(graph: ReviewGraph, *, anchor_types: set[str] | None = Non
 def system_review_items_for(graph: ReviewGraph) -> list[dict[str, object]]:
     rows: list[dict[str, object]] = []
     for anchor in unmatched_anchors(graph):
+        if anchor.anchor_type not in ACTIONABLE_ANCHOR_TYPES:
+            continue
         diagnostic = graph.retrieval_diagnostics.get(anchor.anchor_id, {})
         code = str(diagnostic.get("failure_code") or "CU_PLAN_EMPTY")
         rows.append(

@@ -6,6 +6,7 @@ from pathlib import Path
 import pytest
 
 import product_facts as product_facts_module
+from claim_modeling import fold_qualifier_anchors_into_parent_claims
 from context_extractor import LLMContextExtractor
 from judge import LLMComplianceJudge
 from llm_gateway import LLMGateway
@@ -24,6 +25,7 @@ from retriever import PolicyRetriever, candidate_allowed_for_anchor, candidate_f
 from revision import LLMRevisionSuggester
 from schemas import (
     Claim,
+    ClaimQualifier,
     ContextAnchor,
     CUPlanItem,
     EvidenceWindow,
@@ -65,6 +67,17 @@ class FakeLLM(LLMGateway):
                         "consumer_effect": "소비자가 원금손실 및 조건 위험을 과소평가할 수 있음",
                         "risk_hypernym": "past performance claim / suitability target",
                         "risk_severity": "HIGH",
+                        "qualifiers": [
+                            {
+                                "text": "좋은 선택",
+                                "role": "benefit_scope",
+                                "start": 33,
+                                "end": 38,
+                                "meaning": "투자 선택의 적합성을 긍정적으로 표현",
+                                "risk_reason": "대상 투자자에게 적합하다는 인상을 줄 수 있음",
+                                "confidence": 0.8,
+                            }
+                        ],
                         "entities": [
                             {"name": "ELS", "entity_type": "product", "start": 17, "end": 20},
                             {"name": "중위험 투자자", "entity_type": "target_consumer", "start": 22, "end": 29},
@@ -203,6 +216,17 @@ class CapturingExtractionLLM(FakeLLM):
                         "consumer_effect": "소비자가 조건 변동 가능성을 낮게 볼 수 있음",
                         "risk_hypernym": "definitive-rate claim",
                         "risk_severity": "HIGH",
+                        "qualifiers": [
+                            {
+                                "text": "확정",
+                                "role": "certainty",
+                                "start": 13,
+                                "end": 15,
+                                "meaning": "금리 제공을 단정적으로 표현",
+                                "risk_reason": "조건 없는 확정 제공으로 오인될 수 있음",
+                                "confidence": 0.92,
+                            }
+                        ],
                         "entities": [],
                         "relations": [],
                     }
@@ -444,6 +468,51 @@ def test_context_extractor_prompt_preserves_risky_claims_separately() -> None:
     assert claims[0].risk_severity == "HIGH"
     assert "Do not collapse a risky claim into a later mitigating disclosure" in llm.last_system
     assert "최고 연 5.0% 금리를 확정 제공" in llm.last_system
+
+
+def test_generic_scope_qualifier_folds_into_parent_claim_anchor() -> None:
+    claim = Claim(
+        claim_id="claim_rate",
+        text="누구나 연 5% 확정 보장 수익",
+        span=Span(start=0, end=17, text="누구나 연 5% 확정 보장 수익"),
+        meaning="모든 소비자가 확정 수익을 받을 수 있다는 주장",
+        implicature="조건 없이 확정 수익을 받을 수 있다는 인상",
+        consumer_effect="소비자가 가입대상과 우대조건을 확인하지 않을 수 있음",
+        risk_hypernym="보장성 수익 오인",
+        risk_severity="HIGH",
+        qualifiers=[
+            ClaimQualifier(
+                qualifier_id="qualifier_anyone",
+                text="누구나",
+                role="target_scope",
+                span=Span(start=0, end=3, text="누구나"),
+                meaning="대상 제한이 없는 것으로 표현",
+                risk_reason="가입대상 제한이나 조건이 없다는 인상을 줄 수 있음",
+                confidence=0.93,
+            )
+        ],
+    )
+    claim_anchor = ContextAnchor(
+        anchor_id="anchor_claim",
+        anchor_type="claim_anchor",
+        claim_id=claim.claim_id,
+        span=claim.span,
+        facts=["확정 보장 수익 주장"],
+        hypernyms=[],
+    )
+    target_anchor = ContextAnchor(
+        anchor_id="anchor_anyone",
+        anchor_type="target_consumer_anchor",
+        claim_id=claim.claim_id,
+        span=Span(start=0, end=3, text="누구나"),
+        facts=["일반 금융소비자 전체"],
+        hypernyms=[],
+    )
+
+    folded = fold_qualifier_anchors_into_parent_claims([claim_anchor, target_anchor], [claim])
+
+    assert [anchor.anchor_id for anchor in folded] == ["anchor_claim"]
+    assert any("ClaimQualifier role=target_scope text='누구나'" in fact for fact in folded[0].facts)
 
 
 def test_policy_normalization_schema_restricts_hypernym_ids_to_approved_vocabulary() -> None:

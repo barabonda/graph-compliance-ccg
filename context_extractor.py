@@ -5,7 +5,7 @@ from __future__ import annotations
 from typing import Any
 
 from llm_gateway import LLMGateway
-from schemas import Claim, ContextEntity, ContextRelation, ContextTriple, ReviewInput, Span
+from schemas import Claim, ClaimQualifier, ContextEntity, ContextRelation, ContextTriple, ReviewInput, Span
 from utils import stable_id
 
 
@@ -27,6 +27,37 @@ EXTRACTION_SCHEMA: dict[str, Any] = {
                     "consumer_effect": {"type": "string"},
                     "risk_hypernym": {"type": "string"},
                     "risk_severity": {"type": "string", "enum": ["LOW", "MEDIUM", "HIGH"]},
+                    "qualifiers": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "additionalProperties": False,
+                            "properties": {
+                                "text": {"type": "string"},
+                                "role": {
+                                    "type": "string",
+                                    "enum": [
+                                        "target_scope",
+                                        "condition_scope",
+                                        "certainty",
+                                        "guarantee",
+                                        "benefit_scope",
+                                        "risk_downplay",
+                                        "urgency",
+                                        "comparison",
+                                        "disclosure_qualifier",
+                                        "other",
+                                    ],
+                                },
+                                "start": {"type": "integer"},
+                                "end": {"type": "integer"},
+                                "meaning": {"type": "string"},
+                                "risk_reason": {"type": "string"},
+                                "confidence": {"type": "number"},
+                            },
+                            "required": ["text", "role", "start", "end", "meaning", "risk_reason", "confidence"],
+                        },
+                    },
                     "entities": {
                         "type": "array",
                         "items": {
@@ -68,6 +99,7 @@ EXTRACTION_SCHEMA: dict[str, Any] = {
                     "consumer_effect",
                     "risk_hypernym",
                     "risk_severity",
+                    "qualifiers",
                     "entities",
                     "relations",
                 ],
@@ -95,6 +127,14 @@ class LLMContextExtractor:
                 "Extraction recall is critical: every material benefit, rate, fee, guarantee, safety, "
                 "approval, eligibility, past-performance, recommendation, and disclosure statement must be "
                 "represented as a separate Claim when it has a distinct compliance meaning. "
+                "Within each Claim, extract risky or materially limiting expression-level qualifiers as "
+                "ClaimQualifier items. Examples: '누구나' -> target_scope, '전 고객' -> target_scope, "
+                "'조건 없이' or '제한 없이' -> condition_scope, '확정' or '반드시' -> certainty, "
+                "'보장' or '원금보장' -> guarantee, '안정적 고수익' -> risk_downplay/benefit_scope. "
+                "Do not create a standalone target_consumer anchor later for generic scope words like "
+                "'누구나'; those words belong inside the parent Claim as qualifiers. Concrete consumer "
+                "segments such as '고령층 고객', '중위험 투자자', or '소상공인' may remain target_consumer "
+                "entities because they define an actual audience segment. "
                 "Do not collapse a risky claim into a later mitigating disclosure. For example, extract "
                 "'최고 연 5.0% 금리를 확정 제공' as its own benefit/definitive-rate claim even if a later "
                 "sentence says rates may vary by conditions. Also extract the later condition disclosure as "
@@ -129,6 +169,18 @@ class LLMContextExtractor:
                 )
                 for rel in item["relations"]
             ]
+            qualifiers = [
+                ClaimQualifier(
+                    qualifier_id=stable_id("qualifier", claim_id, qualifier["text"], qualifier["role"], qualifier["start"], qualifier["end"]),
+                    text=qualifier["text"],
+                    role=qualifier["role"],
+                    span=Span(start=qualifier["start"], end=qualifier["end"], text=qualifier["text"]),
+                    meaning=qualifier["meaning"],
+                    risk_reason=qualifier["risk_reason"],
+                    confidence=float(qualifier["confidence"]),
+                )
+                for qualifier in item["qualifiers"]
+            ]
             claims.append(
                 Claim(
                     claim_id=claim_id,
@@ -141,6 +193,7 @@ class LLMContextExtractor:
                     risk_severity=item["risk_severity"],
                     entities=entities,
                     relations=relations,
+                    qualifiers=qualifiers,
                 )
             )
         return claims
@@ -219,5 +272,30 @@ def build_context_triples(*, review_run_id: str, claims: list[Claim]) -> list[Co
                     subject_type=source.entity_type if source else "ContextEntity",
                     object_type=target.entity_type if target else "ContextEntity",
                 )
+            )
+        for qualifier in claim.qualifiers:
+            triples.extend(
+                [
+                    ContextTriple(
+                        triple_id=stable_id("triple", review_run_id, claim.claim_id, "HAS_QUALIFIER", qualifier.qualifier_id),
+                        claim_id=claim.claim_id,
+                        subject=claim.text,
+                        predicate="HAS_QUALIFIER",
+                        object=f"{qualifier.role}:{qualifier.text}",
+                        evidence=qualifier.text,
+                        subject_type="Claim",
+                        object_type="ClaimQualifier",
+                    ),
+                    ContextTriple(
+                        triple_id=stable_id("triple", review_run_id, claim.claim_id, "QUALIFIER_RAISES", qualifier.qualifier_id, qualifier.risk_reason),
+                        claim_id=claim.claim_id,
+                        subject=qualifier.text,
+                        predicate="QUALIFIER_RAISES",
+                        object=qualifier.risk_reason,
+                        evidence=claim.text,
+                        subject_type="ClaimQualifier",
+                        object_type="RiskReason",
+                    ),
+                ]
             )
     return triples

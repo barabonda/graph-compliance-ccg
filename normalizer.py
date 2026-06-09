@@ -93,7 +93,11 @@ class PolicyGuidedNormalizer:
                 "PolicyHypernym vocabulary. The hypernym_id field is schema-restricted to approved ids; "
                 "choose one of those ids exactly. Do not invent new hypernyms or ids. Mark support STRONG "
                 "only when a provided Premise directly supports the mapping; otherwise mark WEAK. Keep only "
-                "useful anchors."
+                "useful anchors. Do not create standalone target_consumer_anchor items for generic claim "
+                "scope qualifiers such as '누구나', '전 고객', '조건 없이', '제한 없이', '무조건', '확정', "
+                "or '보장'. Those expressions should remain inside the parent claim/risk anchor because "
+                "their compliance meaning depends on the whole claim they modify. Use target_consumer_anchor "
+                "only for concrete audience segments such as '고령층 고객', '중위험 투자자', or '소상공인'."
             ),
             user=(
                 "[claims]\n"

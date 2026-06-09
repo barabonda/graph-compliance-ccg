@@ -154,7 +154,34 @@ class Neo4jReviewWriter:
                         "span_start": entity.span.start,
                         "span_end": entity.span.end,
                     }
-                    for entity in claim.entities
+                for entity in claim.entities
+                ],
+            )
+            session.run(
+                """
+                UNWIND $qualifiers AS row
+                MATCH (claim:Claim {id: $claim_id, workspace_id: $workspace_id})
+                MERGE (qualifier:ClaimQualifier {id: row.id, workspace_id: $workspace_id})
+                SET qualifier += row
+                MERGE (claim)-[:HAS_QUALIFIER {workspace_id: $workspace_id, review_run_id: $review_run_id, source: $source}]->(qualifier)
+                """,
+                workspace_id=review_input.workspace_id,
+                review_run_id=graph.review_run_id,
+                source=SOURCE,
+                claim_id=claim.claim_id,
+                qualifiers=[
+                    {
+                        **common,
+                        "id": qualifier.qualifier_id,
+                        "text": qualifier.text,
+                        "role": qualifier.role,
+                        "span_start": qualifier.span.start,
+                        "span_end": qualifier.span.end,
+                        "meaning": qualifier.meaning,
+                        "risk_reason": qualifier.risk_reason,
+                        "confidence": qualifier.confidence,
+                    }
+                    for qualifier in claim.qualifiers
                 ],
             )
 

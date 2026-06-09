@@ -350,6 +350,7 @@ function renderClaimCards() {
       const displayVerdict = display?.display_verdict || "ANCHOR";
       const cardClass = display?.display_role === "scope" ? " is-scope" : "";
       const failureCode = display?.retrieval_failure_code && display.retrieval_failure_code !== "MATCHED" ? display.retrieval_failure_code : "";
+      const qualifiers = claimQualifiers(anchor.claim_id);
       return `
         <article class="claim-card${cardClass} ${state.selectedAnchorId === anchor.anchor_id ? "is-selected" : ""}" data-anchor-id="${anchor.anchor_id}">
           <div class="card-top">
@@ -366,6 +367,7 @@ function renderClaimCards() {
           </div>
           <div class="tag-row">
             ${anchor.hypernyms.map((item) => `<span class="tag">${escapeHtml(item.hypernym)}</span>`).join("")}
+            ${qualifiers.map((item) => `<span class="tag qualifier-tag">${escapeHtml(item.text)} · ${escapeHtml(item.role)}</span>`).join("")}
           </div>
         </article>
       `;
@@ -398,6 +400,7 @@ function renderDetail() {
         <span class="tag">${display?.display_role === "scope" ? "scope/context" : "actionable"}</span>
         ${anchor.hypernyms.map((item) => `<span class="tag">${escapeHtml(item.hypernym)} · ${item.support}</span>`).join("")}
       </div>
+      ${claimQualifierPanel(anchor)}
       <details open>
         <summary>Context facts</summary>
         <div class="evidence-text">${anchor.facts.map(escapeHtml).join("<br />") || "없음"}</div>
@@ -578,6 +581,32 @@ function overallImpressionPanel(anchor) {
         </div>
       </details>
     </article>
+  `;
+}
+
+function claimQualifierPanel(anchor) {
+  const qualifiers = claimQualifiers(anchor.claim_id);
+  if (!qualifiers.length) return "";
+  return `
+    <details open>
+      <summary>Claim 내부 표현 / Qualifiers</summary>
+      <div class="qualifier-list">
+        ${qualifiers
+          .map(
+            (item) => `
+              <article class="qualifier-card">
+                <strong>${escapeHtml(item.text)}</strong>
+                <div class="meta-row">
+                  <span class="tag">${escapeHtml(item.role)}</span>
+                  <span class="tag">${Number(item.confidence || 0).toFixed(2)}</span>
+                </div>
+                <p class="evidence-text">${escapeHtml(item.meaning || "")}<br />${escapeHtml(item.risk_reason || "")}</p>
+              </article>
+            `
+          )
+          .join("")}
+      </div>
+    </details>
   `;
 }
 
@@ -1136,6 +1165,10 @@ function productFactSummary(context = state.result?.product_fact_context || {}) 
 
 function productClaimFactsForAnchor(anchor) {
   return (state.result?.product_fact_context?.claim_facts || []).filter((item) => item.claim_id === anchor.claim_id);
+}
+
+function claimQualifiers(claimId) {
+  return (state.result?.claims || []).find((item) => item.claim_id === claimId)?.qualifiers || [];
 }
 
 function productComparisonsForClaimFact(claimFactId) {

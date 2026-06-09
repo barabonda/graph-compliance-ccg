@@ -58,6 +58,17 @@ class ContextTriple:
 
 
 @dataclass(frozen=True)
+class ClaimQualifier:
+    qualifier_id: str
+    text: str
+    role: str
+    span: Span
+    meaning: str
+    risk_reason: str
+    confidence: float
+
+
+@dataclass(frozen=True)
 class Claim:
     claim_id: str
     text: str
@@ -69,6 +80,7 @@ class Claim:
     risk_severity: str
     entities: list[ContextEntity] = field(default_factory=list)
     relations: list[ContextRelation] = field(default_factory=list)
+    qualifiers: list[ClaimQualifier] = field(default_factory=list)
 
 
 @dataclass(frozen=True)
@@ -241,6 +253,7 @@ class ReviewOutput:
     post_approval_required_actions: list[str]
     rationale: str
     review_run_id: str
+    claims: list[dict[str, Any]]
     context_triples: list[dict[str, Any]]
     context_anchors: list[dict[str, Any]]
     cu_plan: list[dict[str, Any]]

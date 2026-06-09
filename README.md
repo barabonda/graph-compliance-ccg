@@ -73,6 +73,10 @@ adds `review_run_id`, `context_anchors`, `cu_plan`, `judgments`,
 
 JB dataset extensions add:
 
+- `claims[].qualifiers` — expression-level modeling inside each Claim. Generic
+  scope/certainty/guarantee wording such as `누구나`, `조건 없이`, `확정`, and
+  `보장` stays inside the parent Claim as `ClaimQualifier` evidence instead of
+  becoming a standalone target-consumer judgment anchor.
 - `overall_impression_judgment` — Track B consumer-misleading review grounded in
   `Claim -> Meaning -> Implicature -> ConsumerEffect` paths and the overall
   impression standard.
