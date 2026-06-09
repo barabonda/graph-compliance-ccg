@@ -1,0 +1,40 @@
+name: graphcompliance_ccg
+version: 0.1.0
+description: Policy-guided Context Graph for Korean financial-ad pre-review.
+nodes:
+  AdDraft: {description: Original advertising draft text.}
+  ReviewRun: {description: One persisted review execution.}
+  Claim: {description: Atomic advertising claim with source span.}
+  ContextEntity: {description: Extracted real-world entity from the ad.}
+  ContextRelation: {description: Fact-style subject-predicate-object relation.}
+  Meaning: {description: Literal meaning of a claim.}
+  Implicature: {description: Likely implication of a claim.}
+  ConsumerEffect: {description: Consumer misunderstanding or interpretation effect.}
+  RiskNode: {description: Regulatory expression or omission risk.}
+  ContextAnchor: {description: Small judgment unit aligned to policy terms.}
+  PolicyHypernymProposal: {description: Candidate policy-level normalization.}
+  CUPlan: {description: Selected compliance-unit plan for one review run.}
+  CUPlanItem: {description: One selected compliance unit for one anchor.}
+  EvidenceWindow: {description: Narrow context and legal evidence window for judging.}
+  LLMJudgment: {description: CU-level verdict grounded in an evidence window.}
+  ExceptionReview: {description: Closure-based override decision for a non-compliant CU.}
+  HighlightSpan: {description: Source text span used in findings.}
+relationships:
+  HAS_REVIEW_RUN: [AdDraft, ReviewRun]
+  HAS_CLAIM: [ReviewRun, Claim]
+  MENTIONS_ENTITY: [Claim, ContextEntity]
+  HAS_FACT: [Claim, ContextRelation]
+  DENOTES: [Claim, Meaning]
+  IMPLIES: [Meaning, Implicature]
+  CAN_MISLEAD: [Implicature, ConsumerEffect]
+  RAISES: [ConsumerEffect, RiskNode]
+  HAS_ANCHOR: [Claim, ContextAnchor]
+  NORMALIZED_TO: [ContextAnchor, PolicyHypernymProposal]
+  HAS_PLAN_ITEM: [CUPlan, CUPlanItem]
+  SELECTED_FOR_PLAN: [ContextAnchor, CUPlanItem]
+  TARGETS_CU: [CUPlanItem, ComplianceUnit]
+  HAS_EVIDENCE_WINDOW: [CUPlanItem, EvidenceWindow]
+  USES_EVIDENCE: [LLMJudgment, EvidenceWindow]
+  JUDGED_AS: [CUPlanItem, LLMJudgment]
+  HAS_EXCEPTION_REVIEW: [LLMJudgment, ExceptionReview]
+  HAS_HIGHLIGHT: [LLMJudgment, HighlightSpan]

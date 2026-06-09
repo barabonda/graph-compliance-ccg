@@ -1,0 +1,241 @@
+name: financial-compliance-ad-review
+description: Manual ontology contract for GraphCompliance CCG financial-ad review.
+version: 0.1.0
+
+enums:
+  PolicyHypernymDomain:
+    values: [product, claim, risk, actor, disclosure, suitability, channel, obligation]
+  SupportStrength:
+    values: [STRONG, WEAK]
+  ComplianceUnitType:
+    values: [META_CU, ACTOR_CU, ARTICLE_CU, CLAUSE_CU]
+  JudgmentVerdict:
+    values: [COMPLIANT, NON_COMPLIANT, INSUFFICIENT, NOT_APPLICABLE]
+  ReviewRouting:
+    values: [pass_candidate, revise, reject, needs_review]
+
+entities:
+  PolicyDocument:
+    description: Source policy or legal document.
+    properties:
+      id: {type: string, required: true}
+      title: {type: string, required: true}
+      workspace_id: {type: string, required: true}
+  LegalChunk:
+    description: Provenance text chunk, not primary candidate retrieval object.
+    properties:
+      id: {type: string, required: true}
+      text: {type: string, required: true}
+      document_title: {type: string}
+      article_no: {type: string}
+      workspace_id: {type: string, required: true}
+  Premise:
+    description: Atomic policy premise derived from a legal source.
+    properties:
+      id: {type: string, required: true}
+      statement: {type: string, required: true}
+      premise_type: {type: string, required: true}
+      support_strength: {type: string}
+      confidence: {type: float}
+      workspace_id: {type: string, required: true}
+  PolicyHypernym:
+    description: Approved policy-level vocabulary node used for context normalization.
+    properties:
+      id: {type: string, required: true}
+      name: {type: string, required: true}
+      domain: {type: string, required: true}
+      description: {type: string}
+      status: {type: string}
+      workspace_id: {type: string, required: true}
+  ComplianceUnit:
+    description: Policy decision unit with subject, condition, constraint, and context.
+    properties:
+      id: {type: string, required: true}
+      principle: {type: string}
+      subject: {type: string}
+      condition: {type: string}
+      constraint: {type: string}
+      context: {type: string}
+      cu_type: {type: string}
+      active_for_gate: {type: boolean}
+      workspace_id: {type: string, required: true}
+  CUEmbeddingProfile:
+    description: Embedding profile for CU candidate retrieval.
+    properties:
+      id: {type: string, required: true}
+      embedding_text: {type: string, required: true}
+      profile_summary: {type: string}
+      workspace_id: {type: string, required: true}
+  AdDraft:
+    description: Input ad draft.
+    properties:
+      id: {type: string, required: true}
+      text: {type: string, required: true}
+      channel: {type: string}
+      product_group: {type: string}
+      workspace_id: {type: string, required: true}
+  ReviewRun:
+    description: One immutable review execution.
+    properties:
+      id: {type: string, required: true}
+      content_hash: {type: string}
+      dataset_item_id: {type: string}
+      workspace_id: {type: string, required: true}
+  Claim:
+    description: Reviewable claim extracted from ad text.
+    properties:
+      id: {type: string, required: true}
+      text: {type: string, required: true}
+      span_start: {type: integer}
+      span_end: {type: integer}
+      workspace_id: {type: string, required: true}
+  ContextAnchor:
+    description: Judgment anchor containing claim facts and hypernym proposals.
+    properties:
+      id: {type: string, required: true}
+      anchor_type: {type: string, required: true}
+      text: {type: string, required: true}
+      workspace_id: {type: string, required: true}
+  PolicyHypernymProposal:
+    description: Runtime mapping from anchor to approved PolicyHypernym.
+    properties:
+      id: {type: string, required: true}
+      hypernym_id: {type: string, required: true}
+      hypernym: {type: string, required: true}
+      support: {type: string, required: true}
+      normalized_score: {type: float}
+      workspace_id: {type: string, required: true}
+  CUPlan:
+    description: Candidate CU plan for one review run.
+    properties:
+      id: {type: string, required: true}
+      workspace_id: {type: string, required: true}
+  CUPlanItem:
+    description: Reranked candidate CU for a ContextAnchor.
+    properties:
+      id: {type: string, required: true}
+      cu_id: {type: string, required: true}
+      anchor_id: {type: string, required: true}
+      rerank_score: {type: float}
+      selection_reason: {type: string}
+      workspace_id: {type: string, required: true}
+  EvidenceWindow:
+    description: Narrow evidence passed to LLM judge.
+    properties:
+      id: {type: string, required: true}
+      plan_item_id: {type: string, required: true}
+      workspace_id: {type: string, required: true}
+  LLMJudgment:
+    description: CU-level LLM judgment restricted to anchor and evidence window.
+    properties:
+      id: {type: string, required: true}
+      verdict: {type: string, required: true}
+      score: {type: float}
+      why: {type: string}
+      workspace_id: {type: string, required: true}
+  ExceptionReview:
+    description: LLM exception override result for NON_COMPLIANT judgments.
+    properties:
+      id: {type: string, required: true}
+      applies: {type: boolean}
+      effect: {type: string}
+      why: {type: string}
+      workspace_id: {type: string, required: true}
+
+relationships:
+  DERIVES_PREMISE:
+    from: [LegalChunk]
+    to: [Premise]
+  DEFINES_HYPERNYM:
+    from: [Premise]
+    to: [PolicyHypernym]
+  SUPPORTS_HYPERNYM:
+    from: [Premise]
+    to: [PolicyHypernym]
+  SUPPORTS_CU:
+    from: [Premise]
+    to: [ComplianceUnit]
+  HAS_SUBJECT_HYPERNYM:
+    from: [ComplianceUnit]
+    to: [PolicyHypernym]
+  HAS_EMBEDDING_PROFILE:
+    from: [ComplianceUnit]
+    to: [CUEmbeddingProfile]
+  HAS_REVIEW_RUN:
+    from: [AdDraft]
+    to: [ReviewRun]
+  HAS_CLAIM:
+    from: [ReviewRun]
+    to: [Claim]
+  HAS_ANCHOR:
+    from: [Claim]
+    to: [ContextAnchor]
+  NORMALIZED_TO:
+    from: [ContextAnchor]
+    to: [PolicyHypernymProposal]
+  SELECTS_HYPERNYM:
+    from: [PolicyHypernymProposal]
+    to: [PolicyHypernym]
+  HAS_CU_PLAN:
+    from: [ReviewRun]
+    to: [CUPlan]
+  HAS_PLAN_ITEM:
+    from: [CUPlan]
+    to: [CUPlanItem]
+  TARGETS_CU:
+    from: [CUPlanItem]
+    to: [ComplianceUnit]
+  HAS_EVIDENCE_WINDOW:
+    from: [CUPlanItem]
+    to: [EvidenceWindow]
+  USES_EVIDENCE:
+    from: [EvidenceWindow, LLMJudgment, ExceptionReview]
+    to: [Premise, LegalChunk, EvidenceWindow]
+  JUDGED_AS:
+    from: [CUPlanItem]
+    to: [LLMJudgment]
+  HAS_EXCEPTION_REVIEW:
+    from: [LLMJudgment]
+    to: [ExceptionReview]
+
+agent_tools:
+  - name: get_policy_hypernyms
+    description: List approved policy hypernyms by domain.
+    cypher: |
+      MATCH (h:PolicyHypernym {workspace_id: $workspace_id})
+      WHERE coalesce(h.status, 'approved') = 'approved'
+      RETURN h.id AS id, h.name AS name, h.domain AS domain, h.description AS description
+      ORDER BY h.domain, h.name
+      LIMIT 200
+    parameters:
+      - name: workspace_id
+        type: string
+        required: true
+  - name: get_cu_plan_for_anchor
+    description: Show CUPlanItem to ComplianceUnit path for one ContextAnchor.
+    cypher: |
+      MATCH (anchor:ContextAnchor {id: $anchor_id, workspace_id: $workspace_id})-[:SELECTED_FOR_PLAN]->(item:CUPlanItem)-[:TARGETS_CU]->(cu:ComplianceUnit)
+      RETURN anchor, item, cu
+      ORDER BY item.rerank_score DESC
+      LIMIT 20
+    parameters:
+      - name: workspace_id
+        type: string
+        required: true
+      - name: anchor_id
+        type: string
+        required: true
+  - name: get_exception_closure
+    description: Diagnostic read-only closure for CU exception/reference review.
+    cypher: |
+      MATCH (cu:ComplianceUnit {id: $cu_id, workspace_id: $workspace_id})
+      MATCH path = (cu)-[:REFERS_TO|DERIVES|GROUNDED_IN|HAS_SOURCE_CHUNK|HAS_EXCEPTION|REQUIRES_EVIDENCE*1..4]->(node)
+      RETURN path
+      LIMIT 40
+    parameters:
+      - name: workspace_id
+        type: string
+        required: true
+      - name: cu_id
+        type: string
+        required: true

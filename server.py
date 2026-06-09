@@ -1,0 +1,147 @@
+"""FastAPI server for the GraphCompliance CCG reviewer."""
+
+from __future__ import annotations
+
+from pathlib import Path
+from typing import Any
+
+from fastapi import FastAPI, HTTPException
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
+from neo4j.exceptions import AuthError, ServiceUnavailable
+from openai import APIConnectionError, APIStatusError, AuthenticationError, BadRequestError, RateLimitError
+
+from env_loader import load_local_env
+from workflow import GraphComplianceCCGWorkflow, review_input_from_payload
+from utils import to_jsonable
+
+
+load_local_env(Path.cwd() / ".env")
+app = FastAPI(title="GraphCompliance CCG", version="0.1.0")
+CONSOLE_DIR = Path(__file__).resolve().parent / "console"
+
+
+@app.get("/health")
+def health() -> dict[str, str]:
+    return {"status": "ok"}
+
+
+@app.post("/api/review")
+def review(payload: dict[str, Any]) -> dict[str, Any]:
+    try:
+        workflow = GraphComplianceCCGWorkflow()
+        output = workflow.review(review_input_from_payload(payload))
+        return to_jsonable(output)
+    except ServiceUnavailable as exc:
+        raise HTTPException(
+            status_code=503,
+            detail={
+                "error": "neo4j_unavailable",
+                "message": "Neo4j is unavailable or DNS/network resolution failed.",
+                "cause": str(exc),
+            },
+        ) from exc
+    except AuthError as exc:
+        raise HTTPException(
+            status_code=503,
+            detail={
+                "error": "neo4j_auth_failed",
+                "message": "Neo4j authentication failed. Check NEO4J_USER and NEO4J_PASSWORD.",
+            },
+        ) from exc
+    except AuthenticationError as exc:
+        raise HTTPException(status_code=401, detail=openai_error_detail("openai_auth_failed", exc)) from exc
+    except RateLimitError as exc:
+        raise HTTPException(status_code=429, detail=openai_error_detail("openai_rate_limited", exc)) from exc
+    except BadRequestError as exc:
+        detail = openai_error_detail("openai_bad_request", exc)
+        if "model" in str(exc).lower():
+            detail["message"] = "OpenAI rejected the request. Check OPENAI_MODEL and structured-output support."
+        raise HTTPException(status_code=400, detail=detail) from exc
+    except APIConnectionError as exc:
+        raise HTTPException(status_code=503, detail=openai_error_detail("openai_connection_failed", exc)) from exc
+    except APIStatusError as exc:
+        raise HTTPException(status_code=exc.status_code, detail=openai_error_detail("openai_api_error", exc)) from exc
+    except RuntimeError as exc:
+        detail = runtime_error_detail(exc)
+        raise HTTPException(status_code=detail.pop("status_code"), detail=detail) from exc
+
+
+@app.get("/")
+def console() -> FileResponse:
+    return FileResponse(CONSOLE_DIR / "index.html")
+
+
+app.mount("/console", StaticFiles(directory=CONSOLE_DIR), name="console")
+
+
+def openai_error_detail(code: str, exc: Exception) -> dict[str, Any]:
+    return {
+        "error": code,
+        "message": friendly_openai_message(code, exc),
+        "cause": str(exc),
+    }
+
+
+def friendly_openai_message(code: str, exc: Exception) -> str:
+    text = str(exc)
+    if "insufficient_quota" in text:
+        return "OpenAI quota or billing is insufficient for this API key."
+    if code == "openai_rate_limited":
+        return "OpenAI rate limit or quota blocked the LLM call."
+    if code == "openai_auth_failed":
+        return "OpenAI authentication failed. Check OPENAI_API_KEY."
+    if code == "openai_connection_failed":
+        return "OpenAI network connection failed."
+    return "OpenAI API request failed."
+
+
+def runtime_error_detail(exc: RuntimeError) -> dict[str, Any]:
+    message = str(exc)
+    if "unknown PolicyHypernym id" in message:
+        return {
+            "status_code": 422,
+            "error": "policy_normalization_failed",
+            "message": (
+                "LLM returned a PolicyHypernym id that is not in the approved Neo4j vocabulary. "
+                "Re-run vocabulary governance or inspect the policy_context_for_claims result."
+            ),
+            "cause": message,
+        }
+    if "PolicyHypernym vocabulary is empty" in message:
+        return {
+            "status_code": 503,
+            "error": "policy_vocabulary_missing",
+            "message": "PolicyHypernym vocabulary is empty. Run the policy compiler before review.",
+            "cause": message,
+        }
+    if "Policy alignment graph is missing" in message or "Policy alignment graph is not ready" in message:
+        return {
+            "status_code": 503,
+            "error": "policy_alignment_missing",
+            "message": (
+                "Policy alignment graph is missing or incomplete. Run policy_compiler.py and "
+                "vocabulary_governance.py for this workspace before review."
+            ),
+            "cause": message,
+        }
+    if "No embedded Premise nodes found" in message:
+        return {
+            "status_code": 503,
+            "error": "policy_premise_embeddings_missing",
+            "message": "Embedded Premise nodes are missing. Run policy_compiler.py before review.",
+            "cause": message,
+        }
+    if "OPENAI_API_KEY is required" in message:
+        return {
+            "status_code": 503,
+            "error": "openai_key_missing",
+            "message": "OPENAI_API_KEY is required for LLM-only review.",
+            "cause": message,
+        }
+    return {
+        "status_code": 500,
+        "error": "review_runtime_error",
+        "message": "Review workflow failed before a verdict could be produced.",
+        "cause": message,
+    }

@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>GraphCompliance CCG Review Console</title>
+    <link rel="stylesheet" href="/console/styles.css" />
+  </head>
+  <body>
+    <main class="review-console">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">GraphCompliance CCG</p>
+          <h1>금융광고 준법심사 콘솔</h1>
+          <p class="subtitle">광고 문안의 Claim, PolicyHypernym, CU 판단, 근거, 예외 검토를 한 화면에서 추적합니다.</p>
+        </div>
+        <div class="system-status">
+          <span class="status-dot"></span>
+          <span>Neo4j live · LLM-only</span>
+        </div>
+      </header>
+
+      <section class="input-panel">
+        <form id="reviewForm" class="review-form">
+          <label class="field title-field">
+            <span>제목</span>
+            <input id="titleInput" type="text" placeholder="예: JB시니어우대예금 특판 문안" />
+          </label>
+          <label class="field product-field">
+            <span>상품군</span>
+            <select id="productInput">
+              <option value="auto">자동</option>
+              <option value="deposit">예금</option>
+              <option value="loan">대출</option>
+              <option value="investment">투자</option>
+              <option value="insurance">보험</option>
+            </select>
+          </label>
+          <label class="field channel-field">
+            <span>채널</span>
+            <select id="channelInput">
+              <option value="web_page">웹페이지</option>
+              <option value="sns">SNS</option>
+              <option value="youtube">유튜브</option>
+              <option value="sms">문자</option>
+              <option value="banner">배너</option>
+              <option value="bank_event_page_text">은행 이벤트 페이지</option>
+            </select>
+          </label>
+          <label class="field text-field">
+            <span>광고 문안</span>
+            <textarea id="textInput" rows="5"></textarea>
+          </label>
+          <div class="form-actions">
+            <div class="examples" id="examples"></div>
+            <button id="reviewButton" type="submit">Review</button>
+          </div>
+          <p id="errorMessage" class="error-message" hidden></p>
+        </form>
+      </section>
+
+      <section class="verdict-header" id="verdictHeader"></section>
+
+      <section class="risk-strip" id="riskStrip" aria-label="6대 판매원칙 리스크"></section>
+
+      <section class="workspace">
+        <article class="source-panel">
+          <div class="panel-heading">
+            <h2>광고 원문 하이라이트</h2>
+            <span id="reviewRunLabel"></span>
+          </div>
+          <div id="highlightedText" class="highlighted-text"></div>
+          <div class="notice-box" id="conditionalNotice"></div>
+        </article>
+
+        <aside class="detail-panel">
+          <div class="panel-heading">
+            <h2>선택된 이슈 상세</h2>
+            <button id="copyRunButton" class="ghost-button" type="button">Run ID</button>
+          </div>
+          <div id="detailContent" class="detail-content"></div>
+        </aside>
+      </section>
+
+      <section class="tabs">
+        <div class="tab-list" role="tablist">
+          <button class="tab-button is-active" data-tab="claims" type="button">Claim Cards</button>
+          <button class="tab-button" data-tab="graph" type="button">Evidence Graph</button>
+          <button class="tab-button" data-tab="audit" type="button">Audit / Trace</button>
+        </div>
+        <div id="claimsTab" class="tab-panel is-active"></div>
+        <div id="graphTab" class="tab-panel">
+          <div id="graphCanvas" class="graph-canvas"></div>
+        </div>
+        <div id="auditTab" class="tab-panel">
+          <div id="auditTrace" class="audit-trace"></div>
+        </div>
+      </section>
+    </main>
+    <script src="/console/app.js"></script>
+  </body>
+</html>

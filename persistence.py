@@ -1,0 +1,405 @@
+"""Neo4j persistence for graph-compliance-ccg review runs."""
+
+from __future__ import annotations
+
+import os
+import json
+from datetime import UTC, datetime
+from typing import Protocol
+
+from schemas import ReviewGraph, ReviewInput
+from utils import to_jsonable
+
+
+SOURCE = "graphcompliance_ccg_review"
+
+
+class ReviewWriter(Protocol):
+    def save(self, review_input: ReviewInput, graph: ReviewGraph) -> None:
+        ...
+
+
+class Neo4jReviewWriter:
+    def __init__(self, uri: str | None = None, user: str | None = None, password: str | None = None) -> None:
+        from neo4j import GraphDatabase
+
+        self.uri = uri or os.environ.get("NEO4J_URI", "")
+        self.user = user or os.environ.get("NEO4J_USER") or os.environ.get("NEO4J_USERNAME", "")
+        self.password = password or os.environ.get("NEO4J_PASSWORD", "")
+        if not self.uri or not self.user or not self.password:
+            raise RuntimeError("NEO4J_URI, NEO4J_USER/NEO4J_USERNAME, and NEO4J_PASSWORD are required.")
+        self.driver = GraphDatabase.driver(self.uri, auth=(self.user, self.password))
+        self.database = os.environ.get("NEO4J_DATABASE")
+
+    def close(self) -> None:
+        self.driver.close()
+
+    def _session_kwargs(self) -> dict[str, str]:
+        return {"database": self.database} if self.database else {}
+
+    def save(self, review_input: ReviewInput, graph: ReviewGraph) -> None:
+        now = datetime.now(UTC).isoformat()
+        common = {
+            "workspace_id": review_input.workspace_id,
+            "review_run_id": graph.review_run_id,
+            "dataset_item_id": review_input.dataset_item_id,
+            "content_hash": graph.content_hash,
+            "created_at": now,
+            "source": SOURCE,
+        }
+        with self.driver.session(**self._session_kwargs()) as session:
+            session.run(
+                """
+                MERGE (ad:AdDraft {id: $ad_id, workspace_id: $workspace_id})
+                SET ad += $ad_props
+                MERGE (run:ReviewRun {id: $review_run_id, workspace_id: $workspace_id})
+                SET run += $run_props
+                MERGE (ad)-[:HAS_REVIEW_RUN {workspace_id: $workspace_id, review_run_id: $review_run_id, source: $source}]->(run)
+                """,
+                ad_id=graph.ad_draft_id,
+                workspace_id=review_input.workspace_id,
+                review_run_id=graph.review_run_id,
+                source=SOURCE,
+                ad_props={
+                    **common,
+                    "id": graph.ad_draft_id,
+                    "title": review_input.title,
+                    "text": review_input.content_text,
+                    "channel": review_input.channel,
+                    "source_type": review_input.source_type,
+                    "product_group": review_input.product_group,
+                },
+                run_props=neo4j_props(
+                    {
+                        **common,
+                        "id": graph.review_run_id,
+                        "overall_impression_judgment": graph.overall_impression_judgment,
+                        "product_context": graph.product_context,
+                        "disclosure_requirements": graph.disclosure_requirements,
+                        "track_c_summary": graph.track_c_summary,
+                        "retrieval_diagnostics": graph.retrieval_diagnostics,
+                    }
+                ),
+            )
+            self._save_claims(session, review_input, graph, common)
+            self._save_context_triples(session, review_input, graph, common)
+            self._save_anchors(session, review_input, graph, common)
+            self._save_plan(session, review_input, graph, common)
+            self._save_judgments(session, review_input, graph, common)
+            self._save_product_context(session, review_input, graph, common)
+
+    def _save_claims(self, session, review_input: ReviewInput, graph: ReviewGraph, common: dict[str, object]) -> None:
+        for claim in graph.claims:
+            session.run(
+                """
+                MATCH (run:ReviewRun {id: $review_run_id, workspace_id: $workspace_id})
+                MERGE (claim:Claim {id: $claim_id, workspace_id: $workspace_id})
+                SET claim += $claim_props
+                MERGE (run)-[:HAS_CLAIM {workspace_id: $workspace_id, review_run_id: $review_run_id, source: $source}]->(claim)
+                MERGE (meaning:Meaning {id: $meaning_id, workspace_id: $workspace_id})
+                SET meaning += $meaning_props
+                MERGE (imp:Implicature {id: $implicature_id, workspace_id: $workspace_id})
+                SET imp += $implicature_props
+                MERGE (effect:ConsumerEffect {id: $effect_id, workspace_id: $workspace_id})
+                SET effect += $effect_props
+                MERGE (risk:RiskNode {id: $risk_id, workspace_id: $workspace_id})
+                SET risk += $risk_props
+                MERGE (claim)-[:DENOTES {workspace_id: $workspace_id, review_run_id: $review_run_id, source: $source}]->(meaning)
+                MERGE (meaning)-[:IMPLIES {workspace_id: $workspace_id, review_run_id: $review_run_id, source: $source}]->(imp)
+                MERGE (imp)-[:CAN_MISLEAD {workspace_id: $workspace_id, review_run_id: $review_run_id, source: $source}]->(effect)
+                MERGE (effect)-[:RAISES {workspace_id: $workspace_id, review_run_id: $review_run_id, source: $source}]->(risk)
+                """,
+                workspace_id=review_input.workspace_id,
+                review_run_id=graph.review_run_id,
+                source=SOURCE,
+                claim_id=claim.claim_id,
+                meaning_id=f"meaning_{claim.claim_id}",
+                implicature_id=f"implicature_{claim.claim_id}",
+                effect_id=f"effect_{claim.claim_id}",
+                risk_id=f"risk_{claim.claim_id}",
+                claim_props={
+                    **common,
+                    "id": claim.claim_id,
+                    "text": claim.text,
+                    "span_start": claim.span.start,
+                    "span_end": claim.span.end,
+                    "risk_hypernym": claim.risk_hypernym,
+                    "risk_severity": claim.risk_severity,
+                },
+                meaning_props={**common, "id": f"meaning_{claim.claim_id}", "text": claim.meaning},
+                implicature_props={**common, "id": f"implicature_{claim.claim_id}", "text": claim.implicature},
+                effect_props={**common, "id": f"effect_{claim.claim_id}", "text": claim.consumer_effect},
+                risk_props={**common, "id": f"risk_{claim.claim_id}", "name": claim.risk_hypernym, "severity": claim.risk_severity},
+            )
+            session.run(
+                """
+                UNWIND $entities AS row
+                MATCH (claim:Claim {id: $claim_id, workspace_id: $workspace_id})
+                MERGE (entity:ContextEntity {id: row.id, workspace_id: $workspace_id})
+                SET entity += row
+                MERGE (claim)-[:MENTIONS_ENTITY {workspace_id: $workspace_id, review_run_id: $review_run_id, source: $source}]->(entity)
+                """,
+                workspace_id=review_input.workspace_id,
+                review_run_id=graph.review_run_id,
+                source=SOURCE,
+                claim_id=claim.claim_id,
+                entities=[
+                    {
+                        **common,
+                        "id": entity.entity_id,
+                        "name": entity.name,
+                        "entity_type": entity.entity_type,
+                        "span_start": entity.span.start,
+                        "span_end": entity.span.end,
+                    }
+                    for entity in claim.entities
+                ],
+            )
+
+    def _save_context_triples(self, session, review_input: ReviewInput, graph: ReviewGraph, common: dict[str, object]) -> None:
+        for triple in graph.context_triples:
+            session.run(
+                """
+                MATCH (claim:Claim {id: $claim_id, workspace_id: $workspace_id})
+                MERGE (triple:ContextTriple {id: $triple_id, workspace_id: $workspace_id})
+                SET triple += $triple_props
+                MERGE (claim)-[:HAS_CONTEXT_TRIPLE {workspace_id: $workspace_id, review_run_id: $review_run_id, source: $source}]->(triple)
+                """,
+                workspace_id=review_input.workspace_id,
+                review_run_id=graph.review_run_id,
+                source=SOURCE,
+                claim_id=triple.claim_id,
+                triple_id=triple.triple_id,
+                triple_props=neo4j_props({**common, **to_jsonable(triple)}),
+            )
+
+    def _save_anchors(self, session, review_input: ReviewInput, graph: ReviewGraph, common: dict[str, object]) -> None:
+        for anchor in graph.anchors:
+            session.run(
+                """
+                MATCH (claim:Claim {id: $claim_id, workspace_id: $workspace_id})
+                MERGE (anchor:ContextAnchor {id: $anchor_id, workspace_id: $workspace_id})
+                SET anchor += $anchor_props
+                MERGE (claim)-[:HAS_ANCHOR {workspace_id: $workspace_id, review_run_id: $review_run_id, source: $source}]->(anchor)
+                WITH anchor
+                UNWIND $hypernyms AS row
+                MERGE (h:PolicyHypernymProposal {id: row.id, workspace_id: $workspace_id})
+                SET h += row
+                MERGE (anchor)-[:NORMALIZED_TO {workspace_id: $workspace_id, review_run_id: $review_run_id, source: $source}]->(h)
+                WITH h, row
+                OPTIONAL MATCH (canonical:PolicyHypernym {id: row.hypernym_id, workspace_id: $workspace_id})
+                FOREACH (_ IN CASE WHEN canonical IS NULL THEN [] ELSE [1] END |
+                  MERGE (h)-[:SELECTS_HYPERNYM {workspace_id: $workspace_id, review_run_id: $review_run_id, source: $source}]->(canonical)
+                )
+                """,
+                workspace_id=review_input.workspace_id,
+                review_run_id=graph.review_run_id,
+                source=SOURCE,
+                claim_id=anchor.claim_id,
+                anchor_id=anchor.anchor_id,
+                anchor_props={
+                    **common,
+                    "id": anchor.anchor_id,
+                    "anchor_type": anchor.anchor_type,
+                    "text": anchor.span.text,
+                    "span_start": anchor.span.start,
+                    "span_end": anchor.span.end,
+                    "facts_json": to_jsonable(anchor.facts),
+                },
+                hypernyms=[
+                    {
+                        **common,
+                        "id": proposal.proposal_id,
+                        "hypernym_id": proposal.hypernym_id,
+                        "hypernym": proposal.hypernym,
+                        "support": proposal.support,
+                        "confidence": proposal.confidence,
+                        "normalized_score": proposal.normalized_score,
+                        "evidence_ids": proposal.evidence_ids,
+                        "why": proposal.why,
+                    }
+                    for proposal in anchor.hypernyms
+                ],
+            )
+
+    def _save_plan(self, session, review_input: ReviewInput, graph: ReviewGraph, common: dict[str, object]) -> None:
+        session.run(
+            """
+            MATCH (run:ReviewRun {id: $review_run_id, workspace_id: $workspace_id})
+            MERGE (plan:CUPlan {id: $plan_id, workspace_id: $workspace_id})
+            SET plan += $plan_props
+            MERGE (run)-[:HAS_CU_PLAN {workspace_id: $workspace_id, review_run_id: $review_run_id, source: $source}]->(plan)
+            """,
+            workspace_id=review_input.workspace_id,
+            review_run_id=graph.review_run_id,
+            source=SOURCE,
+            plan_id=f"cuplan_{graph.review_run_id}",
+            plan_props={**common, "id": f"cuplan_{graph.review_run_id}"},
+        )
+        for item in graph.cu_plan:
+            session.run(
+                """
+                MATCH (plan:CUPlan {id: $plan_id, workspace_id: $workspace_id})
+                MATCH (anchor:ContextAnchor {id: $anchor_id, workspace_id: $workspace_id})
+                MERGE (item:CUPlanItem {id: $item_id, workspace_id: $workspace_id})
+                SET item += $item_props
+                MERGE (plan)-[:HAS_PLAN_ITEM {workspace_id: $workspace_id, review_run_id: $review_run_id, source: $source}]->(item)
+                MERGE (anchor)-[:SELECTED_FOR_PLAN {workspace_id: $workspace_id, review_run_id: $review_run_id, source: $source}]->(item)
+                WITH item
+                OPTIONAL MATCH (cu:ComplianceUnit {id: $cu_id, workspace_id: $workspace_id})
+                FOREACH (_ IN CASE WHEN cu IS NULL THEN [] ELSE [1] END |
+                  MERGE (item)-[:TARGETS_CU {workspace_id: $workspace_id, review_run_id: $review_run_id, source: $source}]->(cu)
+                )
+                """,
+                workspace_id=review_input.workspace_id,
+                review_run_id=graph.review_run_id,
+                source=SOURCE,
+                plan_id=f"cuplan_{graph.review_run_id}",
+                anchor_id=item.anchor_id,
+                item_id=item.plan_item_id,
+                cu_id=item.cu_id,
+                item_props=neo4j_props({**common, **to_jsonable(item)}),
+            )
+        for window in graph.evidence_windows:
+            session.run(
+                """
+                MATCH (item:CUPlanItem {id: $plan_item_id, workspace_id: $workspace_id})
+                MERGE (window:EvidenceWindow {id: $window_id, workspace_id: $workspace_id})
+                SET window += $window_props
+                MERGE (item)-[:HAS_EVIDENCE_WINDOW {workspace_id: $workspace_id, review_run_id: $review_run_id, source: $source}]->(window)
+                WITH window
+                UNWIND $legal_evidence_ids AS evidence_id
+                OPTIONAL MATCH (evidence {id: evidence_id, workspace_id: $workspace_id})
+                FOREACH (_ IN CASE WHEN evidence IS NULL THEN [] ELSE [1] END |
+                  MERGE (window)-[:USES_EVIDENCE {workspace_id: $workspace_id, review_run_id: $review_run_id, source: $source}]->(evidence)
+                )
+                """,
+                workspace_id=review_input.workspace_id,
+                review_run_id=graph.review_run_id,
+                source=SOURCE,
+                plan_item_id=window.plan_item_id,
+                window_id=window.evidence_window_id,
+                legal_evidence_ids=window.legal_evidence_ids,
+                window_props=neo4j_props({**common, **to_jsonable(window)}),
+            )
+
+    def _save_judgments(self, session, review_input: ReviewInput, graph: ReviewGraph, common: dict[str, object]) -> None:
+        for judgment in graph.judgments:
+            session.run(
+                """
+                MATCH (item:CUPlanItem {id: $plan_item_id, workspace_id: $workspace_id})
+                MERGE (j:LLMJudgment {id: $judgment_id, workspace_id: $workspace_id})
+                SET j += $judgment_props
+                MERGE (item)-[:JUDGED_AS {workspace_id: $workspace_id, review_run_id: $review_run_id, source: $source}]->(j)
+                WITH item, j
+                OPTIONAL MATCH (window:EvidenceWindow {plan_item_id: $plan_item_id, workspace_id: $workspace_id})
+                FOREACH (_ IN CASE WHEN window IS NULL THEN [] ELSE [1] END |
+                  MERGE (j)-[:USES_EVIDENCE {workspace_id: $workspace_id, review_run_id: $review_run_id, source: $source}]->(window)
+                )
+                """,
+                workspace_id=review_input.workspace_id,
+                review_run_id=graph.review_run_id,
+                source=SOURCE,
+                plan_item_id=judgment.plan_item_id,
+                judgment_id=judgment.judgment_id,
+                judgment_props=neo4j_props({**common, **to_jsonable(judgment)}),
+            )
+        for review in graph.exception_reviews:
+            session.run(
+                """
+                MATCH (j:LLMJudgment {id: $judgment_id, workspace_id: $workspace_id})
+                MERGE (e:ExceptionReview {id: $review_id, workspace_id: $workspace_id})
+                SET e += $review_props
+                MERGE (j)-[:HAS_EXCEPTION_REVIEW {workspace_id: $workspace_id, review_run_id: $review_run_id, source: $source}]->(e)
+                WITH e
+                UNWIND $closure_evidence_ids AS evidence_id
+                OPTIONAL MATCH (evidence {id: evidence_id, workspace_id: $workspace_id})
+                FOREACH (_ IN CASE WHEN evidence IS NULL THEN [] ELSE [1] END |
+                  MERGE (e)-[:USES_EVIDENCE {workspace_id: $workspace_id, review_run_id: $review_run_id, source: $source}]->(evidence)
+                )
+                """,
+                workspace_id=review_input.workspace_id,
+                review_run_id=graph.review_run_id,
+                source=SOURCE,
+                judgment_id=review.judgment_id,
+                review_id=review.exception_review_id,
+                closure_evidence_ids=review.closure_evidence_ids,
+                review_props=neo4j_props({**common, **to_jsonable(review)}),
+            )
+
+    def _save_product_context(self, session, review_input: ReviewInput, graph: ReviewGraph, common: dict[str, object]) -> None:
+        product_group = graph.product_context.get("product_group", "auto")
+        session.run(
+            """
+            MATCH (run:ReviewRun {id: $review_run_id, workspace_id: $workspace_id})
+            MERGE (group:ProductGroup {id: $group_id, workspace_id: $workspace_id})
+            SET group += $group_props
+            MERGE (run)-[:SCOPED_TO_PRODUCT_GROUP {workspace_id: $workspace_id, review_run_id: $review_run_id, source: $source}]->(group)
+            """,
+            workspace_id=review_input.workspace_id,
+            review_run_id=graph.review_run_id,
+            source=SOURCE,
+            group_id=f"product_group_{product_group}",
+            group_props=neo4j_props({**common, "id": f"product_group_{product_group}", "name": product_group}),
+        )
+        for requirement in graph.disclosure_requirements:
+            session.run(
+                """
+                MATCH (run:ReviewRun {id: $review_run_id, workspace_id: $workspace_id})
+                MATCH (group:ProductGroup {id: $group_id, workspace_id: $workspace_id})
+                MERGE (req:DisclosureRequirement {id: $requirement_id, workspace_id: $workspace_id})
+                SET req += $requirement_props
+                MERGE (group)-[:REQUIRES_DISCLOSURE {workspace_id: $workspace_id, review_run_id: $review_run_id, source: $source}]->(req)
+                MERGE (run)-[:CHECKS_DISCLOSURE {workspace_id: $workspace_id, review_run_id: $review_run_id, source: $source}]->(req)
+                """,
+                workspace_id=review_input.workspace_id,
+                review_run_id=graph.review_run_id,
+                source=SOURCE,
+                group_id=f"product_group_{product_group}",
+                requirement_id=requirement["id"],
+                requirement_props=neo4j_props({**common, **requirement}),
+            )
+        for product in graph.product_context.get("matched_products", []):
+            product_id = f"product_{product.get('product', '')}"
+            session.run(
+                """
+                MATCH (run:ReviewRun {id: $review_run_id, workspace_id: $workspace_id})
+                MATCH (group:ProductGroup {id: $group_id, workspace_id: $workspace_id})
+                MERGE (product:Product {id: $product_id, workspace_id: $workspace_id})
+                SET product += $product_props
+                MERGE (group)-[:HAS_PRODUCT {workspace_id: $workspace_id, review_run_id: $review_run_id, source: $source}]->(product)
+                MERGE (run)-[:ABOUT_PRODUCT {workspace_id: $workspace_id, review_run_id: $review_run_id, source: $source}]->(product)
+                WITH product
+                UNWIND $source_ids AS source_id
+                MERGE (doc:ProductDocument {id: source_id, workspace_id: $workspace_id})
+                SET doc += $doc_props
+                MERGE (product)-[:HAS_PRODUCT_DOCUMENT {workspace_id: $workspace_id, review_run_id: $review_run_id, source: $source}]->(doc)
+                """,
+                workspace_id=review_input.workspace_id,
+                review_run_id=graph.review_run_id,
+                source=SOURCE,
+                group_id=f"product_group_{product_group}",
+                product_id=product_id,
+                product_props=neo4j_props({**common, **product, "id": product_id, "name": product.get("product", "")}),
+                source_ids=product.get("source_ids", []),
+                doc_props=neo4j_props(
+                    {
+                        **common,
+                        "product": product.get("product", ""),
+                        "document_labels": product.get("document_labels", []),
+                        "metadata_source": "전북은행 상품문서 메타데이터.xlsx",
+                    }
+                ),
+            )
+
+
+def neo4j_props(values: dict[str, object]) -> dict[str, object]:
+    props: dict[str, object] = {}
+    for key, value in values.items():
+        if value is None or isinstance(value, (str, int, float, bool)):
+            props[key] = value
+        elif isinstance(value, list) and all(isinstance(item, (str, int, float, bool)) for item in value):
+            props[key] = value
+        else:
+            props[key] = json.dumps(value, ensure_ascii=False)
+    return props
