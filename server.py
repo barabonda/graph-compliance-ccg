@@ -2,11 +2,12 @@
 
 from __future__ import annotations
 
+import json
 from pathlib import Path
 from typing import Any
 
 from fastapi import FastAPI, HTTPException
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from neo4j.exceptions import AuthError, ServiceUnavailable
 from openai import APIConnectionError, APIStatusError, AuthenticationError, BadRequestError, RateLimitError
@@ -67,6 +68,48 @@ def review(payload: dict[str, Any]) -> dict[str, Any]:
         raise HTTPException(status_code=detail.pop("status_code"), detail=detail) from exc
 
 
+@app.post("/api/review/stream")
+def review_stream(payload: dict[str, Any]) -> StreamingResponse:
+    def event_lines():
+        try:
+            workflow = GraphComplianceCCGWorkflow()
+            review_input = review_input_from_payload(payload)
+            for event in workflow.review_events(review_input):
+                yield json.dumps(to_jsonable(event), ensure_ascii=False) + "\n"
+        except ServiceUnavailable as exc:
+            yield stream_error_event("neo4j_unavailable", {
+                "error": "neo4j_unavailable",
+                "message": "Neo4j is unavailable or DNS/network resolution failed.",
+                "cause": str(exc),
+            })
+        except AuthError as exc:
+            yield stream_error_event("neo4j_auth_failed", {
+                "error": "neo4j_auth_failed",
+                "message": "Neo4j authentication failed. Check NEO4J_USER and NEO4J_PASSWORD.",
+                "cause": str(exc),
+            })
+        except AuthenticationError as exc:
+            yield stream_error_event("openai_auth_failed", openai_error_detail("openai_auth_failed", exc))
+        except RateLimitError as exc:
+            yield stream_error_event("openai_rate_limited", openai_error_detail("openai_rate_limited", exc))
+        except BadRequestError as exc:
+            detail = openai_error_detail("openai_bad_request", exc)
+            if "model" in str(exc).lower():
+                detail["message"] = "OpenAI rejected the request. Check OPENAI_MODEL and structured-output support."
+            yield stream_error_event("openai_bad_request", detail)
+        except APIConnectionError as exc:
+            yield stream_error_event("openai_connection_failed", openai_error_detail("openai_connection_failed", exc))
+        except APIStatusError as exc:
+            detail = openai_error_detail("openai_api_error", exc)
+            detail["status_code"] = exc.status_code
+            yield stream_error_event("openai_api_error", detail)
+        except RuntimeError as exc:
+            detail = runtime_error_detail(exc)
+            yield stream_error_event(str(detail.get("error") or "review_runtime_error"), detail)
+
+    return StreamingResponse(event_lines(), media_type="application/x-ndjson")
+
+
 @app.get("/")
 def console() -> FileResponse:
     return FileResponse(CONSOLE_DIR / "index.html")
@@ -94,6 +137,19 @@ def friendly_openai_message(code: str, exc: Exception) -> str:
     if code == "openai_connection_failed":
         return "OpenAI network connection failed."
     return "OpenAI API request failed."
+
+
+def stream_error_event(code: str, detail: dict[str, Any]) -> str:
+    return json.dumps(
+        {
+            "event": "error",
+            "step": "Error",
+            "summary": detail.get("message") or code,
+            "error": code,
+            "detail": detail,
+        },
+        ensure_ascii=False,
+    ) + "\n"
 
 
 def runtime_error_detail(exc: RuntimeError) -> dict[str, Any]:

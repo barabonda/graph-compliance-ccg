@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Iterator
 from typing import Any
 from uuid import uuid4
 
@@ -40,30 +41,125 @@ class GraphComplianceCCGWorkflow:
         self.writer = writer or Neo4jReviewWriter()
 
     def review(self, review_input: ReviewInput) -> ReviewOutput:
+        output: ReviewOutput | None = None
+        for event in self.review_events(review_input):
+            if event.get("event") == "result":
+                output = event["result"]
+        if output is None:
+            raise RuntimeError("Review workflow finished without a result event.")
+        return output
+
+    def review_events(self, review_input: ReviewInput) -> Iterator[dict[str, Any]]:
         digest = content_hash(review_input.content_text)
         ad_draft_id = stable_id("ad_draft", review_input.workspace_id, review_input.dataset_item_id, digest)
         review_run_id = stable_id("review_run", ad_draft_id, digest, uuid4().hex)
 
+        yield workflow_event(
+            "start",
+            "Review started",
+            review_run_id=review_run_id,
+            summary=f"{review_input.product_group} · {review_input.channel}",
+        )
+
+        yield workflow_event("step_started", "Policy alignment check", review_run_id=review_run_id)
         self.retriever.assert_policy_alignment_ready(workspace_id=review_input.workspace_id)
+        yield workflow_event("step_completed", "Policy alignment check", review_run_id=review_run_id, summary="Policy alignment graph is ready.")
+
+        yield workflow_event("step_started", "Context extraction", review_run_id=review_run_id, summary="LLM extracts atomic claims, entities, relations, meaning, implicature, and consumer effect.")
         claims = self.extractor.extract(review_input, review_run_id=review_run_id)
         context_triples = build_context_triples(review_run_id=review_run_id, claims=claims)
+        yield workflow_event(
+            "step_completed",
+            "Context extraction",
+            review_run_id=review_run_id,
+            summary=f"{len(claims)} claims · {len(context_triples)} context triples",
+            counts={"claims": len(claims), "context_triples": len(context_triples)},
+            sample=[claim.text for claim in claims[:5]],
+        )
+
+        yield workflow_event("step_started", "Policy context retrieval", review_run_id=review_run_id, summary="Retrieve approved PolicyHypernym vocabulary, Premise evidence, and supporting fragments.")
         policy_context = self.retriever.policy_context_for_claims(
             workspace_id=review_input.workspace_id,
             query_text=review_input.content_text[:1200],
             limit=80,
         )
+        yield workflow_event(
+            "step_completed",
+            "Policy context retrieval",
+            review_run_id=review_run_id,
+            summary=(
+                f"{len(policy_context.get('hypernyms', []))} hypernyms · "
+                f"{len(policy_context.get('premises', []))} premises · "
+                f"{len(policy_context.get('fragments', []))} fragments"
+            ),
+            counts={
+                "hypernyms": len(policy_context.get("hypernyms", [])),
+                "premises": len(policy_context.get("premises", [])),
+                "fragments": len(policy_context.get("fragments", [])),
+            },
+        )
+
+        yield workflow_event("step_started", "Policy normalization", review_run_id=review_run_id, summary="LLM maps each claim/risk anchor only to approved PolicyHypernym ids.")
         anchors = self.normalizer.normalize(
             review_run_id=review_run_id,
             claims=claims,
             policy_context=policy_context,
             top_n=5,
         )
+        yield workflow_event(
+            "step_completed",
+            "Policy normalization",
+            review_run_id=review_run_id,
+            summary=f"{len(anchors)} anchors normalized",
+            counts={"anchors": len(anchors), "hypernym_proposals": sum(len(anchor.hypernyms) for anchor in anchors)},
+            sample=[
+                {
+                    "anchor": anchor.span.text,
+                    "hypernyms": [proposal.hypernym for proposal in anchor.hypernyms],
+                }
+                for anchor in anchors[:5]
+            ],
+        )
+
+        yield workflow_event("step_started", "Product disclosure context", review_run_id=review_run_id, summary="Resolve product metadata and required-disclosure hints.")
         product_context, disclosure_requirements = build_product_context(review_input, claims)
+        yield workflow_event(
+            "step_completed",
+            "Product disclosure context",
+            review_run_id=review_run_id,
+            summary=(
+                f"{product_context.get('product_group', review_input.product_group)} · "
+                f"{len(disclosure_requirements)} disclosure requirements · "
+                f"{product_context.get('document_count', 0)} product documents"
+            ),
+            counts={
+                "disclosure_requirements": len(disclosure_requirements),
+                "product_documents": product_context.get("document_count", 0),
+            },
+        )
+
+        yield workflow_event("step_started", "Track B overall impression", review_run_id=review_run_id, summary="LLM judges the representative consumer impression from Claim -> Meaning -> Implicature -> ConsumerEffect paths.")
         overall_impression_judgment = self.overall_impression.judge(
             review_input=review_input,
             claims=claims,
             disclosure_requirements=disclosure_requirements,
         )
+        yield workflow_event(
+            "step_completed",
+            "Track B overall impression",
+            review_run_id=review_run_id,
+            summary=(
+                f"{overall_impression_judgment.get('verdict', 'pending')} · "
+                f"{float(overall_impression_judgment.get('misleading_risk_score', 0) or 0):.2f}"
+            ),
+            payload={
+                "verdict": overall_impression_judgment.get("verdict"),
+                "misleading_risk_score": overall_impression_judgment.get("misleading_risk_score"),
+                "representative_consumer_impression": overall_impression_judgment.get("representative_consumer_impression"),
+            },
+        )
+
+        yield workflow_event("step_started", "CU candidate retrieval", review_run_id=review_run_id, summary="Retrieve candidate CUs per anchor using PolicyHypernym overlap and CU embedding profiles.")
         candidates_by_anchor = {
             anchor.anchor_id: self.retriever.candidates_for_anchor(
                 workspace_id=review_input.workspace_id,
@@ -74,6 +170,26 @@ class GraphComplianceCCGWorkflow:
             )
             for anchor in anchors
         }
+        yield workflow_event(
+            "step_completed",
+            "CU candidate retrieval",
+            review_run_id=review_run_id,
+            summary=f"{sum(len(items) for items in candidates_by_anchor.values())} candidates across {len(anchors)} anchors",
+            counts={
+                "anchors": len(anchors),
+                "candidates": sum(len(items) for items in candidates_by_anchor.values()),
+            },
+            sample=[
+                {
+                    "anchor": anchor.span.text,
+                    "candidate_count": len(candidates_by_anchor.get(anchor.anchor_id, [])),
+                    "top_cu_ids": [candidate.cu_id for candidate in candidates_by_anchor.get(anchor.anchor_id, [])[:3]],
+                }
+                for anchor in anchors[:5]
+            ],
+        )
+
+        yield workflow_event("step_started", "LLM CU rerank", review_run_id=review_run_id, summary="LLM reranks candidates into the final CUPlan.")
         cu_plan = self.planner.plan(
             review_run_id=review_run_id,
             anchors=anchors,
@@ -86,17 +202,47 @@ class GraphComplianceCCGWorkflow:
             candidates_by_anchor=candidates_by_anchor,
             planned_anchor_ids={item.anchor_id for item in cu_plan},
         )
+        yield workflow_event(
+            "step_completed",
+            "LLM CU rerank",
+            review_run_id=review_run_id,
+            summary=f"{len(cu_plan)} CUPlan items · {sum(1 for row in retrieval_diagnostics.values() if row['failure_code'] != 'MATCHED')} diagnostics",
+            counts={
+                "cu_plan": len(cu_plan),
+                "diagnostics": sum(1 for row in retrieval_diagnostics.values() if row["failure_code"] != "MATCHED"),
+            },
+            sample=[{"cu_id": item.cu_id, "principle": item.principle, "anchor_id": item.anchor_id} for item in cu_plan[:5]],
+        )
+
+        yield workflow_event("step_started", "Evidence window build", review_run_id=review_run_id, summary="Build narrow Anchor + CUPlan + Premise/LegalChunk windows for judge.")
         evidence_windows = self.judge.build_evidence_windows(
             review_run_id=review_run_id,
             anchors=anchors,
             plan=cu_plan,
         )
+        yield workflow_event("step_completed", "Evidence window build", review_run_id=review_run_id, summary=f"{len(evidence_windows)} evidence windows", counts={"evidence_windows": len(evidence_windows)})
+
+        yield workflow_event("step_started", "LLM judgment", review_run_id=review_run_id, summary="LLM judges each CU using only its evidence window.")
         judgments = self.judge.judge(
             review_run_id=review_run_id,
             anchors=anchors,
             plan=cu_plan,
             windows=evidence_windows,
         )
+        yield workflow_event(
+            "step_completed",
+            "LLM judgment",
+            review_run_id=review_run_id,
+            summary=f"{len(judgments)} judgments",
+            counts={
+                "judgments": len(judgments),
+                "non_compliant": sum(1 for judgment in judgments if judgment.verdict == "NON_COMPLIANT"),
+                "insufficient": sum(1 for judgment in judgments if judgment.verdict == "INSUFFICIENT"),
+            },
+            sample=[{"cu_id": judgment.cu_id, "verdict": judgment.verdict, "score": judgment.score} for judgment in judgments[:5]],
+        )
+
+        yield workflow_event("step_started", "Exception override", review_run_id=review_run_id, summary="For NON_COMPLIANT judgments only, retrieve reference/exception closure and ask whether it mitigates the verdict.")
         exception_reviews = []
         for judgment in judgments:
             if judgment.verdict != "NON_COMPLIANT":
@@ -113,6 +259,7 @@ class GraphComplianceCCGWorkflow:
                     closure=closure,
                 )
             )
+        yield workflow_event("step_completed", "Exception override", review_run_id=review_run_id, summary=f"{len(exception_reviews)} exception reviews", counts={"exception_reviews": len(exception_reviews)})
 
         graph = ReviewGraph(
             review_run_id=review_run_id,
@@ -132,9 +279,18 @@ class GraphComplianceCCGWorkflow:
             overall_impression_judgment=overall_impression_judgment,
             track_c_summary=track_c_extension_summary(),
         )
+        yield workflow_event("step_started", "Neo4j persistence", review_run_id=review_run_id, summary="Persist AdDraft, Context Graph, CUPlan, judgments, and evidence paths.")
         self.writer.save(review_input, graph)
+        yield workflow_event("step_completed", "Neo4j persistence", review_run_id=review_run_id, summary="Review graph persisted.")
+
+        yield workflow_event("step_started", "Revision suggestions", review_run_id=review_run_id, summary="Generate reviewer-facing revision suggestions for risky actionable anchors.")
         revision_suggestions = self.revision.suggest(review_input=review_input, graph=graph)
-        return build_output(review_input, graph, revision_suggestions=revision_suggestions)
+        yield workflow_event("step_completed", "Revision suggestions", review_run_id=review_run_id, summary=f"{len(revision_suggestions)} suggestions", counts={"revision_suggestions": len(revision_suggestions)})
+
+        yield workflow_event("step_started", "Routing", review_run_id=review_run_id, summary="Aggregate effective judgments, Track B, CUPlan diagnostics, and disclosure context.")
+        output = build_output(review_input, graph, revision_suggestions=revision_suggestions)
+        yield workflow_event("step_completed", "Routing", review_run_id=review_run_id, summary=output.final_verdict, payload={"final_verdict": output.final_verdict, "routing": output.routing})
+        yield workflow_event("result", "Review result", review_run_id=review_run_id, summary=output.final_verdict, result=output)
 
 
 def review_input_from_payload(payload: dict[str, Any]) -> ReviewInput:
@@ -193,3 +349,13 @@ def build_retrieval_diagnostics(
             "top_candidate_principles": [candidate.principle for candidate in candidates[:5]],
         }
     return diagnostics
+
+
+def workflow_event(event: str, step: str, *, review_run_id: str, summary: str = "", **extra: Any) -> dict[str, Any]:
+    return {
+        "event": event,
+        "step": step,
+        "review_run_id": review_run_id,
+        "summary": summary,
+        **extra,
+    }

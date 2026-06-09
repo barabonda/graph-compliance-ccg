@@ -55,6 +55,8 @@ const state = {
   result: null,
   selectedAnchorId: "",
   selectedPrinciple: "",
+  streamEvents: [],
+  isStreaming: false,
 };
 
 const els = {
@@ -113,6 +115,13 @@ async function runReview(event) {
   els.error.hidden = true;
   els.button.disabled = true;
   els.button.textContent = "Reviewing...";
+  state.result = null;
+  state.selectedAnchorId = "";
+  state.selectedPrinciple = "";
+  state.streamEvents = [];
+  state.isStreaming = true;
+  activateTab("audit");
+  renderStreamingAudit();
   const payload = {
     dataset_item_id: `console_${Date.now()}`,
     title: els.title.value,
@@ -122,7 +131,7 @@ async function runReview(event) {
     workspace_id: "graphcompliance_mvp_jb_20260530",
   };
   try {
-    const response = await fetch("/api/review", {
+    const response = await fetch("/api/review/stream", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
@@ -130,7 +139,10 @@ async function runReview(event) {
     if (!response.ok) {
       throw new Error(await formatApiError(response));
     }
-    state.result = await response.json();
+    await consumeReviewStream(response);
+    if (!state.result) {
+      throw new Error("review_stream_finished_without_result: 결과 이벤트가 수신되지 않았습니다.");
+    }
     els.error.textContent = "";
     els.error.hidden = true;
     state.selectedAnchorId = defaultAnchorId(state.result);
@@ -139,10 +151,59 @@ async function runReview(event) {
   } catch (error) {
     els.error.textContent = String(error.message || error);
     els.error.hidden = false;
+    renderStreamingAudit();
   } finally {
+    state.isStreaming = false;
     els.button.disabled = false;
     els.button.textContent = "Review";
+    if (!state.result) renderStreamingAudit();
   }
+}
+
+async function consumeReviewStream(response) {
+  if (!response.body) {
+    throw new Error("stream_not_available: 이 브라우저에서 응답 스트림을 읽을 수 없습니다.");
+  }
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = "";
+  while (true) {
+    const { value, done } = await reader.read();
+    if (done) break;
+    buffer += decoder.decode(value, { stream: true });
+    const lines = buffer.split("\n");
+    buffer = lines.pop() || "";
+    for (const line of lines) {
+      if (!line.trim()) continue;
+      handleStreamEvent(JSON.parse(line));
+    }
+  }
+  buffer += decoder.decode();
+  if (buffer.trim()) {
+    handleStreamEvent(JSON.parse(buffer));
+  }
+}
+
+function handleStreamEvent(event) {
+  state.streamEvents.push({ ...event, received_at: new Date().toLocaleTimeString("ko-KR", { hour12: false }) });
+  if (event.review_run_id) {
+    els.runLabel.textContent = event.review_run_id;
+  }
+  if (event.event === "result") {
+    state.result = event.result;
+  }
+  renderStreamingAudit();
+  if (event.event === "error") {
+    throw new Error(formatStreamError(event));
+  }
+}
+
+function formatStreamError(event) {
+  const detail = event.detail || {};
+  const title = detail.error || event.error || "review_failed";
+  const message = detail.message || event.summary || "심사 워크플로우가 완료되지 못했습니다.";
+  const cause = detail.cause ? `\n\n원인: ${detail.cause}` : "";
+  return `${title}: ${message}${cause}`;
 }
 
 async function formatApiError(response) {
@@ -182,7 +243,7 @@ function renderResult() {
   renderClaimCards();
   renderDetail();
   renderGraph();
-  renderAudit(buildAuditSteps());
+  renderAudit(state.streamEvents.length ? state.streamEvents : buildAuditSteps());
 }
 
 function renderVerdictHeader() {
@@ -612,17 +673,54 @@ function drawEdge(from, to, label) {
 }
 
 function renderAudit(steps) {
-  els.auditTrace.innerHTML = steps
+  const renderedSteps = steps.length ? steps : [];
+  els.auditTrace.innerHTML = renderedSteps
     .map(
       (step) => `
-      <article class="audit-step">
-        <strong>${escapeHtml(step.name)}</strong>
-        <span class="${step.ok ? "status-ok" : "status-review"} badge">${step.ok ? "success" : "check"}</span>
-        <p class="evidence-text">${escapeHtml(step.summary)}</p>
+      <article class="audit-step ${streamEventClass(step)}">
+        <div class="card-top">
+          <strong>${escapeHtml(step.name || step.step)}</strong>
+          <span class="${auditBadgeClass(step)} badge">${auditBadgeText(step)}</span>
+        </div>
+        <p class="evidence-text">${escapeHtml(step.summary || "")}</p>
+        ${step.counts ? `<div class="tag-row">${Object.entries(step.counts).map(([key, value]) => `<span class="tag">${escapeHtml(key)} ${escapeHtml(value)}</span>`).join("")}</div>` : ""}
+        ${step.sample ? `<details><summary>sample</summary><div class="evidence-text">${escapeHtml(JSON.stringify(step.sample, null, 2))}</div></details>` : ""}
+        ${step.payload ? `<details><summary>payload</summary><div class="evidence-text">${escapeHtml(JSON.stringify(step.payload, null, 2))}</div></details>` : ""}
+        ${step.detail ? `<details open><summary>error detail</summary><div class="evidence-text">${escapeHtml(JSON.stringify(step.detail, null, 2))}</div></details>` : ""}
+        ${step.received_at ? `<div class="audit-time">${escapeHtml(step.received_at)}</div>` : ""}
       </article>
     `
     )
-    .join("");
+    .join("") || `<div class="empty-state">Review를 실행하면 단계별 trace가 여기에 실시간으로 표시됩니다.</div>`;
+}
+
+function renderStreamingAudit() {
+  renderAudit(state.streamEvents);
+  if (!state.result && state.isStreaming) {
+    els.verdictHeader.innerHTML = `<div class="verdict-main"><span class="verdict-label"><span class="badge review">실행 중</span></span><p class="verdict-desc">LLM/Neo4j 단계별 이벤트를 수신하고 있습니다.</p></div>${metricCell("Events", state.streamEvents.length)}${metricCell("Step", state.streamEvents.at(-1)?.step || "-")}${metricCell("Status", state.streamEvents.at(-1)?.event || "start")}${metricCell("Run", state.streamEvents.at(-1)?.review_run_id ? "생성됨" : "-")}`;
+  }
+}
+
+function streamEventClass(step) {
+  if (step.event === "error") return "is-error";
+  if (step.event === "step_started") return "is-running";
+  if (step.event === "result") return "is-result";
+  return "";
+}
+
+function auditBadgeClass(step) {
+  if (step.event === "error") return "badge reject";
+  if (step.event === "step_started") return "badge review";
+  if (step.event === "result" || step.event === "step_completed" || step.ok) return "badge pass";
+  return "badge review";
+}
+
+function auditBadgeText(step) {
+  if (step.event === "step_started") return "running";
+  if (step.event === "step_completed") return "done";
+  if (step.event === "result") return "result";
+  if (step.event === "error") return "error";
+  return step.ok ? "success" : "check";
 }
 
 function buildAuditSteps() {

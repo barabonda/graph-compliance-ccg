@@ -600,14 +600,37 @@ textarea:focus {
 
 .audit-step {
   border: 1px solid var(--line);
+  border-left: 4px solid var(--line-strong);
   border-radius: 8px;
   padding: 12px;
   background: var(--panel-soft);
 }
 
+.audit-step.is-running {
+  border-left-color: var(--amber);
+  background: #fffbeb;
+}
+
+.audit-step.is-error {
+  border-left-color: var(--red);
+  background: #fff1f2;
+}
+
+.audit-step.is-result {
+  border-left-color: var(--green);
+  background: #f0fdf4;
+}
+
 .audit-step strong {
   display: block;
   margin-bottom: 6px;
+}
+
+.audit-time {
+  margin-top: 8px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
 }
 
 details {
