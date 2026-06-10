@@ -12,6 +12,28 @@ SupportLevel = Literal["STRONG", "WEAK"]
 
 
 @dataclass(frozen=True)
+class AnchorFeatureSet:
+    feature_set_id: str
+    anchor_id: str
+    action_types: list[str]
+    positive_features: list[str]
+    missing_context: list[str]
+    evidence: list[str]
+
+
+@dataclass(frozen=True)
+class CULegalElementProfile:
+    profile_id: str
+    cu_id: str
+    action_type: str
+    required_positive_features: list[str]
+    applicability_scope: list[str]
+    risk_title: str
+    exception_eligible: bool
+    rationale: str = ""
+
+
+@dataclass(frozen=True)
 class ReviewInput:
     content_text: str
     workspace_id: str = "graphcompliance_mvp_jb_20260530"
@@ -160,6 +182,7 @@ class ContextAnchor:
     span: Span
     facts: list[str]
     hypernyms: list[PolicyHypernymProposal]
+    feature_set: AnchorFeatureSet | None = None
 
 
 @dataclass(frozen=True)
@@ -176,10 +199,15 @@ class PolicyCandidate:
     matched_hypernym_ids: list[str]
     legal_evidence_ids: list[str]
     evidence_texts: list[str]
-    retrieval_scores: dict[str, float]
+    retrieval_scores: dict[str, Any]
     retrieval_basis: str = "hypernym_profile"
     gate_status: str = "active"
     reference_paths: list[dict[str, Any]] = field(default_factory=list)
+    legal_element_profile: CULegalElementProfile | None = None
+    matched_required_features: list[str] = field(default_factory=list)
+    missing_required_features: list[str] = field(default_factory=list)
+    legal_element_match: bool = False
+    risk_title: str = ""
 
 
 @dataclass(frozen=True)
@@ -195,12 +223,17 @@ class CUPlanItem:
     context: str
     legal_evidence_ids: list[str]
     evidence_texts: list[str]
-    retrieval_scores: dict[str, float]
+    retrieval_scores: dict[str, Any]
     rerank_score: float
     selection_reason: str
     retrieval_basis: str = "hypernym_profile"
     gate_status: str = "active"
     reference_paths: list[dict[str, Any]] = field(default_factory=list)
+    legal_element_profile: CULegalElementProfile | None = None
+    matched_required_features: list[str] = field(default_factory=list)
+    missing_required_features: list[str] = field(default_factory=list)
+    legal_element_match: bool = False
+    risk_title: str = ""
 
 
 @dataclass(frozen=True)
@@ -214,6 +247,7 @@ class EvidenceWindow:
     context_frame: dict[str, Any] = field(default_factory=dict)
     sentence_unit: dict[str, Any] = field(default_factory=dict)
     context_influences: list[dict[str, Any]] = field(default_factory=list)
+    policy_evidence_chains: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass(frozen=True)
@@ -294,6 +328,7 @@ class ReviewGraph:
     claims: list[Claim] = field(default_factory=list)
     context_triples: list[ContextTriple] = field(default_factory=list)
     anchors: list[ContextAnchor] = field(default_factory=list)
+    anchor_feature_sets: list[AnchorFeatureSet] = field(default_factory=list)
     cu_plan: list[CUPlanItem] = field(default_factory=list)
     evidence_windows: list[EvidenceWindow] = field(default_factory=list)
     judgments: list[LLMJudgment] = field(default_factory=list)
@@ -303,6 +338,7 @@ class ReviewGraph:
     product_context: dict[str, Any] = field(default_factory=dict)
     product_fact_context: dict[str, Any] = field(default_factory=dict)
     disclosure_requirements: list[dict[str, Any]] = field(default_factory=list)
+    policy_evidence_chains: dict[str, list[dict[str, Any]]] = field(default_factory=dict)
     overall_impression_judgment: dict[str, Any] = field(default_factory=dict)
     track_c_summary: dict[str, Any] = field(default_factory=dict)
 
@@ -323,6 +359,7 @@ class ReviewOutput:
     claims: list[dict[str, Any]]
     context_triples: list[dict[str, Any]]
     context_anchors: list[dict[str, Any]]
+    anchor_feature_sets: list[dict[str, Any]]
     cu_plan: list[dict[str, Any]]
     judgments: list[dict[str, Any]]
     effective_judgments: list[dict[str, Any]]
@@ -333,7 +370,11 @@ class ReviewOutput:
     product_context: dict[str, Any]
     product_fact_context: dict[str, Any]
     disclosure_requirements: list[dict[str, Any]]
+    policy_evidence_chains: dict[str, list[dict[str, Any]]]
     overall_impression_judgment: dict[str, Any]
     track_c_summary: dict[str, Any]
+    article_aggregation: list[dict[str, Any]]
+    principle_aggregation: list[dict[str, Any]]
+    reference_paths_summary: list[dict[str, Any]]
     graph_paths: list[dict[str, Any]]
     highlight_spans: list[dict[str, Any]]

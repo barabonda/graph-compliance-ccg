@@ -345,6 +345,62 @@ textarea:focus {
   font-size: 12px;
 }
 
+.highlight-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--line);
+  background: #fbfdff;
+}
+
+.highlight-meta,
+.highlight-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  align-items: center;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 750;
+}
+
+.highlight-meta span {
+  padding: 3px 7px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: #fff;
+}
+
+.highlight-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.legend-dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.legend-dot.non-compliant {
+  background: #f87171;
+}
+
+.legend-dot.insufficient {
+  background: #fbbf24;
+}
+
+.legend-dot.compliant {
+  background: #60a5fa;
+}
+
+.legend-dot.anchor-only {
+  background: #94a3b8;
+}
+
 .highlighted-text {
   min-height: 220px;
   padding: 18px;
@@ -354,23 +410,33 @@ textarea:focus {
 }
 
 .hl {
+  position: relative;
+  display: inline;
   border: 0;
-  border-radius: 4px;
-  padding: 2px 3px;
+  border-radius: 5px;
+  padding: 2px 4px;
   margin: 0 1px;
   color: var(--ink);
   cursor: pointer;
   box-decoration-break: clone;
   -webkit-box-decoration-break: clone;
+  transition:
+    outline-color 120ms ease,
+    filter 120ms ease,
+    background-color 120ms ease;
+}
+
+.hl:hover {
+  filter: saturate(1.12) contrast(1.02);
 }
 
 .hl.non-compliant {
-  background: #fecaca;
+  background: #fee2e2;
   border-bottom: 2px solid var(--red);
 }
 
 .hl.insufficient {
-  background: #fde68a;
+  background: #fef3c7;
   border-bottom: 2px solid var(--amber);
 }
 
@@ -384,8 +450,31 @@ textarea:focus {
   border-bottom: 2px solid #94a3b8;
 }
 
+.hl.scope-highlight {
+  opacity: 0.72;
+}
+
+.hl.actionable-highlight {
+  font-weight: 780;
+}
+
 .hl.is-selected {
   outline: 2px solid var(--blue);
+  outline-offset: 2px;
+}
+
+.hl-chip {
+  display: inline-flex;
+  transform: translateY(-1px);
+  margin-left: 4px;
+  padding: 1px 5px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.8);
+  color: #475569;
+  font-size: 10px;
+  font-weight: 900;
+  line-height: 1.35;
+  white-space: nowrap;
 }
 
 .notice-box {
@@ -416,11 +505,35 @@ textarea:focus {
 .judgment-card,
 .exception-card,
 .revision-card,
+.aggregation-card,
+.reference-path-card,
 .fact-card {
   border: 1px solid var(--line);
   border-radius: 8px;
   background: var(--panel-soft);
   padding: 12px;
+}
+
+.aggregation-list,
+.reference-path-list {
+  display: grid;
+  gap: 10px;
+}
+
+.policy-chain-grid {
+  display: grid;
+  gap: 10px;
+}
+
+.chain-item {
+  border-top: 1px solid var(--line);
+  margin-top: 10px;
+  padding-top: 10px;
+}
+
+.aggregation-card,
+.reference-path-card {
+  background: #fff;
 }
 
 .card-top {

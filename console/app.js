@@ -71,6 +71,7 @@ const els = {
   verdictHeader: document.getElementById("verdictHeader"),
   riskStrip: document.getElementById("riskStrip"),
   highlightedText: document.getElementById("highlightedText"),
+  highlightSummary: document.getElementById("highlightSummary"),
   conditionalNotice: document.getElementById("conditionalNotice"),
   detail: document.getElementById("detailContent"),
   runLabel: document.getElementById("reviewRunLabel"),
@@ -232,6 +233,7 @@ function renderEmpty() {
     els.riskStrip.appendChild(principleButton(principle, "해당 없음"));
   });
   els.highlightedText.innerHTML = `<div class="empty-state">심사할 광고 원문이 여기에 표시됩니다.</div>`;
+  els.highlightSummary.innerHTML = highlightLegend();
   els.conditionalNotice.textContent = "통과 후보도 완전 면책이 아니라 현재 문안 기준의 1차 검토 결과입니다.";
   els.detail.innerHTML = `<div class="empty-state">하이라이트나 Claim 카드를 선택하면 상세 판단이 표시됩니다.</div>`;
   els.overallTab.innerHTML = "";
@@ -312,22 +314,7 @@ function principleButton(principle, status) {
 
 function renderHighlights() {
   const text = els.text.value || "";
-  const anchors = filteredAnchors();
-  const spans = anchors
-    .map((anchor) => {
-      const display = anchorDisplay(anchor.anchor_id);
-      const aligned = alignSpan(text, anchor.span);
-      const className = highlightClass(display?.display_verdict || "ANCHOR");
-      return {
-        id: anchor.anchor_id,
-        start: aligned.start,
-        end: aligned.end,
-        text: anchor.span.text,
-        className,
-      };
-    })
-    .filter((span) => Number.isInteger(span.start) && Number.isInteger(span.end))
-    .sort((a, b) => a.start - b.start || b.end - a.end);
+  const spans = nonOverlappingHighlights(highlightCandidates(text));
 
   let cursor = 0;
   const parts = [];
@@ -335,15 +322,104 @@ function renderHighlights() {
     if (span.start < cursor || span.start < 0 || span.end > text.length || span.end <= span.start) return;
     parts.push(escapeHtml(text.slice(cursor, span.start)));
     parts.push(
-      `<button class="hl ${span.className} ${state.selectedAnchorId === span.id ? "is-selected" : ""}" data-anchor-id="${span.id}" type="button">${escapeHtml(text.slice(span.start, span.end))}</button>`
+      `<button class="hl ${span.className} ${span.roleClass} ${state.selectedAnchorId === span.id ? "is-selected" : ""}" data-anchor-id="${span.id}" title="${escapeHtml(span.tooltip)}" type="button"><span class="hl-text">${escapeHtml(text.slice(span.start, span.end))}</span><span class="hl-chip">${escapeHtml(span.label)}</span></button>`
     );
     cursor = span.end;
   });
   parts.push(escapeHtml(text.slice(cursor)));
   els.highlightedText.innerHTML = parts.join("") || `<div class="empty-state">광고 원문이 비어 있습니다.</div>`;
+  els.highlightSummary.innerHTML = highlightSummary(spans, text);
   els.highlightedText.querySelectorAll(".hl").forEach((button) => {
     button.addEventListener("click", () => selectAnchor(button.dataset.anchorId));
   });
+}
+
+function highlightCandidates(text) {
+  const anchors = filteredAnchors();
+  return anchors
+    .map((anchor) => {
+      const display = anchorDisplay(anchor.anchor_id);
+      const aligned = alignSpan(text, anchor.span);
+      const verdict = display?.display_verdict || "ANCHOR";
+      const role = display?.display_role || (isActionableAnchor(anchor.anchor_id) ? "actionable" : "scope");
+      const className = highlightClass(verdict);
+      const cuCount = display?.cu_count || 0;
+      return {
+        id: anchor.anchor_id,
+        start: aligned.start,
+        end: aligned.end,
+        text: anchor.span.text,
+        verdict,
+        role,
+        className,
+        roleClass: role === "scope" ? "scope-highlight" : "actionable-highlight",
+        label: highlightLabel(verdict, role, cuCount),
+        tooltip: highlightTooltip(anchor, display),
+        priority: highlightPriority(verdict, role, anchor.anchor_type, cuCount),
+      };
+    })
+    .filter((span) => Number.isInteger(span.start) && Number.isInteger(span.end) && span.start >= 0 && span.end <= text.length && span.end > span.start);
+}
+
+function nonOverlappingHighlights(candidates) {
+  const selected = [];
+  [...candidates]
+    .sort((a, b) => b.priority - a.priority || (b.end - b.start) - (a.end - a.start) || a.start - b.start)
+    .forEach((candidate) => {
+      const overlaps = selected.some((item) => candidate.start < item.end && item.start < candidate.end);
+      if (!overlaps) selected.push(candidate);
+    });
+  return selected.sort((a, b) => a.start - b.start || b.priority - a.priority);
+}
+
+function highlightPriority(verdict, role, anchorType, cuCount) {
+  if (role === "scope") return 5;
+  const verdictScore = { NON_COMPLIANT: 90, RETRIEVAL_FAILURE: 80, INSUFFICIENT: 70, COMPLIANT: 40, NOT_APPLICABLE: 30, ANCHOR: 20 }[verdict] || 20;
+  const typeScore = anchorType === "risk_anchor" ? 12 : anchorType === "claim_anchor" ? 10 : 0;
+  return verdictScore + typeScore + Math.min(Number(cuCount || 0), 5);
+}
+
+function highlightLabel(verdict, role, cuCount) {
+  if (role === "scope") return "범위";
+  if (verdict === "NON_COMPLIANT") return `위험 · CU ${cuCount}`;
+  if (verdict === "RETRIEVAL_FAILURE") return "매칭 실패";
+  if (verdict === "INSUFFICIENT") return "검토";
+  if (verdict === "COMPLIANT" || verdict === "NOT_APPLICABLE") return "완화";
+  return cuCount ? `검토 · CU ${cuCount}` : "검토됨";
+}
+
+function highlightTooltip(anchor, display) {
+  const hypernyms = (anchor.hypernyms || []).map((item) => item.hypernym).slice(0, 3).join(", ");
+  const verdict = JUDGMENT_STATUS[display?.display_verdict] || display?.display_verdict || "검토됨";
+  const role = display?.display_role === "scope" ? "범위 정보" : "판단 대상";
+  return `${role} · ${verdict}${hypernyms ? ` · ${hypernyms}` : ""}`;
+}
+
+function highlightSummary(spans, text) {
+  if (!state.result) return highlightLegend();
+  const totalActionable = (state.result.anchor_display || []).filter((item) => item.display_role === "actionable").length;
+  const hiddenByOverlap = Math.max(0, filteredAnchors().length - spans.length);
+  return `
+    <div class="highlight-meta">
+      <span>원문 ${text.length}자</span>
+      <span>표시 ${spans.length}</span>
+      <span>판단 anchor ${totalActionable}</span>
+      ${hiddenByOverlap ? `<span>겹침 정리 ${hiddenByOverlap}</span>` : ""}
+      ${state.selectedPrinciple ? `<span>필터 ${escapeHtml(PRINCIPLES.find((item) => item.key === state.selectedPrinciple)?.label || "")}</span>` : ""}
+    </div>
+    ${highlightLegend()}
+  `;
+}
+
+function highlightLegend() {
+  return `
+    <div class="highlight-legend" aria-label="하이라이트 범례">
+      <span><i class="legend-dot non-compliant"></i>위반 가능성</span>
+      <span><i class="legend-dot insufficient"></i>검토 필요</span>
+      <span><i class="legend-dot compliant"></i>고지/예외 완화</span>
+      <span><i class="legend-dot anchor-only"></i>범위/검토됨</span>
+    </div>
+  `;
 }
 
 function renderOverallContext() {
@@ -518,6 +594,7 @@ function renderDetail() {
         <span class="tag">${display?.display_role === "scope" ? "scope/context" : "actionable"}</span>
         ${anchor.hypernyms.map((item) => `<span class="tag">${escapeHtml(item.hypernym)} · ${item.support}</span>`).join("")}
       </div>
+      ${anchorFeaturePanel(anchor)}
       ${claimQualifierPanel(anchor)}
       <details open>
         <summary>Context facts</summary>
@@ -533,6 +610,14 @@ function renderDetail() {
             ? `<div class="empty-state">CUPlan은 생성됐지만 이 anchor에 대한 judgment가 없습니다. LLM judgment 단계를 확인하세요.</div>`
             : `<div class="empty-state">이 anchor에 매칭된 CU가 없습니다. 정책 매칭 실패로 검토 필요 상태입니다.</div>`
       }
+    </section>
+    <section class="detail-card">
+      <h3>조항 / 원칙 집계</h3>
+      ${policyAggregationPanel(anchor)}
+    </section>
+    <section class="detail-card">
+      <h3>Policy Evidence Chains</h3>
+      ${policyEvidenceChainPanel(anchor)}
     </section>
     <section class="detail-card">
       <h3>Track B · 소비자 오인</h3>
@@ -553,6 +638,132 @@ function renderDetail() {
   `;
 }
 
+function policyAggregationPanel(anchor) {
+  const articleRows = aggregationRowsForAnchor(state.result?.article_aggregation || [], anchor);
+  const principleRows = aggregationRowsForAnchor(state.result?.principle_aggregation || [], anchor);
+  const rows = [...articleRows, ...principleRows.filter((row) => !articleRows.some((item) => item.key === row.key))];
+  if (!rows.length) return `<div class="empty-state">이 anchor가 조항/원칙 집계에 아직 연결되지 않았습니다.</div>`;
+  return `
+    <div class="aggregation-list">
+      ${rows.map((row) => `
+        <article class="aggregation-card">
+          <div class="card-top">
+            <strong>${escapeHtml(policyAggregationTitle(row))}</strong>
+            <span class="badge ${judgmentBadgeClass(row.effective_verdict)}">${JUDGMENT_STATUS[row.effective_verdict] || row.effective_verdict}</span>
+          </div>
+          <div class="meta-row">
+            <span class="tag">${escapeHtml(row.axis || "policy")}</span>
+            <span class="tag">CU ${Number(row.cu_count || 0)}</span>
+            <span class="tag">issue ${Number(row.issue_count || 0)}</span>
+            <span class="tag">max ${Number(row.max_score || 0).toFixed(2)}</span>
+            ${(row.principles || []).map((item) => `<span class="tag">${escapeHtml(item)}</span>`).join("")}
+          </div>
+          <p class="evidence-text">
+            <b>관련 문구</b><br />${(row.anchor_spans || []).map(escapeHtml).join("<br />") || "-"}<br /><br />
+            <b>연결 CU</b><br />${(row.cu_titles || []).map(escapeHtml).join("<br />") || "-"}
+          </p>
+        </article>
+      `).join("")}
+    </div>
+  `;
+}
+
+function policyAggregationTitle(row) {
+  if (row.axis === "article") return `${row.key || "근거 조항"} 기준 최종 영향`;
+  return `${row.key || "원칙 미상"} 원칙 기준 최종 영향`;
+}
+
+function aggregationRowsForAnchor(rows, anchor) {
+  return (rows || []).filter((row) => (row.anchor_spans || []).includes(anchor.span.text));
+}
+
+function policyEvidenceChainPanel(anchor) {
+  const chains = state.result?.policy_evidence_chains || {};
+  const legal = chainsForAnchor(chains.legal_basis_chains, anchor.anchor_id).filter((chain) => chain.status === "FOUND");
+  const disclosures = chainsForAnchor(chains.disclosure_chains, anchor.anchor_id).filter((chain) => chain.status === "FOUND");
+  const exceptions = chainsForAnchor(chains.exception_chains, anchor.anchor_id).filter((chain) => chain.status === "FOUND");
+  const fallbackRows = (state.result?.reference_paths_summary || []).filter((row) => row.anchor_id === anchor.anchor_id);
+  if (!legal.length && !disclosures.length && !exceptions.length && !fallbackRows.length) {
+    return `<div class="empty-state">이 anchor의 목적별 근거 chain이 없습니다. 부족한 chain은 Audit/Trace 진단에 모았습니다.</div>`;
+  }
+  return `
+    <div class="policy-chain-grid">
+      ${chainGroup("Legal basis", "어떤 금소법/시행령/감독규정/심의기준 근거에서 왔는가", legal, "basis_nodes")}
+      ${chainGroup("Required disclosure", "문안에 무엇을 보완하거나 유지해야 하는가", disclosures, "disclosure_nodes")}
+      ${chainGroup("Exception / mitigation", "어떤 고지/상품사실/승인 근거가 있으면 완화 가능한가", exceptions, "exception_nodes", "현재 문안 기준 명시적 예외/완화 chain 없음")}
+      ${!legal.length && fallbackRows.length ? fallbackReferenceRows(fallbackRows) : ""}
+    </div>
+  `;
+}
+
+function chainsForAnchor(rows, anchorId) {
+  return (rows || []).filter((chain) => chain.anchor_id === anchorId);
+}
+
+function chainGroup(title, subtitle, rows, nodeKey, emptyText = "FOUND chain 없음") {
+  return `
+    <article class="reference-path-card">
+      <div class="card-top">
+        <strong>${escapeHtml(title)}</strong>
+        <span class="tag">${rows.length ? `${rows.length} found` : "not found"}</span>
+      </div>
+      <p class="evidence-text">${escapeHtml(subtitle)}</p>
+      ${
+        rows.length
+          ? rows
+              .map(
+                (chain) => `
+                <div class="chain-item">
+                  <strong>${escapeHtml(chain.summary || chain.chain_type || title)}</strong>
+                  <div class="tag-row">
+                    ${(chain[nodeKey] || []).map((node) => `<span class="tag">${escapeHtml(chainNodeLabel(node))}</span>`).join("")}
+                  </div>
+                  ${
+                    (chain.provenance_snippets || []).length
+                      ? `<details><summary>Provenance snippets</summary><p class="evidence-text">${chain.provenance_snippets
+                          .map((item) => escapeHtml(shorten(item.text || item.summary || "", 360)))
+                          .join("<hr />")}</p></details>`
+                      : ""
+                  }
+                </div>
+              `
+              )
+              .join("")
+          : `<div class="empty-state">${escapeHtml(emptyText)}</div>`
+      }
+    </article>
+  `;
+}
+
+function chainNodeLabel(node) {
+  if (!node) return "-";
+  return node.title || node.name || node.label || node.article || node.id || JSON.stringify(node);
+}
+
+function fallbackReferenceRows(rows) {
+  return `
+    <div class="reference-path-list">
+      ${rows.map((row) => `
+        <article class="reference-path-card">
+          <div class="card-top">
+            <strong>${escapeHtml(row.risk_title || row.cu_id || "CU 근거")}</strong>
+            <span class="tag">${escapeHtml(row.source_article || "조항 미상")}</span>
+          </div>
+          <div class="meta-row">
+            <span class="tag">${escapeHtml(row.principle || "원칙 미상")}</span>
+            ${row.has_disclosure_evidence ? `<span class="tag">필수고지 evidence</span>` : ""}
+            ${row.has_exception_path ? `<span class="tag">exception path</span>` : ""}
+          </div>
+          <p class="evidence-text">
+            <b>Traversal</b><br />${(row.path_labels || []).map(escapeHtml).join(" → ") || "CU → Premise/LegalChunk evidence"}<br /><br />
+            <b>Evidence</b><br />${(row.legal_evidence || []).map((item) => `${escapeHtml(item.id || "")}<br />${escapeHtml(shorten(item.text || "", 360))}`).join("<hr />") || "-"}
+          </p>
+        </article>
+      `).join("")}
+    </div>
+  `;
+}
+
 function judgmentCard(judgment, planItem, raw) {
   const evidence = planItem?.evidence_texts || [];
   const rawTag = raw && raw.verdict !== judgment.verdict ? `<span class="tag">raw ${escapeHtml(raw.verdict)}</span>` : "";
@@ -565,6 +776,8 @@ function judgmentCard(judgment, planItem, raw) {
       <div class="meta-row">
         <span class="tag">${escapeHtml(planItem?.principle || "원칙 미상")}</span>
         ${planItem?.source_article ? `<span class="tag">${escapeHtml(planItem.source_article)}</span>` : ""}
+        ${planItem?.legal_element_profile?.action_type ? `<span class="tag">${escapeHtml(planItem.legal_element_profile.action_type)}</span>` : ""}
+        ${(planItem?.matched_required_features || []).map((item) => `<span class="tag">${escapeHtml(item)}</span>`).join("")}
         <span class="tag">score ${Number(judgment.score || 0).toFixed(2)}</span>
         <span class="tag">${escapeHtml(judgment.cu_id)}</span>
         ${rawTag}
@@ -649,10 +862,28 @@ function revisionPanel(anchor, issues, judgments, display) {
 
 function legalJudgmentTitle(planItem, judgment) {
   if (!planItem) return "CU 근거 확인 필요";
+  if (planItem.risk_title) {
+    return `${planItem.risk_title} · ${planItem.source_article || planItem.principle || "법적 근거 확인"}`;
+  }
   const article = planItem.source_article || "근거 조항";
   const subject = planItem.subject || "광고 표현";
   const constraint = planItem.constraint || planItem.context || judgment.cu_id || "준수 여부";
   return `${article} 근거: ${subject} · ${constraint}`;
+}
+
+function anchorFeaturePanel(anchor) {
+  const featureSet = anchor.feature_set || (state.result?.anchor_feature_sets || []).find((item) => item.anchor_id === anchor.anchor_id);
+  if (!featureSet) return "";
+  return `
+    <details open>
+      <summary>금소법 행위요건 feature</summary>
+      <div class="tag-row">
+        ${(featureSet.action_types || []).map((item) => `<span class="tag">${escapeHtml(item)}</span>`).join("")}
+        ${(featureSet.positive_features || []).map((item) => `<span class="tag">${escapeHtml(item)}</span>`).join("")}
+      </div>
+      <div class="evidence-text">${(featureSet.evidence || []).map(escapeHtml).join("<br />") || "feature evidence 없음"}</div>
+    </details>
+  `;
 }
 
 function revisionSuggestionCard(suggestion) {
@@ -795,6 +1026,7 @@ function renderProductFacts() {
         <span class="tag">ClaimFact ${claimFacts.length}</span>
       </div>
     </section>
+    ${productSelectionNotice(context)}
     ${context.reason ? `<div class="notice-box">${escapeHtml(context.reason)}</div>` : ""}
     <section class="product-facts-grid">
       <article class="fact-column">
@@ -815,6 +1047,20 @@ function renderProductFacts() {
       <h3>선택 문서</h3>
       <div class="evidence-text">
         ${documents.map((doc) => `<b>${escapeHtml(doc.label || "문서")}</b> · ${escapeHtml(doc.file_name || doc.original_name || doc.document_id)}<br />${escapeHtml(doc.relative_path || "")}<br />exists ${escapeHtml(doc.exists)}`).join("<hr />") || "상품명이 확정되지 않아 문서를 선택하지 않았습니다."}
+      </div>
+    </section>
+  `;
+}
+
+function productSelectionNotice(context) {
+  if (context.extraction_status !== "NEEDS_PRODUCT_SELECTION") return "";
+  const candidates = state.result?.product_context?.matched_products || [];
+  return `
+    <section class="detail-card product-selection-cta">
+      <h3>상품 선택 필요</h3>
+      <p class="evidence-text">상품명이 명확하지 않아 ProductFact를 추정하지 않았습니다. 광고 claim과 실제 상품문서 fact를 대조하려면 리뷰 대상 상품을 먼저 확정해야 합니다.</p>
+      <div class="tag-row">
+        ${candidates.slice(0, 8).map((item) => `<span class="tag">${escapeHtml(item.product || item.name || "상품 후보")}</span>`).join("") || `<span class="tag">상품 후보 없음</span>`}
       </div>
     </section>
   `;
@@ -1034,11 +1280,14 @@ function auditBadgeText(step) {
 
 function buildAuditSteps() {
   const result = state.result || {};
+  const chains = result.policy_evidence_chains || {};
+  const chainCount = (rows) => (rows || []).filter((row) => row.status === "FOUND").length;
   return [
     { name: "Context extraction", ok: (result.context_anchors || []).length > 0, summary: `${result.context_anchors?.length || 0} anchors generated` },
     { name: "Policy normalization", ok: allAnchorsHaveHypernyms(result), summary: "Approved PolicyHypernym vocabulary selected" },
     { name: "Anchor generation", ok: (result.context_anchors || []).length > 0, summary: "Anchor spans persisted under review run" },
     { name: "CU retrieval", ok: (result.cu_plan || []).length > 0, summary: `${result.cu_plan?.length || 0} CUPlan items · ${(result.system_review_items || []).length} diagnostics` },
+    { name: "Policy evidence chains", ok: chainCount(chains.legal_basis_chains) > 0, summary: `${chainCount(chains.legal_basis_chains)} legal · ${chainCount(chains.disclosure_chains)} disclosure · ${chainCount(chains.exception_chains)} exception · ${(chains.chain_diagnostics || []).length} diagnostics` },
     { name: "LLM rerank", ok: (result.cu_plan || []).length > 0, summary: "Top candidates selected for judgment" },
     { name: "LLM judgment", ok: (result.judgments || []).length > 0, summary: `${result.judgments?.length || 0} judgments` },
     { name: "Exception override", ok: true, summary: `${result.exception_reviews?.length || 0} exception reviews` },

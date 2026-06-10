@@ -78,6 +78,7 @@ class Neo4jReviewWriter:
                         "sentence_units": to_jsonable(graph.sentence_units),
                         "inter_sentence_relations": to_jsonable(graph.inter_sentence_relations),
                         "context_influences": to_jsonable(graph.context_influences),
+                        "anchor_feature_sets": to_jsonable(graph.anchor_feature_sets),
                         "product_context": graph.product_context,
                         "product_fact_context": graph.product_fact_context,
                         "disclosure_requirements": graph.disclosure_requirements,
@@ -340,6 +341,21 @@ class Neo4jReviewWriter:
                     for proposal in anchor.hypernyms
                 ],
             )
+            if anchor.feature_set:
+                session.run(
+                    """
+                    MATCH (anchor:ContextAnchor {id: $anchor_id, workspace_id: $workspace_id})
+                    MERGE (feature_set:AnchorFeatureSet {id: $feature_set_id, workspace_id: $workspace_id})
+                    SET feature_set += $feature_set_props
+                    MERGE (anchor)-[:HAS_FEATURE_SET {workspace_id: $workspace_id, review_run_id: $review_run_id, source: $source}]->(feature_set)
+                    """,
+                    workspace_id=review_input.workspace_id,
+                    review_run_id=graph.review_run_id,
+                    source=SOURCE,
+                    anchor_id=anchor.anchor_id,
+                    feature_set_id=anchor.feature_set.feature_set_id,
+                    feature_set_props=neo4j_props({**common, **to_jsonable(anchor.feature_set)}),
+                )
 
     def _save_plan(self, session, review_input: ReviewInput, graph: ReviewGraph, common: dict[str, object]) -> None:
         session.run(
@@ -380,6 +396,11 @@ class Neo4jReviewWriter:
                 item_props=neo4j_props({**common, **to_jsonable(item)}),
             )
         for window in graph.evidence_windows:
+            window_props = to_jsonable(window)
+            # Purpose-specific evidence chains are runtime/UI artifacts in v1.
+            # Persist the EvidenceWindow itself and its evidence links, but do
+            # not store chain payloads as Neo4j properties or hop nodes.
+            window_props.pop("policy_evidence_chains", None)
             session.run(
                 """
                 MATCH (item:CUPlanItem {id: $plan_item_id, workspace_id: $workspace_id})
@@ -399,7 +420,7 @@ class Neo4jReviewWriter:
                 plan_item_id=window.plan_item_id,
                 window_id=window.evidence_window_id,
                 legal_evidence_ids=window.legal_evidence_ids,
-                window_props=neo4j_props({**common, **to_jsonable(window)}),
+                window_props=neo4j_props({**common, **window_props}),
             )
 
     def _save_judgments(self, session, review_input: ReviewInput, graph: ReviewGraph, common: dict[str, object]) -> None:

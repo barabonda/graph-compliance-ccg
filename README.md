@@ -38,12 +38,31 @@ The compiler creates the policy alignment layer:
 ```text
 LegalClause/LegalChunk -> Premise -> PolicyHypernym
 Premise -> ComplianceUnit -> CUEmbeddingProfile
+ComplianceUnit -> CULegalElementProfile
 ComplianceUnit -> HAS_SUBJECT_HYPERNYM -> PolicyHypernym
 ```
 
 `LegalChunk` is evidence/provenance, not the primary CU retrieval engine.
 Runtime candidate retrieval uses approved `PolicyHypernym` nodes, CU embedding
-profiles, and overlap scoring before LLM rerank.
+profiles, legal-element profiles, and overlap scoring before optional
+cross-encoder rerank and LLM rerank.
+`CULegalElementProfile` records the positive claim evidence required before a
+CU can become a candidate. For example, comparison-ad CUs require a comparison
+target or superiority claim, while unfair superior-position CUs require coercion,
+tie-in-sale, collateral/guarantee demand, or sales-process context.
+
+Optional cross-encoder rerank:
+
+```bash
+pip install FlagEmbedding
+export CCG_ENABLE_CROSS_ENCODER_RERANKER=true
+export CCG_CROSS_ENCODER_RERANKER_MODEL=BAAI/bge-reranker-v2-m3
+```
+
+When enabled, the workflow scores `(ContextAnchor packet, CU candidate packet)`
+pairs after graph retrieval and legal-element gating. The cross-encoder only
+reorders already eligible candidates; it does not override missing legal
+elements. LLM rerank still produces the final `CUPlanItem` explanation.
 
 API:
 
@@ -85,6 +104,11 @@ JB dataset extensions add:
   scope/certainty/guarantee wording such as `누구나`, `조건 없이`, `확정`, and
   `보장` stays inside the parent Claim as `ClaimQualifier` evidence instead of
   becoming a standalone target-consumer judgment anchor.
+- `anchor_feature_sets` — 금소법 행위요건 feature layer derived from the
+  Context Graph. It maps parent-claim qualifiers and facts to positive features
+  such as `universal_scope_expression`, `certainty_expression`,
+  `guarantee_expression`, and `unconditional_expression`; these features are
+  matched against each CU's `CULegalElementProfile` before LLM rerank.
 - `overall_impression_judgment` — Track B consumer-misleading review grounded in
   `Claim -> Meaning -> Implicature -> ConsumerEffect` paths and the overall
   impression standard.
@@ -103,7 +127,8 @@ JB dataset extensions add:
   rate/condition basis, fees, and review-number display.
 - `system_review_items[].risk_code` — CUPlan 0 diagnostics split into
   `NO_HYPERNYM_MATCH`, `MISSING_POLICY_COVERAGE`,
-  `NO_ACTIVE_CU_AFTER_GATE`, and `RERANK_DROPPED_ALL`.
+  `NO_LEGAL_ELEMENT_MATCH`, `NO_ACTIVE_CU_AFTER_GATE`, and
+  `RERANK_DROPPED_ALL`.
 
 Track C expression/brand-safety risk is intentionally exposed as an extension
 slot (`track_c_summary`) until a dedicated precedent/risk-pattern dataset is

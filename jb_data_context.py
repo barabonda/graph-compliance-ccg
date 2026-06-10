@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 import os
 from functools import lru_cache
 from pathlib import Path
@@ -10,6 +11,8 @@ from typing import Any
 from schemas import Claim, ReviewInput
 
 
+LOGGER = logging.getLogger(__name__)
+PRODUCT_GRAPH_SOURCE = "graphcompliance_ccg_product_graph_loader"
 DEFAULT_PRODUCT_META_PATH = Path(
     "/Users/barabonda/Downloads/JB금융그룹해커톤_데이터셋/금융상품 데이터셋/전북은행 상품문서 메타데이터.xlsx"
 )
@@ -103,12 +106,13 @@ def build_product_context(review_input: ReviewInput, claims: list[Claim]) -> tup
     product_group = normalize_product_group(review_input.product_group, review_input.content_text)
     products = match_products(review_input.content_text, claims, product_group)
     requirements = requirements_for_group(product_group)
+    source = "Neo4j Product Graph" if any(product.get("source") == PRODUCT_GRAPH_SOURCE for product in products) else "JB 금융상품 데이터셋 · 전북은행 상품문서 메타데이터.xlsx"
     return (
         {
             "product_group": product_group,
             "matched_products": products[:12],
             "document_count": sum(int(product.get("document_count", 0)) for product in products),
-            "source": "JB 금융상품 데이터셋 · 전북은행 상품문서 메타데이터.xlsx",
+            "source": source,
         },
         requirements,
     )
@@ -142,6 +146,10 @@ def requirements_for_group(product_group: str) -> list[dict[str, Any]]:
 
 
 def match_products(text: str, claims: list[Claim], product_group: str) -> list[dict[str, Any]]:
+    graph_matches = match_products_from_neo4j(text, claims, product_group)
+    if graph_matches:
+        return graph_matches
+
     rows = load_product_rows()
     if not rows:
         return []
@@ -157,6 +165,117 @@ def match_products(text: str, claims: list[Claim], product_group: str) -> list[d
         return sorted(matches, key=lambda item: (-int(item["document_count"]), item["product"]))
     group_rows = [meta for meta in rows.values() if product_group != "auto" and meta["product_group"] == product_group]
     return sorted(group_rows, key=lambda item: (-int(item["document_count"]), item["product"]))[:5]
+
+
+def match_products_from_neo4j(text: str, claims: list[Claim], product_group: str) -> list[dict[str, Any]]:
+    if not os.environ.get("NEO4J_URI") or not (os.environ.get("NEO4J_USER") or os.environ.get("NEO4J_USERNAME")):
+        return []
+    if not os.environ.get("NEO4J_PASSWORD"):
+        return []
+
+    try:
+        rows = load_product_rows_from_neo4j()
+    except Exception as exc:  # noqa: BLE001
+        LOGGER.warning("Neo4j Product Graph lookup failed; falling back to local metadata: %s", exc)
+        return []
+
+    if not rows:
+        return []
+
+    needles = {text}
+    needles.update(claim.text for claim in claims)
+    needles.update(entity.name for claim in claims for entity in claim.entities)
+    joined = " ".join(needles)
+
+    exact_matches = [
+        {**meta, "match_basis": "exact_product_name"}
+        for product, meta in rows.items()
+        if product and product in joined and (product_group == "auto" or meta["product_group"] == product_group)
+    ]
+    if exact_matches:
+        return sorted(exact_matches, key=lambda item: (-int(item["document_count"]), item["product"]))
+
+    if product_group == "auto":
+        return []
+    group_rows = [
+        {**meta, "match_basis": "product_group_candidate"}
+        for meta in rows.values()
+        if meta["product_group"] == product_group
+    ]
+    return sorted(group_rows, key=lambda item: (-int(item["document_count"]), item["product"]))[:5]
+
+
+@lru_cache(maxsize=1)
+def load_product_rows_from_neo4j() -> dict[str, dict[str, Any]]:
+    try:
+        from neo4j import GraphDatabase
+    except Exception:
+        return {}
+
+    uri = os.environ.get("NEO4J_URI", "")
+    user = os.environ.get("NEO4J_USER") or os.environ.get("NEO4J_USERNAME", "")
+    password = os.environ.get("NEO4J_PASSWORD", "")
+    if not uri or not user or not password:
+        return {}
+
+    workspace_id = os.environ.get("WORKSPACE_ID") or os.environ.get("GRAPHCOMPLIANCE_WORKSPACE_ID") or "graphcompliance_mvp_jb_20260530"
+    database = os.environ.get("NEO4J_DATABASE")
+    driver = GraphDatabase.driver(uri, auth=(user, password))
+    try:
+        with driver.session(database=database) if database else driver.session() as session:
+            result = session.run(
+                """
+                MATCH (product:Product {workspace_id: $workspace_id})
+                WHERE product.source = $source
+                OPTIONAL MATCH (product)-[rel:HAS_PRODUCT_DOCUMENT {workspace_id: $workspace_id, source: $source}]->(doc:ProductDocument {workspace_id: $workspace_id})
+                WITH product, collect(DISTINCT doc) AS docs
+                RETURN
+                    product.name AS product,
+                    product.product_group AS product_group,
+                    product.major AS major,
+                    product.subcategory AS subcategory,
+                    product.category AS category,
+                    size([doc IN docs WHERE doc IS NOT NULL]) AS document_count,
+                    [label IN [doc IN docs WHERE doc IS NOT NULL | doc.label] WHERE label IS NOT NULL][0..12] AS document_labels,
+                    [source_id IN [doc IN docs WHERE doc IS NOT NULL | doc.id] WHERE source_id IS NOT NULL][0..8] AS source_ids,
+                    [doc IN docs WHERE doc IS NOT NULL][0..20] AS documents
+                """,
+                workspace_id=workspace_id,
+                source=PRODUCT_GRAPH_SOURCE,
+            )
+            rows: dict[str, dict[str, Any]] = {}
+            for record in result:
+                product_name = str(record.get("product") or "")
+                if not product_name:
+                    continue
+                rows[product_name] = {
+                    "product": product_name,
+                    "product_group": str(record.get("product_group") or "auto"),
+                    "major": str(record.get("major") or ""),
+                    "subcategory": str(record.get("subcategory") or ""),
+                    "category": str(record.get("category") or ""),
+                    "document_count": int(record.get("document_count") or 0),
+                    "document_labels": [str(value) for value in (record.get("document_labels") or [])],
+                    "source_ids": [str(value) for value in (record.get("source_ids") or [])],
+                    "documents": [document_from_neo4j_node(node) for node in (record.get("documents") or [])],
+                    "source": PRODUCT_GRAPH_SOURCE,
+                }
+            return rows
+    finally:
+        driver.close()
+
+
+def document_from_neo4j_node(node: Any) -> dict[str, Any]:
+    data = dict(node)
+    return {
+        "source_id": str(data.get("id") or ""),
+        "label": str(data.get("label") or ""),
+        "extension": str(data.get("extension") or ""),
+        "file_name": str(data.get("file_name") or ""),
+        "relative_path": str(data.get("relative_path") or ""),
+        "original_name": str(data.get("original_name") or ""),
+        "exists": bool(data.get("exists", False)),
+    }
 
 
 @lru_cache(maxsize=1)

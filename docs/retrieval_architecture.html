@@ -1,0 +1,349 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>GraphCompliance CCG · 검색 아키텍처 해설</title>
+<style>
+  :root{
+    --bg:#0e1116; --panel:#161b22; --panel2:#1c232d; --line:#2b333d;
+    --txt:#e6edf3; --mut:#9aa7b4; --acc:#5aa6ff; --acc2:#7ee787;
+    --warn:#f0a35e; --bad:#ff6b6b; --pur:#b692ff;
+    --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--txt);font-family:var(--sans);line-height:1.65;font-size:15px}
+  .wrap{max-width:1080px;margin:0 auto;padding:32px 20px 80px}
+  h1{font-size:30px;margin:0 0 6px;letter-spacing:-.5px}
+  h2{font-size:21px;margin:46px 0 14px;padding-top:14px;border-top:1px solid var(--line)}
+  h3{font-size:16px;margin:24px 0 8px;color:var(--acc)}
+  p{color:var(--txt)}
+  .sub{color:var(--mut);margin:0 0 22px}
+  code{font-family:var(--mono);background:#0b0e13;border:1px solid var(--line);border-radius:5px;padding:1px 6px;font-size:12.5px;color:#cdd9e5}
+  .mono{font-family:var(--mono)}
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px 20px;margin:14px 0}
+  .grid{display:grid;gap:12px}
+  .g2{grid-template-columns:1fr 1fr}
+  .g3{grid-template-columns:repeat(3,1fr)}
+  @media(max-width:760px){.g2,.g3{grid-template-columns:1fr}}
+  .tag{display:inline-block;font-size:11px;font-weight:600;padding:2px 8px;border-radius:20px;vertical-align:middle}
+  .t-crit{background:#3a1620;color:#ff8f8f;border:1px solid #5a2230}
+  .t-high{background:#3a2a16;color:#ffc587;border:1px solid #5a3f22}
+  .t-med{background:#15303a;color:#7ed0ff;border:1px solid #20505f}
+  .t-ok{background:#16331f;color:#9af0b0;border:1px solid #235a32}
+  .muted{color:var(--mut)}
+  .kpi{display:flex;flex-wrap:wrap;gap:10px;margin:8px 0}
+  .kpi .card{flex:1;min-width:120px;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:12px 14px;text-align:center}
+  .kpi .num{font-size:24px;font-weight:700;font-family:var(--mono)}
+  .kpi .lbl{font-size:11.5px;color:var(--mut);margin-top:2px}
+  /* funnel */
+  .funnel{display:flex;flex-direction:column;gap:6px;margin-top:8px}
+  .frow{display:flex;align-items:center;gap:12px}
+  .fbar{height:34px;border-radius:7px;display:flex;align-items:center;padding:0 12px;color:#06131f;font-weight:700;font-family:var(--mono);font-size:13px;white-space:nowrap;transition:width .6s ease}
+  .fmeta{font-size:12.5px;color:var(--mut);flex:1}
+  /* pipeline */
+  .pipe{display:flex;flex-direction:column;gap:0}
+  .step{display:flex;gap:12px;align-items:flex-start;padding:9px 0;border-bottom:1px dashed var(--line)}
+  .step:last-child{border-bottom:0}
+  .step .n{flex:0 0 26px;height:26px;border-radius:50%;background:var(--panel2);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:12px;color:var(--mut)}
+  .step.search .n{background:#13344f;border-color:#1f5e8c;color:#9fd0ff}
+  .step .body{flex:1}
+  .step .ttl{font-weight:600}
+  .step .desc{font-size:12.5px;color:var(--mut)}
+  .chip{font-size:10.5px;padding:1px 7px;border-radius:5px;background:#13344f;color:#9fd0ff;border:1px solid #1f5e8c;margin-left:6px}
+  /* calc */
+  .calc label{display:flex;align-items:center;gap:10px;margin:10px 0;font-size:13px}
+  .calc input[type=range]{flex:1}
+  .calc .v{font-family:var(--mono);width:48px;text-align:right;color:var(--acc2)}
+  .result{font-family:var(--mono);font-size:22px;font-weight:700;margin-top:8px}
+  .gatebar{height:10px;border-radius:6px;background:#0b0e13;border:1px solid var(--line);overflow:hidden;margin-top:6px}
+  .gatebar>i{display:block;height:100%}
+  pre{background:#0b0e13;border:1px solid var(--line);border-radius:8px;padding:12px 14px;overflow:auto;font-family:var(--mono);font-size:12.5px;color:#cdd9e5;margin:8px 0}
+  table{width:100%;border-collapse:collapse;font-size:13px;margin-top:8px}
+  th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{color:var(--mut);font-weight:600;font-size:12px}
+  .w-item{border-left:3px solid var(--line);padding:2px 0 2px 14px;margin:18px 0}
+  .w-item.crit{border-color:var(--bad)} .w-item.high{border-color:var(--warn)} .w-item.med{border-color:var(--acc)}
+  .w-item h3{margin-top:0;color:var(--txt)}
+  .ref{font-family:var(--mono);font-size:11.5px;color:var(--mut)}
+  .arrow{color:var(--mut);font-family:var(--mono)}
+  .legend{font-size:12px;color:var(--mut);margin-top:6px}
+  a{color:var(--acc)}
+  .note{font-size:12.5px;color:var(--warn);background:#241a10;border:1px solid #4a3415;border-radius:8px;padding:10px 12px;margin:12px 0}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>GraphCompliance CCG · 검색(Retrieval) 아키텍처 해설</h1>
+  <p class="sub">금융광고 사전심사용 Policy-Guided 검색 파이프라인 — 구조 · 점수 산식 · 게이트 · 병목/비효율 진단</p>
+
+  <div class="note">
+    이 문서는 <code>retriever.py · workflow.py · planner.py · normalizer.py · judge.py · router.py</code>의
+    실제 코드를 추적해 작성했습니다. 아래 "실측 스냅샷"은 여러분이 방금 돌린 실제 1회 실행 로그 수치입니다.
+    검색 단계만 격리해 더 깊게 보려면 함께 제공한 <code>retrieval_probe.py</code>를 실행하세요.
+  </div>
+
+  <!-- ============ 실측 스냅샷 ============ -->
+  <h2>① 실측 스냅샷 <span class="muted" style="font-size:13px;font-weight:400">— 방금 1회 실행 결과</span></h2>
+  <div class="kpi">
+    <div class="card"><div class="num" style="color:var(--acc)">212</div><div class="lbl">approved hypernyms</div></div>
+    <div class="card"><div class="num" style="color:var(--acc)">80</div><div class="lbl">premises</div></div>
+    <div class="card"><div class="num" style="color:var(--acc)">40</div><div class="lbl">fragments</div></div>
+    <div class="card"><div class="num" style="color:var(--pur)">3</div><div class="lbl">anchors</div></div>
+    <div class="card"><div class="num" style="color:var(--pur)">36</div><div class="lbl">CU 후보</div></div>
+    <div class="card"><div class="num" style="color:var(--acc2)">7</div><div class="lbl">CUPlan</div></div>
+    <div class="card"><div class="num" style="color:var(--warn)">4</div><div class="lbl">INSUFFICIENT</div></div>
+    <div class="card"><div class="num" style="color:var(--bad)">0</div><div class="lbl">NON_COMPLIANT</div></div>
+  </div>
+
+  <p>검색 깔때기(funnel) — 단계별로 후보가 어떻게 좁혀지는가:</p>
+  <div class="funnel" id="funnel"></div>
+  <p class="legend">⚠️ 주목할 두 신호: (1) 7건 판단 중 <b>4건이 INSUFFICIENT</b> — 검색이 CU는 찾았지만 근거 창(evidence window)이 얇아 판단이 안 됨.
+  (2) <b>NON_COMPLIANT 0건</b>인데 최종 라우팅이 <code>revise</code> — 그래프 검색 트랙이 위반을 1건도 못 잡았고, 별도 LLM 인상 판단(Track B HIGH 1.00)이 단독으로 결과를 끌어올림.</p>
+
+  <!-- ============ 그래프 계약 ============ -->
+  <h2>② 그래프 계약 (검색이 따르는 경로)</h2>
+  <div class="panel">
+    <pre>ContextAnchor ──▶ PolicyHypernym ──▶ ComplianceUnit ──▶ Premise ──▶ LegalChunk
+   (광고에서        (승인된 정책어      (실제 판단단위 CU)   (전제/근거)   (원문 조항)
+    추출한 앵커)      어휘)                                              = provenance만</pre>
+    <p class="muted" style="font-size:13px;margin:6px 0 0">
+      핵심 설계: <b>LegalChunk 전문검색은 CU 후보 엔진이 아니다.</b> 후보는 ① 승인된 PolicyHypernym 겹침과
+      ② CU 임베딩 프로파일(<code>CUEmbeddingProfile</code>) 벡터 유사도로 찾고, LegalChunk/LegalClause는 근거·출처로만 쓴다.
+      (retriever.py 1–10행)
+    </p>
+  </div>
+
+  <!-- ============ 파이프라인 ============ -->
+  <h2>③ 전체 파이프라인 (검색 단계 강조)</h2>
+  <p class="sub">파란 단계가 검색/그래프 조회. 나머지는 LLM·집계 단계. (workflow.py <code>review_events</code>)</p>
+  <div class="panel pipe" id="pipe"></div>
+
+  <!-- ============ 3개 검색 함수 ============ -->
+  <h2>④ 검색 로직의 3개 함수 (retriever.py)</h2>
+
+  <div class="panel">
+    <h3>a) <span class="mono">assert_policy_alignment_ready</span> <span class="tag t-ok">준비 게이트</span></h3>
+    <p style="margin:4px 0">그래프가 검색 가능한 상태인지 빠르게 차단. 조건: hypernym ≥ 30, premise ≥ 100,
+    <i>활성 CU의 hypernym 연결 비율</i> ≥ 0.8. 하나라도 미달이면 즉시 예외(폴백 없음). <span class="ref">retriever.py 72–103</span></p>
+  </div>
+
+  <div class="panel">
+    <h3>b) <span class="mono">policy_context_for_claims</span> <span class="tag t-med">정규화기 입력</span></h3>
+    <p style="margin:4px 0">정규화 LLM에 넘길 컨텍스트를 모은다. 세 덩어리의 <b>정렬 방식이 서로 다르다</b>:</p>
+    <table>
+      <tr><th>덩어리</th><th>정렬</th><th>한도</th><th>정규화기가 실제로 쓰는 양</th></tr>
+      <tr><td>hypernyms</td><td><code>priority</code> 정렬 (질의 무관)</td><td><code>max(limit,2000)</code></td><td>앞 <b>200개</b>만 (normalizer.py 90)</td></tr>
+      <tr><td>premises</td><td class="mono" style="color:var(--warn)">ORDER BY 없음 (임의)</td><td>80</td><td>앞 80개 (normalizer.py 91)</td></tr>
+      <tr><td>fragments</td><td style="color:var(--acc2)">코사인 유사도 top-40</td><td>40</td><td>앞 40개 (normalizer.py 92)</td></tr>
+    </table>
+    <p class="legend">→ 질의 관련도로 랭크되는 건 fragments(40개)뿐. 어휘·전제는 관련도와 무관하게 들어간다. <span class="ref">retriever.py 105–145</span></p>
+  </div>
+
+  <div class="panel">
+    <h3>c) <span class="mono">candidates_for_anchor</span> <span class="tag t-high">핵심 후보검색</span></h3>
+    <p style="margin:4px 0">앵커당 CU 후보를 찾는 본체. 흐름:</p>
+    <ol style="margin:6px 0 0;padding-left:20px;font-size:13.5px">
+      <li><b>조기 차단</b>: 앵커에 hypernym 제안이 없으면 <code>return []</code> — 임베딩 안 보고 끝. <span class="ref">157–158</span></li>
+      <li>앵커 텍스트(span+facts+hypernym why) 임베딩 1회. <span class="ref">159–166</span></li>
+      <li>Cypher: <b>임베딩 보유 활성 CU 전부</b>에 대해 <code>vector.similarity.cosine</code> 계산 + hypernym id/name 겹침 계산. <span class="ref">176–195</span></li>
+      <li>WHERE 통과 조건: id겹침&gt;0 <b>또는</b> name겹침&gt;0 <b>또는</b> (vector≥0.68 그리고 principle≠'제재'). <span class="ref">196–201</span></li>
+      <li>근거 수집: premise(≤6) + premise source(≤4) + 직접근거(≤4). <span class="ref">202–228</span></li>
+      <li>Cypher ORDER BY로 거른 뒤 LIMIT 300 → Python에서 점수 재계산·게이트·정렬 후 top 12. <span class="ref">245–275</span></li>
+    </ol>
+  </div>
+
+  <!-- ============ 점수 계산기 ============ -->
+  <h2>⑤ 결합 점수 산식 (직접 조절해보기)</h2>
+  <div class="panel calc">
+    <p style="margin:0 0 6px"><code>combined = 0.55·vector + 0.35·hypernym_overlap + 0.10·active_for_gate</code> <span class="ref">retriever.py 342</span></p>
+    <label>vector_score <input id="v" type="range" min="0" max="1" step="0.01" value="0.62"><span class="v" id="vv">0.62</span></label>
+    <label>hypernym_overlap <input id="o" type="range" min="0" max="1" step="0.01" value="0.50"><span class="v" id="ov">0.50</span></label>
+    <label>active_for_gate <input id="a" type="range" min="0" max="1" step="1" value="1"><span class="v" id="av">1</span></label>
+    <div class="result" id="score">combined = 0.000</div>
+    <div class="gatebar"><i id="gbar"></i></div>
+    <p class="legend" id="gnote"></p>
+    <p class="legend">벡터 임계 <code>ACTIONABLE_VECTOR_THRESHOLD = 0.68</code>. hypernym 겹침이 0이면 actionable 앵커는 vector ≥ 0.68 이어야 통과.
+    (<code>candidate_allowed_for_anchor</code>, retriever.py 379–390)</p>
+  </div>
+
+  <!-- ============ 게이트 ============ -->
+  <h2>⑥ 검색 후 게이트/필터 (점수 외 탈락 경로)</h2>
+  <p class="sub">점수가 높아도 아래 휴리스틱에 걸리면 조용히 제거된다. 점수 추적에 안 남는다.</p>
+  <div class="grid g2">
+    <div class="panel">
+      <h3>scope gate</h3>
+      <p style="font-size:13px;margin:4px 0">상품군 토큰 불일치 → <code>suppressed</code>. 예: <code>product_group=deposit</code>인데 CU 텍스트에 '대출/펀드' 토큰이 있고 '예금' 토큰이 없으면 억제. <span class="ref">393–427</span></p>
+    </div>
+    <div class="panel">
+      <h3>operational 필터</h3>
+      <p style="font-size:13px;margin:4px 0">'제재·벌점·심의필·협회·준법감시인' 등 토큰 또는 <code>cu_type ∈ {SANCTION, PROCEDURE, ...}</code> → 제거. <span class="ref">430–452</span></p>
+    </div>
+    <div class="panel">
+      <h3>anchor 적격</h3>
+      <p style="font-size:13px;margin:4px 0"><code>product_anchor / target_consumer_anchor</code>는 hypernym 겹침이 없으면 전부 탈락(=scope 전용). principle='제재' 탈락. <span class="ref">379–390</span></p>
+    </div>
+    <div class="panel">
+      <h3>LLM rerank</h3>
+      <p style="font-size:13px;margin:4px 0">통과한 후보를 cross-encoder식 LLM이 앵커당 ≤5, 총 ≤20개로 재선별. actionable 앵커가 0개로 비면 최고점 1개를 강제 보존. <span class="ref">planner.py 100–156</span></p>
+    </div>
+  </div>
+
+  <!-- ============ 병목/비효율 ============ -->
+  <h2>⑦ 병목 · 비효율 진단</h2>
+  <p class="sub">심각도 순. 각 항목에 코드 위치와 권장 개선을 표기.</p>
+
+  <div class="w-item crit">
+    <h3><span class="tag t-crit">치명</span> 1. 검색 리콜이 단일 LLM 호출에 전부 종속</h3>
+    <p>정규화 LLM이 앵커에 PolicyHypernym을 못 붙이면 <code>candidates_for_anchor</code>가 첫 줄에서 <code>return []</code>. 임베딩이 아무리 가까운 CU가 있어도 <b>검색이 0건</b>이 된다. 벡터 단독 fallback 경로가 없다(쿼리 내부엔 vector 분기가 있으나, 함수가 그 전에 조기 반환).</p>
+    <p class="ref">retriever.py 156–158 · 의존: normalizer.py(LLM) → 실패코드 NO_HYPERNYM_MATCH (router.py 253)</p>
+    <p style="font-size:13px"><b>개선</b>: hypernym이 비어도 앵커 임베딩으로 CU 벡터검색을 돌리는 fallback을 추가(이미 있는 vector 분기를 함수 조기반환 위로 끌어올리기). <code>retrieval_probe.py</code> §5가 이 구멍을 실측한다.</p>
+  </div>
+
+  <div class="w-item crit">
+    <h3><span class="tag t-crit">치명</span> 2. 근거 창이 얇아 판단이 INSUFFICIENT로 샘 (실측 4/7)</h3>
+    <p>판단 LLM에 들어가는 evidence window는 <code>anchor.facts</code> + CU의 <code>evidence_texts</code>(premise 문장/출처 스니펫, 각 ≤360자, 소수)만 담는다. <b>LegalChunk 원문은 판단 창에 안 들어간다</b>(설계상 provenance). 그래서 판단기가 "필요한 사실/문서가 창에 없다"며 INSUFFICIENT를 반환하는 비율이 높다.</p>
+    <p class="ref">judge.py 56–77 (window) · judge system prompt 99–108 · planner.py 174</p>
+    <p style="font-size:13px"><b>개선</b>: CUPlan에 선택된 CU의 legal_evidence_id에 대해 LegalChunk 원문 일부를 on-demand로 끌어와 창에 주입. 또는 premise 스니펫 360자 한도를 상향.</p>
+  </div>
+
+  <div class="w-item high">
+    <h3><span class="tag t-high">높음</span> 3. 활성 CU 전수 코사인 — 벡터 인덱스 미사용</h3>
+    <p><code>candidates_for_anchor</code>는 앵커마다 <b>임베딩 보유 활성 CU 전부</b>에 대해 <code>vector.similarity.cosine</code>를 계산한다. Neo4j 벡터 ANN 인덱스(<code>db.index.vector.queryNodes</code>)를 안 쓴다. 비용 O(앵커수 × 활성CU수). 지금 규모(앵커 3)는 무난하지만 CU/광고가 늘면 핫패스가 된다.</p>
+    <p class="ref">retriever.py 176–201</p>
+    <p style="font-size:13px"><b>개선</b>: CUEmbeddingProfile.embedding에 벡터 인덱스를 만들고 ANN top-k로 1차 후보를 좁힌 뒤 hypernym 겹침을 재랭킹. <code>probe</code>가 활성 CU 수와 단계 소요시간을 출력한다.</p>
+  </div>
+
+  <div class="w-item high">
+    <h3><span class="tag t-high">높음</span> 4. 두 개의 서로 다른 점수식 + 죽은 항</h3>
+    <p>Cypher ORDER BY는 <code>0.55·vector + 0.35·overlap + 0.10</code>로 1차 정렬 후 LIMIT 300, Python은 <code>0.55·vector + 0.35·overlap + 0.10·active</code>로 재정렬한다. Cypher의 <code>+0.10</code>은 모든 행에 같은 상수 → <b>정렬에 무의미한 죽은 항</b>이고, active 가중이 Cypher 1차컷엔 반영되지 않는다. 1차 LIMIT이 최종 식 기준 상위 후보를 미리 잘라버릴 수 있다(현재 규모에선 300이 넉넉해 영향 적음).</p>
+    <p class="ref">retriever.py 245–251 vs 342</p>
+    <p style="font-size:13px"><b>개선</b>: 두 곳의 식을 일치시키거나, 1차 컷은 vector만으로 단순화하고 결합점수는 Python 한 곳에서만 계산.</p>
+  </div>
+
+  <div class="w-item high">
+    <h3><span class="tag t-high">높음</span> 5. 게이트 휴리스틱이 한국어 토큰 부분일치 — 조용한 오탈락</h3>
+    <p>상품군/운영 필터가 연결된 CU 텍스트에 대한 단순 substring 매칭이다. 예금 CU가 본문에 '대출'을 한 번 언급하면 <code>suppressed</code>로 떨어질 수 있고(거짓양성), 반대로 표현이 다르면 운영성 CU를 못 거른다(거짓음성). 탈락이 점수 trace에 남지 않아 디버깅이 어렵다.</p>
+    <p class="ref">retriever.py 409–452</p>
+    <p style="font-size:13px"><b>개선</b>: 게이트 결과를 후보에 사유 코드로 기록(억제/탈락 이유)하고, 토큰셋을 그래프 라벨/속성(상품군 태그)로 대체.</p>
+  </div>
+
+  <div class="w-item med">
+    <h3><span class="tag t-med">중간</span> 6. 어휘 과다 적재 + 하류 절단으로 낭비</h3>
+    <p><code>policy_context_for_claims</code>는 매 실행 hypernym을 최대 2000개까지 가져오는데(LIMIT max(limit,2000)), 정규화기는 앞 <b>200개</b>만 쓴다(normalizer.py 90). 200개를 넘는 어휘는 DB·전송 비용만 쓰고 버려지며, 동시에 <b>유효 어휘가 priority 정렬상 뒤로 밀려 잘릴</b> 위험이 있다(질의 관련도 정렬이 아님).</p>
+    <p class="ref">retriever.py 119–123 · normalizer.py 90</p>
+    <p style="font-size:13px"><b>개선</b>: 어휘를 질의 임베딩 유사도로 1차 랭크해 상위 N개만 적재. 가져오는 한도와 사용 한도를 일치.</p>
+  </div>
+
+  <div class="w-item med">
+    <h3><span class="tag t-med">중간</span> 7. premise 컨텍스트가 무정렬 LIMIT 80</h3>
+    <p>정규화기로 가는 premise는 <code>ORDER BY</code> 없이 앞 80개. 질의와 무관한 임의의 80개가 들어가 정규화 품질을 흔든다. (유사도 랭크된 fragments 40개와 중복/경쟁)</p>
+    <p class="ref">retriever.py 125–143</p>
+    <p style="font-size:13px"><b>개선</b>: premise도 질의 임베딩 유사도로 정렬하거나, fragments로 일원화.</p>
+  </div>
+
+  <div class="w-item med">
+    <h3><span class="tag t-med">중간</span> 8. 중복 계산 · 임베딩 왕복</h3>
+    <p>Cypher가 이미 <code>profile_vector_score</code>를 계산해 주는데, Python <code>candidate_from_row</code>가 <code>profile.embedding</code>을 통째로 받아 cosine을 한 번 더 계산할 fallback을 둔다(라인 335). 임베딩 벡터를 매 후보마다 와이어로 끌어오는 비용이 있다. 앵커 임베딩도 한 번에 한 앵커씩(<code>embed_many</code> 미사용).</p>
+    <p class="ref">retriever.py 243·332–335 · ccg_embeddings.py 28</p>
+    <p style="font-size:13px"><b>개선</b>: Cypher 점수를 신뢰하고 profile.embedding 반환 제거. 앵커 임베딩은 배치(embed_many)로.</p>
+  </div>
+
+  <div class="w-item med">
+    <h3><span class="tag t-med">중간</span> 9. 그래프 검색 트랙의 낮은 기여도</h3>
+    <p>이번 실행에서 그래프 검색→판단 트랙은 NON_COMPLIANT 0건. 최종 <code>revise</code>는 전적으로 별도 Track B(전체 인상 LLM)가 끌어올린 결과다(router.py 34). 즉 비싼 검색 파이프라인이 이 광고에선 위반 신호를 1건도 못 만들었다 — 리콜(항목 1,2)과 직결된 품질 지표.</p>
+    <p class="ref">router.py 30–43</p>
+    <p style="font-size:13px"><b>개선</b>: 항목 1·2를 먼저 고쳐 검색 트랙의 recall을 올린 뒤, Track B는 보조 안전망으로 유지.</p>
+  </div>
+
+  <!-- ============ probe 실행법 ============ -->
+  <h2>⑧ 직접 검색만 격리해서 돌려보기</h2>
+  <p>같이 드린 <code>retrieval_probe.py</code>는 LLM 판단을 빼고 <b>검색 단계만</b> 실제 DB에 돌려, 위 분석의 수치를 직접 확인하게 해줍니다(임베딩 호출만 사용 → 비용 최소).</p>
+  <pre>cd &lt;repo-root&gt;
+export PYTHONPATH=examples/graph-compliance-ccg
+
+# 기본: 질의로 자동 hypernym 선택 후 후보검색 점수 분해 출력
+python3 examples/graph-compliance-ccg/retrieval_probe.py \
+  --workspace-id graphcompliance_mvp_jb_20260530 \
+  --text "지난 3년간 조기상환 성공률이 높았던 ELS, 중위험 투자자에게 좋은 선택입니다." \
+  --product-group investment \
+  --json examples/graph-compliance-ccg/docs/probe_result.json
+
+# 특정 hypernym id를 직접 seed로 주고 싶을 때
+python3 ... retrieval_probe.py --hypernym-ids "&lt;id1&gt;,&lt;id2&gt;"</pre>
+  <p class="legend">출력: 준비 게이트 결과 / 활성 CU 수 / 정규화 컨텍스트의 세 정렬 / 후보별 (vector·overlap·active·combined·gate) 분해 표 /
+  <b>§5 — hypernym 0개 앵커가 후보 0건이 되는 리콜 구멍 실증</b>. <code>--json</code>으로 저장하면 이 문서 옆에 결과가 남습니다.</p>
+
+  <p class="sub" style="margin-top:40px">생성: 코드 추적 기반 정적 분석 + 실측 1회 실행 로그. 수치 검증은 <code>retrieval_probe.py</code> 실행으로 갱신하세요.</p>
+
+</div>
+
+<script>
+// ---- funnel ----
+const funnelData = [
+  {label:"hypernyms 212", v:212, c:"#5aa6ff", meta:"승인 어휘 전체 (정규화 입력)"},
+  {label:"premises 80 / fragments 40", v:120, c:"#5aa6ff", meta:"정규화 컨텍스트"},
+  {label:"anchors 3", v:60, c:"#b692ff", meta:"정규화가 만든 판단 앵커"},
+  {label:"CU 후보 36", v:90, c:"#b692ff", meta:"앵커당 ~12 (limit=12)"},
+  {label:"CUPlan 7", v:40, c:"#7ee787", meta:"LLM rerank 통과"},
+  {label:"judgments 7", v:40, c:"#7ee787", meta:"판단 7건"},
+  {label:"INSUFFICIENT 4", v:24, c:"#f0a35e", meta:"근거 부족 (검색 품질 신호)"},
+  {label:"NON_COMPLIANT 0", v:6, c:"#ff6b6b", meta:"위반 0건 → 그래프 트랙 기여 없음"},
+];
+const maxV = Math.max(...funnelData.map(d=>d.v));
+const fEl = document.getElementById('funnel');
+funnelData.forEach(d=>{
+  const row=document.createElement('div'); row.className='frow';
+  const bar=document.createElement('div'); bar.className='fbar';
+  bar.style.background=d.c; bar.style.width=Math.max(12,(d.v/maxV*70))+'%'; bar.textContent=d.label;
+  const meta=document.createElement('div'); meta.className='fmeta'; meta.textContent=d.meta;
+  row.appendChild(bar); row.appendChild(meta); fEl.appendChild(row);
+});
+
+// ---- pipeline ----
+const steps = [
+  ["Policy alignment check","그래프 준비 게이트 (개수/연결비율)",true],
+  ["Context extraction","LLM: 클레임·의미·함의·소비자효과 추출",false],
+  ["Policy context retrieval","승인 어휘 + premise + 유사 fragment 조회",true],
+  ["Policy normalization","LLM: 앵커를 승인 hypernym으로 매핑",false],
+  ["Product disclosure context","상품 메타/필수고지 힌트 해석",false],
+  ["Track B overall impression","LLM: 전체 인상 오인 위험 판단",false],
+  ["CU candidate retrieval","앵커별 CU 후보검색 (벡터+겹침+게이트)",true],
+  ["LLM CU rerank","후보를 CUPlan으로 재선별",false],
+  ["Evidence window build","앵커+CUPlan+근거로 판단창 구성",true],
+  ["LLM judgment","판단창만 보고 CU별 판정",false],
+  ["Exception override","NON_COMPLIANT만 예외 closure 조회",true],
+  ["Persist / Revision / Routing","저장·수정제안·최종 라우팅",false],
+];
+const pEl=document.getElementById('pipe');
+steps.forEach((s,i)=>{
+  const d=document.createElement('div'); d.className='step'+(s[2]?' search':'');
+  d.innerHTML=`<div class="n">${i+1}</div><div class="body"><div class="ttl">${s[0]}${s[2]?'<span class="chip">검색/그래프</span>':''}</div><div class="desc">${s[1]}</div></div>`;
+  pEl.appendChild(d);
+});
+
+// ---- score calculator ----
+const v=document.getElementById('v'),o=document.getElementById('o'),a=document.getElementById('a');
+const vv=document.getElementById('vv'),ov=document.getElementById('ov'),av=document.getElementById('av');
+const score=document.getElementById('score'),gbar=document.getElementById('gbar'),gnote=document.getElementById('gnote');
+const TH=0.68;
+function calc(){
+  const V=+v.value,O=+o.value,A=+a.value;
+  vv.textContent=V.toFixed(2);ov.textContent=O.toFixed(2);av.textContent=A.toFixed(0);
+  const c=0.55*V+0.35*O+0.10*A;
+  score.textContent='combined = '+c.toFixed(3);
+  gbar.style.width=Math.min(100,c*100)+'%';
+  // 적격 판정: overlap>0 이면 통과, 아니면 vector>=0.68 필요 (actionable 가정)
+  let pass, why, col;
+  if(O>0){pass=true; why='hypernym 겹침 > 0 → 통과 (벡터 임계 무관)'; col='#7ee787';}
+  else if(V>=TH){pass=true; why=`겹침 0 이지만 vector ${V.toFixed(2)} ≥ 0.68 → 통과`; col='#f0a35e';}
+  else {pass=false; why=`겹침 0 이고 vector ${V.toFixed(2)} < 0.68 → 탈락`; col='#ff6b6b';}
+  gbar.style.background=col;
+  gnote.innerHTML=`<b style="color:${col}">${pass?'통과':'탈락'}</b> — ${why}`;
+}
+[v,o,a].forEach(el=>el.addEventListener('input',calc)); calc();
+</script>
+</body>
+</html>

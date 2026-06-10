@@ -13,9 +13,11 @@ from __future__ import annotations
 
 import math
 import os
+from dataclasses import replace
 from typing import Any, Protocol
 
 from ccg_embeddings import EmbeddingGateway
+from legal_elements import candidate_satisfies_legal_elements, profile_from_row
 from schemas import ContextAnchor, PolicyCandidate
 
 
@@ -202,6 +204,7 @@ class Neo4jPolicyRetriever:
                     OPTIONAL MATCH (cu)<-[:SUPPORTS_CU]-(premise:Premise)
                     OPTIONAL MATCH (premise)<-[:DERIVES_PREMISE]-(source)
                     OPTIONAL MATCH (cu)-[:GROUNDED_IN|HAS_SOURCE_CHUNK|EVIDENCES_CU]-(direct_evidence)
+                    OPTIONAL MATCH (cu)-[:HAS_LEGAL_ELEMENT_PROFILE]->(legal_profile:CULegalElementProfile {workspace_id: $workspace_id})
                     WITH seed_ids,
                          seed_names,
                          cu,
@@ -211,6 +214,7 @@ class Neo4jPolicyRetriever:
                          name_overlap_count,
                          profile_vector_score,
                          profile,
+                         legal_profile,
                          collect(DISTINCT {
                             id: premise.id,
                             text: premise.statement,
@@ -241,6 +245,13 @@ class Neo4jPolicyRetriever:
                            name_overlap_count,
                            profile_vector_score,
                            profile.embedding AS profile_embedding,
+                           legal_profile.id AS legal_profile_id,
+                           legal_profile.action_type AS action_type,
+                           legal_profile.required_positive_features AS required_positive_features,
+                           legal_profile.applicability_scope AS applicability_scope,
+                           legal_profile.risk_title AS risk_title,
+                           coalesce(legal_profile.exception_eligible, false) AS exception_eligible,
+                           legal_profile.rationale AS legal_profile_rationale,
                            premise_evidence + premise_sources + direct_evidence AS evidence
                     ORDER BY (0.55 * profile_vector_score)
                            + (0.35 * CASE
@@ -270,6 +281,7 @@ class Neo4jPolicyRetriever:
             with_scope_gate(candidate, product_group=product_group, channel=channel)
             for candidate in scored
         ]
+        scored = [with_legal_element_gate(candidate, anchor) for candidate in scored]
         scored = [candidate for candidate in scored if candidate_allowed_for_anchor(candidate, anchor, product_group=product_group)]
         scored.sort(key=lambda item: item.retrieval_scores["combined_score"], reverse=True)
         return scored[:limit]
@@ -339,7 +351,15 @@ def candidate_from_row(
     name_overlap = len(set(matched_names) & set(requested_hypernym_names)) / max(1, len(set(requested_hypernym_names)))
     overlap_score = max(id_overlap, name_overlap)
     active_score = 1.0 if row.get("active_for_gate") else 0.0
-    combined_score = 0.55 * vector_score + 0.35 * overlap_score + 0.10 * active_score
+    legal_profile = profile_from_row(row)
+    legal_match, matched_required_features, missing_required_features = candidate_satisfies_legal_elements(
+        feature_set=getattr(row.get("anchor"), "feature_set", None),
+        profile=legal_profile,
+    )
+    # The caller re-evaluates legal_match with the actual anchor below. Keep the
+    # row-level score neutral here so candidate_from_row remains easy to unit test.
+    legal_element_score = 1.0 if legal_profile else 0.0
+    combined_score = 0.40 * vector_score + 0.25 * overlap_score + 0.25 * legal_element_score + 0.10 * active_score
     retrieval_basis = "hypernym_overlap" if overlap_score > 0 else "embedding_profile"
     return PolicyCandidate(
         cu_id=str(row["cu_id"]),
@@ -359,9 +379,15 @@ def candidate_from_row(
             "hypernym_overlap": overlap_score,
             "active_for_gate": active_score,
             "combined_score": combined_score,
+            "legal_element_match": legal_element_score,
         },
         retrieval_basis=retrieval_basis,
         gate_status="active" if row.get("active_for_gate") else "unknown",
+        legal_element_profile=legal_profile,
+        matched_required_features=matched_required_features,
+        missing_required_features=missing_required_features,
+        legal_element_match=legal_match,
+        risk_title=legal_profile.risk_title if legal_profile else "",
     )
 
 
@@ -381,19 +407,65 @@ def candidate_allowed_for_anchor(candidate: PolicyCandidate, anchor: ContextAnch
         return False
     if is_operational_candidate(candidate):
         return False
-    if candidate.retrieval_scores.get("hypernym_overlap", 0.0) > 0:
-        return True
+    if not candidate.legal_element_match:
+        return False
     if anchor.anchor_type in {"product_anchor", "target_consumer_anchor"}:
         return False
+    if candidate.retrieval_scores.get("hypernym_overlap", 0.0) > 0:
+        return True
     if candidate.principle == "제재":
         return False
     return candidate.retrieval_scores.get("vector_score", 0.0) >= ACTIONABLE_VECTOR_THRESHOLD
 
 
+def with_legal_element_gate(candidate: PolicyCandidate, anchor: ContextAnchor) -> PolicyCandidate:
+    legal_match, matched, missing = candidate_satisfies_legal_elements(
+        feature_set=anchor.feature_set,
+        profile=candidate.legal_element_profile,
+    )
+    legal_profile = candidate.legal_element_profile
+    if legal_profile:
+        from legal_elements import canonicalize_required_features
+
+        legal_profile = replace(
+            legal_profile,
+            required_positive_features=canonicalize_required_features(
+                legal_profile.required_positive_features,
+                action_type=legal_profile.action_type,
+            ),
+        )
+    scores = {
+        **candidate.retrieval_scores,
+        "legal_element_match": 1.0 if legal_match else 0.0,
+    }
+    scores["combined_score"] = (
+        0.40 * scores.get("vector_score", 0.0)
+        + 0.25 * scores.get("hypernym_overlap", 0.0)
+        + 0.25 * scores.get("legal_element_match", 0.0)
+        + 0.10 * scores.get("active_for_gate", 0.0)
+    )
+    return replace(
+        candidate,
+        retrieval_scores=scores,
+        legal_element_match=legal_match,
+        legal_element_profile=legal_profile,
+        matched_required_features=matched,
+        missing_required_features=missing,
+        risk_title=legal_profile.risk_title if legal_profile else "",
+    )
+
+
 def with_scope_gate(candidate: PolicyCandidate, *, product_group: str, channel: str) -> PolicyCandidate:
     gate_status = "active" if candidate.active_for_gate else "unknown"
+    gate_reason = ""
     if is_product_scope_mismatch(candidate, product_group):
         gate_status = "suppressed"
+        gate_reason = "product_group_text_mismatch"
+    else:
+        profile_scope_reason = profile_scope_mismatch_reason(candidate, product_group=product_group, channel=channel)
+    if gate_status != "suppressed" and profile_scope_reason:
+        gate_status = "suppressed"
+        gate_reason = profile_scope_reason
     return PolicyCandidate(
         **{
             **candidate.__dict__,
@@ -401,9 +473,84 @@ def with_scope_gate(candidate: PolicyCandidate, *, product_group: str, channel: 
             "retrieval_scores": {
                 **candidate.retrieval_scores,
                 "scope_gate": 0.0 if gate_status == "suppressed" else 1.0,
+                "product_scope_gate": 0.0 if gate_status == "suppressed" and "product" in gate_reason else 1.0,
+                "channel_scope_gate": 0.0 if gate_status == "suppressed" and "channel" in gate_reason else 1.0,
+                "scope_gate_reason": gate_reason,
             },
         }
     )
+
+
+PRODUCT_SCOPE_ALIASES = {
+    "deposit": {"deposit", "예금", "적금", "예금성", "수신", "deposit_product"},
+    "loan": {"loan", "대출", "대출성", "여신", "credit_product"},
+    "investment": {"investment", "투자", "투자성", "펀드", "els", "파생", "financial_investment"},
+    "insurance": {"insurance", "보험", "보장성", "insurance_product"},
+}
+
+CHANNEL_SCOPE_ALIASES = {
+    "web_page": {"web_page", "web", "homepage", "웹", "웹페이지", "인터넷"},
+    "sns": {"sns", "social", "instagram", "facebook", "블로그", "인스타그램"},
+    "youtube": {"youtube", "유튜브", "video"},
+    "sms": {"sms", "문자", "message", "lms", "mms"},
+    "banner": {"banner", "배너"},
+}
+
+GENERIC_SCOPE_TOKENS = {
+    "all",
+    "common",
+    "generic",
+    "전체",
+    "공통",
+    "금융상품",
+    "금융상품광고",
+    "financial_advertising",
+    "product_ad",
+    "상품광고",
+}
+
+
+def is_profile_scope_mismatch(candidate: PolicyCandidate, *, product_group: str, channel: str) -> bool:
+    return bool(profile_scope_mismatch_reason(candidate, product_group=product_group, channel=channel))
+
+
+def profile_scope_mismatch_reason(candidate: PolicyCandidate, *, product_group: str, channel: str) -> str:
+    profile = candidate.legal_element_profile
+    if not profile:
+        return ""
+    scopes = {normalize_scope_token(item) for item in profile.applicability_scope if item}
+    scopes = {item for item in scopes if item}
+    if not scopes or scopes & GENERIC_SCOPE_TOKENS:
+        return ""
+
+    product = normalize_product_group(product_group)
+    if product != "auto":
+        product_related = set().union(*PRODUCT_SCOPE_ALIASES.values())
+        scoped_products = scopes & product_related
+        if scoped_products and not (scopes & PRODUCT_SCOPE_ALIASES.get(product, set())):
+            return "product_scope_mismatch"
+
+    normalized_channel = normalize_scope_token(channel)
+    if normalized_channel:
+        channel_related = set().union(*CHANNEL_SCOPE_ALIASES.values())
+        scoped_channels = scopes & channel_related
+        accepted_channels = CHANNEL_SCOPE_ALIASES.get(normalized_channel, {normalized_channel})
+        if scoped_channels and not (scopes & accepted_channels):
+            return "channel_scope_mismatch"
+
+    return ""
+
+
+def normalize_scope_token(value: str) -> str:
+    return str(value or "").strip().lower().replace("-", "_").replace(" ", "_")
+
+
+def normalize_product_group(value: str) -> str:
+    token = normalize_scope_token(value or "auto")
+    for canonical, aliases in PRODUCT_SCOPE_ALIASES.items():
+        if token in aliases:
+            return canonical
+    return token or "auto"
 
 
 def is_product_scope_mismatch(candidate: PolicyCandidate, product_group: str) -> bool:

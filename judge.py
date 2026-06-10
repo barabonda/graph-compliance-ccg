@@ -63,6 +63,7 @@ class LLMComplianceJudge:
         context_frame: ContextFrame | None = None,
         sentence_units: list[SentenceUnit] | None = None,
         context_influences: list[ContextInfluence] | None = None,
+        policy_evidence_chains: dict[str, list[dict[str, Any]]] | None = None,
     ) -> list[EvidenceWindow]:
         anchor_by_id = {anchor.anchor_id: anchor for anchor in anchors}
         claim_by_id = {claim.claim_id: claim for claim in claims or []}
@@ -91,6 +92,7 @@ class LLMComplianceJudge:
                     context_frame=to_jsonable(context_frame) if context_frame else {},
                     sentence_unit=to_jsonable(sentence) if sentence else {},
                     context_influences=to_jsonable(related_influences),
+                    policy_evidence_chains=chains_for_plan_item(policy_evidence_chains or {}, item.plan_item_id),
                 )
             )
         return windows
@@ -144,6 +146,8 @@ class LLMComplianceJudge:
                 "Prioritize explicit contradiction. Strong implication is allowed. Never infer a violation "
                 "from silence. If the CU is unrelated to the anchor, return NOT_APPLICABLE. If the CU is "
                 "related but a required fact or document is missing from the window, return INSUFFICIENT. "
+                "Use policy_evidence_chains only as concise legal-basis, disclosure, and exception summaries; "
+                "ignore chains whose status is INCOMPLETE unless explaining evidence insufficiency. "
                 "Do not return INSUFFICIENT merely because there is no evidence of wrongdoing; that should "
                 "usually be NOT_APPLICABLE or COMPLIANT depending on the CU. A mitigating disclosure anchor "
                 "can be COMPLIANT for that disclosure, but it must not erase a separate risky anchor such as "
@@ -159,6 +163,8 @@ class LLMComplianceJudge:
             item = item_by_plan_id.get(row.get("plan_item_id"))
             anchor = anchor_by_plan_id.get(row.get("plan_item_id"))
             if not item or not anchor:
+                continue
+            if item.plan_item_id in seen_plan_ids:
                 continue
             seen_plan_ids.add(item.plan_item_id)
             grounded = grounded_judgment_row(row, anchor)
@@ -257,3 +263,11 @@ def missing_judgment(review_run_id: str, item: CUPlanItem, *, reason: str) -> LL
         evidence_span="",
         used_policy_evidence=[],
     )
+
+
+def chains_for_plan_item(chains: dict[str, list[dict[str, Any]]], plan_item_id: str) -> dict[str, list[dict[str, Any]]]:
+    return {
+        key: [chain for chain in values if chain.get("plan_item_id") == plan_item_id and chain.get("status") == "FOUND"]
+        for key, values in chains.items()
+        if key != "chain_diagnostics"
+    }

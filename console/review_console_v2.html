@@ -1,0 +1,565 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>GraphCompliance · 준법심사 콘솔 v2</title>
+<style>
+  :root{
+    --ink:#16191d; --ink2:#3b424b; --mut:#6b7480; --faint:#9aa3ad;
+    --bg:#f4f5f7; --surface:#ffffff; --surface2:#fafbfc; --line:#e3e6ea; --line2:#eef0f2;
+    --bad:#c2342f; --bad-bg:#fbecea; --bad-line:#eecac6;
+    --warn:#b06a00; --warn-bg:#fcf2e2; --warn-line:#f0dcb8;
+    --ok:#1f7a4d; --ok-bg:#e9f4ee; --ok-line:#c4e2d0;
+    --na:#7a828c; --na-bg:#f0f1f3; --na-line:#e0e3e7;
+    --accent:#1d4e74; --accent-bg:#e9f1f7;
+    --mono:ui-monospace,SFMono-Regular,Menlo,"Cascadia Mono",Consolas,monospace;
+    --sans:system-ui,-apple-system,"Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",Roboto,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14px;line-height:1.55;-webkit-font-smoothing:antialiased}
+  .mono{font-family:var(--mono)}
+  button{font-family:inherit;cursor:pointer}
+
+  /* ---- top bar ---- */
+  .topbar{position:sticky;top:0;z-index:20;background:var(--surface);border-bottom:1px solid var(--line);padding:10px 20px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+  .topbar .brand{font-weight:700;letter-spacing:-.2px}
+  .topbar .brand small{display:block;font-weight:400;color:var(--mut);font-size:11px;letter-spacing:0}
+  .meta-chip{font-size:11.5px;color:var(--ink2);background:var(--surface2);border:1px solid var(--line);border-radius:5px;padding:3px 8px}
+  .spacer{flex:1}
+  .verdict-pill{display:flex;align-items:center;gap:10px;border-radius:8px;padding:7px 14px;font-weight:700;border:1px solid}
+  .verdict-pill .v-main{font-size:16px}
+  .verdict-pill .v-sub{font-size:11px;font-weight:500;opacity:.85}
+  .vp-reject{background:var(--bad-bg);border-color:var(--bad-line);color:var(--bad)}
+  .vp-revise{background:var(--warn-bg);border-color:var(--warn-line);color:var(--warn)}
+  .vp-review{background:var(--accent-bg);border-color:#c5dcec;color:var(--accent)}
+  .vp-pass{background:var(--ok-bg);border-color:var(--ok-line);color:var(--ok)}
+
+  /* ---- principle strip ---- */
+  .strip{display:flex;gap:0;background:var(--surface);border-bottom:1px solid var(--line);padding:0 20px;overflow:auto}
+  .strip .cell{padding:8px 16px 8px 0;margin-right:16px;border-right:1px solid var(--line2);display:flex;flex-direction:column;gap:2px;min-width:84px}
+  .strip .cell:last-child{border-right:0}
+  .strip .lbl{font-size:11px;color:var(--mut)}
+  .strip .st{font-size:12.5px;font-weight:600;display:flex;align-items:center;gap:5px}
+  .dot{width:8px;height:8px;border-radius:50%;display:inline-block}
+  .d-bad{background:var(--bad)} .d-warn{background:var(--warn)} .d-ok{background:var(--ok)} .d-na{background:var(--faint)}
+
+  /* ---- layout ---- */
+  .shell{display:grid;grid-template-columns:340px 1fr;gap:0;align-items:start}
+  @media(max-width:980px){.shell{grid-template-columns:1fr}}
+  .rail{position:sticky;top:97px;align-self:start;height:calc(100vh - 97px);overflow:auto;border-right:1px solid var(--line);background:var(--surface);padding:18px}
+  @media(max-width:980px){.rail{position:static;height:auto;border-right:0;border-bottom:1px solid var(--line)}}
+  .main{padding:20px 24px 80px;max-width:900px}
+
+  .rail h4,.main h3.sec{font-size:11px;text-transform:uppercase;letter-spacing:.6px;color:var(--mut);margin:0 0 10px;font-weight:700}
+  .ad-doc{font-size:14.5px;line-height:1.85;color:var(--ink)}
+  .ad-title{font-weight:700;font-size:13px;color:var(--ink2);margin-bottom:8px;padding-bottom:8px;border-bottom:1px dashed var(--line)}
+  .hl{border-radius:3px;padding:1px 2px;cursor:pointer;border-bottom:2px solid transparent;transition:background .15s}
+  .hl-bad{background:var(--bad-bg);border-color:var(--bad)} .hl-warn{background:var(--warn-bg);border-color:var(--warn)}
+  .hl-na{background:var(--na-bg);border-color:var(--na-line)} .hl-ok{background:var(--ok-bg);border-color:var(--ok)}
+  .hl.active{outline:2px solid var(--accent);outline-offset:1px}
+  .rail-legend{margin-top:16px;font-size:11px;color:var(--mut);display:flex;flex-direction:column;gap:5px}
+  .rail-legend span{display:flex;align-items:center;gap:6px}
+  .sw{width:14px;height:10px;border-radius:2px;border:1px solid}
+
+  /* ---- ladder ---- */
+  .ladder{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-bottom:18px}
+  .ladder .ttl{font-weight:700;font-size:13px;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+  .rule{display:flex;align-items:center;gap:10px;padding:6px 0;font-size:12.5px;color:var(--mut);border-bottom:1px dashed var(--line2)}
+  .rule:last-child{border-bottom:0}
+  .rule .rn{width:18px;height:18px;border-radius:50%;background:var(--na-bg);color:var(--mut);font-size:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:var(--mono)}
+  .rule.fired{color:var(--ink);font-weight:600}
+  .rule.fired .rn{background:var(--bad);color:#fff}
+  .rule.passed{opacity:.55}
+  .rule .res{margin-left:auto;font-size:11px;padding:1px 7px;border-radius:4px;background:var(--na-bg);color:var(--mut)}
+  .rule.fired .res{background:var(--bad-bg);color:var(--bad)}
+
+  /* ---- track tabs ---- */
+  .tracks{display:flex;gap:8px;margin-bottom:14px}
+  .track-tab{flex:1;border:1px solid var(--line);background:var(--surface);border-radius:9px;padding:10px 13px;text-align:left}
+  .track-tab.on{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent) inset}
+  .track-tab .tt{font-weight:700;font-size:13px;display:flex;align-items:center;gap:7px}
+  .track-tab .td{font-size:11px;color:var(--mut);margin-top:2px}
+  .track-tab .cnt{margin-left:auto;font-family:var(--mono);font-size:12px}
+
+  /* ---- anchor card ---- */
+  .anchor{background:var(--surface);border:1px solid var(--line);border-radius:11px;margin-bottom:14px;overflow:hidden;scroll-margin-top:108px}
+  .anchor.lead{border-color:var(--bad-line)}
+  .a-head{padding:13px 16px;display:flex;gap:12px;align-items:flex-start;border-bottom:1px solid var(--line2);background:var(--surface2)}
+  .a-rank{font-family:var(--mono);font-size:11px;color:var(--mut);background:#fff;border:1px solid var(--line);border-radius:6px;padding:3px 7px;flex-shrink:0}
+  .a-body{flex:1;min-width:0}
+  .a-span{font-weight:600;font-size:14px;color:var(--ink);margin-bottom:6px}
+  .a-tags{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:2px}
+  .tag{font-size:10.5px;padding:2px 7px;border-radius:11px;border:1px solid var(--line);color:var(--ink2);background:#fff;white-space:nowrap}
+  .tag.type{background:var(--accent-bg);border-color:#cadcea;color:var(--accent);font-weight:600}
+  .tag.risk{background:#fff4ef;border-color:#f3d3c4;color:#b3502a;font-weight:600}
+  .tag.hyp{background:#fff}
+  .tag.hyp b{color:var(--ink)}
+  .tag .sp-strong{color:var(--bad);font-weight:700}
+  .tag .sp-weak{color:var(--faint);font-weight:600}
+  .a-facts{font-size:12px;color:var(--mut);margin-top:8px;padding-left:10px;border-left:2px solid var(--line)}
+  .a-maxscore{flex-shrink:0;text-align:right}
+  .a-maxscore .n{font-family:var(--mono);font-size:20px;font-weight:700;line-height:1}
+  .a-maxscore .l{font-size:10px;color:var(--mut)}
+
+  /* ---- cu rows ---- */
+  .cu-list{padding:4px 0}
+  .cu{border-bottom:1px solid var(--line2)}
+  .cu:last-child{border-bottom:0}
+  .cu-head{padding:10px 16px;display:flex;align-items:center;gap:12px;cursor:pointer}
+  .cu-head:hover{background:var(--surface2)}
+  .cu-principle{font-size:11px;color:var(--mut);width:74px;flex-shrink:0}
+  .cu-article{font-size:12.5px;color:var(--ink);font-weight:600;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .verd{font-size:11px;font-weight:700;padding:2px 9px;border-radius:5px;border:1px solid;white-space:nowrap}
+  .vd-bad{background:var(--bad-bg);border-color:var(--bad-line);color:var(--bad)}
+  .vd-warn{background:var(--warn-bg);border-color:var(--warn-line);color:var(--warn)}
+  .vd-na{background:var(--na-bg);border-color:var(--na-line);color:var(--na)}
+  .vd-ok{background:var(--ok-bg);border-color:var(--ok-line);color:var(--ok)}
+  .transition{font-size:10.5px;color:var(--mut);display:flex;align-items:center;gap:4px;white-space:nowrap}
+  .transition .arrow{color:var(--faint)}
+  /* score meter */
+  .meter{width:150px;flex-shrink:0}
+  .meter .track{height:7px;border-radius:4px;background:var(--line2);position:relative;overflow:visible}
+  .meter .fill{height:100%;border-radius:4px}
+  .meter .mark{position:absolute;top:-3px;width:1px;height:13px;background:var(--ink2);opacity:.45}
+  .meter .mark.reject{background:var(--bad);opacity:.7}
+  .meter .scale{display:flex;justify-content:space-between;font-size:9px;color:var(--faint);margin-top:2px;font-family:var(--mono)}
+  .cu-score-num{font-family:var(--mono);font-size:13px;font-weight:700;width:42px;text-align:right;flex-shrink:0}
+  .chev{color:var(--faint);transition:transform .15s;flex-shrink:0}
+  .cu.open .chev{transform:rotate(90deg)}
+
+  .cu-detail{display:none;padding:0 16px 14px 16px;background:var(--surface2)}
+  .cu.open .cu-detail{display:block}
+  .why{font-size:12.5px;color:var(--ink2);background:#fff;border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin:10px 0}
+  .ev-block{margin-top:8px}
+  .ev-label{font-size:10.5px;text-transform:uppercase;letter-spacing:.5px;color:var(--mut);margin-bottom:5px}
+  .ev-span{font-size:12.5px;background:#fffaf0;border:1px solid var(--warn-line);border-left:3px solid var(--warn);border-radius:6px;padding:7px 10px;color:var(--ink)}
+  .art-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+  .art-chip{font-size:11px;font-family:var(--mono);background:#fff;border:1px solid var(--line);border-radius:5px;padding:3px 8px;color:var(--accent)}
+  .legal-toggle{font-size:11px;color:var(--accent);background:none;border:0;padding:4px 0;text-decoration:underline}
+  .legal-text{display:none;font-size:11.5px;color:var(--ink2);background:#fff;border:1px solid var(--line);border-radius:6px;padding:9px 11px;margin-top:6px;max-height:200px;overflow:auto;line-height:1.6}
+  .legal-text.show{display:block}
+  .exc{margin-top:10px;border:1px dashed var(--warn-line);background:var(--warn-bg);border-radius:8px;padding:9px 11px;font-size:12px;color:var(--ink2)}
+  .exc .et{font-weight:700;color:var(--warn);font-size:11px;margin-bottom:3px;display:flex;align-items:center;gap:6px}
+
+  /* ---- track B ---- */
+  .trackb{background:var(--surface);border:1px solid var(--line);border-radius:11px;padding:16px;margin-bottom:14px}
+  .tb-head{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+  .tb-score{font-family:var(--mono);font-size:26px;font-weight:800;color:var(--bad)}
+  .tb-meta{font-size:11px;color:var(--mut)}
+  .flow{display:flex;align-items:stretch;gap:0;margin:12px 0;overflow:auto}
+  .flow .node{flex:1;min-width:120px;background:var(--surface2);border:1px solid var(--line);padding:9px 11px;position:relative}
+  .flow .node:first-child{border-radius:8px 0 0 8px}
+  .flow .node:last-child{border-radius:0 8px 8px 0}
+  .flow .node+.node{border-left:0}
+  .flow .nk{font-size:10px;text-transform:uppercase;letter-spacing:.4px;color:var(--accent);font-weight:700;margin-bottom:3px}
+  .flow .nv{font-size:11.5px;color:var(--ink2)}
+  .factors{margin:10px 0 0;padding-left:18px;font-size:12px;color:var(--ink2)}
+  .factors li{margin-bottom:4px}
+
+  /* ---- revision ---- */
+  .rev{background:var(--surface);border:1px solid var(--line);border-radius:11px;padding:16px;margin-bottom:14px}
+  .diff{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px}
+  @media(max-width:620px){.diff{grid-template-columns:1fr}}
+  .diff .col{border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-size:12.5px}
+  .diff .before{background:var(--bad-bg);border-color:var(--bad-line)}
+  .diff .after{background:var(--ok-bg);border-color:var(--ok-line)}
+  .diff .ct{font-size:10px;text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px;font-weight:700}
+  .diff .before .ct{color:var(--bad)} .diff .after .ct{color:var(--ok)}
+  .note{font-size:11.5px;color:var(--mut);margin-top:8px}
+
+  .hidden{display:none !important}
+  .foot{font-size:11px;color:var(--faint);padding:0 24px 40px;max-width:900px}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand">GraphCompliance<small>금융광고 준법심사 · 계층형 판단 뷰 (v2 proposal)</small></div>
+  <span class="meta-chip" id="meta-product"></span>
+  <span class="meta-chip" id="meta-channel"></span>
+  <span class="meta-chip mono" id="meta-run"></span>
+  <div class="spacer"></div>
+  <div class="verdict-pill" id="verdict-pill"></div>
+</div>
+
+<div class="strip" id="principle-strip"></div>
+
+<div class="shell">
+  <!-- LEFT: ad document with highlight spans -->
+  <aside class="rail">
+    <h4>광고 원문</h4>
+    <div class="ad-title" id="ad-title"></div>
+    <div class="ad-doc" id="ad-doc"></div>
+    <div class="rail-legend">
+      <span><i class="sw" style="background:var(--bad-bg);border-color:var(--bad)"></i> 위반 가능성</span>
+      <span><i class="sw" style="background:var(--warn-bg);border-color:var(--warn)"></i> 검토 필요</span>
+      <span><i class="sw" style="background:var(--na-bg);border-color:var(--na-line)"></i> 근거부족 / 해당없음</span>
+    </div>
+    <p class="note" style="margin-top:14px">문장을 클릭하면 해당 anchor 분석으로 이동합니다.</p>
+  </aside>
+
+  <!-- RIGHT: hierarchical analysis -->
+  <main class="main">
+    <!-- routing ladder -->
+    <div class="ladder">
+      <div class="ttl">왜 이 결론인가 — 라우팅 결정 추적</div>
+      <div id="ladder-rules"></div>
+    </div>
+
+    <!-- track selector -->
+    <div class="tracks">
+      <button class="track-tab on" data-track="A">
+        <div class="tt"><span class="dot d-bad"></span>Track A · 법적 CU 판단<span class="cnt" id="ta-cnt"></span></div>
+        <div class="td">anchor → 정책어 → 법조문 CU 판단 → 근거</div>
+      </button>
+      <button class="track-tab" data-track="B">
+        <div class="tt"><span class="dot d-warn"></span>Track B · 전체 인상<span class="cnt" id="tb-cnt"></span></div>
+        <div class="td">대법원 2017두60109 · 소비자 오인 위험</div>
+      </button>
+    </div>
+
+    <!-- Track A panel -->
+    <section id="track-a"></section>
+
+    <!-- Track B panel -->
+    <section id="track-b" class="hidden"></section>
+
+    <!-- revision -->
+    <h3 class="sec" style="margin-top:22px">수정 제안</h3>
+    <div id="revisions"></div>
+  </main>
+</div>
+
+<p class="foot">
+  데이터는 <span class="mono">review_run_7ab43ef59f3e8215</span> 실제 실행 결과를 ReviewOutput 형태로 내장한 것입니다.
+  실서비스 연결 시 <span class="mono">REVIEW</span> 객체를 <span class="mono">/api/review</span> 응답으로 교체하면 그대로 렌더됩니다.
+</p>
+
+<script>
+/* =====================================================================
+   REVIEW : ReviewOutput 형태(서버 응답과 동일 구조)로 내장한 실데이터.
+   교체 포인트 — fetch('/api/review').then(r=>r.json()) 결과를 그대로 넣으면 됨.
+   score는 이번 실행에서 0~100 스케일로 관측되어 그대로 사용(임계 82=reject).
+   ===================================================================== */
+const REVIEW = {
+  title:"고지 없는 특판예금", product_group:"deposit", channel:"웹페이지",
+  review_run_id:"review_run_7ab43ef59f3e8215",
+  final_verdict:"reject",
+  ad_text:"JB 특판예금 출시. 누구나 연 5% 확정 보장 수익을 받을 수 있는 절호의 기회입니다. 지금 가입하면 조건 없이 안정적인 고수익을 보장합니다.",
+  // routing inputs (router.py 사다리 재현)
+  routing:{ max_noncompliant_score:95, has_noncompliant:true, has_insufficient:true, track_b_verdict:"HIGH", track_b_score:1.00 },
+  principles:[
+    {key:"적합성", status:"na"},{key:"적정성", status:"na"},{key:"설명의무", status:"warn"},
+    {key:"불공정영업", status:"na"},{key:"부당권유", status:"na"},{key:"광고규제", status:"bad"}
+  ],
+  highlight_spans:[
+    {text:"JB 특판예금 출시.", verdict:"na", anchor_id:null},
+    {text:"누구나 연 5% 확정 보장 수익을 받을 수 있는 절호의 기회입니다.", verdict:"bad", anchor_id:"A1"},
+    {text:"지금 가입하면 조건 없이 안정적인 고수익을 보장합니다.", verdict:"bad", anchor_id:"A2"}
+  ],
+  anchors:[
+    {
+      anchor_id:"A1", type:"claim_anchor", max_score:95,
+      span:"누구나 연 5% 확정 보장 수익을 받을 수 있는 절호의 기회입니다.",
+      facts:"‘누구나’(보편적 대상) 연 5% ‘확정 보장 수익’이라고 표현, ‘절호의 기회’로 권유/유인.",
+      hypernyms:[{n:"오해 소지 광고",s:"STRONG"},{n:"보장 금지",s:"WEAK"},{n:"허위광고",s:"WEAK"},{n:"광고 진실성",s:"WEAK"},{n:"무허가 영업",s:"WEAK"}],
+      judgments:[
+        { principle:"광고규제", article:"표시·광고의 공정화에 관한 법률 제3조", cu_id:"cu_legal_article_8ab2bc39",
+          raw:"NON_COMPLIANT", effect:"NONE", effective:"NON_COMPLIANT", score:95,
+          why:"문구가 ‘누구나 연 5% 확정 보장 수익’이라고 확정적·보장적 수익이 보편적 대상에게 지급된다고 단정하여 소비자를 오인시킬 우려가 있는 ‘거짓·과장/기만’ 유형에 해당한다.",
+          evidence_span:"누구나 연 5% 확정 보장 수익을 받을 수 있는 절호의 기회입니다.",
+          used_policy_evidence:["표시·광고법 제3조 ①1 거짓·과장","제3조 ①2 기만적 광고","공정거래질서 저해"],
+          legal_text:"제3조(부당한 표시·광고 행위의 금지) ① 사업자등은 소비자를 속이거나 소비자로 하여금 잘못 알게 할 우려가 있는 표시·광고 행위로서 공정한 거래질서를 해칠 우려가 있는 다음 각 호의 행위를 하여서는 아니 된다. 1. 거짓·과장의 표시·광고 2. 기만적인 표시·광고 3. 부당하게 비교하는 표시·광고 4. 비방적인 표시·광고."},
+        { principle:"광고규제", article:"금융소비자보호법 시행령 제20조 ①-3·4", cu_id:"cu_legal_clause_3176bac8",
+          raw:"NON_COMPLIANT", effect:"DOWNGRADE_TO_REVIEW", effective:"INSUFFICIENT", score:70,
+          why:"‘연 5% 확정 보장 수익’처럼 단정적 수익 보장 표현으로 오인 소지가 있으나, CU 제약이 ‘비교대상·기준’ 중심이라 해당 문구가 ①4호(확실로 오인)/①3호(비교) 어느 세부유형과 직접 대응되는지 클로저 근거가 완전히 특정하지 못해 위반강도를 일부 완화해 재검토로 강등.",
+          evidence_span:"누구나 연 5% 확정 보장 수익을 받을 수 있는 절호의 기회입니다.",
+          used_policy_evidence:["시행령 제20조 ①4 단정적 판단·확실 오인","제20조 ①3 비교대상·기준 미제시","제22조 광고 준수사항"],
+          legal_text:"제20조(광고 시 금지행위) ① … 4. 불확실한 사항에 대해 단정적 판단을 제공하거나 확실하다고 오인하게 할 소지가 있는 내용을 알리는 행위 3. 비교대상 및 기준을 분명히 밝히지 않거나 객관적 근거 없이 비교하는 행위."},
+        { principle:"설명의무", article:"금융소비자보호법 제19조", cu_id:"cu_legal_article_393603c4",
+          raw:"INSUFFICIENT", effect:"NONE", effective:"INSUFFICIENT", score:45,
+          why:"설명의무 위반을 보려면 ‘설명해야 할 중요사항’과 그 누락·왜곡 여부가 확인돼야 하는데, 증거창에 어떤 중요사항(상품유형·지급제한·조건 등)이 빠졌는지와 설명 제공 여부가 없어 판단 근거가 부족하다.",
+          evidence_span:"누구나 연 5% 확정 보장 수익을 받을 수 있는 절호의 기회입니다.",
+          used_policy_evidence:["제19조 ① 중요사항 설명의무","제19조 ③ 거짓·왜곡 설명 금지"],
+          legal_text:"제19조(설명의무) ① 금융상품판매업자등은 일반금융소비자에게 계약 체결을 권유하는 경우 … 중요한 사항을 이해할 수 있도록 설명하여야 한다. ③ … 중요한 사항을 거짓·왜곡하여 설명하거나 빠뜨려서는 아니 된다."},
+        { principle:"광고규제", article:"표시·광고의 공정화에 관한 법률 제7조의2 (동의의결)", cu_id:"cu_legal_article_acff1866",
+          raw:"NOT_APPLICABLE", effect:"NONE", effective:"NOT_APPLICABLE", score:0,
+          why:"해당 CU의 주된 내용은 ‘동의의결’(공정위 조사·심의 중 사업자의 자발적 시정 절차)인데, 광고 문구 자체는 동의의결 신청·절차에 관한 사실을 포함하지 않는다.",
+          evidence_span:"누구나 연 5% 확정 보장 수익을 받을 수 있는 절호의 기회입니다.",
+          used_policy_evidence:["제7조의2 동의의결 신청"],
+          legal_text:"제7조의2(동의의결) ① 공정거래위원회의 조사·심의를 받고 있는 사업자등은 … 소비자 오인상태의 자발적 해소 등을 위하여 동의의결을 신청할 수 있다."}
+      ]
+    },
+    {
+      anchor_id:"A2", type:"claim_anchor", max_score:90,
+      span:"지금 가입하면 조건 없이 안정적인 고수익을 보장합니다.",
+      facts:"가입만으로 ‘조건 없이’ 안정적인 고수익을 ‘보장’한다고 주장. 조건/제한·변동 요소를 배제한 확정적 수익 인상을 유발함.",
+      hypernyms:[{n:"보장 금지",s:"STRONG"},{n:"오해 소지 광고",s:"STRONG"},{n:"허위광고",s:"WEAK"},{n:"허위·과장 광고 금지",s:"WEAK"}],
+      judgments:[
+        { principle:"광고규제", article:"금융소비자보호법 시행령 제20조 ①-4 (단정적·확실 오인)", cu_id:"cu_legal_clause_55ad1",
+          raw:"NON_COMPLIANT", effect:"NONE", effective:"NON_COMPLIANT", score:90,
+          why:"‘조건 없이 … 고수익을 보장’은 불확실한 수익을 확실한 것으로 단정·보장하는 전형적 표현으로, 변동·제한 요소를 배제해 소비자가 무조건적 확정수익으로 오인하게 한다.",
+          evidence_span:"지금 가입하면 조건 없이 안정적인 고수익을 보장합니다.",
+          used_policy_evidence:["시행령 제20조 ①4 단정적 판단·확실 오인","예금 금리 변동성 미고지"],
+          legal_text:"제20조(광고 시 금지행위) ① … 4. 불확실한 사항에 대해 단정적 판단을 제공하거나 확실하다고 오인하게 할 소지가 있는 내용을 알리는 행위."}
+      ]
+    },
+    {
+      anchor_id:"A3", type:"claim_anchor", max_score:40,
+      span:"고지 없는 특판예금 (제목)",
+      facts:"제목이 ‘고지 없는’이라고 표현 — 고지/안내의 부재 또는 생략 가능성을 암시(또는 고지 부재를 이점처럼 제시)할 여지.",
+      hypernyms:[{n:"소비자 보호법",s:"WEAK"},{n:"설명의무",s:"WEAK"},{n:"오해 소지 광고",s:"WEAK"}],
+      judgments:[
+        { principle:"설명의무", article:"금융소비자보호법 제19조", cu_id:"cu_legal_article_393603c4",
+          raw:"INSUFFICIENT", effect:"NONE", effective:"INSUFFICIENT", score:40,
+          why:"제목만으로는 어떤 중요사항이 실제로 누락됐는지 본문 대조가 필요해 단독으로는 위반 확정 근거가 부족하다(검토 필요).",
+          evidence_span:"고지 없는 특판예금",
+          used_policy_evidence:["제19조 ① 중요사항 설명의무"],
+          legal_text:"제19조(설명의무) ① … 중요한 사항을 일반금융소비자가 이해할 수 있도록 설명하여야 한다."}
+      ]
+    },
+    {
+      anchor_id:"A4", type:"risk_anchor", max_score:95,
+      span:"연 5% 확정 보장 수익(누구나) 및 ‘절호의 기회’ 표현",
+      facts:"보편적 대상에 대한 확정 보장 수익 + 권유성 표현이 결합된 위험 패턴(risk anchor).",
+      hypernyms:[{n:"오해 소지 광고",s:"STRONG"},{n:"보장 금지",s:"WEAK"},{n:"허위·과장 광고 금지",s:"WEAK"}],
+      judgments:[
+        { principle:"광고규제", article:"금융소비자보호법 시행령 제20조 ①-4", cu_id:"cu_legal_clause_3176bac8",
+          raw:"NON_COMPLIANT", effect:"DOWNGRADE_TO_REVIEW", effective:"INSUFFICIENT", score:95,
+          why:"risk anchor로 동일 위험 패턴을 재확인. 단, 세부 금지유형 특정이 클로저 내에서 완전하지 않아 재검토로 다운그레이드.",
+          evidence_span:"연 5% 확정 보장 수익(누구나) 및 절호의 기회 표현",
+          used_policy_evidence:["시행령 제20조 ①4 단정적 판단·확실 오인"],
+          legal_text:"제20조(광고 시 금지행위) ① … 4. 불확실한 사항에 대해 단정적 판단을 제공하거나 확실하다고 오인하게 할 소지가 있는 내용을 알리는 행위."}
+      ]
+    }
+  ],
+  track_b:{
+    verdict:"HIGH", score:1.00, standard:"대법원 2017두60109 전체적·궁극적 인상 기준",
+    impression:"소비자는 ‘조건 없이(무제한 자격) 연 5%를 확정적으로 보장’하는 고수익 특판예금이 즉시 가입 가능하다고 이해하고, 추가 고지·제한 사항은 없을 것처럼 느낄 가능성이 큼.",
+    path:{ claim:"누구나 연 5% 확정 보장 수익을 받을 수 있는 절호의 기회입니다.",
+           meaning:"누구나(모든 대상) 연 5% 확정 보장 수익을 받을 수 있다고 주장.",
+           implicature:"가입 자격·조건이 사실상 없으며 연 5%가 확정적으로 보장된다는 인상.",
+           consumer_effect:"보편적·확정적 고수익 가능성을 강조해 가입을 촉진." },
+    factors:[
+      "‘누구나 연 5% 확정 보장 수익’: 대상 제한이 없고 금리가 확정 보장된다는 취지로 해석되어 약관/조건 존재 가능성을 강하게 가림",
+      "‘조건 없이 … 보장’: ‘조건 없이’·‘보장’이 무조건적 확정 수익 인상을 강화",
+      "제목 ‘고지 없는 특판예금’: 정보고지 부족·생략을 오인(또는 고지 부재를 이점처럼 암시)할 소지",
+      "고수익·보장 표현이 조건/기간/금리 산정방법/부보내용/심의필 등 필수 안내 신호 없이 제시됨"
+    ]
+  },
+  revisions:[
+    { risk:"누구나 연 5% 확정 보장 수익을 받을 수 있는 절호의 기회입니다.",
+      why:"‘누구나’·‘확정 보장 수익’처럼 보편 대상에 수익을 확정·보장하는 단정 표현으로 소비자 오인 우려.",
+      before:"누구나 연 5% 확정 보장 수익을 받을 수 있는 절호의 기회입니다.",
+      after:"연 5% 수준의 금리를 적용받을 수 있는 상품입니다(우대조건·적용기간에 따라 달라질 수 있음).",
+      note:"‘누구나/확정 보장’의 단정성을 완화하고 ‘조건에 따라 달라질 수 있음’으로 확정성 오인 위험을 낮춘 대체 문안." }
+  ]
+};
+
+/* ---------------- render helpers ---------------- */
+const $ = (s,r=document)=>r.querySelector(s);
+const el = (t,c,h)=>{const e=document.createElement(t); if(c)e.className=c; if(h!=null)e.innerHTML=h; return e;};
+const esc = s => String(s==null?"":s).replace(/[&<>]/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[m]));
+
+const VERDICT = {
+  NON_COMPLIANT:{label:"위반 가능성", cls:"vd-bad"},
+  INSUFFICIENT:{label:"검토 필요", cls:"vd-warn"},
+  NOT_APPLICABLE:{label:"해당 없음", cls:"vd-na"},
+  COMPLIANT:{label:"문제 없음", cls:"vd-ok"}
+};
+const FINAL = {
+  reject:{main:"반려", sub:"명백한 위반 가능성 — 배포 전 수정 필요", cls:"vp-reject"},
+  revise:{main:"수정", sub:"위험 표현 수정 후 재검토", cls:"vp-revise"},
+  needs_review:{main:"검토 필요", sub:"사람 검토 필요", cls:"vp-review"},
+  pass_candidate:{main:"통과 후보", sub:"1차 검토 통과 · 고지 유지", cls:"vp-pass"}
+};
+const REJECT_TH = 82;
+
+/* top bar */
+$("#meta-product").textContent = "상품군 · "+REVIEW.product_group;
+$("#meta-channel").textContent = "채널 · "+REVIEW.channel;
+$("#meta-run").textContent = REVIEW.review_run_id;
+(()=>{ const f=FINAL[REVIEW.final_verdict]||FINAL.needs_review;
+  $("#verdict-pill").className="verdict-pill "+f.cls;
+  $("#verdict-pill").innerHTML=`<span class="v-main">${f.main}</span><span class="v-sub">${f.sub}</span>`;
+})();
+
+/* principle strip */
+(()=>{ const map={bad:"위반 가능성",warn:"검토 필요",ok:"문제 없음",na:"해당 없음"};
+  REVIEW.principles.forEach(p=>{
+    const c=el("div","cell");
+    c.innerHTML=`<span class="lbl">${esc(p.key)}</span><span class="st"><i class="dot d-${p.status}"></i>${map[p.status]}</span>`;
+    $("#principle-strip").appendChild(c);
+  });
+})();
+
+/* ad rail with highlights */
+(()=>{ $("#ad-title").textContent="제목 · "+REVIEW.title;
+  const doc=$("#ad-doc"); const hlMap={bad:"hl-bad",warn:"hl-warn",na:"hl-na",ok:"hl-ok"};
+  REVIEW.highlight_spans.forEach(sp=>{
+    const span=el("span","hl "+(hlMap[sp.verdict]||"hl-na"));
+    span.textContent=sp.text+" ";
+    if(sp.anchor_id){ span.dataset.anchor=sp.anchor_id;
+      span.onclick=()=>{ const t=document.getElementById("anchor-"+sp.anchor_id);
+        if(t){t.scrollIntoView({behavior:"smooth",block:"start"}); flash(t);} };
+    }
+    doc.appendChild(span);
+  });
+})();
+function flash(t){ t.style.transition="box-shadow .2s"; t.style.boxShadow="0 0 0 3px var(--accent)"; setTimeout(()=>t.style.boxShadow="",700); }
+
+/* routing ladder (router.py 30-43 재현) */
+(()=>{ const r=REVIEW.routing;
+  const rules=[
+    {t:`NON_COMPLIANT 중 score ≥ ${REJECT_TH}`, fired:r.has_noncompliant&&r.max_noncompliant_score>=REJECT_TH, res:"반려"},
+    {t:`그 외 NON_COMPLIANT 존재`, fired:false, res:"수정"},
+    {t:`Track B = HIGH (또는 score ≥ 0.75)`, fired:false, res:"수정"},
+    {t:`INSUFFICIENT 존재`, fired:false, res:"검토 필요"},
+    {t:`Track B = MEDIUM (또는 ≥ 0.45)`, fired:false, res:"검토 필요"},
+    {t:`그 외`, fired:false, res:"통과 후보"}
+  ];
+  let done=false;
+  rules.forEach((rule,i)=>{
+    const fired=!done && rule.fired; if(fired)done=true;
+    const div=el("div","rule "+(fired?"fired":(done?"passed":"")));
+    div.innerHTML=`<span class="rn">${i+1}</span><span>${rule.t}</span><span class="res">${rule.res}</span>`;
+    $("#ladder-rules").appendChild(div);
+  });
+  const extra=el("div","note");
+  extra.innerHTML=`이번 건은 1번 규칙(최고 NON_COMPLIANT score <b>${r.max_noncompliant_score}</b> ≥ ${REJECT_TH})에서 <b>반려</b> 확정. Track B(${r.track_b_verdict} ${r.track_b_score.toFixed(2)})는 독립적으로 ‘수정’ 이상을 보장하는 안전망.`;
+  $("#ladder-rules").appendChild(extra);
+})();
+
+/* Track A : anchors sorted by score */
+(()=>{ const host=$("#track-a");
+  const sorted=[...REVIEW.anchors].sort((a,b)=>b.max_score-a.max_score);
+  let cuCount=0;
+  sorted.forEach((a,idx)=>{
+    cuCount+=a.judgments.length;
+    const card=el("section","anchor"+(idx===0?" lead":"")); card.id="anchor-"+a.anchor_id;
+    const isRisk=a.type==="risk_anchor";
+    const hyps=a.hypernyms.map(h=>`<span class="tag hyp"><b>${esc(h.n)}</b> · <span class="${h.s==='STRONG'?'sp-strong':'sp-weak'}">${h.s}</span></span>`).join("");
+    card.appendChild(el("div","a-head",`
+      <span class="a-rank">#${idx+1}</span>
+      <div class="a-body">
+        <div class="a-span">${esc(a.span)}</div>
+        <div class="a-tags">
+          <span class="tag ${isRisk?'risk':'type'}">${isRisk?'risk_anchor':'claim_anchor'}</span>
+          ${hyps}
+        </div>
+        <div class="a-facts">${esc(a.facts)}</div>
+      </div>
+      <div class="a-maxscore"><div class="n" style="color:${scoreColor(a.max_score)}">${a.max_score}</div><div class="l">최고 score</div></div>
+    `));
+    const list=el("div","cu-list");
+    [...a.judgments].sort((x,y)=>y.score-x.score).forEach(j=>list.appendChild(cuRow(j)));
+    card.appendChild(list);
+    host.appendChild(card);
+  });
+  $("#ta-cnt").textContent=cuCount; $("#tb-cnt").textContent=REVIEW.track_b.score.toFixed(2);
+})();
+
+function scoreColor(s){ return s>=REJECT_TH?"var(--bad)": s>=45?"var(--warn)": s>0?"var(--na)":"var(--faint)"; }
+
+function cuRow(j){
+  const v=VERDICT[j.effective]||VERDICT.INSUFFICIENT;
+  const changed = j.raw!==j.effective;
+  const rawV=VERDICT[j.raw]||{label:j.raw};
+  const cu=el("div","cu");
+  const pct=Math.max(2,Math.min(100,j.score));
+  const transition = changed
+    ? `<span class="transition"><span>${rawV.label}</span><span class="arrow">→</span><span>${j.effect==='DOWNGRADE_TO_REVIEW'?'예외 다운그레이드':j.effect}</span><span class="arrow">→</span><b>${v.label}</b></span>`
+    : "";
+  cu.appendChild(el("div","cu-head",`
+    <span class="cu-principle">${esc(j.principle)}</span>
+    <span class="cu-article" title="${esc(j.article)}">${esc(j.article)}</span>
+    <span class="verd ${v.cls}">${v.label}</span>
+    ${transition}
+    <span class="meter">
+      <span class="track">
+        <span class="fill" style="width:${pct}%;background:${scoreColor(j.score)}"></span>
+        <span class="mark reject" style="left:${REJECT_TH}%" title="반려 임계 ${REJECT_TH}"></span>
+        <span class="mark" style="left:45%" title="검토 임계 45"></span>
+      </span>
+      <span class="scale"><span>0</span><span>45</span><span>82</span><span>100</span></span>
+    </span>
+    <span class="cu-score-num" style="color:${scoreColor(j.score)}">${j.score}</span>
+    <span class="chev">▶</span>
+  `));
+  const detail=el("div","cu-detail");
+  const arts=(j.used_policy_evidence||[]).map(a=>`<span class="art-chip">${esc(a)}</span>`).join("");
+  detail.innerHTML=`
+    <div class="why">${esc(j.why)}</div>
+    <div class="ev-block">
+      <div class="ev-label">광고 내 근거 (evidence_span)</div>
+      <div class="ev-span">“${esc(j.evidence_span)}”</div>
+    </div>
+    <div class="ev-block">
+      <div class="ev-label">적용 정책 근거 · used_policy_evidence (${(j.used_policy_evidence||[]).length})</div>
+      <div class="art-chips">${arts}</div>
+      <button class="legal-toggle">법조문 원문 보기 ▾</button>
+      <div class="legal-text">${esc(j.legal_text||"")}</div>
+    </div>
+    ${j.effect&&j.effect!=="NONE" ? `<div class="exc"><div class="et">예외/고지 검토 · ${esc(j.effect)}</div>raw 판정 <b>${esc((VERDICT[j.raw]||{}).label||j.raw)}</b> → closure 검토 결과 <b>${esc(v.label)}</b>로 조정됨.</div>`:""}
+  `;
+  cu.appendChild(detail);
+  cu.querySelector(".cu-head").onclick=(e)=>{ if(e.target.classList.contains("legal-toggle"))return; cu.classList.toggle("open"); };
+  const lt=detail.querySelector(".legal-toggle"); const lx=detail.querySelector(".legal-text");
+  lt.onclick=(e)=>{e.stopPropagation(); lx.classList.toggle("show"); lt.textContent=lx.classList.contains("show")?"법조문 원문 접기 ▴":"법조문 원문 보기 ▾";};
+  return cu;
+}
+
+/* Track B */
+(()=>{ const tb=REVIEW.track_b; const host=$("#track-b");
+  const p=tb.path;
+  host.innerHTML=`
+    <div class="trackb">
+      <div class="tb-head">
+        <span class="tb-score">${tb.score.toFixed(2)}</span>
+        <div>
+          <div style="font-weight:700">소비자 오인 위험 · <span style="color:var(--bad)">${tb.verdict}</span></div>
+          <div class="tb-meta">${esc(tb.standard)}</div>
+        </div>
+      </div>
+      <div class="why" style="margin-top:0"><b>대표 소비자 인상</b> · ${esc(tb.impression)}</div>
+      <div class="ev-label" style="margin-top:14px">판단 경로 (Context Graph evidence path)</div>
+      <div class="flow">
+        <div class="node"><div class="nk">Claim</div><div class="nv">${esc(p.claim)}</div></div>
+        <div class="node"><div class="nk">Meaning</div><div class="nv">${esc(p.meaning)}</div></div>
+        <div class="node"><div class="nk">Implicature</div><div class="nv">${esc(p.implicature)}</div></div>
+        <div class="node"><div class="nk">ConsumerEffect</div><div class="nv">${esc(p.consumer_effect)}</div></div>
+      </div>
+      <div class="ev-label" style="margin-top:6px">오인 요인</div>
+      <ul class="factors">${tb.factors.map(f=>`<li>${esc(f)}</li>`).join("")}</ul>
+    </div>`;
+})();
+
+/* revisions */
+(()=>{ const host=$("#revisions");
+  REVIEW.revisions.forEach(r=>{
+    host.appendChild(el("div","rev",`
+      <div style="font-weight:700;font-size:13px;margin-bottom:4px">위험 표현 · <span style="color:var(--bad)">${esc(r.risk)}</span></div>
+      <div class="note" style="margin-top:0">${esc(r.why)}</div>
+      <div class="diff">
+        <div class="col before"><div class="ct">Before</div>${esc(r.before)}</div>
+        <div class="col after"><div class="ct">After (제안)</div>${esc(r.after)}</div>
+      </div>
+      <div class="note">${esc(r.note)}</div>
+    `));
+  });
+})();
+
+/* track tab switching */
+document.querySelectorAll(".track-tab").forEach(btn=>{
+  btn.onclick=()=>{
+    document.querySelectorAll(".track-tab").forEach(b=>b.classList.remove("on"));
+    btn.classList.add("on");
+    const t=btn.dataset.track;
+    $("#track-a").classList.toggle("hidden",t!=="A");
+    $("#track-b").classList.toggle("hidden",t!=="B");
+  };
+});
+</script>
+</body>
+</html>

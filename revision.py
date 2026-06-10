@@ -5,7 +5,7 @@ from __future__ import annotations
 from typing import Any
 
 from llm_gateway import LLMGateway
-from router import ACTIONABLE_ANCHOR_TYPES, effective_judgments
+from router import ACTIONABLE_ANCHOR_TYPES, anchor_display_role, effective_judgments
 from schemas import ReviewGraph, ReviewInput
 from utils import to_jsonable
 
@@ -93,6 +93,8 @@ class LLMRevisionSuggester:
         for judgment in effective:
             anchor = anchor_by_id.get(judgment.anchor_id)
             if not anchor or anchor.anchor_type not in ACTIONABLE_ANCHOR_TYPES:
+                continue
+            if anchor_display_role(graph, anchor.anchor_id) != "actionable":
                 continue
             if judgment.verdict not in {"NON_COMPLIANT", "INSUFFICIENT"}:
                 continue

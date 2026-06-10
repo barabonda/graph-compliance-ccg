@@ -19,6 +19,14 @@ from datetime import UTC, datetime
 from typing import Any
 
 from ccg_embeddings import EmbeddingGateway
+from legal_elements import (
+    CANONICAL_ACTION_TYPES,
+    CANONICAL_POSITIVE_FEATURES,
+    build_legal_element_profile_from_compiler_row,
+    canonicalize_required_features,
+    infer_legal_profile_from_text,
+    unknown_canonical_features,
+)
 from llm_gateway import LLMGateway
 from utils import stable_id, to_jsonable
 
@@ -95,8 +103,36 @@ COMPILER_SCHEMA: dict[str, Any] = {
                 "required": ["cu_id", "subject_hypernym_names", "profile_summary", "embedding_text"],
             },
         },
+        "cu_legal_element_profiles": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "additionalProperties": False,
+                "properties": {
+                    "cu_id": {"type": "string"},
+                    "action_type": {"type": "string", "enum": CANONICAL_ACTION_TYPES},
+                    "required_positive_features": {
+                        "type": "array",
+                        "items": {"type": "string", "enum": CANONICAL_POSITIVE_FEATURES},
+                    },
+                    "applicability_scope": {"type": "array", "items": {"type": "string"}},
+                    "risk_title": {"type": "string"},
+                    "exception_eligible": {"type": "boolean"},
+                    "rationale": {"type": "string"},
+                },
+                "required": [
+                    "cu_id",
+                    "action_type",
+                    "required_positive_features",
+                    "applicability_scope",
+                    "risk_title",
+                    "exception_eligible",
+                    "rationale",
+                ],
+            },
+        },
     },
-    "required": ["policy_hypernyms", "premises", "cu_profiles"],
+    "required": ["policy_hypernyms", "premises", "cu_profiles", "cu_legal_element_profiles"],
 }
 
 
@@ -143,7 +179,7 @@ class PolicyAlignmentCompiler:
         batches = [sources[index : index + batch_size] for index in range(0, len(sources), batch_size)]
         if max_batches is not None:
             batches = batches[:max_batches]
-        counts = {"batches": 0, "policy_hypernyms": 0, "premises": 0, "cu_profiles": 0}
+        counts = {"batches": 0, "policy_hypernyms": 0, "premises": 0, "cu_profiles": 0, "cu_legal_element_profiles": 0}
         embedding_dimension = 0
         for batch in batches:
             compiled = self._compile_batch(batch)
@@ -156,6 +192,7 @@ class PolicyAlignmentCompiler:
             counts["policy_hypernyms"] += len(normalized["policy_hypernyms"])
             counts["premises"] += len(normalized["premises"])
             counts["cu_profiles"] += len(normalized["cu_profiles"])
+            counts["cu_legal_element_profiles"] += len(normalized["cu_legal_element_profiles"])
             if dry_run:
                 LOGGER.info("dry-run compiled batch sample: %s", str(to_jsonable(normalized))[:1000])
                 continue
@@ -163,6 +200,146 @@ class PolicyAlignmentCompiler:
         if not dry_run:
             self._ensure_vector_indexes(embedding_dimension or 1536)
         return counts
+
+    def backfill_legal_element_profiles(
+        self,
+        *,
+        workspace_id: str,
+        dry_run: bool = False,
+    ) -> dict[str, int]:
+        """Create CULegalElementProfile nodes from existing CUEmbeddingProfile text.
+
+        This is an offline governance backfill for environments where the
+        previous compiler already created CU embedding profiles but the newer
+        legal-element schema has not yet been loaded. It does not make runtime
+        verdicts and does not replace the LLM compiler path.
+        """
+
+        rows = self._load_existing_cu_profiles(workspace_id=workspace_id)
+        profiles = [
+            infer_legal_profile_from_text(
+                workspace_id=workspace_id,
+                cu_id=str(row["cu_id"]),
+                text=" ".join(
+                    [
+                        str(row.get("principle", "")),
+                        str(row.get("subject", "")),
+                        str(row.get("condition", "")),
+                        str(row.get("constraint", "")),
+                        str(row.get("context", "")),
+                        str(row.get("cu_type", "")),
+                        str(row.get("profile_summary", "")),
+                        str(row.get("embedding_text", "")),
+                    ]
+                ),
+            )
+            for row in rows
+        ]
+        profiles = list({str(profile["id"]): profile for profile in profiles}.values())
+        if dry_run:
+            LOGGER.info("dry-run legal-element backfill sample: %s", str(to_jsonable(profiles[:5]))[:2000])
+            return {"source_profiles": len(rows), "cu_legal_element_profiles": len(profiles)}
+        self._write_legal_element_profiles(workspace_id=workspace_id, profiles=profiles)
+        return {"source_profiles": len(rows), "cu_legal_element_profiles": len(profiles)}
+
+    def canonicalize_existing_legal_element_profiles(
+        self,
+        *,
+        workspace_id: str,
+        dry_run: bool = False,
+    ) -> dict[str, int]:
+        rows = self._load_existing_legal_element_profiles(workspace_id=workspace_id)
+        updates: list[dict[str, object]] = []
+        changed = 0
+        for row in rows:
+            original = [str(item) for item in row.get("required_positive_features") or []]
+            canonical = canonicalize_required_features(original, action_type=str(row.get("action_type") or ""))
+            if canonical != original:
+                changed += 1
+            updates.append(
+                {
+                    "id": str(row["id"]),
+                    "required_positive_features": canonical,
+                    "feature_contract": "canonical_legal_element_v1",
+                }
+            )
+        if dry_run:
+            LOGGER.info("dry-run legal-element canonicalization sample: %s", str(to_jsonable(updates[:10]))[:2000])
+            return {"legal_element_profiles": len(rows), "changed_profiles": changed}
+        now = datetime.now(UTC).isoformat()
+        with self.driver.session(**self._session_kwargs()) as session:
+            session.run(
+                """
+                UNWIND $updates AS row
+                MATCH (profile:CULegalElementProfile {id: row.id, workspace_id: $workspace_id})
+                SET profile.required_positive_features = row.required_positive_features,
+                    profile.feature_contract = row.feature_contract,
+                    profile.canonicalized_at = $now,
+                    profile.updated_at = $now
+                """,
+                workspace_id=workspace_id,
+                now=now,
+                updates=updates,
+            )
+        return {"legal_element_profiles": len(rows), "changed_profiles": changed}
+
+    def _load_existing_legal_element_profiles(self, *, workspace_id: str) -> list[dict[str, Any]]:
+        with self.driver.session(**self._session_kwargs()) as session:
+            return [
+                dict(record)
+                for record in session.run(
+                    """
+                    MATCH (profile:CULegalElementProfile {workspace_id: $workspace_id})
+                    RETURN profile.id AS id,
+                           coalesce(profile.action_type, '') AS action_type,
+                           coalesce(profile.required_positive_features, []) AS required_positive_features
+                    ORDER BY profile.id
+                    """,
+                    workspace_id=workspace_id,
+                )
+            ]
+
+    def _load_existing_cu_profiles(self, *, workspace_id: str) -> list[dict[str, Any]]:
+        with self.driver.session(**self._session_kwargs()) as session:
+            return [
+                dict(record)
+                for record in session.run(
+                    """
+                    MATCH (cu:ComplianceUnit {workspace_id: $workspace_id})-[:HAS_EMBEDDING_PROFILE]->(profile:CUEmbeddingProfile {workspace_id: $workspace_id})
+                    WHERE coalesce(cu.active_for_gate, false) = true
+                    RETURN cu.id AS cu_id,
+                           coalesce(cu.principle, '') AS principle,
+                           coalesce(cu.subject, '') AS subject,
+                           coalesce(cu.condition, '') AS condition,
+                           coalesce(cu.constraint, '') AS constraint,
+                           coalesce(cu.context, '') AS context,
+                           coalesce(cu.cu_type, '') AS cu_type,
+                           coalesce(profile.profile_summary, '') AS profile_summary,
+                           coalesce(profile.embedding_text, '') AS embedding_text
+                    ORDER BY cu.id
+                    """,
+                    workspace_id=workspace_id,
+                )
+            ]
+
+    def _write_legal_element_profiles(self, *, workspace_id: str, profiles: list[dict[str, object]]) -> None:
+        now = datetime.now(UTC).isoformat()
+        with self.driver.session(**self._session_kwargs()) as session:
+            session.run(
+                """
+                UNWIND $profiles AS row
+                MATCH (cu:ComplianceUnit {id: row.cu_id, workspace_id: $workspace_id})
+                MERGE (profile:CULegalElementProfile {id: row.id, workspace_id: $workspace_id})
+                SET profile += row,
+                    profile.workspace_id = $workspace_id,
+                    profile.updated_at = $now,
+                    profile.backfill_source = 'existing_cu_embedding_profile'
+                MERGE (cu)-[:HAS_LEGAL_ELEMENT_PROFILE {workspace_id: $workspace_id, source: 'graphcompliance_ccg_policy_compiler_backfill'}]->(profile)
+                """,
+                workspace_id=workspace_id,
+                now=now,
+                profiles=profiles,
+            )
 
     def _load_policy_sources(self, *, workspace_id: str, missing_active_links_only: bool) -> list[dict[str, Any]]:
         with self.driver.session(**self._session_kwargs()) as session:
@@ -176,6 +353,7 @@ class PolicyAlignmentCompiler:
                         $missing_active_links_only = false
                         OR NOT (cu)-[:HAS_SUBJECT_HYPERNYM]->(:PolicyHypernym {workspace_id: $workspace_id})
                         OR NOT (cu)-[:HAS_EMBEDDING_PROFILE]->(:CUEmbeddingProfile {workspace_id: $workspace_id})
+                        OR NOT (cu)-[:HAS_LEGAL_ELEMENT_PROFILE]->(:CULegalElementProfile {workspace_id: $workspace_id})
                       )
                     OPTIONAL MATCH (clause:LegalClause)-[:GROUNDS_CU]->(cu)
                     OPTIONAL MATCH (chunk:LegalChunk)-[:EVIDENCES_CU]->(cu)
@@ -223,16 +401,26 @@ class PolicyAlignmentCompiler:
                 system=(
                     "You compile Korean financial compliance policy graph sources into GraphCompliance "
                     "alignment nodes. Extract policy-level hypernyms, concise premises, and CU embedding "
-                    "profiles. Use only provided sources. Do not invent laws. Hypernyms must be reusable "
+                    "profiles plus CU legal-element profiles. Use only provided sources. Do not invent laws. Hypernyms must be reusable "
                     "policy terms suitable for normalizing financial ad context entities and risks. "
                     "Every policy_hypernyms.name must be a Korean canonical label. English acronyms are "
                     "allowed only with Korean context, for example '주가연계증권(ELS)'. Do not use snake_case, "
                     "English-only labels, or generic labels such as 'actor' or 'claim'. "
                     "Return exactly one cu_profiles item for every input cu_id, even when the CU is broad; "
-                    "use the most policy-relevant subject hypernyms supported by the source."
+                    "use the most policy-relevant subject hypernyms supported by the source. Also return exactly one "
+                    "cu_legal_element_profiles item for every input cu_id. The legal-element profile must model "
+                    "what positive evidence must exist in an ad claim before this CU can be a candidate. For example, "
+                    "comparison_ad requires a comparison target or comparative superiority claim; "
+                    "unfair_superior_position_sales requires coercion, tie-in sale, collateral/guarantee demand, "
+                    "or sales-process superior-position context; guarantee_or_return_misleading requires guarantee, "
+                    "certainty, or return-guarantee expression. required_positive_features must contain only the "
+                    f"allowed feature ids from this list, with no Korean prose or custom ids: {CANONICAL_POSITIVE_FEATURES}. "
+                    f"action_type must be one of these ids: {CANONICAL_ACTION_TYPES}. Mark review procedures and sanctions with their own "
+                    "action_type so they can be shown as workflow/procedure context rather than normal claim judgments."
                 ),
                 user=f"{validation_note}[required_cu_ids]\n{sorted(required_cu_ids)}\n\n[policy_sources]\n{batch}",
             )
+            compiled = repair_compiler_cu_ids(compiled, required_cu_ids)
             errors = validate_compiler_output(compiled, required_cu_ids)
             if not errors:
                 return compiled
@@ -299,10 +487,35 @@ class PolicyAlignmentCompiler:
         profile_embeddings = self.embedder.embed_many([row["embedding_text"] for row in profile_rows])
         profiles = [{**row, "embedding": embedding} for row, embedding in zip(profile_rows, profile_embeddings, strict=True)]
 
+        legal_profile_rows: list[dict[str, object]] = []
+        cu_profile_text_by_id = {
+            str(row["cu_id"]): " ".join([str(row.get("profile_summary", "")), str(row.get("embedding_text", ""))])
+            for row in compiled["cu_profiles"]
+        }
+        explicit_legal_profiles = {str(row["cu_id"]): row for row in compiled.get("cu_legal_element_profiles", [])}
+        for cu_id, text in cu_profile_text_by_id.items():
+            row = explicit_legal_profiles.get(cu_id)
+            if row:
+                legal_profile_rows.append(
+                    build_legal_element_profile_from_compiler_row(
+                        workspace_id=workspace_id,
+                        cu_id=cu_id,
+                        action_type=str(row["action_type"]),
+                        required_positive_features=[str(item) for item in row["required_positive_features"]],
+                        applicability_scope=[str(item) for item in row["applicability_scope"]],
+                        risk_title=str(row["risk_title"]),
+                        exception_eligible=bool(row["exception_eligible"]),
+                        rationale=str(row["rationale"]),
+                    )
+                )
+            else:
+                legal_profile_rows.append(infer_legal_profile_from_text(workspace_id=workspace_id, cu_id=cu_id, text=text))
+
         return {
             "policy_hypernyms": list(hypernyms_by_name.values()),
             "premises": premises,
             "cu_profiles": profiles,
+            "cu_legal_element_profiles": legal_profile_rows,
         }
 
     def _write_compiled(self, *, workspace_id: str, compiled: dict[str, list[dict[str, Any]]]) -> None:
@@ -373,6 +586,20 @@ class PolicyAlignmentCompiler:
                     props=profile,
                     hypernym_ids=profile["subject_hypernym_ids"],
                 )
+            for legal_profile in compiled["cu_legal_element_profiles"]:
+                session.run(
+                    """
+                    MATCH (cu:ComplianceUnit {id: $cu_id, workspace_id: $workspace_id})
+                    MERGE (profile:CULegalElementProfile {id: $profile_id, workspace_id: $workspace_id})
+                    SET profile += $props, profile.workspace_id = $workspace_id, profile.updated_at = $now
+                    MERGE (cu)-[:HAS_LEGAL_ELEMENT_PROFILE {workspace_id: $workspace_id, source: 'graphcompliance_ccg_policy_compiler'}]->(profile)
+                    """,
+                    workspace_id=workspace_id,
+                    now=now,
+                    cu_id=legal_profile["cu_id"],
+                    profile_id=legal_profile["id"],
+                    props=legal_profile,
+                )
 
     def _ensure_vector_indexes(self, dimension: int) -> None:
         dimension = int(dimension)
@@ -401,6 +628,8 @@ def main() -> None:
     parser.add_argument("--batch-size", type=int, default=16)
     parser.add_argument("--max-batches", type=int, default=None)
     parser.add_argument("--missing-active-links-only", action="store_true")
+    parser.add_argument("--legal-elements-only-from-existing-profiles", action="store_true")
+    parser.add_argument("--canonicalize-existing-legal-elements", action="store_true")
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--log-level", default="INFO")
     args = parser.parse_args()
@@ -408,13 +637,24 @@ def main() -> None:
     logging.basicConfig(level=getattr(logging, args.log_level.upper(), logging.INFO), format="%(levelname)s %(message)s")
     compiler = PolicyAlignmentCompiler()
     try:
-        counts = compiler.compile(
-            workspace_id=args.workspace_id,
-            batch_size=args.batch_size,
-            max_batches=args.max_batches,
-            missing_active_links_only=args.missing_active_links_only,
-            dry_run=args.dry_run,
-        )
+        if args.canonicalize_existing_legal_elements:
+            counts = compiler.canonicalize_existing_legal_element_profiles(
+                workspace_id=args.workspace_id,
+                dry_run=args.dry_run,
+            )
+        elif args.legal_elements_only_from_existing_profiles:
+            counts = compiler.backfill_legal_element_profiles(
+                workspace_id=args.workspace_id,
+                dry_run=args.dry_run,
+            )
+        else:
+            counts = compiler.compile(
+                workspace_id=args.workspace_id,
+                batch_size=args.batch_size,
+                max_batches=args.max_batches,
+                missing_active_links_only=args.missing_active_links_only,
+                dry_run=args.dry_run,
+            )
     finally:
         compiler.close()
     LOGGER.info("compiled policy alignment counts: %s", counts)
@@ -427,12 +667,28 @@ def validate_compiler_output(compiled: dict[str, Any], required_cu_ids: set[str]
     if non_korean:
         errors.append(f"policy_hypernyms contain non-Korean canonical labels: {non_korean}")
     profile_cu_ids = {str(row["cu_id"]) for row in compiled.get("cu_profiles", [])}
+    legal_profile_cu_ids = {str(row["cu_id"]) for row in compiled.get("cu_legal_element_profiles", [])}
     missing_profiles = sorted(required_cu_ids - profile_cu_ids)
     extra_profiles = sorted(profile_cu_ids - required_cu_ids)
     if missing_profiles:
         errors.append(f"missing cu_profiles for cu_id: {missing_profiles}")
     if extra_profiles:
         errors.append(f"cu_profiles contain unknown cu_id: {extra_profiles}")
+    missing_legal_profiles = sorted(required_cu_ids - legal_profile_cu_ids)
+    extra_legal_profiles = sorted(legal_profile_cu_ids - required_cu_ids)
+    if missing_legal_profiles:
+        errors.append(f"missing cu_legal_element_profiles for cu_id: {missing_legal_profiles}")
+    if extra_legal_profiles:
+        errors.append(f"cu_legal_element_profiles contain unknown cu_id: {extra_legal_profiles}")
+    for legal_profile in compiled.get("cu_legal_element_profiles", []):
+        cu_id = legal_profile.get("cu_id")
+        action_type = str(legal_profile.get("action_type") or "")
+        if action_type not in CANONICAL_ACTION_TYPES:
+            errors.append(f"cu_legal_element_profile has unknown action_type for {cu_id}: {action_type}")
+        required_features = [str(item) for item in legal_profile.get("required_positive_features", [])]
+        unknown_features = unknown_canonical_features(required_features)
+        if unknown_features:
+            errors.append(f"cu_legal_element_profile has unknown required_positive_features for {cu_id}: {unknown_features}")
     for profile in compiled.get("cu_profiles", []):
         names = [str(name) for name in profile.get("subject_hypernym_names", [])]
         if not names:
@@ -445,6 +701,40 @@ def validate_compiler_output(compiled: dict[str, Any], required_cu_ids: set[str]
         if unknown:
             errors.append(f"premise references undefined hypernyms: {unknown}")
     return errors
+
+
+def repair_compiler_cu_ids(compiled: dict[str, Any], required_cu_ids: set[str]) -> dict[str, Any]:
+    """Repair obvious LLM copy errors in CU ids before validation.
+
+    The compiler prompt requires exact ids, but structured LLM calls can still
+    copy the unique hash suffix while changing a semantic prefix such as
+    `cu_legal_article_...` to `cu_legal_clause_...`. If the suffix uniquely maps
+    to one required id, this is a deterministic id-copy repair, not policy
+    inference.
+    """
+
+    suffix_map: dict[str, str] = {}
+    for cu_id in required_cu_ids:
+        suffix = cu_id.rsplit("_", 1)[-1]
+        if suffix in suffix_map:
+            suffix_map[suffix] = ""
+        else:
+            suffix_map[suffix] = cu_id
+
+    def repair(value: object) -> str:
+        text = str(value).removesuffix("_unused_placeholder")
+        if text in required_cu_ids:
+            return text
+        suffix = text.rsplit("_", 1)[-1]
+        return suffix_map.get(suffix) or text
+
+    for profile in compiled.get("cu_profiles", []):
+        profile["cu_id"] = repair(profile.get("cu_id", ""))
+    for profile in compiled.get("cu_legal_element_profiles", []):
+        profile["cu_id"] = repair(profile.get("cu_id", ""))
+    for premise in compiled.get("premises", []):
+        premise["source_cu_ids"] = [repair(item) for item in premise.get("source_cu_ids", [])]
+    return compiled
 
 
 def is_korean_canonical_label(name: str) -> bool:

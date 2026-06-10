@@ -66,6 +66,7 @@ class LLMCUPlanner:
                             }
                             for h in anchor.hypernyms
                         ],
+                        "anchor_feature_set": anchor.feature_set.__dict__ if anchor.feature_set else {},
                         "candidate": compact_candidate_for_rerank(candidate),
                     }
                 )
@@ -74,15 +75,21 @@ class LLMCUPlanner:
             schema=RERANK_SCHEMA,
             system=(
                 "You are a cross-encoder-style reranker for Korean financial-ad compliance. "
-                "Select only CUs that are materially relevant to the anchor. Prefer active gate CUs, "
-                "direct subject/constraint matches, and legal evidence that explains the anchor. "
+                "Select only CUs that are materially relevant to the anchor. You are not a legal "
+                "interpreter at this step; you are confirming the already retrieved and legally "
+                "eligible candidate set before the judge step. Prefer active gate CUs, direct "
+                "subject/constraint matches, and legal evidence that explains the anchor. "
                 "Do not select CUs just because they share broad words. If an anchor is a condition, "
                 "rate, fee, depositor-protection, or risk disclosure, prefer disclosure/explanation/ad "
                 "regulation CUs and reject unfair-sales, sanction, procedure, or association-review CUs "
                 "unless the anchor explicitly describes coercion, tie-in sales, unfair demand, review-number "
                 "process, or sanction conduct. If an anchor is a definitive guarantee or unconditional "
                 "benefit claim, keep the misleading-ad and explanation-duty CUs even when another anchor "
-                "contains a mitigating disclosure."
+                "contains a mitigating disclosure. The candidate.cu_legal_element_profile is the primary "
+                "eligibility contract: do not select candidates whose required legal elements are missing. "
+                "Respect candidate.gate_status and retrieval_scores.scope_gate; suppressed candidates must "
+                "not be revived. selection_reason must cite the matched_required_features, source_article, "
+                "and the concrete anchor fact/span that made the CU relevant."
             ),
             user=(
                 f"Select at most {per_anchor_limit} CUs per anchor and {total_limit} total.\n"
@@ -138,7 +145,10 @@ def ensure_actionable_anchors_have_plan_items(
         candidates = candidates_by_anchor.get(anchor.anchor_id, [])
         if not candidates or len(selected) >= total_limit:
             continue
-        candidate = max(candidates, key=lambda item: item.retrieval_scores.get("combined_score", 0.0))
+        legally_matched = [candidate for candidate in candidates if candidate.legal_element_match]
+        if not legally_matched:
+            continue
+        candidate = max(legally_matched, key=lambda item: item.retrieval_scores.get("combined_score", 0.0))
         key = (anchor.anchor_id, candidate.cu_id)
         if key in selected_keys:
             continue
@@ -148,7 +158,7 @@ def ensure_actionable_anchors_have_plan_items(
                 anchor.anchor_id,
                 candidate,
                 candidate.retrieval_scores.get("combined_score", 0.0),
-                "Highest retrieval candidate retained so the actionable anchor is judged instead of becoming CUPlan 0.",
+                "Highest legal-element-matched retrieval candidate retained so the actionable anchor is judged instead of becoming CUPlan 0.",
             )
         )
         selected_keys.add(key)
@@ -173,6 +183,11 @@ def compact_candidate_for_rerank(candidate: PolicyCandidate) -> dict[str, Any]:
         "legal_evidence_ids": candidate.legal_evidence_ids[:8],
         "evidence_snippets": [shorten_evidence(text, 360) for text in candidate.evidence_texts[:4]],
         "retrieval_scores": candidate.retrieval_scores,
+        "cu_legal_element_profile": candidate.legal_element_profile.__dict__ if candidate.legal_element_profile else {},
+        "matched_required_features": candidate.matched_required_features,
+        "missing_required_features": candidate.missing_required_features,
+        "legal_element_match": candidate.legal_element_match,
+        "risk_title": candidate.risk_title,
     }
 
 
@@ -208,4 +223,9 @@ def plan_item_from_candidate(
         retrieval_basis=candidate.retrieval_basis,
         gate_status=candidate.gate_status,
         reference_paths=candidate.reference_paths,
+        legal_element_profile=candidate.legal_element_profile,
+        matched_required_features=candidate.matched_required_features,
+        missing_required_features=candidate.missing_required_features,
+        legal_element_match=candidate.legal_element_match,
+        risk_title=candidate.risk_title,
     )

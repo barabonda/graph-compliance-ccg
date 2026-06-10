@@ -16,12 +16,16 @@ def build_output(
     *,
     revision_suggestions: list[dict[str, object]] | None = None,
 ) -> ReviewOutput:
-    effective = effective_judgments(graph.judgments, graph.exception_reviews)
+    effective = unique_judgments(effective_judgments(graph.judgments, graph.exception_reviews))
     anchor_by_id = {anchor.anchor_id: anchor for anchor in graph.anchors}
     actionable_effective = [
-        judgment for judgment in effective if anchor_by_id[judgment.anchor_id].anchor_type in ACTIONABLE_ANCHOR_TYPES
+        judgment for judgment in effective if anchor_is_actionable_for_issues(graph, judgment.anchor_id)
     ]
-    unmatched_actionable = unmatched_anchors(graph, anchor_types=ACTIONABLE_ANCHOR_TYPES)
+    unmatched_actionable = [
+        anchor
+        for anchor in unmatched_anchors(graph, anchor_types=ACTIONABLE_ANCHOR_TYPES)
+        if anchor_is_actionable_for_issues(graph, anchor.anchor_id)
+    ]
     non_compliant = [j for j in actionable_effective if j.verdict == "NON_COMPLIANT"]
     insufficient = [j for j in actionable_effective if j.verdict == "INSUFFICIENT"]
     track_b = graph.overall_impression_judgment or {}
@@ -42,21 +46,24 @@ def build_output(
     else:
         final = "pass_candidate"
 
-    detected_issues = [
-        {
-            "risk_code": judgment.cu_id,
-            "principle": plan_item_for_judgment(graph, judgment).principle if plan_item_for_judgment(graph, judgment) else "",
-            "source_article": plan_item_for_judgment(graph, judgment).source_article if plan_item_for_judgment(graph, judgment) else "",
-            "subject": plan_item_for_judgment(graph, judgment).subject if plan_item_for_judgment(graph, judgment) else "",
-            "constraint": plan_item_for_judgment(graph, judgment).constraint if plan_item_for_judgment(graph, judgment) else "",
-            "severity": severity_from_score(judgment.score),
-            "problem_span": judgment.evidence_span,
-            "rationale": judgment.why,
-            "required_action": action_for_verdict(judgment.verdict),
-        }
-        for judgment in actionable_effective
-        if judgment.verdict in {"NON_COMPLIANT", "INSUFFICIENT"}
-    ]
+    detected_issues = unique_detected_issues(
+        [
+            {
+                "risk_code": judgment.cu_id,
+                "principle": plan_item_for_judgment(graph, judgment).principle if plan_item_for_judgment(graph, judgment) else "",
+                "source_article": plan_item_for_judgment(graph, judgment).source_article if plan_item_for_judgment(graph, judgment) else "",
+                "risk_title": plan_item_for_judgment(graph, judgment).risk_title if plan_item_for_judgment(graph, judgment) else "",
+                "subject": plan_item_for_judgment(graph, judgment).subject if plan_item_for_judgment(graph, judgment) else "",
+                "constraint": plan_item_for_judgment(graph, judgment).constraint if plan_item_for_judgment(graph, judgment) else "",
+                "severity": severity_from_score(judgment.score),
+                "problem_span": judgment.evidence_span,
+                "rationale": judgment.why,
+                "required_action": action_for_verdict(judgment.verdict),
+            }
+            for judgment in actionable_effective
+            if judgment.verdict in {"NON_COMPLIANT", "INSUFFICIENT"}
+        ]
+    )
     if misleading_verdict in {"HIGH", "MEDIUM"} or misleading_score >= 0.45:
         detected_issues.append(
             {
@@ -90,6 +97,7 @@ def build_output(
         claims=to_jsonable(graph.claims),
         context_triples=to_jsonable(graph.context_triples),
         context_anchors=to_jsonable(graph.anchors),
+        anchor_feature_sets=to_jsonable(graph.anchor_feature_sets),
         cu_plan=to_jsonable(graph.cu_plan),
         judgments=to_jsonable(graph.judgments),
         effective_judgments=to_jsonable(effective),
@@ -100,8 +108,12 @@ def build_output(
         product_context=graph.product_context,
         product_fact_context=graph.product_fact_context,
         disclosure_requirements=graph.disclosure_requirements,
+        policy_evidence_chains=graph.policy_evidence_chains,
         overall_impression_judgment=graph.overall_impression_judgment,
         track_c_summary=graph.track_c_summary,
+        article_aggregation=article_aggregation(graph, effective),
+        principle_aggregation=principle_aggregation(graph, effective),
+        reference_paths_summary=reference_paths_summary(graph),
         graph_paths=graph.graph_paths,
         highlight_spans=highlight_spans(graph, effective),
     )
@@ -140,6 +152,35 @@ def effective_judgments(judgments: list[LLMJudgment], reviews: list[ExceptionRev
     return effective
 
 
+def unique_judgments(judgments: list[LLMJudgment]) -> list[LLMJudgment]:
+    """Keep one effective judgment per CUPlan item.
+
+    LLM structured outputs can occasionally repeat the same plan item. The
+    workflow still guarantees coverage for every CUPlan item, but routing and
+    UI counts should not be inflated by duplicated rows.
+    """
+    by_plan: dict[str, LLMJudgment] = {}
+    for judgment in judgments:
+        existing = by_plan.get(judgment.plan_item_id)
+        if not existing or (verdict_rank(judgment.verdict), judgment.score) > (verdict_rank(existing.verdict), existing.score):
+            by_plan[judgment.plan_item_id] = judgment
+    return list(by_plan.values())
+
+
+def unique_detected_issues(issues: list[dict[str, object]]) -> list[dict[str, object]]:
+    by_key: dict[tuple[str, str, str], dict[str, object]] = {}
+    for issue in issues:
+        key = (
+            str(issue.get("risk_code") or ""),
+            str(issue.get("problem_span") or ""),
+            str(issue.get("source_article") or ""),
+        )
+        existing = by_key.get(key)
+        if not existing or int(issue.get("severity") or 0) > int(existing.get("severity") or 0):
+            by_key[key] = issue
+    return list(by_key.values())
+
+
 def plan_item_for_judgment(graph: ReviewGraph, judgment: LLMJudgment):
     for item in graph.cu_plan:
         if item.plan_item_id == judgment.plan_item_id:
@@ -174,18 +215,122 @@ def summary_rationale(final: str, judgments: list[LLMJudgment]) -> str:
     return f"{len(risky)}개 CU에서 위반 또는 추가 검토 필요 판단이 확인되어 {final}로 라우팅했습니다."
 
 
+def article_aggregation(graph: ReviewGraph, effective: list[LLMJudgment]) -> list[dict[str, object]]:
+    return aggregate_by_policy_axis(graph, effective, axis="article")
+
+
+def principle_aggregation(graph: ReviewGraph, effective: list[LLMJudgment]) -> list[dict[str, object]]:
+    return aggregate_by_policy_axis(graph, effective, axis="principle")
+
+
+def aggregate_by_policy_axis(graph: ReviewGraph, effective: list[LLMJudgment], *, axis: str) -> list[dict[str, object]]:
+    anchor_by_id = {anchor.anchor_id: anchor for anchor in graph.anchors}
+    groups: dict[str, dict[str, object]] = {}
+    for judgment in unique_judgments(effective):
+        anchor = anchor_by_id.get(judgment.anchor_id)
+        if not anchor or not anchor_is_actionable_for_issues(graph, judgment.anchor_id):
+            continue
+        plan_item = plan_item_for_judgment(graph, judgment)
+        if not plan_item:
+            continue
+        key = plan_item.source_article if axis == "article" else plan_item.principle
+        if not key:
+            key = "근거 미상" if axis == "article" else "원칙 미상"
+        row = groups.setdefault(
+            key,
+            {
+                "key": key,
+                "axis": axis,
+                "article": plan_item.source_article,
+                "principles": set(),
+                "verdicts": [],
+                "max_score": 0.0,
+                "cu_ids": set(),
+                "cu_titles": set(),
+                "anchor_spans": set(),
+                "issue_count": 0,
+            },
+        )
+        row["principles"].add(plan_item.principle)
+        row["verdicts"].append(judgment.verdict)
+        row["max_score"] = max(float(row["max_score"]), float(judgment.score or 0.0))
+        row["cu_ids"].add(judgment.cu_id)
+        row["cu_titles"].add(plan_item.risk_title or plan_item.subject or judgment.cu_id)
+        row["anchor_spans"].add(anchor.span.text)
+        if judgment.verdict in {"NON_COMPLIANT", "INSUFFICIENT"}:
+            row["issue_count"] = int(row["issue_count"]) + 1
+
+    output: list[dict[str, object]] = []
+    for row in groups.values():
+        verdicts = [LLMJudgment("", "", "", "", verdict, 0.0, "", "", []) for verdict in row["verdicts"]]
+        output.append(
+            {
+                "key": row["key"],
+                "axis": row["axis"],
+                "article": row["article"],
+                "principles": sorted(row["principles"]),
+                "effective_verdict": aggregate_verdict(verdicts),
+                "max_score": row["max_score"],
+                "cu_count": len(row["cu_ids"]),
+                "issue_count": row["issue_count"],
+                "cu_titles": sorted(row["cu_titles"])[:8],
+                "anchor_spans": sorted(row["anchor_spans"])[:8],
+            }
+        )
+    return sorted(output, key=lambda item: (verdict_rank(str(item["effective_verdict"])), float(item["max_score"])), reverse=True)
+
+
+def reference_paths_summary(graph: ReviewGraph) -> list[dict[str, object]]:
+    anchor_by_id = {anchor.anchor_id: anchor for anchor in graph.anchors}
+    rows: list[dict[str, object]] = []
+    for item in graph.cu_plan:
+        anchor = anchor_by_id.get(item.anchor_id)
+        if not anchor or anchor.anchor_type not in ACTIONABLE_ANCHOR_TYPES:
+            continue
+        path_labels = []
+        for path in item.reference_paths:
+            label = path.get("path") or path.get("relationship") or path.get("type") or ""
+            if label:
+                path_labels.append(str(label))
+        evidence_labels = [
+            {
+                "id": evidence_id,
+                "text": item.evidence_texts[index] if index < len(item.evidence_texts) else "",
+            }
+            for index, evidence_id in enumerate(item.legal_evidence_ids[:4])
+        ]
+        rows.append(
+            {
+                "anchor_id": item.anchor_id,
+                "anchor_text": anchor.span.text,
+                "cu_id": item.cu_id,
+                "risk_title": item.risk_title or item.subject,
+                "principle": item.principle,
+                "source_article": item.source_article,
+                "path_labels": path_labels[:6],
+                "legal_evidence": evidence_labels,
+                "has_exception_path": any("EXCEPTION" in label.upper() for label in path_labels),
+                "has_disclosure_evidence": any("고지" in text or "표시" in text for text in item.evidence_texts),
+            }
+        )
+    return rows[:40]
+
+
 def anchor_display(graph: ReviewGraph, effective: list[LLMJudgment]) -> list[dict[str, object]]:
     raw_by_anchor = judgments_by_anchor(graph.judgments)
-    effective_by_anchor = judgments_by_anchor(effective)
+    effective_by_anchor = judgments_by_anchor(unique_judgments(effective))
     plan_counts = plan_count_by_anchor(graph)
     system_items = {item["anchor_id"]: item for item in system_review_items_for(graph)}
     diagnostics = graph.retrieval_diagnostics
     rows = []
     for anchor in graph.anchors:
-        is_actionable = anchor.anchor_type in ACTIONABLE_ANCHOR_TYPES
+        role = anchor_display_role(graph, anchor.anchor_id)
+        is_actionable = role == "actionable"
         raw = raw_by_anchor.get(anchor.anchor_id, [])
         effective_items = effective_by_anchor.get(anchor.anchor_id, [])
-        if not is_actionable:
+        if role == "mitigation":
+            display_verdict = "MITIGATION"
+        elif not is_actionable:
             display_verdict = "SCOPE"
         elif not plan_counts.get(anchor.anchor_id, 0):
             display_verdict = "RETRIEVAL_FAILURE"
@@ -195,7 +340,7 @@ def anchor_display(graph: ReviewGraph, effective: list[LLMJudgment]) -> list[dic
             {
                 "anchor_id": anchor.anchor_id,
                 "anchor_type": anchor.anchor_type,
-                "display_role": "actionable" if is_actionable else "scope",
+                "display_role": role,
                 "is_actionable": is_actionable,
                 "display_verdict": display_verdict,
                 "raw_verdict": aggregate_verdict(raw),
@@ -213,14 +358,17 @@ def anchor_display(graph: ReviewGraph, effective: list[LLMJudgment]) -> list[dic
 
 def highlight_spans(graph: ReviewGraph, effective: list[LLMJudgment]) -> list[dict[str, object]]:
     by_anchor = {anchor.anchor_id: anchor for anchor in graph.anchors}
-    effective_by_anchor = judgments_by_anchor(effective)
+    effective_by_anchor = judgments_by_anchor(unique_judgments(effective))
     spans = []
     for anchor in graph.anchors:
         judgments = effective_by_anchor.get(anchor.anchor_id, [])
         verdict = aggregate_verdict(judgments)
-        if anchor.anchor_type not in ACTIONABLE_ANCHOR_TYPES:
+        role = anchor_display_role(graph, anchor.anchor_id)
+        if role == "mitigation":
+            verdict = "MITIGATION"
+        elif role != "actionable":
             verdict = "SCOPE"
-        if not judgments and anchor.anchor_type in ACTIONABLE_ANCHOR_TYPES:
+        if not judgments and role == "actionable":
             verdict = "RETRIEVAL_FAILURE"
         spans.append(
             {
@@ -248,7 +396,7 @@ def unmatched_anchors(graph: ReviewGraph, *, anchor_types: set[str] | None = Non
 def system_review_items_for(graph: ReviewGraph) -> list[dict[str, object]]:
     rows: list[dict[str, object]] = []
     for anchor in unmatched_anchors(graph):
-        if anchor.anchor_type not in ACTIONABLE_ANCHOR_TYPES:
+        if not anchor_is_actionable_for_issues(graph, anchor.anchor_id):
             continue
         diagnostic = graph.retrieval_diagnostics.get(anchor.anchor_id, {})
         code = str(diagnostic.get("failure_code") or "CU_PLAN_EMPTY")
@@ -273,6 +421,7 @@ def retrieval_failure_rationale(code: str) -> str:
         "NO_ACTIVE_CU_AFTER_GATE": "후보 CU는 있었지만 상품군/채널/광고유형 gate 이후 활성 CU가 남지 않았습니다.",
         "RERANK_DROPPED_ALL": "후보 CU는 있었지만 LLM rerank가 판단 계획에 포함하지 않았습니다.",
         "MISSING_POLICY_COVERAGE": "정책어는 잡혔지만 연결 가능한 CU 후보가 부족합니다.",
+        "NO_LEGAL_ELEMENT_MATCH": "정책어는 잡혔지만 해당 CU의 금소법 행위요건을 충족하는 후보가 없습니다.",
         "CU_PLAN_EMPTY": "ContextAnchor는 생성됐지만 연결 가능한 CUPlan이 없어 자동 통과할 수 없습니다.",
     }.get(code, "정책 매칭 상태를 확인해야 합니다.")
 
@@ -283,6 +432,7 @@ def retrieval_failure_action(code: str) -> str:
         "NO_ACTIVE_CU_AFTER_GATE": "MetaCU gate 적용범위와 상품군/채널 scope를 확인하세요.",
         "RERANK_DROPPED_ALL": "CUEmbeddingProfile, rerank prompt, 후보 evidence를 확인하세요.",
         "MISSING_POLICY_COVERAGE": "해당 PolicyHypernym과 ComplianceUnit/DisclosureRequirement 연결을 보강하세요.",
+        "NO_LEGAL_ELEMENT_MATCH": "AnchorFeatureSet과 CULegalElementProfile의 action_type/required_positive_features를 확인하세요.",
         "CU_PLAN_EMPTY": "Policy compiler와 CUEmbeddingProfile/PolicyHypernym 연결 상태를 확인하세요.",
     }.get(code, "Policy Graph와 후보검색 상태를 확인하세요.")
 
@@ -294,9 +444,45 @@ def judgments_by_anchor(judgments: list[LLMJudgment]) -> dict[str, list[LLMJudgm
     return rows
 
 
+def anchor_is_actionable_for_issues(graph: ReviewGraph, anchor_id: str) -> bool:
+    return anchor_display_role(graph, anchor_id) == "actionable"
+
+
+def anchor_display_role(graph: ReviewGraph, anchor_id: str) -> str:
+    anchor_by_id = {anchor.anchor_id: anchor for anchor in graph.anchors}
+    anchor = anchor_by_id.get(anchor_id)
+    if not anchor or anchor.anchor_type not in ACTIONABLE_ANCHOR_TYPES:
+        return "scope"
+    sentence_role = sentence_role_for_anchor(graph, anchor_id)
+    if sentence_role in {"condition_disclosure", "risk_disclosure", "protection_disclosure"}:
+        return "mitigation"
+    if sentence_role == "launch_notice":
+        return "scope"
+    return "actionable"
+
+
+def sentence_role_for_anchor(graph: ReviewGraph, anchor_id: str) -> str:
+    anchor_by_id = {anchor.anchor_id: anchor for anchor in graph.anchors}
+    claim_by_id = {claim.claim_id: claim for claim in graph.claims}
+    sentence_by_id = {sentence.sentence_id: sentence for sentence in graph.sentence_units}
+    anchor = anchor_by_id.get(anchor_id)
+    if not anchor:
+        return ""
+    claim = claim_by_id.get(anchor.claim_id)
+    if not claim:
+        return ""
+    sentence = sentence_by_id.get(claim.sentence_id)
+    return sentence.role if sentence else ""
+
+
 def plan_count_by_anchor(graph: ReviewGraph) -> dict[str, int]:
     counts: dict[str, int] = {}
+    seen: set[tuple[str, str]] = set()
     for item in graph.cu_plan:
+        key = (item.anchor_id, item.cu_id)
+        if key in seen:
+            continue
+        seen.add(key)
         counts[item.anchor_id] = counts.get(item.anchor_id, 0) + 1
     return counts
 

@@ -7,8 +7,10 @@ import pytest
 
 import product_facts as product_facts_module
 from claim_modeling import fold_qualifier_anchors_into_parent_claims
+from cross_encoder_reranker import with_cross_encoder_score
 from context_extractor import LLMContextExtractor
 from judge import LLMComplianceJudge
+from legal_elements import canonicalize_required_features
 from llm_gateway import LLMGateway
 from evaluate import (
     EvaluationLabels,
@@ -19,14 +21,18 @@ from evaluate import (
     summarize_prediction,
 )
 from normalizer import PolicyGuidedNormalizer, normalization_schema_for_allowed_ids
+from policy_evidence import build_policy_evidence_chains
 from policy_compiler import validate_compiler_output
 from product_facts import ProductFactAnalyzer
-from retriever import PolicyRetriever, candidate_allowed_for_anchor, candidate_from_row
+from retriever import PolicyRetriever, candidate_allowed_for_anchor, candidate_from_row, with_legal_element_gate, with_scope_gate
 from revision import LLMRevisionSuggester
+from router import build_output
 from schemas import (
+    AnchorFeatureSet,
     Claim,
     ClaimQualifier,
     ContextAnchor,
+    CULegalElementProfile,
     CUPlanItem,
     EvidenceWindow,
     LLMJudgment,
@@ -34,11 +40,253 @@ from schemas import (
     PolicyHypernymProposal,
     ReviewGraph,
     ReviewInput,
+    SentenceUnit,
     Span,
 )
 from vocabulary_governance import validate_governance_output
 from workflow import GraphComplianceCCGWorkflow
 from server import runtime_error_detail
+
+
+def sample_plan_item_for_policy_chain() -> CUPlanItem:
+    return CUPlanItem(
+        plan_item_id="plan_guarantee",
+        anchor_id="anchor_guarantee",
+        cu_id="cu_guarantee_mislead",
+        principle="광고규제",
+        source_article="금소법 제22조",
+        subject="수익 보장 오인 가능 표현",
+        condition="예금 광고에서 최고금리 또는 수익을 단정적으로 표시하는 경우",
+        constraint="조건과 한도를 명확히 고지해야 함",
+        context="deposit_advertising",
+        legal_evidence_ids=["premise_rate_disclosure"],
+        evidence_texts=["금융상품 광고는 소비자가 오인하지 않도록 명확하고 공정하게 전달해야 한다."],
+        retrieval_scores={"combined_score": 0.91},
+        rerank_score=0.91,
+        selection_reason="보장/확정/조건 누락 표현과 직접 관련된 CU입니다.",
+        legal_element_profile=CULegalElementProfile(
+            profile_id="profile_guarantee",
+            cu_id="cu_guarantee_mislead",
+            action_type="guarantee_or_return_misleading",
+            required_positive_features=["guarantee_expression", "certainty_expression"],
+            applicability_scope=["deposit", "web_page"],
+            risk_title="확정 보장 수익 표현으로 수익 보장 오인 가능",
+            exception_eligible=False,
+        ),
+        matched_required_features=["guarantee_expression", "certainty_expression", "unconditional_expression"],
+        legal_element_match=True,
+        risk_title="확정 보장 수익 표현으로 수익 보장 오인 가능",
+    )
+
+
+def test_policy_evidence_chains_are_split_by_purpose() -> None:
+    plan = sample_plan_item_for_policy_chain()
+
+    chains = build_policy_evidence_chains(
+        review_run_id="run_policy_chain",
+        cu_plan=[plan],
+        disclosure_requirements=[
+            {
+                "id": "disclosure_rate_condition",
+                "label": "금리 및 우대조건 표시",
+                "why": "최고금리 표시 시 적용 조건과 기간을 함께 안내해야 함",
+                "source": "은행 광고심의 기준",
+            }
+        ],
+        product_context={"product_group": "deposit"},
+    )
+
+    assert chains["legal_basis_chains"][0]["status"] == "FOUND"
+    assert chains["legal_basis_chains"][0]["basis_nodes"][0]["label"] == "금소법 제22조"
+    assert chains["disclosure_chains"][0]["status"] == "FOUND"
+    assert chains["disclosure_chains"][0]["disclosure_nodes"][0]["label"] == "금리 및 우대조건 표시"
+    assert chains["exception_chains"][0]["status"] == "NOT_FOUND"
+    assert any(row["chain_type"] == "ExceptionChain" for row in chains["chain_diagnostics"])
+
+
+def test_evidence_window_uses_only_found_policy_chains_for_judge() -> None:
+    plan = sample_plan_item_for_policy_chain()
+    chains = {
+        "legal_basis_chains": [
+            {
+                "status": "FOUND",
+                "anchor_id": plan.anchor_id,
+                "plan_item_id": plan.plan_item_id,
+                "summary": "금소법 제22조 광고규제 근거",
+            }
+        ],
+        "disclosure_chains": [
+            {
+                "status": "FOUND",
+                "anchor_id": plan.anchor_id,
+                "plan_item_id": plan.plan_item_id,
+                "summary": "금리 및 우대조건 표시 필요",
+            }
+        ],
+        "exception_chains": [
+            {
+                "status": "INCOMPLETE",
+                "anchor_id": plan.anchor_id,
+                "plan_item_id": plan.plan_item_id,
+                "summary": "예외 chain 미완성",
+            }
+        ],
+        "chain_diagnostics": [],
+    }
+
+    window = LLMComplianceJudge(FakeLLM()).build_evidence_windows(
+        review_run_id="run_policy_chain",
+        anchors=[
+            ContextAnchor(
+                anchor_id=plan.anchor_id,
+                anchor_type="claim_anchor",
+                claim_id="claim_1",
+                span=Span(0, 10, "누구나 연 5% 확정 보장"),
+                facts=["확정 보장 수익 표현"],
+                hypernyms=[],
+            )
+        ],
+        plan=[plan],
+        policy_evidence_chains=chains,
+    )[0]
+
+    assert window.policy_evidence_chains["legal_basis_chains"][0]["summary"] == "금소법 제22조 광고규제 근거"
+    assert window.policy_evidence_chains["disclosure_chains"][0]["summary"] == "금리 및 우대조건 표시 필요"
+    assert window.policy_evidence_chains["exception_chains"] == []
+
+
+class DuplicateJudgmentLLM(LLMGateway):
+    def structured(self, *, name, system, user, schema):
+        if name != "graphcompliance_cu_judgment":
+            raise AssertionError(f"unexpected LLM call: {name}")
+        plan_item_id = re.search(r"'plan_item_id': '([^']+)'", user).group(1)
+        return {
+            "judgments": [
+                {
+                    "plan_item_id": plan_item_id,
+                    "verdict": "NON_COMPLIANT",
+                    "score": 0.9,
+                    "why": "확정 보장 표현입니다.",
+                    "evidence_span": "누구나 연 5% 확정 보장",
+                    "used_policy_evidence": ["legal_chunk_1"],
+                },
+                {
+                    "plan_item_id": plan_item_id,
+                    "verdict": "NON_COMPLIANT",
+                    "score": 0.7,
+                    "why": "중복 판단입니다.",
+                    "evidence_span": "누구나 연 5% 확정 보장",
+                    "used_policy_evidence": ["legal_chunk_1"],
+                },
+            ]
+        }
+
+
+def test_judge_deduplicates_repeated_rows_for_one_plan_item() -> None:
+    plan = sample_plan_item_for_policy_chain()
+    anchor = ContextAnchor(
+        anchor_id=plan.anchor_id,
+        anchor_type="claim_anchor",
+        claim_id="claim_1",
+        span=Span(0, 14, "누구나 연 5% 확정 보장"),
+        facts=["확정 보장 표현"],
+        hypernyms=[],
+    )
+    window = EvidenceWindow(
+        evidence_window_id="window_1",
+        plan_item_id=plan.plan_item_id,
+        anchor_id=plan.anchor_id,
+        facts=anchor.facts,
+        legal_evidence_ids=plan.legal_evidence_ids,
+        legal_evidence_texts=plan.evidence_texts,
+    )
+
+    judgments = LLMComplianceJudge(DuplicateJudgmentLLM()).judge(
+        review_run_id="run_duplicate_judgment",
+        anchors=[anchor],
+        plan=[plan],
+        windows=[window],
+    )
+
+    assert len(judgments) == 1
+    assert judgments[0].score == 0.9
+
+
+def test_condition_disclosure_sentence_is_displayed_as_mitigation_not_issue() -> None:
+    claim = Claim(
+        claim_id="claim_disclosure",
+        text="우대조건과 가입기간에 따라 실제 적용 금리는 달라질 수 있습니다.",
+        span=Span(0, 35, "우대조건과 가입기간에 따라 실제 적용 금리는 달라질 수 있습니다."),
+        meaning="금리 적용 조건이 달라질 수 있음을 고지",
+        implicature="소비자가 조건을 확인해야 함",
+        consumer_effect="확정 보장 인상을 완화",
+        risk_hypernym="조건 고지",
+        risk_severity="LOW",
+        sentence_id="sentence_disclosure",
+    )
+    anchor = ContextAnchor(
+        anchor_id="anchor_disclosure",
+        anchor_type="claim_anchor",
+        claim_id=claim.claim_id,
+        span=claim.span,
+        facts=["우대조건과 가입기간에 따라 금리가 달라질 수 있음을 고지"],
+        hypernyms=[],
+    )
+    plan = CUPlanItem(
+        plan_item_id="plan_disclosure",
+        anchor_id=anchor.anchor_id,
+        cu_id="cu_rate_disclosure",
+        principle="광고규제",
+        source_article="금소법 제22조",
+        subject="금리 조건 고지",
+        condition="최고금리 표시 시",
+        constraint="조건을 명확히 표시해야 함",
+        context="deposit_advertising",
+        legal_evidence_ids=["legal_chunk_1"],
+        evidence_texts=["최고금리 표시 시 조건을 명확히 표시해야 한다."],
+        retrieval_scores={"combined_score": 0.8},
+        rerank_score=0.8,
+        selection_reason="조건 고지 확인",
+    )
+    judgment = LLMJudgment(
+        judgment_id="judgment_disclosure",
+        plan_item_id=plan.plan_item_id,
+        anchor_id=anchor.anchor_id,
+        cu_id=plan.cu_id,
+        verdict="NON_COMPLIANT",
+        score=0.86,
+        why="테스트상 위험 판단이 반환되어도 condition_disclosure 문장은 issue로 승격하지 않는다.",
+        evidence_span=anchor.span.text,
+        used_policy_evidence=["legal_chunk_1"],
+    )
+    graph = ReviewGraph(
+        review_run_id="run_disclosure",
+        ad_draft_id="ad_disclosure",
+        content_hash="hash_disclosure",
+        sentence_units=[
+            SentenceUnit(
+                sentence_id="sentence_disclosure",
+                index=1,
+                text=claim.text,
+                span=claim.span,
+                role="condition_disclosure",
+                local_meaning=claim.meaning,
+                context_effect="위험 claim을 완화",
+                risk_level="LOW",
+            )
+        ],
+        claims=[claim],
+        anchors=[anchor],
+        cu_plan=[plan],
+        judgments=[judgment],
+    )
+
+    output = build_output(ReviewInput(content_text=claim.text), graph)
+
+    assert output.detected_issues == []
+    assert output.anchor_display[0]["display_role"] == "mitigation"
+    assert output.anchor_display[0]["display_verdict"] == "MITIGATION"
+    assert output.highlight_spans[0]["verdict"] == "MITIGATION"
 
 
 class FakeOpenAIClient:
@@ -473,6 +721,19 @@ class FakeRetriever(PolicyRetriever):
                 legal_evidence_ids=["legal_chunk_1"],
                 evidence_texts=["과거 실적은 미래 수익률을 보장하지 않는다는 내용을 표시해야 한다."],
                 retrieval_scores={"active_for_gate": 1.0, "combined_score": 0.95},
+                legal_element_profile=CULegalElementProfile(
+                    profile_id="profile_past_performance",
+                    cu_id="cu_past_performance",
+                    action_type="past_performance_or_future_return",
+                    required_positive_features=["past_performance_claim"],
+                    applicability_scope=["investment"],
+                    risk_title="과거 성과를 미래 수익으로 오인시킬 가능성",
+                    exception_eligible=True,
+                    rationale="과거 성과 표시에는 미래 수익 보장 오인 방지 고지가 필요함",
+                ),
+                matched_required_features=["past_performance_claim"],
+                legal_element_match=True,
+                risk_title="과거 성과를 미래 수익으로 오인시킬 가능성",
             )
         ]
 
@@ -491,6 +752,62 @@ class FakeWriter:
 
     def save(self, review_input: ReviewInput, graph: ReviewGraph) -> None:
         self.saved.append(graph)
+
+
+class FakeCrossEncoderReranker:
+    @property
+    def enabled(self) -> bool:
+        return True
+
+    def rerank(self, *, candidates_by_anchor, anchors, limit_per_anchor: int):
+        reranked = {}
+        for anchor_id, candidates in candidates_by_anchor.items():
+            scored = [
+                with_cross_encoder_score(candidate, 0.95 if candidate.cu_id == "cu_past_performance" else 0.10)
+                for candidate in candidates
+            ]
+            scored.sort(key=lambda candidate: candidate.retrieval_scores["cross_encoder_combined_score"], reverse=True)
+            reranked[anchor_id] = scored[:limit_per_anchor]
+        return reranked
+
+
+class TwoCandidateRetriever(FakeRetriever):
+    def candidates_for_anchor(self, *, workspace_id: str, anchor: ContextAnchor, product_group: str = "auto", channel: str = "", limit: int = 12):
+        relevant = super().candidates_for_anchor(
+            workspace_id=workspace_id,
+            anchor=anchor,
+            product_group=product_group,
+            channel=channel,
+            limit=limit,
+        )[0]
+        broad = PolicyCandidate(
+            cu_id="cu_broad_ad",
+            principle="광고규제",
+            subject="일반 금융상품 광고",
+            condition="금융상품 광고를 하는 경우",
+            constraint="명확하고 공정하게 전달해야 한다",
+            context="financial_product_advertising",
+            cu_type="ACTOR_CU",
+            source_article="금소법 제22조",
+            active_for_gate=True,
+            matched_hypernym_ids=["policy_hypernym_past_performance"],
+            legal_evidence_ids=["legal_chunk_broad"],
+            evidence_texts=["광고는 명확하고 공정해야 한다."],
+            retrieval_scores={"active_for_gate": 1.0, "combined_score": 0.99, "legal_element_match": 1.0},
+            legal_element_profile=CULegalElementProfile(
+                profile_id="profile_broad",
+                cu_id="cu_broad_ad",
+                action_type="past_performance_or_future_return",
+                required_positive_features=["past_performance_claim"],
+                applicability_scope=["investment"],
+                risk_title="일반 광고 명확성 검토",
+                exception_eligible=False,
+            ),
+            matched_required_features=["past_performance_claim"],
+            legal_element_match=True,
+            risk_title="일반 광고 명확성 검토",
+        )
+        return [broad, relevant]
 
 
 def test_workflow_builds_cuplan_judges_and_persists() -> None:
@@ -521,6 +838,34 @@ def test_workflow_builds_cuplan_judges_and_persists() -> None:
     assert output.disclosure_requirements
     assert writer.saved
     assert llm.exception_calls == 1
+
+
+def test_workflow_uses_cross_encoder_reranker_before_llm_rerank() -> None:
+    llm = FakeLLM(verdict="NON_COMPLIANT")
+    workflow = GraphComplianceCCGWorkflow(
+        llm=llm,
+        retriever=TwoCandidateRetriever(),
+        writer=FakeWriter(),
+        cross_encoder_reranker=FakeCrossEncoderReranker(),
+    )
+
+    events = list(
+        workflow.review_events(
+            ReviewInput(
+                dataset_item_id="demo_cross_encoder_001",
+                content_text="지난 3년간 조기상환 성공률이 높았던 ELS는 중위험 투자자에게 좋은 선택입니다.",
+            )
+        )
+    )
+
+    output = next(event["result"] for event in events if event["event"] == "result")
+    cross_encoder_event = next(
+        event for event in events if event["event"] == "step_completed" and event["step"] == "Cross-encoder CU rerank"
+    )
+
+    assert cross_encoder_event["counts"]["enabled"] == 1
+    assert output.cu_plan[0]["cu_id"] == "cu_past_performance"
+    assert output.cu_plan[0]["retrieval_scores"]["cross_encoder_score"] == pytest.approx(0.95)
 
 
 def test_context_extractor_prompt_preserves_risky_claims_separately() -> None:
@@ -763,9 +1108,9 @@ def test_empty_cuplan_routes_to_needs_review() -> None:
 
     assert output.final_verdict == "needs_review"
     assert output.detected_issues == []
-    assert output.system_review_items[0]["risk_code"] == "MISSING_POLICY_COVERAGE"
+    assert output.system_review_items[0]["risk_code"] == "NO_LEGAL_ELEMENT_MATCH"
     assert output.anchor_display[0]["display_verdict"] == "RETRIEVAL_FAILURE"
-    assert output.anchor_display[0]["retrieval_failure_code"] == "MISSING_POLICY_COVERAGE"
+    assert output.anchor_display[0]["retrieval_failure_code"] == "NO_LEGAL_ELEMENT_MATCH"
 
 
 def test_track_b_overall_impression_routes_to_revise() -> None:
@@ -876,6 +1221,13 @@ def test_candidate_scoring_accepts_canonical_name_overlap() -> None:
             "matched_hypernym_ids": ["policy_hypernym_connected_duplicate"],
             "matched_hypernym_names": ["보장 금지"],
             "profile_embedding": [1.0, 0.0],
+            "legal_profile_id": "legal_profile_false_ad",
+            "action_type": "guarantee_or_return_misleading",
+            "required_positive_features": ["guarantee_expression"],
+            "applicability_scope": ["deposit"],
+            "risk_title": "확정·보장 표현으로 수익 보장 오인 가능",
+            "exception_eligible": False,
+            "legal_profile_rationale": "보장 표현은 오인 가능 광고에 해당할 수 있다.",
             "evidence": [{"id": "premise_1", "text": "보장 표현은 오인 가능 광고에 해당할 수 있다."}],
         },
         anchor_embedding=[1.0, 0.0],
@@ -913,6 +1265,325 @@ def test_review_procedure_candidate_is_not_actionable_cu() -> None:
     )
 
     assert candidate_allowed_for_anchor(candidate, anchor, product_group="deposit") is False
+
+
+def test_legal_element_gate_excludes_comparison_cu_without_comparison_feature() -> None:
+    anchor = ContextAnchor(
+        anchor_id="anchor_guarantee",
+        anchor_type="claim_anchor",
+        claim_id="claim_1",
+        span=Span(start=0, end=17, text="누구나 연 5% 확정 보장"),
+        facts=["ClaimQualifier role=target_scope text='누구나'", "ClaimQualifier role=guarantee text='보장'"],
+        hypernyms=[],
+        feature_set=AnchorFeatureSet(
+            feature_set_id="feature_1",
+            anchor_id="anchor_guarantee",
+            action_types=["guarantee_or_return_misleading", "condition_or_scope_missing"],
+            positive_features=["universal_scope_expression", "guarantee_expression", "certainty_expression"],
+            missing_context=["no_comparison_target"],
+            evidence=["누구나/확정/보장 qualifier"],
+        ),
+    )
+    comparison_candidate = PolicyCandidate(
+        cu_id="cu_comparison_ad",
+        principle="광고규제",
+        subject="비교광고",
+        condition="다른 금융상품과 비교하는 광고",
+        constraint="객관적 근거 없이 우월하게 표시해서는 안 된다",
+        context="financial_advertising",
+        cu_type="ACTOR_CU",
+        source_article="금소법 제22조",
+        active_for_gate=True,
+        matched_hypernym_ids=["policy_hypernym_ad"],
+        legal_evidence_ids=[],
+        evidence_texts=[],
+        retrieval_scores={"vector_score": 0.99, "hypernym_overlap": 1.0, "active_for_gate": 1.0, "combined_score": 0.99},
+        legal_element_profile=CULegalElementProfile(
+            profile_id="profile_comparison",
+            cu_id="cu_comparison_ad",
+            action_type="comparison_ad",
+            required_positive_features=["comparison_target", "comparative_superiority_claim"],
+            applicability_scope=["deposit"],
+            risk_title="비교·우월 표현에 대한 객관 근거 필요",
+            exception_eligible=False,
+        ),
+    )
+
+    gated = with_legal_element_gate(comparison_candidate, anchor)
+
+    assert gated.legal_element_match is False
+    assert "action_type_not_supported:comparison_ad" in gated.missing_required_features
+    assert candidate_allowed_for_anchor(gated, anchor, product_group="deposit") is False
+
+
+def test_canonicalizes_existing_free_text_required_features_for_runtime_gate() -> None:
+    free_text_features = [
+        "광고 문구/자료가 ‘보장성 상품 만기환급금이 확정적으로 지급되는 것으로 오인’되게 표시됨",
+        "불확실한 사항을 단정적 판단으로 제공하거나 확실하다고 오인하게 할 소지가 있음",
+    ]
+
+    assert canonicalize_required_features(free_text_features) == ["guarantee_expression", "certainty_expression"]
+
+    anchor = ContextAnchor(
+        anchor_id="anchor_guarantee",
+        anchor_type="claim_anchor",
+        claim_id="claim_1",
+        span=Span(start=0, end=17, text="누구나 연 5% 확정 보장"),
+        facts=["ClaimQualifier role=guarantee text='보장'", "ClaimQualifier role=certainty text='확정'"],
+        hypernyms=[],
+        feature_set=AnchorFeatureSet(
+            feature_set_id="feature_free_text",
+            anchor_id="anchor_guarantee",
+            action_types=["guarantee_or_return_misleading"],
+            positive_features=["guarantee_expression", "certainty_expression"],
+            missing_context=[],
+            evidence=["확정/보장 qualifier"],
+        ),
+    )
+    legacy_candidate = PolicyCandidate(
+        cu_id="cu_legacy_guarantee",
+        principle="광고규제",
+        subject="보장 표현",
+        condition="확정 보장처럼 오인되는 광고",
+        constraint="오인 유발 광고 금지",
+        context="financial_advertising",
+        cu_type="ACTOR_CU",
+        source_article="금소법 제22조",
+        active_for_gate=True,
+        matched_hypernym_ids=["policy_hypernym_ad"],
+        legal_evidence_ids=[],
+        evidence_texts=[],
+        retrieval_scores={"vector_score": 0.9, "hypernym_overlap": 1.0, "active_for_gate": 1.0, "combined_score": 0.9},
+        legal_element_profile=CULegalElementProfile(
+            profile_id="profile_legacy_guarantee",
+            cu_id="cu_legacy_guarantee",
+            action_type="guarantee_or_return_misleading",
+            required_positive_features=free_text_features,
+            applicability_scope=["deposit"],
+            risk_title="확정·보장 표현으로 수익 보장 오인 가능",
+            exception_eligible=False,
+        ),
+    )
+
+    gated = with_legal_element_gate(legacy_candidate, anchor)
+
+    assert gated.legal_element_match is True
+    assert gated.matched_required_features == ["certainty_expression", "guarantee_expression"]
+    assert gated.legal_element_profile
+    assert gated.legal_element_profile.required_positive_features == ["guarantee_expression", "certainty_expression"]
+
+
+def test_legal_element_gate_allows_comparison_cu_with_comparison_feature() -> None:
+    anchor = ContextAnchor(
+        anchor_id="anchor_compare",
+        anchor_type="claim_anchor",
+        claim_id="claim_1",
+        span=Span(start=0, end=12, text="타 은행보다 높은 금리"),
+        facts=["타 은행과 비교해 높은 금리를 주장"],
+        hypernyms=[],
+        feature_set=AnchorFeatureSet(
+            feature_set_id="feature_2",
+            anchor_id="anchor_compare",
+            action_types=["comparison_ad"],
+            positive_features=["comparison_target", "comparative_superiority_claim"],
+            missing_context=[],
+            evidence=["비교 대상과 우월 표현 있음"],
+        ),
+    )
+    comparison_candidate = PolicyCandidate(
+        cu_id="cu_comparison_ad",
+        principle="광고규제",
+        subject="비교광고",
+        condition="다른 금융상품과 비교하는 광고",
+        constraint="객관적 근거 없이 우월하게 표시해서는 안 된다",
+        context="financial_advertising",
+        cu_type="ACTOR_CU",
+        source_article="금소법 제22조",
+        active_for_gate=True,
+        matched_hypernym_ids=["policy_hypernym_ad"],
+        legal_evidence_ids=[],
+        evidence_texts=[],
+        retrieval_scores={"vector_score": 0.88, "hypernym_overlap": 1.0, "active_for_gate": 1.0, "combined_score": 0.88},
+        legal_element_profile=CULegalElementProfile(
+            profile_id="profile_comparison",
+            cu_id="cu_comparison_ad",
+            action_type="comparison_ad",
+            required_positive_features=["comparison_target", "comparative_superiority_claim"],
+            applicability_scope=["deposit"],
+            risk_title="비교·우월 표현에 대한 객관 근거 필요",
+            exception_eligible=False,
+        ),
+    )
+
+    gated = with_legal_element_gate(comparison_candidate, anchor)
+
+    assert gated.legal_element_match is True
+    assert gated.matched_required_features == ["comparative_superiority_claim", "comparison_target"]
+    assert candidate_allowed_for_anchor(gated, anchor, product_group="deposit") is True
+
+
+def test_scope_anchor_is_not_actionable_even_with_legal_element_overlap() -> None:
+    anchor = ContextAnchor(
+        anchor_id="anchor_product_scope",
+        anchor_type="product_anchor",
+        claim_id="claim_1",
+        span=Span(start=0, end=12, text="JB 특판예금"),
+        facts=["상품 scope"],
+        hypernyms=[],
+        feature_set=AnchorFeatureSet(
+            feature_set_id="feature_scope",
+            anchor_id="anchor_product_scope",
+            action_types=["guarantee_or_return_misleading"],
+            positive_features=["guarantee_expression"],
+            missing_context=["scope_anchor_not_actionable_by_default"],
+            evidence=["scope anchor"],
+        ),
+    )
+    candidate = PolicyCandidate(
+        cu_id="cu_guarantee",
+        principle="광고규제",
+        subject="보장 표현",
+        condition="확정 보장 표현",
+        constraint="오인 유발 광고 금지",
+        context="financial_advertising",
+        cu_type="ACTOR_CU",
+        source_article="금소법 제22조",
+        active_for_gate=True,
+        matched_hypernym_ids=["policy_hypernym_ad"],
+        legal_evidence_ids=[],
+        evidence_texts=[],
+        retrieval_scores={"vector_score": 0.9, "hypernym_overlap": 1.0, "active_for_gate": 1.0, "combined_score": 0.9},
+        legal_element_profile=CULegalElementProfile(
+            profile_id="profile_guarantee",
+            cu_id="cu_guarantee",
+            action_type="guarantee_or_return_misleading",
+            required_positive_features=["guarantee_expression"],
+            applicability_scope=["deposit"],
+            risk_title="확정·보장 표현으로 수익 보장 오인 가능",
+            exception_eligible=False,
+        ),
+    )
+
+    gated = with_legal_element_gate(candidate, anchor)
+
+    assert gated.legal_element_match is True
+    assert candidate_allowed_for_anchor(gated, anchor, product_group="deposit") is False
+
+
+def test_profile_applicability_scope_suppresses_wrong_product_group() -> None:
+    candidate = PolicyCandidate(
+        cu_id="cu_investment_only",
+        principle="광고규제",
+        subject="상품 위험고지",
+        condition="상품 광고",
+        constraint="중요 위험을 고지해야 한다",
+        context="financial_advertising",
+        cu_type="ACTOR_CU",
+        source_article="금소법 제22조",
+        active_for_gate=True,
+        matched_hypernym_ids=["policy_hypernym_risk"],
+        legal_evidence_ids=[],
+        evidence_texts=[],
+        retrieval_scores={"vector_score": 0.91, "hypernym_overlap": 1.0, "active_for_gate": 1.0, "combined_score": 0.91},
+        legal_element_profile=CULegalElementProfile(
+            profile_id="profile_investment",
+            cu_id="cu_investment_only",
+            action_type="required_disclosure_missing",
+            required_positive_features=["benefit_claim_expression"],
+            applicability_scope=["investment"],
+            risk_title="투자성 상품 위험고지 누락 가능",
+            exception_eligible=True,
+        ),
+        legal_element_match=True,
+    )
+
+    gated = with_scope_gate(candidate, product_group="deposit", channel="web_page")
+
+    assert gated.gate_status == "suppressed"
+    assert gated.retrieval_scores["scope_gate"] == 0.0
+    assert gated.retrieval_scores["scope_gate_reason"] == "product_scope_mismatch"
+
+
+def test_profile_applicability_scope_allows_auto_product_group_probe() -> None:
+    candidate = PolicyCandidate(
+        cu_id="cu_investment_only",
+        principle="광고규제",
+        subject="투자성 상품 위험고지",
+        condition="투자성 상품 광고",
+        constraint="원금손실 가능성을 고지해야 한다",
+        context="financial_investment_advertising",
+        cu_type="ACTOR_CU",
+        source_article="금소법 제22조",
+        active_for_gate=True,
+        matched_hypernym_ids=["policy_hypernym_risk"],
+        legal_evidence_ids=[],
+        evidence_texts=[],
+        retrieval_scores={"vector_score": 0.91, "hypernym_overlap": 1.0, "active_for_gate": 1.0, "combined_score": 0.91},
+        legal_element_profile=CULegalElementProfile(
+            profile_id="profile_investment",
+            cu_id="cu_investment_only",
+            action_type="required_disclosure_missing",
+            required_positive_features=["benefit_claim_expression"],
+            applicability_scope=["investment"],
+            risk_title="투자성 상품 위험고지 누락 가능",
+            exception_eligible=True,
+        ),
+        legal_element_match=True,
+    )
+
+    gated = with_scope_gate(candidate, product_group="auto", channel="web_page")
+
+    assert gated.gate_status == "active"
+    assert gated.retrieval_scores["scope_gate"] == 1.0
+
+
+def test_legal_element_gate_excludes_unfair_sales_cu_without_coercion_context() -> None:
+    anchor = ContextAnchor(
+        anchor_id="anchor_guarantee",
+        anchor_type="claim_anchor",
+        claim_id="claim_1",
+        span=Span(start=0, end=17, text="누구나 연 5% 확정 보장"),
+        facts=["보장성 금리 표현"],
+        hypernyms=[],
+        feature_set=AnchorFeatureSet(
+            feature_set_id="feature_3",
+            anchor_id="anchor_guarantee",
+            action_types=["guarantee_or_return_misleading"],
+            positive_features=["guarantee_expression"],
+            missing_context=["no_superior_position_or_coercion_context"],
+            evidence=["보장 qualifier"],
+        ),
+    )
+    unfair_candidate = PolicyCandidate(
+        cu_id="cu_unfair_sales",
+        principle="불공정영업행위 금지",
+        subject="우월적 지위 이용",
+        condition="판매 과정에서 소비자에게 부당한 요구를 하는 경우",
+        constraint="다른 계약 강요, 부당한 담보 또는 보증 요구 금지",
+        context="sales_process",
+        cu_type="ACTOR_CU",
+        source_article="금소법 제20조",
+        active_for_gate=True,
+        matched_hypernym_ids=["policy_hypernym_ad"],
+        legal_evidence_ids=[],
+        evidence_texts=[],
+        retrieval_scores={"vector_score": 0.92, "hypernym_overlap": 1.0, "active_for_gate": 1.0, "combined_score": 0.92},
+        legal_element_profile=CULegalElementProfile(
+            profile_id="profile_unfair",
+            cu_id="cu_unfair_sales",
+            action_type="unfair_superior_position_sales",
+            required_positive_features=["coercion_or_tie_in_context", "collateral_or_guarantee_demand", "sales_process_context"],
+            applicability_scope=["loan"],
+            risk_title="우월적 지위 이용 또는 끼워팔기 정황 검토",
+            exception_eligible=False,
+        ),
+    )
+
+    gated = with_legal_element_gate(unfair_candidate, anchor)
+
+    assert gated.legal_element_match is False
+    assert "action_type_not_supported:unfair_superior_position_sales" in gated.missing_required_features
+    assert candidate_allowed_for_anchor(gated, anchor, product_group="deposit") is False
 
 
 def test_normalizer_rejects_unknown_policy_hypernym() -> None:
@@ -998,11 +1669,60 @@ def test_compiler_rejects_english_only_hypernym_labels() -> None:
                     "embedding_text": "",
                 }
             ],
+            "cu_legal_element_profiles": [
+                {
+                    "cu_id": "cu_1",
+                    "action_type": "required_disclosure_missing",
+                    "required_positive_features": [],
+                    "applicability_scope": [],
+                    "risk_title": "필수 고지 확인 필요",
+                    "exception_eligible": True,
+                    "rationale": "",
+                }
+            ],
         },
         {"cu_1"},
     )
 
     assert any("non-Korean canonical" in error for error in errors)
+
+
+def test_compiler_rejects_free_text_legal_element_features() -> None:
+    errors = validate_compiler_output(
+        {
+            "policy_hypernyms": [
+                {
+                    "name": "보장 금지",
+                    "domain": "risk",
+                    "description": "확정 보장 표현 관련 정책어",
+                    "priority": 1,
+                }
+            ],
+            "premises": [],
+            "cu_profiles": [
+                {
+                    "cu_id": "cu_1",
+                    "subject_hypernym_names": ["보장 금지"],
+                    "profile_summary": "",
+                    "embedding_text": "",
+                }
+            ],
+            "cu_legal_element_profiles": [
+                {
+                    "cu_id": "cu_1",
+                    "action_type": "guarantee_or_return_misleading",
+                    "required_positive_features": ["보장성 상품이 확정적으로 지급되는 것으로 오인되는 문구"],
+                    "applicability_scope": [],
+                    "risk_title": "확정·보장 표현으로 수익 보장 오인 가능",
+                    "exception_eligible": False,
+                    "rationale": "",
+                }
+            ],
+        },
+        {"cu_1"},
+    )
+
+    assert any("unknown required_positive_features" in error for error in errors)
 
 
 def test_vocabulary_governance_rejects_english_only_canonical_name() -> None:

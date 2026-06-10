@@ -8,12 +8,15 @@ from uuid import uuid4
 
 from claim_modeling import fold_qualifier_anchors_into_parent_claims
 from context_extractor import LLMContextExtractor, build_context_triples
+from cross_encoder_reranker import CUReranker, NoopCUReranker, create_cross_encoder_reranker_from_env
 from jb_data_context import build_product_context
 from judge import LLMComplianceJudge
+from legal_elements import attach_anchor_feature_sets
 from llm_gateway import LLMGateway
 from normalizer import PolicyGuidedNormalizer
 from overall_impression import LLMOverallImpressionJudge
 from persistence import Neo4jReviewWriter, ReviewWriter
+from policy_evidence import build_policy_evidence_chains
 from planner import LLMCUPlanner
 from product_facts import ProductFactAnalyzer
 from retriever import Neo4jPolicyRetriever, PolicyRetriever
@@ -31,6 +34,7 @@ class GraphComplianceCCGWorkflow:
         llm: LLMGateway | None = None,
         retriever: PolicyRetriever | None = None,
         writer: ReviewWriter | None = None,
+        cross_encoder_reranker: CUReranker | None = None,
     ) -> None:
         self.llm = llm or LLMGateway()
         self.extractor = LLMContextExtractor(self.llm)
@@ -42,6 +46,14 @@ class GraphComplianceCCGWorkflow:
         self.product_facts = ProductFactAnalyzer(self.llm)
         self.retriever = retriever or Neo4jPolicyRetriever()
         self.writer = writer or Neo4jReviewWriter()
+        if cross_encoder_reranker is not None:
+            self.cross_encoder_reranker = cross_encoder_reranker
+        elif llm is not None or retriever is not None or writer is not None:
+            # Tests and embedded harnesses often inject fake dependencies and
+            # should not implicitly download/load a local cross-encoder model.
+            self.cross_encoder_reranker = NoopCUReranker()
+        else:
+            self.cross_encoder_reranker = create_cross_encoder_reranker_from_env()
 
     def review(self, review_input: ReviewInput) -> ReviewOutput:
         output: ReviewOutput | None = None
@@ -136,16 +148,27 @@ class GraphComplianceCCGWorkflow:
             top_n=5,
         )
         anchors = fold_qualifier_anchors_into_parent_claims(anchors, claims)
+        anchors, anchor_feature_sets = attach_anchor_feature_sets(
+            review_run_id=review_run_id,
+            anchors=anchors,
+            claims=claims,
+        )
         yield workflow_event(
             "step_completed",
             "Policy normalization",
             review_run_id=review_run_id,
             summary=f"{len(anchors)} anchors normalized",
-            counts={"anchors": len(anchors), "hypernym_proposals": sum(len(anchor.hypernyms) for anchor in anchors)},
+            counts={
+                "anchors": len(anchors),
+                "hypernym_proposals": sum(len(anchor.hypernyms) for anchor in anchors),
+                "anchor_feature_sets": len(anchor_feature_sets),
+            },
             sample=[
                 {
                     "anchor": anchor.span.text,
                     "hypernyms": [proposal.hypernym for proposal in anchor.hypernyms],
+                    "action_types": anchor.feature_set.action_types if anchor.feature_set else [],
+                    "positive_features": anchor.feature_set.positive_features if anchor.feature_set else [],
                 }
                 for anchor in anchors[:5]
             ],
@@ -246,6 +269,45 @@ class GraphComplianceCCGWorkflow:
             ],
         )
 
+        yield workflow_event(
+            "step_started",
+            "Cross-encoder CU rerank",
+            review_run_id=review_run_id,
+            summary="Optionally rerank graph-retrieved CU candidates with a pairwise cross-encoder before LLM rerank.",
+        )
+        before_cross_encoder = sum(len(items) for items in candidates_by_anchor.values())
+        candidates_by_anchor = self.cross_encoder_reranker.rerank(
+            candidates_by_anchor=candidates_by_anchor,
+            anchors=anchors,
+            limit_per_anchor=8,
+        )
+        after_cross_encoder = sum(len(items) for items in candidates_by_anchor.values())
+        yield workflow_event(
+            "step_completed",
+            "Cross-encoder CU rerank",
+            review_run_id=review_run_id,
+            summary=(
+                f"{'enabled' if self.cross_encoder_reranker.enabled else 'disabled'} · "
+                f"{before_cross_encoder} -> {after_cross_encoder} candidates"
+            ),
+            counts={
+                "enabled": int(self.cross_encoder_reranker.enabled),
+                "before": before_cross_encoder,
+                "after": after_cross_encoder,
+            },
+            sample=[
+                {
+                    "anchor": anchor.span.text,
+                    "top_cu_ids": [candidate.cu_id for candidate in candidates_by_anchor.get(anchor.anchor_id, [])[:3]],
+                    "top_cross_encoder_scores": [
+                        candidate.retrieval_scores.get("cross_encoder_score")
+                        for candidate in candidates_by_anchor.get(anchor.anchor_id, [])[:3]
+                    ],
+                }
+                for anchor in anchors[:5]
+            ],
+        )
+
         yield workflow_event("step_started", "LLM CU rerank", review_run_id=review_run_id, summary="LLM reranks candidates into the final CUPlan.")
         cu_plan = self.planner.plan(
             review_run_id=review_run_id,
@@ -271,6 +333,36 @@ class GraphComplianceCCGWorkflow:
             sample=[{"cu_id": item.cu_id, "principle": item.principle, "anchor_id": item.anchor_id} for item in cu_plan[:5]],
         )
 
+        yield workflow_event(
+            "step_started",
+            "Policy evidence chains",
+            review_run_id=review_run_id,
+            summary="Build purpose-specific LegalBasis, Disclosure, and Exception chain summaries.",
+        )
+        policy_evidence_chains = build_policy_evidence_chains(
+            review_run_id=review_run_id,
+            cu_plan=cu_plan,
+            disclosure_requirements=disclosure_requirements,
+            product_context=product_context,
+        )
+        yield workflow_event(
+            "step_completed",
+            "Policy evidence chains",
+            review_run_id=review_run_id,
+            summary=(
+                f"{len(policy_evidence_chains['legal_basis_chains'])} legal · "
+                f"{len(policy_evidence_chains['disclosure_chains'])} disclosure · "
+                f"{len(policy_evidence_chains['exception_chains'])} exception"
+            ),
+            counts={
+                "legal_basis": len(policy_evidence_chains["legal_basis_chains"]),
+                "disclosure": len(policy_evidence_chains["disclosure_chains"]),
+                "exception": len(policy_evidence_chains["exception_chains"]),
+                "diagnostics": len(policy_evidence_chains["chain_diagnostics"]),
+            },
+            sample=to_jsonable(policy_evidence_chains["legal_basis_chains"][:2]),
+        )
+
         yield workflow_event("step_started", "Evidence window build", review_run_id=review_run_id, summary="Build narrow Anchor + CUPlan + Premise/LegalChunk windows for judge.")
         evidence_windows = self.judge.build_evidence_windows(
             review_run_id=review_run_id,
@@ -280,6 +372,7 @@ class GraphComplianceCCGWorkflow:
             context_frame=extraction.context_frame,
             sentence_units=extraction.sentence_units,
             context_influences=extraction.context_influences,
+            policy_evidence_chains=policy_evidence_chains,
         )
         yield workflow_event("step_completed", "Evidence window build", review_run_id=review_run_id, summary=f"{len(evidence_windows)} evidence windows", counts={"evidence_windows": len(evidence_windows)})
 
@@ -305,14 +398,20 @@ class GraphComplianceCCGWorkflow:
 
         yield workflow_event("step_started", "Exception override", review_run_id=review_run_id, summary="For NON_COMPLIANT judgments only, retrieve reference/exception closure and ask whether it mitigates the verdict.")
         exception_reviews = []
+        plan_by_item_id = {item.plan_item_id: item for item in cu_plan}
         for judgment in judgments:
             if judgment.verdict != "NON_COMPLIANT":
+                continue
+            plan_item = plan_by_item_id.get(judgment.plan_item_id)
+            if not plan_item or not plan_item.legal_element_profile or not plan_item.legal_element_profile.exception_eligible:
                 continue
             closure = self.retriever.exception_closure(
                 workspace_id=review_input.workspace_id,
                 cu_id=judgment.cu_id,
                 max_depth=4,
             )
+            if not exception_closure_has_mitigation_evidence(closure):
+                continue
             exception_reviews.append(
                 self.judge.review_exception(
                     review_run_id=review_run_id,
@@ -333,6 +432,7 @@ class GraphComplianceCCGWorkflow:
             claims=claims,
             context_triples=context_triples,
             anchors=anchors,
+            anchor_feature_sets=anchor_feature_sets,
             cu_plan=cu_plan,
             evidence_windows=evidence_windows,
             judgments=judgments,
@@ -342,6 +442,7 @@ class GraphComplianceCCGWorkflow:
             product_context=product_context,
             product_fact_context=product_fact_context,
             disclosure_requirements=disclosure_requirements,
+            policy_evidence_chains=policy_evidence_chains,
             overall_impression_judgment=overall_impression_judgment,
             track_c_summary=track_c_extension_summary(),
         )
@@ -400,7 +501,7 @@ def build_retrieval_diagnostics(
         elif not anchor.hypernyms:
             code = "NO_HYPERNYM_MATCH"
         elif not candidates:
-            code = "MISSING_POLICY_COVERAGE"
+            code = "NO_LEGAL_ELEMENT_MATCH" if anchor.feature_set and anchor.feature_set.action_types else "MISSING_POLICY_COVERAGE"
         elif not any(candidate.active_for_gate for candidate in candidates):
             code = "NO_ACTIVE_CU_AFTER_GATE"
         else:
@@ -413,6 +514,11 @@ def build_retrieval_diagnostics(
             "hypernym_count": len(anchor.hypernyms),
             "top_candidate_ids": [candidate.cu_id for candidate in candidates[:5]],
             "top_candidate_principles": [candidate.principle for candidate in candidates[:5]],
+            "anchor_action_types": anchor.feature_set.action_types if anchor.feature_set else [],
+            "anchor_positive_features": anchor.feature_set.positive_features if anchor.feature_set else [],
+            "top_candidate_missing_required_features": [
+                candidate.missing_required_features for candidate in candidates[:5]
+            ],
         }
     return diagnostics
 
@@ -425,3 +531,16 @@ def workflow_event(event: str, step: str, *, review_run_id: str, summary: str = 
         "summary": summary,
         **extra,
     }
+
+
+def exception_closure_has_mitigation_evidence(closure: list[dict[str, Any]]) -> bool:
+    mitigation_labels = {"ExceptionRule", "DisclosureRequirement", "EvidenceRequirement", "ProductFact", "ComparisonResult", "ReviewApproval"}
+    mitigation_tokens = ["예외", "고지", "설명", "증거", "상품사실", "예금자보호", "조건", "승인", "완화"]
+    for row in closure:
+        labels = {str(label) for label in row.get("labels") or []}
+        text = str(row.get("text") or "")
+        if labels & mitigation_labels:
+            return True
+        if any(token in text for token in mitigation_tokens):
+            return True
+    return False
