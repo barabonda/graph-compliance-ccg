@@ -64,6 +64,8 @@ def legal_basis_chain(review_run_id: str, item: CUPlanItem) -> dict[str, Any]:
                 "role": "principle",
             }
         )
+    delegation_edges = delegation_edges_for(item)
+    nodes.extend(edge["target_node"] for edge in delegation_edges)
     status = "FOUND" if nodes else "INCOMPLETE"
     summary = (
         f"{item.risk_title or item.subject or item.cu_id} 판단은 "
@@ -78,8 +80,37 @@ def legal_basis_chain(review_run_id: str, item: CUPlanItem) -> dict[str, Any]:
         "cu_id": item.cu_id,
         "summary": summary,
         "basis_nodes": nodes,
+        "delegation_edges": delegation_edges,
         "provenance_snippets": provenance_snippets(item),
     }
+
+
+def delegation_edges_for(item: CUPlanItem) -> list[dict[str, Any]]:
+    text = " ".join([item.source_article, item.principle, item.subject, item.constraint, item.context, item.risk_title])
+    if not any(token in text for token in ["광고", "금소법 제22조", "금융상품등에 관한 광고", "표시", "고지"]):
+        return []
+    edges = []
+    source_id = stable_id("legal_basis_node", item.cu_id, item.source_article or item.cu_id)
+    for label, role in [
+        ("금융소비자보호법 시행령 광고 방법·절차/금지행위", "delegated_enforcement_decree"),
+        ("금융소비자보호 감독규정 및 금융광고 심의기준", "delegated_supervisory_standard"),
+    ]:
+        target = {
+            "id": stable_id("legal_basis_node", item.cu_id, label),
+            "label": label,
+            "node_type": "DelegatedStandard",
+            "role": role,
+        }
+        edges.append(
+            {
+                "relationship_type": "DELEGATES_TO",
+                "source_id": source_id,
+                "target_id": target["id"],
+                "target_node": target,
+                "why": "금소법 광고규제는 시행령과 감독규정/심의기준으로 세부 방법·절차·표시기준이 위임됩니다.",
+            }
+        )
+    return edges
 
 
 def disclosure_chain(

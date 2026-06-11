@@ -104,7 +104,7 @@ def extract_mitigation_signals(text: str) -> list[dict[str, str]]:
     patterns = [
         ("condition_disclosure", ["우대조건", "조건 충족", "가입기간", "대상", "자격요건"], "혜택/금리 적용 조건 고지"),
         ("variable_rate_disclosure", ["달라질 수", "변동", "상이"], "금리나 조건 변동 가능성 고지"),
-        ("depositor_protection", ["예금자보호", "5천만원", "보호됩니다"], "예금자보호 한도 고지"),
+        ("depositor_protection", ["예금자보호", "1억원", "보호됩니다"], "예금자보호 한도 고지"),
         ("risk_warning", ["원금손실", "손실 가능성", "투자위험"], "원금손실/투자위험 고지"),
         ("fee_disclosure", ["수수료", "부대비용", "중도상환"], "수수료/부대비용 고지"),
         ("review_notice", ["심의필", "준법감시인", "유효기간"], "심의필/심의주체 고지"),

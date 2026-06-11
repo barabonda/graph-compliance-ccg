@@ -6,6 +6,7 @@ from pathlib import Path
 import pytest
 
 import product_facts as product_facts_module
+import jb_data_context as jb_data_context_module
 from claim_modeling import fold_qualifier_anchors_into_parent_claims
 from cross_encoder_reranker import with_cross_encoder_score
 from context_extractor import LLMContextExtractor
@@ -24,6 +25,7 @@ from normalizer import PolicyGuidedNormalizer, normalization_schema_for_allowed_
 from policy_evidence import build_policy_evidence_chains
 from policy_compiler import validate_compiler_output
 from product_facts import ProductFactAnalyzer
+from prominence import build_prominence_artifacts
 from retriever import PolicyRetriever, candidate_allowed_for_anchor, candidate_from_row, with_legal_element_gate, with_scope_gate
 from revision import LLMRevisionSuggester
 from router import build_output
@@ -46,6 +48,14 @@ from schemas import (
 from vocabulary_governance import validate_governance_output
 from workflow import GraphComplianceCCGWorkflow
 from server import runtime_error_detail
+from build_synthetic_eval_dataset import (
+    best_deposit_rate_value,
+    build_records_from_product_facts,
+    load_taxonomy,
+    parse_channels,
+    validate_product_facts,
+)
+from quality_report_synthetic_eval_dataset import build_quality_report
 
 
 def sample_plan_item_for_policy_chain() -> CUPlanItem:
@@ -98,6 +108,7 @@ def test_policy_evidence_chains_are_split_by_purpose() -> None:
 
     assert chains["legal_basis_chains"][0]["status"] == "FOUND"
     assert chains["legal_basis_chains"][0]["basis_nodes"][0]["label"] == "금소법 제22조"
+    assert any(edge["relationship_type"] == "DELEGATES_TO" for edge in chains["legal_basis_chains"][0]["delegation_edges"])
     assert chains["disclosure_chains"][0]["status"] == "FOUND"
     assert chains["disclosure_chains"][0]["disclosure_nodes"][0]["label"] == "금리 및 우대조건 표시"
     assert chains["exception_chains"][0]["status"] == "NOT_FOUND"
@@ -1152,6 +1163,310 @@ def test_product_fact_analyzer_requires_exact_product_selection() -> None:
     assert context["extraction_status"] == "NEEDS_PRODUCT_SELECTION"
     assert context["product_facts"] == []
     assert "graphcompliance_product_fact_extraction" not in llm.client.calls
+    assert any(item["label"] == "예금자보호 한도" for item in context["disclosure_checks"])
+
+
+def test_product_fact_analyzer_accepts_selected_product(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(
+        product_facts_module,
+        "select_product_documents",
+        lambda product: [
+            {
+                "document_id": "doc_selected",
+                "product": product,
+                "label": "상품설명서",
+                "file_name": "jumpup.pdf",
+                "relative_path": "예금/jumpup.pdf",
+                "file_path": "/tmp/jumpup.pdf",
+                "exists": True,
+            }
+        ],
+    )
+    monkeypatch.setattr(
+        product_facts_module,
+        "extract_document_snippet",
+        lambda document: {
+            "source_document_id": document["document_id"],
+            "label": document["label"],
+            "file_name": document["file_name"],
+            "text": "최고 연 5.0%는 12개월 가입 및 우대조건 충족 시 적용됩니다.",
+        },
+    )
+
+    context = ProductFactAnalyzer(ProductFactLLM()).analyze(
+        review_input=ReviewInput(
+            product_group="deposit",
+            selected_product_name="(26년 JUMP UP) 특판 예금",
+            content_text="JB 특판예금 출시. 누구나 조건 없이 최고 연 5.0% 확정.",
+        ),
+        claims=[
+            Claim(
+                claim_id="claim_selected",
+                text="누구나 조건 없이 최고 연 5.0% 확정",
+                span=Span(start=0, end=22, text="누구나 조건 없이 최고 연 5.0% 확정"),
+                meaning="조건 없는 확정 금리 주장",
+                implicature="모든 소비자가 최고금리를 받을 수 있다는 인상",
+                consumer_effect="소비자가 우대조건을 확인하지 않을 수 있음",
+                risk_hypernym="조건 누락 금리 주장",
+                risk_severity="HIGH",
+            )
+        ],
+        product_context={
+            "matched_products": [
+                {"product": "(26년 JUMP UP) 특판 예금", "match_basis": "selected_product"}
+            ]
+        },
+    )
+
+    assert context["extraction_status"] == "EXTRACTED"
+    assert context["matched_product"] == "(26년 JUMP UP) 특판 예금"
+    assert context["claim_facts"]
+    assert context["comparison_results"]
+
+
+def test_base_product_name_resolves_to_disclosure_variant(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(jb_data_context_module, "match_products_from_neo4j", lambda text, claims, product_group: [])
+    monkeypatch.setattr(
+        jb_data_context_module,
+        "load_product_rows",
+        lambda: {
+            "JB시니어우대예금(만기일시지급식)": {
+                "product": "JB시니어우대예금(만기일시지급식)",
+                "product_group": "deposit",
+                "major": "예금상품공시",
+                "subcategory": "거치식예금",
+                "category": "거치식예금",
+                "document_count": 3,
+                "document_labels": ["상품설명서", "특약", "약관"],
+                "source_ids": ["doc_maturity"],
+                "documents": [],
+            },
+            "JB시니어우대예금(월이자지급식)": {
+                "product": "JB시니어우대예금(월이자지급식)",
+                "product_group": "deposit",
+                "major": "예금상품공시",
+                "subcategory": "거치식예금",
+                "category": "거치식예금",
+                "document_count": 3,
+                "document_labels": ["상품설명서", "특약", "약관"],
+                "source_ids": ["doc_monthly"],
+                "documents": [],
+            },
+        },
+    )
+
+    product_context, _ = jb_data_context_module.build_product_context(
+        ReviewInput(
+            product_group="deposit",
+            selected_product_name="JB시니어우대예금",
+            content_text="JB시니어우대예금 특판 안내입니다.",
+        ),
+        claims=[],
+    )
+
+    first = product_context["matched_products"][0]
+    assert first["match_basis"] == "selected_product"
+    assert first["selected_product_alias"] == "JB시니어우대예금"
+    assert first["product"] in {
+        "JB시니어우대예금(만기일시지급식)",
+        "JB시니어우대예금(월이자지급식)",
+    }
+    assert first["document_count"] > 0
+
+
+def test_product_fact_analyzer_accepts_exact_product_family(monkeypatch: pytest.MonkeyPatch) -> None:
+    selected_products: list[str] = []
+
+    def fake_select_product_documents(product: str) -> list[dict[str, object]]:
+        selected_products.append(product)
+        return [
+            {
+                "document_id": "doc_senior",
+                "product": product,
+                "label": "상품설명서",
+                "file_name": "senior.pdf",
+                "relative_path": "예금/senior.pdf",
+                "file_path": "/tmp/senior.pdf",
+                "exists": True,
+            }
+        ]
+
+    monkeypatch.setattr(product_facts_module, "select_product_documents", fake_select_product_documents)
+    monkeypatch.setattr(
+        product_facts_module,
+        "extract_document_snippet",
+        lambda document: {
+            "source_document_id": document["document_id"],
+            "label": document["label"],
+            "file_name": document["file_name"],
+            "text": "최고 연 5.0%는 12개월 가입 및 우대조건 충족 시 적용됩니다.",
+        },
+    )
+
+    context = ProductFactAnalyzer(ProductFactLLM()).analyze(
+        review_input=ReviewInput(
+            product_group="deposit",
+            content_text="JB시니어우대예금 안내. 최고 연 5.0% 금리.",
+        ),
+        claims=[],
+        product_context={
+            "matched_products": [
+                {"product": "JB시니어우대예금(만기일시지급식)", "match_basis": "exact_product_family"}
+            ]
+        },
+    )
+
+    assert context["extraction_status"] == "EXTRACTED"
+    assert context["matched_product"] == "JB시니어우대예금(만기일시지급식)"
+    assert selected_products == ["JB시니어우대예금(만기일시지급식)"]
+
+
+def test_prominence_gate_marks_weak_disclosure_and_updates_comparison() -> None:
+    benefit = SentenceUnit(
+        sentence_id="sentence_benefit",
+        index=0,
+        text="최고 연 5.0% 확정 금리를 받을 수 있습니다.",
+        span=Span(start=0, end=24, text="최고 연 5.0% 확정 금리를 받을 수 있습니다."),
+        role="benefit_claim",
+        local_meaning="최고금리 혜택 주장",
+        context_effect="혜택을 강조",
+        risk_level="HIGH",
+        prominence_tier="headline",
+    )
+    disclosure = SentenceUnit(
+        sentence_id="sentence_disclosure",
+        index=1,
+        text="* 우대조건 충족 시 적용됩니다.",
+        span=Span(start=25, end=42, text="* 우대조건 충족 시 적용됩니다."),
+        role="condition_disclosure",
+        local_meaning="조건 고지",
+        context_effect="금리 조건을 일부 완화",
+        risk_level="LOW",
+        prominence_tier="footnote",
+    )
+    claim = Claim(
+        claim_id="claim_rate",
+        text=benefit.text,
+        span=benefit.span,
+        meaning="최고금리 확정 주장",
+        implicature="조건 없이 최고금리를 받을 수 있다는 인상",
+        consumer_effect="소비자가 조건을 놓칠 수 있음",
+        risk_hypernym="조건 누락 금리 주장",
+        risk_severity="HIGH",
+        sentence_id=benefit.sentence_id,
+    )
+    product_context = {
+        "claim_facts": [
+            {
+                "claim_fact_id": "claim_fact_rate",
+                "claim_id": claim.claim_id,
+                "fact_type": "최고금리",
+                "value": "5.0",
+                "unit": "%",
+                "qualifier": "확정",
+                "evidence_text": benefit.text,
+                "confidence": 0.9,
+            }
+        ],
+        "product_facts": [
+            {
+                "fact_id": "product_fact_rate",
+                "fact_type": "최고금리",
+                "value": "5.0",
+                "unit": "%",
+                "condition": "우대조건 충족 시",
+                "evidence_text": "우대조건 충족 시 최고 연 5.0%",
+            }
+        ],
+        "comparison_results": [
+            {
+                "comparison_id": "comparison_rate",
+                "claim_fact_id": "claim_fact_rate",
+                "product_fact_id": "product_fact_rate",
+                "status": "SUPPORTED",
+                "rationale": "숫자는 상품문서와 일치",
+                "evidence_text": "5.0%",
+                "confidence": 0.9,
+            }
+        ],
+        "disclosure_checks": [],
+    }
+
+    analysis, links, diagnostics, updated_context = build_prominence_artifacts(
+        review_input=ReviewInput(product_group="deposit", content_text=f"{benefit.text} {disclosure.text}"),
+        sentence_units=[benefit, disclosure],
+        claims=[claim],
+        product_fact_context=product_context,
+    )
+
+    assert analysis["weak_disclosure_count"] == 1
+    assert links[0]["status"] == "PROMINENCE_INSUFFICIENT"
+    assert diagnostics[0]["diagnostic_code"] == "PROMINENCE_INSUFFICIENT"
+    assert updated_context["comparison_results"][0]["status"] == "PROMINENCE_INSUFFICIENT"
+
+
+def test_prominence_gate_marks_supported_rate_as_condition_missing_when_disclosure_absent() -> None:
+    benefit = SentenceUnit(
+        sentence_id="sentence_benefit_missing",
+        index=0,
+        text="최고 연 5.0% 확정 금리를 받을 수 있습니다.",
+        span=Span(start=0, end=24, text="최고 연 5.0% 확정 금리를 받을 수 있습니다."),
+        role="benefit_claim",
+        local_meaning="최고금리 혜택 주장",
+        context_effect="혜택을 강조",
+        risk_level="HIGH",
+        prominence_tier="headline",
+    )
+    claim = Claim(
+        claim_id="claim_rate_missing",
+        text=benefit.text,
+        span=benefit.span,
+        meaning="최고금리 확정 주장",
+        implicature="조건 없이 최고금리를 받을 수 있다는 인상",
+        consumer_effect="소비자가 조건을 놓칠 수 있음",
+        risk_hypernym="조건 누락 금리 주장",
+        risk_severity="HIGH",
+        sentence_id=benefit.sentence_id,
+    )
+    product_context = {
+        "claim_facts": [
+            {
+                "claim_fact_id": "claim_fact_missing",
+                "claim_id": claim.claim_id,
+                "fact_type": "최고금리",
+                "value": "5.0",
+                "unit": "%",
+                "qualifier": "확정",
+                "evidence_text": benefit.text,
+                "confidence": 0.9,
+            }
+        ],
+        "product_facts": [{"fact_id": "product_fact_missing", "fact_type": "최고금리", "value": "5.0"}],
+        "comparison_results": [
+            {
+                "comparison_id": "comparison_missing",
+                "claim_fact_id": "claim_fact_missing",
+                "product_fact_id": "product_fact_missing",
+                "status": "SUPPORTED",
+                "rationale": "숫자는 상품문서와 일치",
+                "evidence_text": "5.0%",
+                "confidence": 0.9,
+            }
+        ],
+        "disclosure_checks": [
+            {"check_id": "deposit_rate_condition", "label": "최고금리 적용 조건", "status": "MISSING", "present": False}
+        ],
+    }
+
+    _analysis, _links, diagnostics, updated_context = build_prominence_artifacts(
+        review_input=ReviewInput(product_group="deposit", content_text=benefit.text),
+        sentence_units=[benefit],
+        claims=[claim],
+        product_fact_context=product_context,
+    )
+
+    assert diagnostics[0]["diagnostic_code"] == "DISCLOSURE_MISSING"
+    assert updated_context["comparison_results"][0]["status"] == "CONDITION_MISSING"
 
 
 def test_product_fact_analyzer_extracts_and_compares_exact_product(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -1877,3 +2192,160 @@ def test_prediction_summary_uses_only_risky_plan_item_articles() -> None:
     assert summary.predicted_articles == ["금소법 제19조"]
     assert summary.predicted_sales_principles == ["설명의무"]
     assert summary.context_triple_count == 1
+
+
+def test_product_fact_synthetic_records_are_grounded_in_extracted_facts() -> None:
+    taxonomy = load_taxonomy(Path(__file__).resolve().parents[1] / "eval" / "violation_taxonomy_v0_1.json")
+    bundle = {
+        "product_name": "(26년 JUMP UP) 특판 예금",
+        "product_group": "deposit",
+        "channel": "web_page",
+        "disclosure_requirements": [
+            {"label": "금리 범위 및 산정방법"},
+            {"label": "우대조건 및 적용기간"},
+            {"label": "예금자보호 부보내용"},
+        ],
+        "selected_documents": [
+            {
+                "document_id": "doc_jumpup_terms",
+                "label": "상품설명서",
+                "file_name": "0235_(26년 JUMP UP) 특판 예금_상품설명서.pdf",
+                "relative_path": "예금/0235.pdf",
+            }
+        ],
+        "product_facts": [
+            {
+                "fact_id": "pf_rate",
+                "fact_type": "최고금리",
+                "value": "연 5.0%",
+                "unit": "percent",
+                "condition": "12개월 가입 및 우대조건 충족 시",
+                "source_document_id": "doc_jumpup_terms",
+                "page_or_chunk": "page 1",
+                "evidence_text": "12개월 가입 및 우대조건 충족 시 최고 연 5.0%",
+                "confidence": 0.93,
+            },
+            {
+                "fact_id": "pf_protection",
+                "fact_type": "예금자보호",
+                "value": "1인당 최고 1억원",
+                "unit": "KRW",
+                "condition": "예금자보호법상 보호한도",
+                "source_document_id": "doc_jumpup_terms",
+                "page_or_chunk": "page 2",
+                "evidence_text": "원금과 소정의 이자를 합하여 1인당 최고 1억원까지 보호",
+                "confidence": 0.91,
+            },
+        ],
+    }
+    clean_ad = {
+        "headline": "(26년 JUMP UP) 특판 예금 안내",
+        "subcopy": "12개월 가입 및 우대조건 충족 시 최고 연 5.0%(세전) 금리가 적용될 수 있습니다.",
+        "body": "실제 적용금리는 조건에 따라 달라질 수 있습니다.",
+        "footnote": "계약 전 상품설명서와 약관을 확인해 주세요.",
+        "used_fact_ids": ["pf_rate", "pf_protection"],
+        "compliance_notes": ["조건을 같은 위계에 표시"],
+    }
+
+    records = build_records_from_product_facts(taxonomy, bundle, clean_ad)
+
+    assert any(record["source_type"] == "synthetic_product_fact_clean" for record in records)
+    mutated = next(record for record in records if record["labels"]["violation_types"] == ["DEPOSIT_UNIVERSAL_SCOPE_MISLEADING"])
+    assert mutated["facts"]["product_facts"][0]["fact_id"] == "pf_rate"
+    assert mutated["facts"]["source_product_documents"][0]["document_id"] == "doc_jumpup_terms"
+    assert "canonical_product_facts" not in mutated["facts"]
+    assert "누구나 조건 없이" in mutated["facts"]["expected_problem_spans"]
+
+
+def test_synthetic_dataset_channel_parser_rejects_unknown_channel() -> None:
+    assert parse_channels("web_page,sns") == ["web_page", "sns"]
+    with pytest.raises(ValueError, match="Unknown channels"):
+        parse_channels("web_page,kiosk")
+
+
+def test_synthetic_product_fact_validation_requires_selected_document_source() -> None:
+    documents = [{"document_id": "doc_known"}]
+    facts = [
+        {
+            "fact_id": "pf_rate",
+            "fact_type": "최고금리",
+            "value": "연 5.0%",
+            "source_document_id": "doc_unknown",
+            "evidence_text": "최고 연 5.0%",
+            "confidence": 0.9,
+        }
+    ]
+
+    with pytest.raises(RuntimeError, match="source_document_id must match selected documents"):
+        validate_product_facts(facts, documents)
+
+
+def test_synthetic_deposit_rate_slot_combines_base_and_preferential_rates() -> None:
+    facts = [
+        {"fact_type": "basic_interest_rate_3m", "value": "연 2.40%"},
+        {"fact_type": "basic_interest_rate_12m", "value": "연 2.55%"},
+        {"fact_type": "event_preferential_interest_rate_max", "value": "최고 0.30%p"},
+    ]
+
+    assert best_deposit_rate_value(facts) == "2.85%"
+
+
+def test_synthetic_quality_report_checks_spans_and_product_fact_sources() -> None:
+    report = build_quality_report(
+        [
+            {
+                "id": "syn_ok",
+                "text": "누구나 조건 없이 최고 연 5.0%",
+                "source_type": "synthetic_product_fact_mutation",
+                "product_group": "deposit",
+                "channel": "web_page",
+                "facts": {
+                    "expected_problem_spans": ["누구나 조건 없이"],
+                    "source_product_documents": [{"document_id": "doc_1"}],
+                    "product_facts": [
+                        {
+                            "fact_id": "pf_rate",
+                            "source_document_id": "doc_1",
+                            "evidence_text": "최고 연 5.0%",
+                            "confidence": 0.9,
+                        }
+                    ],
+                },
+                "labels": {
+                    "violation": True,
+                    "violation_types": ["DEPOSIT_UNIVERSAL_SCOPE_MISLEADING"],
+                    "risk_level": "high",
+                    "expected_routing": "revise",
+                },
+            },
+            {
+                "id": "syn_bad",
+                "text": "최고 연 5.0%",
+                "source_type": "synthetic_product_fact_mutation",
+                "product_group": "deposit",
+                "channel": "web_page",
+                "facts": {
+                    "expected_problem_spans": ["없는 span"],
+                    "source_product_documents": [{"document_id": "doc_1"}],
+                    "product_facts": [
+                        {
+                            "fact_id": "pf_bad",
+                            "source_document_id": "doc_missing",
+                            "evidence_text": "",
+                            "confidence": 1.2,
+                        }
+                    ],
+                },
+                "labels": {
+                    "violation": True,
+                    "violation_types": ["DEPOSIT_RATE_CONDITION_MISSING"],
+                    "risk_level": "medium",
+                    "expected_routing": "revise",
+                },
+            },
+        ]
+    )
+
+    assert report["record_count"] == 2
+    assert report["blocking_error_count"] == 4
+    assert report["violation_type_counts"]["DEPOSIT_UNIVERSAL_SCOPE_MISLEADING"] == 1

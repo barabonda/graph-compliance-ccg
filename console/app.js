@@ -24,20 +24,61 @@ const JUDGMENT_STATUS = {
   ANCHOR: "검토됨",
 };
 
+const HUMAN_ACTION_LABELS = {
+  guarantee_or_return_misleading: "단정·보장 표현",
+  condition_or_scope_missing: "조건 고지",
+  required_disclosure_missing: "필수 고지 누락",
+  past_performance_or_future_return: "과거성과 오인",
+  comparison_ad: "비교 표현",
+  unfair_superior_position_sales: "불공정 영업",
+};
+
+const HUMAN_FEATURE_LABELS = {
+  guarantee_expression: "보장 표현",
+  certainty_expression: "확정 표현",
+  unconditional_expression: "조건 없음",
+  universal_scope_expression: "대상 범위",
+  comparison_target: "비교 근거",
+  coercion_or_tie_in_context: "강요·끼워팔기",
+};
+
+const QUALIFIER_LABELS = {
+  target_scope: "대상 범위",
+  condition_scope: "조건 범위",
+  certainty: "확정 표현",
+  guarantee: "보장 표현",
+  benefit_scope: "혜택 범위",
+  risk_downplay: "위험 축소",
+  urgency: "긴급성",
+  comparison: "비교 표현",
+  disclosure_qualifier: "고지 표현",
+  other: "표현",
+};
+
+const DISCLOSURE_LABELS = {
+  deposit_rate_condition: "최고금리 조건",
+  deposit_term: "가입기간",
+  deposit_tax_basis: "세전/세후",
+  depositor_protection_limit: "예금자보호",
+  product_document_notice: "상품설명서",
+};
+
 const EXAMPLES = [
   {
     label: "예금 · 고지 있음",
     product: "deposit",
     channel: "web_page",
     title: "JB시니어우대예금 특판",
+    selectedProduct: "JB시니어우대예금",
     text:
-      "JB시니어우대예금 특판 안내. 최고 연 5.0% 금리를 확정 제공하며 안정적으로 목돈을 관리할 수 있습니다. 기본금리와 우대금리는 가입기간, 우대조건 충족 여부에 따라 달라질 수 있습니다. 이 예금은 예금자보호법에 따라 원금과 이자를 합하여 1인당 최고 5천만원까지 보호됩니다.",
+      "JB시니어우대예금 특판 안내. 최고 연 5.0% 금리를 확정 제공하며 안정적으로 목돈을 관리할 수 있습니다. 기본금리와 우대금리는 가입기간, 우대조건 충족 여부에 따라 달라질 수 있습니다. 이 예금은 예금자보호법에 따라 원금과 이자를 합하여 1인당 최고 1억원까지 보호됩니다.",
   },
   {
     label: "예금 · 보장 위험",
     product: "deposit",
     channel: "web_page",
     title: "고지 없는 특판예금",
+    selectedProduct: "",
     text:
       "JB 특판예금 출시. 누구나 연 5% 확정 보장 수익을 받을 수 있는 절호의 기회입니다. 지금 가입하면 조건 없이 안정적인 고수익을 보장합니다.",
   },
@@ -46,6 +87,7 @@ const EXAMPLES = [
     product: "investment",
     channel: "web_page",
     title: "ELS 광고 초안",
+    selectedProduct: "",
     text:
       "요즘 같은 변동성 장세에서는 ELS를 이해하는 것이 중요합니다. OO증권의 더블찬스 ELS는 안정성과 수익성을 동시에 고려한 상품입니다. 지난 3년간 유사 구조 상품의 조기상환 성공률이 높았기 때문에, 중위험 투자자에게 좋은 선택이 될 수 있습니다.",
   },
@@ -64,6 +106,7 @@ const els = {
   title: document.getElementById("titleInput"),
   product: document.getElementById("productInput"),
   channel: document.getElementById("channelInput"),
+  selectedProduct: document.getElementById("selectedProductInput"),
   text: document.getElementById("textInput"),
   examples: document.getElementById("examples"),
   button: document.getElementById("reviewButton"),
@@ -111,6 +154,7 @@ function fillExample(example) {
   els.title.value = example.title;
   els.product.value = example.product;
   els.channel.value = example.channel;
+  els.selectedProduct.value = example.selectedProduct || "";
   els.text.value = example.text;
 }
 
@@ -132,6 +176,7 @@ async function runReview(event) {
     content_text: els.text.value,
     channel: els.channel.value,
     product_group: els.product.value,
+    selected_product_name: els.selectedProduct.value.trim(),
     workspace_id: "graphcompliance_mvp_jb_20260530",
   };
   try {
@@ -314,21 +359,11 @@ function principleButton(principle, status) {
 
 function renderHighlights() {
   const text = els.text.value || "";
-  const spans = nonOverlappingHighlights(highlightCandidates(text));
+  const spans = highlightCandidates(text);
+  const rendered = renderAnnotatedText(text, spans);
 
-  let cursor = 0;
-  const parts = [];
-  spans.forEach((span) => {
-    if (span.start < cursor || span.start < 0 || span.end > text.length || span.end <= span.start) return;
-    parts.push(escapeHtml(text.slice(cursor, span.start)));
-    parts.push(
-      `<button class="hl ${span.className} ${span.roleClass} ${state.selectedAnchorId === span.id ? "is-selected" : ""}" data-anchor-id="${span.id}" title="${escapeHtml(span.tooltip)}" type="button"><span class="hl-text">${escapeHtml(text.slice(span.start, span.end))}</span><span class="hl-chip">${escapeHtml(span.label)}</span></button>`
-    );
-    cursor = span.end;
-  });
-  parts.push(escapeHtml(text.slice(cursor)));
-  els.highlightedText.innerHTML = parts.join("") || `<div class="empty-state">광고 원문이 비어 있습니다.</div>`;
-  els.highlightSummary.innerHTML = highlightSummary(spans, text);
+  els.highlightedText.innerHTML = rendered.html || `<div class="empty-state">광고 원문이 비어 있습니다.</div>`;
+  els.highlightSummary.innerHTML = highlightSummary(rendered.visibleSpans, text, rendered.hiddenByOverlap);
   els.highlightedText.querySelectorAll(".hl").forEach((button) => {
     button.addEventListener("click", () => selectAnchor(button.dataset.anchorId));
   });
@@ -336,7 +371,7 @@ function renderHighlights() {
 
 function highlightCandidates(text) {
   const anchors = filteredAnchors();
-  return anchors
+  const surfaceSpans = anchors
     .map((anchor) => {
       const display = anchorDisplay(anchor.anchor_id);
       const aligned = alignSpan(text, anchor.span);
@@ -346,6 +381,7 @@ function highlightCandidates(text) {
       const cuCount = display?.cu_count || 0;
       return {
         id: anchor.anchor_id,
+        anchorId: anchor.anchor_id,
         start: aligned.start,
         end: aligned.end,
         text: anchor.span.text,
@@ -353,23 +389,126 @@ function highlightCandidates(text) {
         role,
         className,
         roleClass: role === "scope" ? "scope-highlight" : "actionable-highlight",
-        label: highlightLabel(verdict, role, cuCount),
+        label: highlightLabel(anchor, verdict, role, cuCount),
         tooltip: highlightTooltip(anchor, display),
         priority: highlightPriority(verdict, role, anchor.anchor_type, cuCount),
+        layer: "claim-surface",
+        chipMode: "end",
       };
     })
     .filter((span) => Number.isInteger(span.start) && Number.isInteger(span.end) && span.start >= 0 && span.end <= text.length && span.end > span.start);
+  return [...surfaceSpans, ...qualifierHighlightCandidates(text, anchors), ...disclosureHighlightCandidates(text)];
 }
 
-function nonOverlappingHighlights(candidates) {
-  const selected = [];
-  [...candidates]
-    .sort((a, b) => b.priority - a.priority || (b.end - b.start) - (a.end - a.start) || a.start - b.start)
-    .forEach((candidate) => {
-      const overlaps = selected.some((item) => candidate.start < item.end && item.start < candidate.end);
-      if (!overlaps) selected.push(candidate);
+function qualifierHighlightCandidates(text, anchors) {
+  return anchors.flatMap((anchor) => {
+    const display = anchorDisplay(anchor.anchor_id);
+    const qualifierVerdict = display?.display_verdict || "ANCHOR";
+    return claimQualifiers(anchor.claim_id).map((qualifier) => {
+      const aligned = alignSpan(text, qualifier.span || { text: qualifier.text, start: -1, end: -1 });
+      const roleClass = qualifier.role === "disclosure_qualifier" ? "mitigation-highlight" : "qualifier-highlight";
+      const className = qualifier.role === "disclosure_qualifier" ? "compliant" : highlightClass(qualifierVerdict);
+      return {
+        id: qualifier.qualifier_id || `${anchor.anchor_id}_${qualifier.text}`,
+        anchorId: anchor.anchor_id,
+        start: aligned.start,
+        end: aligned.end,
+        text: qualifier.text,
+        verdict: qualifierVerdict,
+        role: qualifier.role,
+        className,
+        roleClass,
+        label: QUALIFIER_LABELS[qualifier.role] || "표현",
+        tooltip: `${QUALIFIER_LABELS[qualifier.role] || "표현"} · ${qualifier.meaning || qualifier.risk_reason || ""}`,
+        priority: qualifierPriority(qualifier, qualifierVerdict),
+        layer: "qualifier-token",
+        chipMode: "end",
+      };
     });
-  return selected.sort((a, b) => a.start - b.start || b.priority - a.priority);
+  }).filter((span) => Number.isInteger(span.start) && Number.isInteger(span.end) && span.start >= 0 && span.end <= text.length && span.end > span.start);
+}
+
+function disclosureHighlightCandidates(text) {
+  const diagnostics = state.result?.prominence_diagnostics || [];
+  const checks = state.result?.product_fact_context?.disclosure_checks || [];
+  return (state.result?.disclosure_links || []).map((link, index) => {
+    const evidence = link.disclosure_text || link.evidence || "";
+    const aligned = alignSpan(text, { text: evidence, start: -1, end: -1 });
+    const status = link.status || "";
+    const diagnostic = diagnostics.find((item) => item.disclosure_sentence_id === link.disclosure_sentence_id || item.evidence === evidence);
+    const check = checks.find((item) => item.check_id === link.check_id);
+    return {
+      id: `disclosure_${link.disclosure_sentence_id || index}`,
+      anchorId: anchorForSentence(link.benefit_sentence_id)?.anchor_id || state.selectedAnchorId,
+      start: aligned.start,
+      end: aligned.end,
+      text: evidence,
+      verdict: status === "PROMINENCE_INSUFFICIENT" ? "INSUFFICIENT" : "COMPLIANT",
+      role: "disclosure",
+      className: status === "PROMINENCE_INSUFFICIENT" ? "prominence-warning" : "compliant",
+      roleClass: "mitigation-highlight",
+      label: status === "PROMINENCE_INSUFFICIENT" ? "고지 있음 · 위계 낮음" : DISCLOSURE_LABELS[link.check_id] || check?.label || "유지 고지",
+      tooltip: diagnostic?.message || link.reason || "수정 시 유지해야 할 고지입니다.",
+      priority: status === "PROMINENCE_INSUFFICIENT" ? 76 : 58,
+      layer: "disclosure-token",
+      chipMode: "end",
+    };
+  }).filter((span) => span.text && Number.isInteger(span.start) && Number.isInteger(span.end) && span.start >= 0 && span.end <= text.length && span.end > span.start);
+}
+
+function renderAnnotatedText(text, candidates) {
+  if (!text) return { html: "", visibleSpans: [], hiddenByOverlap: 0 };
+  const valid = candidates.filter((item) => item.start >= 0 && item.end <= text.length && item.end > item.start);
+  const boundaries = new Set([0, text.length]);
+  valid.forEach((item) => {
+    boundaries.add(item.start);
+    boundaries.add(item.end);
+  });
+  const points = [...boundaries].sort((a, b) => a - b);
+  const parts = [];
+  const visible = new Map();
+  const suppressed = new Map();
+
+  for (let index = 0; index < points.length - 1; index += 1) {
+    const start = points[index];
+    const end = points[index + 1];
+    if (end <= start) continue;
+    const segmentText = text.slice(start, end);
+    const active = valid.filter((item) => item.start < end && start < item.end);
+    if (!active.length) {
+      parts.push(escapeHtml(segmentText));
+      continue;
+    }
+    const top = [...active].sort((a, b) => b.priority - a.priority || layerRank(b.layer) - layerRank(a.layer))[0];
+    active.forEach((item) => {
+      if (item.id === top.id) visible.set(item.id, item);
+      else suppressed.set(item.id, item);
+    });
+    const classes = [
+      "hl",
+      top.className,
+      top.roleClass,
+      top.layer,
+      top.anchorId === state.selectedAnchorId ? "is-selected" : "",
+      top.className === "prominence-warning" ? "has-prominence-gap" : "",
+    ].filter(Boolean).join(" ");
+    const segmentEnd = top.end === end;
+    const hiddenEnding = active.filter((item) => item.id !== top.id && item.end === end).length;
+    const chip = segmentEnd ? `<span class="hl-chip">${escapeHtml(top.label)}${hiddenEnding ? ` +${hiddenEnding}` : ""}</span>` : "";
+    parts.push(
+      `<button class="${classes}" data-anchor-id="${escapeHtml(top.anchorId || "")}" title="${escapeHtml(top.tooltip)}" type="button"><span class="hl-text">${escapeHtml(segmentText)}</span>${chip}</button>`
+    );
+  }
+
+  return {
+    html: parts.join(""),
+    visibleSpans: [...visible.values()].sort((a, b) => a.start - b.start || b.priority - a.priority),
+    hiddenByOverlap: suppressed.size,
+  };
+}
+
+function layerRank(layer) {
+  return { "qualifier-token": 3, "disclosure-token": 2, "claim-surface": 1 }[layer] || 0;
 }
 
 function highlightPriority(verdict, role, anchorType, cuCount) {
@@ -379,26 +518,54 @@ function highlightPriority(verdict, role, anchorType, cuCount) {
   return verdictScore + typeScore + Math.min(Number(cuCount || 0), 5);
 }
 
-function highlightLabel(verdict, role, cuCount) {
+function qualifierPriority(qualifier, verdict) {
+  const roleScore = {
+    guarantee: 98,
+    certainty: 96,
+    condition_scope: 92,
+    target_scope: 90,
+    risk_downplay: 88,
+    benefit_scope: 82,
+    comparison: 78,
+    disclosure_qualifier: 58,
+    other: 50,
+  }[qualifier.role] || 50;
+  const verdictBonus = verdict === "NON_COMPLIANT" ? 8 : verdict === "INSUFFICIENT" ? 4 : 0;
+  return roleScore + verdictBonus;
+}
+
+function highlightLabel(anchor, verdict, role, cuCount) {
   if (role === "scope") return "범위";
-  if (verdict === "NON_COMPLIANT") return `위험 · CU ${cuCount}`;
+  const human = humanAnchorLabel(anchor);
+  if (verdict === "NON_COMPLIANT") return human || "위험 표현";
   if (verdict === "RETRIEVAL_FAILURE") return "매칭 실패";
   if (verdict === "INSUFFICIENT") return "검토";
   if (verdict === "COMPLIANT" || verdict === "NOT_APPLICABLE") return "완화";
-  return cuCount ? `검토 · CU ${cuCount}` : "검토됨";
+  return human || (cuCount ? "검토 문구" : "검토됨");
+}
+
+function humanAnchorLabel(anchor) {
+  const featureSet = anchor.feature_set || (state.result?.anchor_feature_sets || []).find((item) => item.anchor_id === anchor.anchor_id) || {};
+  const action = (featureSet.action_types || []).find((item) => HUMAN_ACTION_LABELS[item]);
+  if (action) return HUMAN_ACTION_LABELS[action];
+  const feature = (featureSet.positive_features || []).find((item) => HUMAN_FEATURE_LABELS[item]);
+  if (feature) return HUMAN_FEATURE_LABELS[feature];
+  const qualifier = claimQualifiers(anchor.claim_id).find((item) => QUALIFIER_LABELS[item.role]);
+  if (qualifier) return QUALIFIER_LABELS[qualifier.role];
+  return "";
 }
 
 function highlightTooltip(anchor, display) {
   const hypernyms = (anchor.hypernyms || []).map((item) => item.hypernym).slice(0, 3).join(", ");
   const verdict = JUDGMENT_STATUS[display?.display_verdict] || display?.display_verdict || "검토됨";
   const role = display?.display_role === "scope" ? "범위 정보" : "판단 대상";
-  return `${role} · ${verdict}${hypernyms ? ` · ${hypernyms}` : ""}`;
+  const basis = policyBasisForAnchor(anchor).slice(0, 2).join(", ");
+  return `${role} · ${verdict}${hypernyms ? ` · ${hypernyms}` : ""}${basis ? ` · 근거 ${basis}` : ""}`;
 }
 
-function highlightSummary(spans, text) {
+function highlightSummary(spans, text, hiddenByOverlap = 0) {
   if (!state.result) return highlightLegend();
   const totalActionable = (state.result.anchor_display || []).filter((item) => item.display_role === "actionable").length;
-  const hiddenByOverlap = Math.max(0, filteredAnchors().length - spans.length);
   return `
     <div class="highlight-meta">
       <span>원문 ${text.length}자</span>
@@ -414,9 +581,10 @@ function highlightSummary(spans, text) {
 function highlightLegend() {
   return `
     <div class="highlight-legend" aria-label="하이라이트 범례">
-      <span><i class="legend-dot non-compliant"></i>위반 가능성</span>
-      <span><i class="legend-dot insufficient"></i>검토 필요</span>
-      <span><i class="legend-dot compliant"></i>고지/예외 완화</span>
+      <span><i class="legend-line non-compliant"></i>위반 의심</span>
+      <span><i class="legend-line insufficient"></i>검토 필요</span>
+      <span><i class="legend-line compliant"></i>유지 고지</span>
+      <span><i class="legend-line prominence-warning"></i>고지 있음 · 위계 낮음</span>
       <span><i class="legend-dot anchor-only"></i>범위/검토됨</span>
     </div>
   `;
@@ -590,52 +758,83 @@ function renderDetail() {
     <section class="detail-card">
       <h3>${escapeHtml(anchor.span.text)}</h3>
       <div class="meta-row">
-        <span class="tag">${escapeHtml(anchor.anchor_type)}</span>
-        <span class="tag">${display?.display_role === "scope" ? "scope/context" : "actionable"}</span>
-        ${anchor.hypernyms.map((item) => `<span class="tag">${escapeHtml(item.hypernym)} · ${item.support}</span>`).join("")}
+        <span class="tag">${display?.display_role === "scope" ? "범위 정보" : display?.display_role === "mitigation" ? "고지/완화 근거" : "심사 대상 문구"}</span>
+        ${anchor.hypernyms.slice(0, 4).map((item) => `<span class="tag">${escapeHtml(item.hypernym)}</span>`).join("")}
       </div>
-      ${anchorFeaturePanel(anchor)}
-      ${claimQualifierPanel(anchor)}
-      <details open>
-        <summary>Context facts</summary>
-        <div class="evidence-text">${anchor.facts.map(escapeHtml).join("<br />") || "없음"}</div>
-      </details>
+      ${issueSummaryPanel(anchor, effective, issues)}
     </section>
     <section class="detail-card">
-      <h3>CU별 판단</h3>
-      ${
-        effective.length
-          ? effective.map((judgment) => judgmentCard(judgment, planItems.find((item) => item.plan_item_id === judgment.plan_item_id), rawJudgment(judgment.judgment_id))).join("")
-          : planItems.length
-            ? `<div class="empty-state">CUPlan은 생성됐지만 이 anchor에 대한 judgment가 없습니다. LLM judgment 단계를 확인하세요.</div>`
-            : `<div class="empty-state">이 anchor에 매칭된 CU가 없습니다. 정책 매칭 실패로 검토 필요 상태입니다.</div>`
-      }
+      <h3>문제 표현</h3>
+      ${claimQualifierPanel(anchor) || `<div class="empty-state">별도 qualifier 없이 문장 전체를 검토합니다.</div>`}
     </section>
     <section class="detail-card">
-      <h3>조항 / 원칙 집계</h3>
-      ${policyAggregationPanel(anchor)}
+      <h3>상품 사실 대조</h3>
+      ${productFactComparisonPanel(anchor)}
     </section>
     <section class="detail-card">
-      <h3>Policy Evidence Chains</h3>
+      <h3>법적 / 정책 근거</h3>
       ${policyEvidenceChainPanel(anchor)}
     </section>
     <section class="detail-card">
-      <h3>Track B · 소비자 오인</h3>
-      ${overallImpressionPanel(anchor)}
-    </section>
-    <section class="detail-card">
-      <h3>Product / Disclosure</h3>
+      <h3>필요한 고지</h3>
       ${productDisclosurePanel(anchor)}
     </section>
     <section class="detail-card">
-      <h3>예외/고지 검토</h3>
+      <h3>소비자 오인 판단</h3>
+      ${overallImpressionPanel(anchor)}
+    </section>
+    <section class="detail-card">
+      <h3>예외 / 완화 검토</h3>
       ${exceptionPanel(anchor, exceptions)}
     </section>
     <section class="detail-card">
       <h3>수정 제안</h3>
       ${revisionPanel(anchor, issues, effective, display)}
     </section>
+    <section class="detail-card">
+      <details>
+        <summary>Debug · 내부 id / feature / raw evidence</summary>
+        ${anchorFeaturePanel(anchor)}
+        <details>
+          <summary>Context facts</summary>
+          <div class="evidence-text">${anchor.facts.map(escapeHtml).join("<br />") || "없음"}</div>
+        </details>
+        <h3>CU별 판단</h3>
+        ${
+          effective.length
+            ? effective.map((judgment) => judgmentCard(judgment, planItems.find((item) => item.plan_item_id === judgment.plan_item_id), rawJudgment(judgment.judgment_id))).join("")
+            : planItems.length
+              ? `<div class="empty-state">CUPlan은 생성됐지만 이 anchor에 대한 judgment가 없습니다. LLM judgment 단계를 확인하세요.</div>`
+              : `<div class="empty-state">이 anchor에 매칭된 CU가 없습니다. 정책 매칭 실패로 검토 필요 상태입니다.</div>`
+        }
+        <h3>조항 / 원칙 집계</h3>
+        ${policyAggregationPanel(anchor)}
+      </details>
+    </section>
   `;
+}
+
+function issueSummaryPanel(anchor, judgments, issues) {
+  const risky = judgments.filter((item) => ["NON_COMPLIANT", "INSUFFICIENT"].includes(item.verdict));
+  if (!risky.length && displayRoleForAnchor(anchor) === "mitigation") {
+    return `<p class="evidence-text">이 문구는 조건이나 제한사항을 보완하는 완화 근거로 사용됩니다.</p>`;
+  }
+  if (!risky.length) {
+    return `<p class="evidence-text">선택 문구 기준 중대한 위반 판단은 없지만, 상품 사실과 필수고지 상태는 별도로 확인해야 합니다.</p>`;
+  }
+  const first = issues[0] || {};
+  return `
+    <p class="evidence-text">${escapeHtml(first.rationale || risky[0].why || "이 문구는 소비자 오인 가능성이 있어 수정 또는 추가 고지가 필요합니다.")}</p>
+    <div class="meta-row">
+      <span class="badge ${judgmentBadgeClass(risky[0].verdict)}">${JUDGMENT_STATUS[risky[0].verdict] || risky[0].verdict}</span>
+      ${first.source_article ? `<span class="tag">${escapeHtml(first.source_article)}</span>` : ""}
+      ${first.risk_title ? `<span class="tag">${escapeHtml(first.risk_title)}</span>` : ""}
+    </div>
+  `;
+}
+
+function displayRoleForAnchor(anchor) {
+  return anchorDisplay(anchor.anchor_id)?.display_role || "actionable";
 }
 
 function policyAggregationPanel(anchor) {
@@ -688,9 +887,9 @@ function policyEvidenceChainPanel(anchor) {
   }
   return `
     <div class="policy-chain-grid">
-      ${chainGroup("Legal basis", "어떤 금소법/시행령/감독규정/심의기준 근거에서 왔는가", legal, "basis_nodes")}
-      ${chainGroup("Required disclosure", "문안에 무엇을 보완하거나 유지해야 하는가", disclosures, "disclosure_nodes")}
-      ${chainGroup("Exception / mitigation", "어떤 고지/상품사실/승인 근거가 있으면 완화 가능한가", exceptions, "exception_nodes", "현재 문안 기준 명시적 예외/완화 chain 없음")}
+      ${chainGroup("법적 근거 · Legal basis", "어떤 금소법/시행령/감독규정/심의기준 근거에서 왔는가", legal, "basis_nodes")}
+      ${chainGroup("필수 고지 · Required disclosure", "문안에 무엇을 보완하거나 유지해야 하는가", disclosures, "disclosure_nodes")}
+      ${chainGroup("예외/완화 · Exception", "어떤 고지/상품사실/승인 근거가 있으면 완화 가능한가", exceptions, "exception_nodes", "현재 문안 기준 명시적 예외/완화 chain 없음")}
       ${!legal.length && fallbackRows.length ? fallbackReferenceRows(fallbackRows) : ""}
     </div>
   `;
@@ -776,16 +975,16 @@ function judgmentCard(judgment, planItem, raw) {
       <div class="meta-row">
         <span class="tag">${escapeHtml(planItem?.principle || "원칙 미상")}</span>
         ${planItem?.source_article ? `<span class="tag">${escapeHtml(planItem.source_article)}</span>` : ""}
-        ${planItem?.legal_element_profile?.action_type ? `<span class="tag">${escapeHtml(planItem.legal_element_profile.action_type)}</span>` : ""}
-        ${(planItem?.matched_required_features || []).map((item) => `<span class="tag">${escapeHtml(item)}</span>`).join("")}
         <span class="tag">score ${Number(judgment.score || 0).toFixed(2)}</span>
-        <span class="tag">${escapeHtml(judgment.cu_id)}</span>
         ${rawTag}
       </div>
       <p class="evidence-text">${escapeHtml(judgment.why)}</p>
       <details>
-        <summary>근거 / Evidence window</summary>
+        <summary>근거 / Evidence window / Debug</summary>
         <div class="evidence-text">
+          <strong>cu_id</strong><br />${escapeHtml(judgment.cu_id || "-")}<br /><br />
+          <strong>action_type</strong><br />${escapeHtml(planItem?.legal_element_profile?.action_type || "-")}<br /><br />
+          <strong>matched_features</strong><br />${(planItem?.matched_required_features || []).map(escapeHtml).join("<br />") || "-"}<br /><br />
           <strong>evidence_span</strong><br />${escapeHtml(judgment.evidence_span || "-")}<br /><br />
           <strong>used_policy_evidence</strong><br />${(judgment.used_policy_evidence || []).map(escapeHtml).join("<br />") || "-"}<br /><br />
           <strong>Premise / LegalChunk</strong><br />${evidence.map((item) => escapeHtml(shorten(item, 520))).join("<hr />") || "-"}
@@ -947,6 +1146,7 @@ function claimQualifierPanel(anchor) {
                 <strong>${escapeHtml(item.text)}</strong>
                 <div class="meta-row">
                   <span class="tag">${escapeHtml(item.role)}</span>
+                  <span class="tag">${escapeHtml(item.prominence_tier || "unknown")}</span>
                   <span class="tag">${Number(item.confidence || 0).toFixed(2)}</span>
                 </div>
                 <p class="evidence-text">${escapeHtml(item.meaning || "")}<br />${escapeHtml(item.risk_reason || "")}</p>
@@ -965,6 +1165,8 @@ function productDisclosurePanel(anchor) {
   const requirements = state.result?.disclosure_requirements || [];
   const products = context.matched_products || [];
   const comparisonSummary = productFactSummary(factContext);
+  const disclosureChecks = factContext.disclosure_checks || [];
+  const prominenceDiagnostics = state.result?.prominence_diagnostics || [];
   return `
     <article class="judgment-card">
       <div class="meta-row">
@@ -981,23 +1183,64 @@ function productDisclosurePanel(anchor) {
           ${Object.entries(comparisonSummary)
             .map(([status, count]) => `${escapeHtml(status)} ${escapeHtml(count)}`)
             .join("<br />") || "-"}<br /><br />
+          <b>prominence</b><br />
+          ${prominenceDiagnostics.length ? prominenceDiagnostics.map((item) => `${escapeHtml(item.diagnostic_code)} · ${escapeHtml(item.message)}`).join("<br />") : "현저성 진단 없음"}<br /><br />
           ${escapeHtml(factContext.reason || "")}
         </div>
       </details>
       <details open>
         <summary>필요 고지 후보</summary>
         <div class="evidence-text">
+          ${
+            disclosureChecks.length
+              ? `<div class="tag-row">${disclosureChecks.map((item) => `<span class="tag ${item.present ? "status-ok" : "status-review"}">${escapeHtml(item.label)} · ${item.present ? "있음" : "누락"}</span>`).join("")}</div><hr />`
+              : ""
+          }
           ${requirements.map((item) => `<b>${escapeHtml(item.label)}</b> · ${escapeHtml(item.source)}<br />${escapeHtml(item.why)}`).join("<hr />") || "-"}
         </div>
       </details>
       <details>
-        <summary>ProductDocument grounding</summary>
+        <summary>ProductDocument grounding · Debug</summary>
         <div class="evidence-text">
           ${products.map((item) => `<b>${escapeHtml(item.product)}</b><br />${escapeHtml(item.major)} / ${escapeHtml(item.subcategory)} / ${escapeHtml(item.category)}<br />문서 ${Number(item.document_count || 0)} · ${(item.document_labels || []).map(escapeHtml).join(", ")}`).join("<hr />") || "광고 문안과 직접 매칭된 상품명은 없습니다. 상품군 기준 고지 후보만 사용합니다."}
         </div>
       </details>
       <p class="evidence-text">Product Fact Graph는 리뷰 대상 상품이 명확할 때 관련 PDF 본문에서 핵심 상품사실을 추출하고, 광고 ClaimFact와 비교합니다. 상품이 모호하면 사실을 추정하지 않고 상품 선택 필요 상태로 둡니다.</p>
     </article>
+  `;
+}
+
+function productFactComparisonPanel(anchor) {
+  const factContext = state.result?.product_fact_context || {};
+  const claimFacts = productClaimFactsForAnchor(anchor);
+  const comparisons = claimFacts.flatMap((fact) => productComparisonsForClaimFact(fact.claim_fact_id));
+  if (factContext.extraction_status === "NEEDS_PRODUCT_SELECTION") {
+    return `
+      <div class="empty-state product-selection-cta">
+        상품을 선택하지 않아 금리/우대조건/예금자보호 문구의 사실 대조가 완료되지 않았습니다.
+      </div>
+      ${productSelectionNotice(factContext)}
+    `;
+  }
+  if (!claimFacts.length) {
+    return `<div class="empty-state">이 문구에서 상품문서와 대조할 ClaimFact가 아직 추출되지 않았습니다.</div>`;
+  }
+  return `
+    <div class="comparison-stack">
+      ${claimFacts.map((fact) => {
+        const rows = productComparisonsForClaimFact(fact.claim_fact_id);
+        return `
+          <article class="fact-card">
+            <div class="card-top">
+              <strong>${escapeHtml(fact.fact_type || "ClaimFact")} · ${escapeHtml(fact.value || "")}</strong>
+              <span class="tag">${escapeHtml(fact.qualifier || "qualifier 없음")}</span>
+            </div>
+            <p class="evidence-text">${escapeHtml(fact.evidence_text || "-")}</p>
+            ${rows.length ? rows.map(comparisonCard).join("") : `<div class="empty-state">비교 결과 없음</div>`}
+          </article>
+        `;
+      }).join("")}
+    </div>
   `;
 }
 
@@ -1008,6 +1251,7 @@ function renderProductFacts() {
   const comparisons = context.comparison_results || [];
   const documents = context.selected_documents || [];
   const summary = productFactSummary(context);
+  const prominenceDiagnostics = state.result?.prominence_diagnostics || [];
   if (!state.result) {
     els.productFactsTab.innerHTML = `<div class="empty-state">Review를 실행하면 상품문서 fact 대조가 여기에 표시됩니다.</div>`;
     return;
@@ -1024,6 +1268,7 @@ function renderProductFacts() {
         <span class="tag">문서 ${documents.length}</span>
         <span class="tag">ProductFact ${productFacts.length}</span>
         <span class="tag">ClaimFact ${claimFacts.length}</span>
+        <span class="tag">현저성 ${prominenceDiagnostics.length}</span>
       </div>
     </section>
     ${productSelectionNotice(context)}
@@ -1031,17 +1276,23 @@ function renderProductFacts() {
     <section class="product-facts-grid">
       <article class="fact-column">
         <h3>광고 ClaimFact</h3>
-        ${claimFacts.length ? claimFacts.map(claimFactCard).join("") : `<div class="empty-state">광고에서 대조할 fact-like assertion이 없거나 상품 선택이 필요합니다.</div>`}
+        ${claimFacts.length ? claimFacts.map(claimFactCard).join("") : `<div class="empty-state">상품을 선택하지 않아 금리/우대조건/예금자보호 문구의 사실 대조가 완료되지 않았습니다.</div>`}
       </article>
       <article class="fact-column">
         <h3>상품문서 ProductFact</h3>
-        ${productFacts.length ? productFacts.map(productFactCard).join("") : `<div class="empty-state">선택 상품 PDF에서 ProductFact가 추출되지 않았습니다.</div>`}
+        ${productFacts.length ? productFacts.map(productFactCard).join("") : `<div class="empty-state">선택 상품 PDF에서 ProductFact가 추출되지 않았습니다. 상품 선택 또는 문서 경로를 확인하세요.</div>`}
       </article>
       <article class="fact-column">
         <h3>비교 결과</h3>
-        <div class="tag-row">${Object.entries(summary).map(([status, count]) => `<span class="tag">${escapeHtml(status)} ${escapeHtml(count)}</span>`).join("") || ""}</div>
+        <div class="tag-row">${Object.entries(summary).map(([status, count]) => `<span class="tag ${productFactStatusClass(status)}">${escapeHtml(status)} ${escapeHtml(count)}</span>`).join("") || ""}</div>
         ${comparisons.length ? comparisons.map(comparisonCard).join("") : `<div class="empty-state">비교 결과가 없습니다.</div>`}
       </article>
+    </section>
+    <section class="detail-card">
+      <h3>고지 현저성 진단</h3>
+      <div class="evidence-text">
+        ${prominenceDiagnostics.length ? prominenceDiagnostics.map((item) => `<b>${escapeHtml(item.diagnostic_code)}</b> · ${escapeHtml(item.severity || "")}<br />${escapeHtml(item.message || "")}<br />${escapeHtml(item.evidence || "")}`).join("<hr />") : "혜택 문구 대비 고지 위계 부족 신호가 없습니다."}
+      </div>
     </section>
     <section class="detail-card">
       <h3>선택 문서</h3>
@@ -1058,7 +1309,7 @@ function productSelectionNotice(context) {
   return `
     <section class="detail-card product-selection-cta">
       <h3>상품 선택 필요</h3>
-      <p class="evidence-text">상품명이 명확하지 않아 ProductFact를 추정하지 않았습니다. 광고 claim과 실제 상품문서 fact를 대조하려면 리뷰 대상 상품을 먼저 확정해야 합니다.</p>
+      <p class="evidence-text">상품을 선택하지 않아 금리/우대조건/예금자보호 문구의 사실 대조가 완료되지 않았습니다. 광고 claim과 실제 상품문서 fact를 대조하려면 리뷰 대상 상품을 먼저 확정해야 합니다.</p>
       <div class="tag-row">
         ${candidates.slice(0, 8).map((item) => `<span class="tag">${escapeHtml(item.product || item.name || "상품 후보")}</span>`).join("") || `<span class="tag">상품 후보 없음</span>`}
       </div>
@@ -1073,6 +1324,7 @@ function claimFactCard(item) {
       <div class="meta-row">
         <span class="tag">${escapeHtml(item.value || "-")}</span>
         <span class="tag">${escapeHtml(item.qualifier || "qualifier 없음")}</span>
+        <span class="tag">${escapeHtml(item.prominence_tier || "unknown")}</span>
         <span class="tag">${escapeHtml(item.claim_id || "")}</span>
       </div>
       <p class="evidence-text">${escapeHtml(item.evidence_text || "-")}</p>
@@ -1123,83 +1375,71 @@ function renderGraph() {
     els.graphCanvas.innerHTML = `<div class="empty-state">선택된 경로가 없습니다.</div>`;
     return;
   }
-  const planItems = state.result.cu_plan.filter((item) => item.anchor_id === anchor.anchor_id).slice(0, 5);
-  const claimFacts = productClaimFactsForAnchor(anchor).slice(0, 3);
-  const comparisons = claimFacts.flatMap((fact) => productComparisonsForClaimFact(fact.claim_fact_id)).slice(0, 3);
   const claim = claimById(anchor.claim_id);
   const sentence = claim ? sentenceById(claim.sentence_id) : null;
-  const frame = state.result?.context_frame || {};
-  const nodes = [
-    { id: "frame", label: "ContextFrame", text: frame.primary_message || frame.summary || "전체 광고 인상", x: 24, y: 20, status: "evidence" },
-    { id: "sentence", label: "SentenceUnit", text: sentence ? `${sentence.role} · ${sentence.text}` : "문장 단위 없음", x: 24, y: 150, status: sentence?.risk_level || "evidence" },
-    { id: "claim", label: "Claim", text: anchor.span.text, x: 220, y: 150 },
-    { id: "anchor", label: "ContextAnchor", text: anchor.anchor_type, x: 430, y: 150 },
-    { id: "hypernym", label: "PolicyHypernym", text: anchor.hypernyms.map((item) => item.hypernym).join(", "), x: 640, y: 150 },
-    { id: "trackb", label: "Track B", text: `${state.result?.overall_impression_judgment?.verdict || "overall impression"} · ${Number(state.result?.overall_impression_judgment?.misleading_risk_score || 0).toFixed(2)}`, x: 430, y: 300, status: trackBGraphStatus() },
-    { id: "product", label: "Product", text: `${state.result?.product_context?.product_group || "auto"} · docs ${Number(state.result?.product_context?.document_count || 0)}`, x: 430, y: 20, status: "evidence" },
+  const claimFacts = productClaimFactsForAnchor(anchor).slice(0, 2);
+  const comparisons = claimFacts.flatMap((fact) => productComparisonsForClaimFact(fact.claim_fact_id)).slice(0, 2);
+  const prominenceDiagnostics = prominenceDiagnosticsForAnchor(anchor);
+  const plans = state.result.cu_plan.filter((item) => item.anchor_id === anchor.anchor_id).slice(0, 2);
+  const legalChains = chainsForAnchor(state.result?.policy_evidence_chains?.legal_basis_chains || [], anchor.anchor_id).filter((item) => item.status === "FOUND");
+  const revision = revisionSuggestion(anchor.anchor_id);
+  const steps = [
+    evidenceStep("Claim", anchor.span.text, "심사 대상 문구"),
+    evidenceStep("Qualifier / ClaimFact", qualifierAndFactText(anchor, claimFacts), "문제 표현과 fact-like 주장"),
+    evidenceStep("ProductFact / Disclosure", productComparisonText(comparisons), "상품문서 사실 또는 필수고지 상태"),
+    evidenceStep("Prominence", prominenceText(prominenceDiagnostics, claim), "고지 존재와 표시 위계"),
+    evidenceStep("ConsumerEffect", claim?.consumer_effect || state.result?.overall_impression_judgment?.representative_consumer_impression || "소비자 영향 미상", "대표 소비자 인상"),
+    evidenceStep("CU", plans.map((item) => item.risk_title || item.subject || item.principle).filter(Boolean).join("\n") || "CUPlan 없음", "정책 판단 단위"),
+    evidenceStep("LegalBasis", legalChains.flatMap((chain) => chain.basis_nodes || []).map(chainNodeLabel).join("\n") || plans.map((item) => item.source_article).filter(Boolean).join("\n") || "법적 근거 미연결", "금소법/감독규정/심의기준"),
+    evidenceStep("Revision", revision?.after || safeAlternative(anchor.span.text), "수정 또는 유지 조치"),
   ];
-  const edges = [
-    ["frame", "sentence", "HAS_SENTENCE"],
-    ["sentence", "claim", "CONTAINS_CLAIM"],
-    ["claim", "anchor", "HAS_ANCHOR"],
-    ["anchor", "hypernym", "NORMALIZED_TO"],
-    ["claim", "trackb", "MEANING_IMPLICATURE_EFFECT"],
-    ["claim", "product", "ABOUT_PRODUCT_SCOPE"],
-  ];
-  claimFacts.forEach((fact, index) => {
-    const y = 420 + index * 95;
-    const comparison = productComparisonsForClaimFact(fact.claim_fact_id)[0];
-    const productFact = comparison ? productFactById(comparison.product_fact_id) : null;
-    nodes.push(
-      { id: `claim_fact_${index}`, label: "ClaimFact", text: `${fact.fact_type}: ${fact.value} ${fact.qualifier || ""}`, x: 220, y, status: "plan" },
-      { id: `product_fact_${index}`, label: "ProductFact", text: productFact ? `${productFact.fact_type}: ${productFact.value} ${productFact.condition || ""}` : "대응 ProductFact 없음", x: 430, y, status: "evidence" },
-      { id: `comparison_${index}`, label: "ComparisonResult", text: `${comparison?.status || "NO_PRODUCT_FACT"} · ${comparison?.rationale || ""}`, x: 660, y, status: comparisonStatusForGraph(comparison?.status) }
-    );
-    edges.push(
-      ["claim", `claim_fact_${index}`, "ASSERTS_FACT"],
-      [`claim_fact_${index}`, `product_fact_${index}`, "COMPARED_TO"],
-      [`product_fact_${index}`, `comparison_${index}`, "EVIDENCES"]
-    );
-  });
-  if (!planItems.length) {
-    const display = anchorDisplay(anchor.anchor_id);
-    nodes.push({ id: "failure", label: "Retrieval", text: `CUPlan 0 · ${display?.retrieval_failure_code || "정책 매칭 실패"}`, x: 650, y: 150, status: "review" });
-    edges.push(["hypernym", "failure", "NO_CU_MATCH"]);
+  els.graphCanvas.innerHTML = `
+    <section class="evidence-path-header">
+      <span class="tag">선택 Claim</span>
+      <strong>${escapeHtml(anchor.span.text)}</strong>
+      ${sentence ? `<span class="tag">${escapeHtml(sentence.role || "sentence")}</span>` : ""}
+    </section>
+    <section class="evidence-path-row">
+      ${steps.map(evidenceStepCard).join("")}
+    </section>
+  `;
+}
+
+function evidenceStep(label, text, caption) {
+  return { label, text: text || "-", caption };
+}
+
+function evidenceStepCard(step, index) {
+  return `
+    <article class="evidence-step-card">
+      <div class="step-index">${index + 1}</div>
+      <strong>${escapeHtml(step.label)}</strong>
+      <p>${escapeHtml(shorten(step.text, 180))}</p>
+      <span>${escapeHtml(step.caption)}</span>
+    </article>
+  `;
+}
+
+function qualifierAndFactText(anchor, claimFacts) {
+  const qualifiers = claimQualifiers(anchor.claim_id).map((item) => item.text);
+  const facts = claimFacts.map((item) => `${item.fact_type}: ${item.value} ${item.qualifier || ""}`.trim());
+  return [...qualifiers, ...facts].filter(Boolean).join("\n") || anchor.hypernyms.map((item) => item.hypernym).join("\n");
+}
+
+function productComparisonText(comparisons) {
+  if (state.result?.product_fact_context?.extraction_status === "NEEDS_PRODUCT_SELECTION") {
+    return "상품을 선택하지 않아 금리/우대조건/예금자보호 문구의 사실 대조가 완료되지 않았습니다.";
   }
-  planItems.forEach((plan, index) => {
-    const y = 70 + index * 120;
-    const judgment = state.result.judgments.find((item) => item.plan_item_id === plan.plan_item_id);
-    const effective = state.result.effective_judgments?.find((item) => item.judgment_id === judgment?.judgment_id) || judgment;
-    const exception = judgment
-      ? state.result.exception_reviews.find((item) => item.judgment_id === judgment.judgment_id)
-      : null;
-    nodes.push(
-      { id: `plan_${index}`, label: "CUPlanItem", text: `${plan.principle || "원칙 미상"} · ${plan.retrieval_basis || "basis"} · ${plan.gate_status || "gate"}`, x: 660, y, status: "plan" },
-      { id: `cu_${index}`, label: "ComplianceUnit", text: `${plan.subject || plan.cu_id} ${plan.constraint || ""}`, x: 880, y, status: effective?.verdict || "review" },
-      { id: `evidence_${index}`, label: "Premise / Legal", text: (plan.legal_evidence_ids || []).slice(0, 3).join(", ") || "evidence window", x: 660, y: y + 72, status: "evidence" },
-      { id: `judgment_${index}`, label: "LLMJudgment", text: effective?.verdict || "not judged", x: 880, y: y + 72, status: effective?.verdict || "review" }
-    );
-    edges.push(
-      ["hypernym", `plan_${index}`, "RETRIEVES"],
-      [`plan_${index}`, `cu_${index}`, "TARGETS_CU"],
-      [`plan_${index}`, `evidence_${index}`, "USES_EVIDENCE"],
-      [`plan_${index}`, `judgment_${index}`, "JUDGED_AS"]
-    );
-    if (exception) {
-      nodes.push({ id: `exception_${index}`, label: "ExceptionReview", text: `${exception.effect} · ${exception.applies ? "applied" : "not applied"}`, x: 1090, y: y + 72, status: "exception" });
-      edges.push([`judgment_${index}`, `exception_${index}`, "HAS_EXCEPTION_REVIEW"]);
-    }
-  });
-  els.graphCanvas.innerHTML = "";
-  nodes.forEach((node) => {
-    const div = document.createElement("div");
-    div.className = `graph-node ${graphStatusClass(node.status)}`;
-    div.style.left = `${node.x}px`;
-    div.style.top = `${node.y}px`;
-    div.innerHTML = `<strong>${escapeHtml(node.label)}</strong>${escapeHtml(shorten(node.text, 80))}`;
-    els.graphCanvas.appendChild(div);
-  });
-  edges.forEach(([from, to, label]) => drawEdge(nodes.find((n) => n.id === from), nodes.find((n) => n.id === to), label));
+  return comparisons
+    .map((item) => `${item.status}: ${item.rationale || item.evidence_text || ""}`.trim())
+    .join("\n") || "대응 ProductFact/Disclosure 비교 결과 없음";
+}
+
+function prominenceText(diagnostics, claim) {
+  if (!diagnostics.length) {
+    return claim?.sentence_id ? "선택 문구 기준 현저성 부족 신호 없음" : "문장 위계 정보 없음";
+  }
+  return diagnostics.map((item) => `${item.diagnostic_code}: ${item.message || item.evidence || ""}`).join("\n");
 }
 
 function drawEdge(from, to, label) {
@@ -1428,7 +1668,7 @@ function principleStatuses(result) {
 function conditionalDisclosures(result) {
   const text = els.text.value;
   const signals = [];
-  if (/예금자보호|5천만원|보호됩니다/.test(text)) signals.push("예금자보호 한도 고지");
+  if (/예금자보호|1억원|보호됩니다/.test(text)) signals.push("예금자보호 한도 고지");
   if (/우대조건|가입기간|달라질 수|조건 충족/.test(text)) signals.push("금리/우대조건 고지");
   if (/원금손실|손실 가능성|투자위험/.test(text)) signals.push("원금손실/투자위험 고지");
   if (/과거.*미래|미래.*보장하지/.test(text)) signals.push("과거성과 미래보장 아님 고지");
@@ -1439,7 +1679,7 @@ function conditionalDisclosures(result) {
 function disclosureSignals(anchor) {
   const text = `${anchor.span.text} ${anchor.facts.join(" ")} ${anchor.hypernyms.map((item) => item.hypernym).join(" ")}`;
   const signals = [];
-  if (/예금자보호|5천만원|보호/.test(text)) signals.push("예금자보호 고지 있음");
+  if (/예금자보호|1억원|보호/.test(text)) signals.push("예금자보호 고지 있음");
   if (/우대조건|가입기간|조건/.test(text)) signals.push("조건/우대금리 고지 있음");
   if (/원금손실|투자위험/.test(text)) signals.push("위험 고지 있음");
   if (!signals.length && /보장|확정|수익/.test(text)) signals.push("완화 고지 확인 필요");
@@ -1561,8 +1801,29 @@ function anchorForClaim(claimId) {
   return (state.result?.context_anchors || []).find((item) => item.claim_id === claimId);
 }
 
+function anchorForSentence(sentenceId) {
+  const claim = claimsForSentence(sentenceId)[0];
+  return claim ? anchorForClaim(claim.claim_id) : null;
+}
+
+function policyBasisForAnchor(anchor) {
+  const planIds = (state.result?.cu_plan || [])
+    .filter((item) => item.anchor_id === anchor.anchor_id)
+    .map((item) => item.plan_item_id);
+  return (state.result?.cu_plan || [])
+    .filter((item) => planIds.includes(item.plan_item_id))
+    .map((item) => item.source_article || item.principle || item.subject)
+    .filter(Boolean);
+}
+
 function productComparisonsForClaimFact(claimFactId) {
   return (state.result?.product_fact_context?.comparison_results || []).filter((item) => item.claim_fact_id === claimFactId);
+}
+
+function prominenceDiagnosticsForAnchor(anchor) {
+  const claim = claimById(anchor.claim_id);
+  const sentenceId = claim?.sentence_id || "";
+  return (state.result?.prominence_diagnostics || []).filter((item) => item.benefit_sentence_id === sentenceId || item.evidence?.includes(anchor.span.text));
 }
 
 function claimFactById(claimFactId) {
@@ -1576,6 +1837,7 @@ function productFactById(productFactId) {
 function productFactStatusClass(status) {
   if (status === "SUPPORTED" || status === "EXTRACTED") return "pass";
   if (status === "CONTRADICTED" || status === "FACT_EXTRACTION_FAILED" || status === "TEXT_EXTRACTION_FAILED") return "reject";
+  if (status === "PROMINENCE_INSUFFICIENT" || status === "CONDITION_MISSING") return "review";
   return "review";
 }
 

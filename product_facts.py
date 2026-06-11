@@ -98,6 +98,7 @@ CLAIM_FACT_COMPARISON_SCHEMA: dict[str, Any] = {
                             "SUPPORTED",
                             "CONTRADICTED",
                             "CONDITION_MISSING",
+                            "PROMINENCE_INSUFFICIENT",
                             "NO_PRODUCT_FACT",
                             "NEEDS_PRODUCT_SELECTION",
                         ],
@@ -133,12 +134,17 @@ class ProductFactAnalyzer:
         product_context: dict[str, Any],
     ) -> dict[str, Any]:
         matched_products = product_context.get("matched_products", []) or []
-        exact_products = [item for item in matched_products if item.get("match_basis") == "exact_product_name"]
+        exact_products = [
+            item
+            for item in matched_products
+            if item.get("match_basis") in {"exact_product_name", "exact_product_family", "selected_product"}
+        ]
         if len(exact_products) != 1:
             return empty_product_fact_context(
                 status="NEEDS_PRODUCT_SELECTION",
                 matched_products=matched_products,
                 reason="광고 문안에서 특정 상품명이 하나로 확정되지 않아 상품문서 본문 fact 대조를 수행하지 않았습니다.",
+                disclosure_checks=build_disclosure_checks(review_input),
             )
 
         product = str(exact_products[0].get("product") or "")
@@ -149,6 +155,7 @@ class ProductFactAnalyzer:
                 matched_products=matched_products,
                 matched_product=product,
                 reason="선택된 상품의 상품주요내용/상품설명서/약관 PDF를 찾지 못했습니다.",
+                disclosure_checks=build_disclosure_checks(review_input),
             )
         selected_documents = documents[:MAX_DOCUMENTS]
         for document in selected_documents:
@@ -212,6 +219,7 @@ class ProductFactAnalyzer:
             "product_facts": product_facts,
             "claim_facts": claim_facts,
             "comparison_results": comparisons,
+            "disclosure_checks": build_disclosure_checks(review_input),
             "reason": "",
         }
 
@@ -291,26 +299,30 @@ class ProductFactAnalyzer:
                 f"{to_jsonable(claims)}\n\n"
                 "[product_facts]\n"
                 f"{product_facts}"
-            ),
+        ),
         )
         claim_facts = []
+        claim_by_id = {claim.claim_id: claim for claim in claims}
+        sentence_prominence_by_claim = {claim.claim_id: claim.qualifiers[0].prominence_tier if claim.qualifiers else "unknown" for claim in claims}
         for index, row in enumerate(result.get("claim_facts", [])):
+            claim_id = str(row.get("claim_id", ""))
             claim_facts.append(
                 {
                     "claim_fact_id": stable_id(
                         "claim_fact",
-                        row.get("claim_id", ""),
+                        claim_id,
                         row.get("fact_type", ""),
                         row.get("value", ""),
                         index,
                     ),
-                    "claim_id": str(row.get("claim_id", "")),
+                    "claim_id": claim_id,
                     "fact_type": str(row.get("fact_type", "")),
                     "value": str(row.get("value", "")),
                     "unit": str(row.get("unit", "")),
                     "qualifier": str(row.get("qualifier", "")),
                     "evidence_text": str(row.get("evidence_text", "")),
                     "confidence": float(row.get("confidence") or 0.0),
+                    "prominence_tier": sentence_prominence_by_claim.get(claim_id) or ("body" if claim_by_id.get(claim_id) else "unknown"),
                 }
             )
         comparisons = []
@@ -342,6 +354,7 @@ def empty_product_fact_context(
     matched_products: list[dict[str, Any]],
     reason: str,
     matched_product: str = "",
+    disclosure_checks: list[dict[str, Any]] | None = None,
 ) -> dict[str, Any]:
     return {
         "matched_product": matched_product,
@@ -351,6 +364,7 @@ def empty_product_fact_context(
         "product_facts": [],
         "claim_facts": [],
         "comparison_results": [],
+        "disclosure_checks": disclosure_checks or [],
         "reason": reason,
     }
 
@@ -369,8 +383,57 @@ def context_with_documents(
         "product_facts": [],
         "claim_facts": [],
         "comparison_results": [],
+        "disclosure_checks": [],
         "reason": reason,
     }
+
+
+def build_disclosure_checks(review_input: ReviewInput) -> list[dict[str, Any]]:
+    text = review_input.content_text
+    product_group = review_input.product_group
+    if product_group == "auto":
+        lowered = text.lower()
+        if any(token in lowered for token in ["예금", "적금", "특판"]):
+            product_group = "deposit"
+        elif any(token in lowered for token in ["대출", "한도", "승인"]):
+            product_group = "loan"
+        elif any(token in lowered for token in ["els", "펀드", "투자", "수익률"]):
+            product_group = "investment"
+    if product_group == "deposit":
+        return [
+            disclosure_check("deposit_rate_condition", "최고금리 적용 조건", any_token(text, ["우대조건", "조건 충족", "조건에 따라", "가입기간"])),
+            disclosure_check("deposit_term", "가입기간", any_token(text, ["개월", "년", "가입기간", "만기"])),
+            disclosure_check("deposit_tax_basis", "세전/세후 기준", any_token(text, ["세전", "세후"])),
+            disclosure_check("depositor_protection_limit", "예금자보호 한도", any_token(text, ["1억원", "예금자보호", "보호법"])),
+            disclosure_check("product_document_notice", "상품설명서·약관 확인", any_token(text, ["상품설명서", "약관", "설명서"])),
+        ]
+    if product_group == "loan":
+        return [
+            disclosure_check("loan_rate_range", "대출금리 범위", any_token(text, ["연 ", "%", "금리"])),
+            disclosure_check("loan_screening", "심사 조건", any_token(text, ["심사", "신용도", "상환능력"])),
+            disclosure_check("loan_fee", "수수료/부대비용", any_token(text, ["수수료", "부대비용", "중도상환"])),
+            disclosure_check("product_document_notice", "상품설명서·약관 확인", any_token(text, ["상품설명서", "약관", "설명서"])),
+        ]
+    if product_group == "investment":
+        return [
+            disclosure_check("investment_loss_risk", "원금손실 가능성", any_token(text, ["원금손실", "손실", "투자위험"])),
+            disclosure_check("past_performance_warning", "과거성과 미래수익 보장 아님", any_token(text, ["미래 수익을 보장", "보장하지 않습니다", "과거"])),
+            disclosure_check("product_document_notice", "투자설명서·약관 확인", any_token(text, ["투자설명서", "상품설명서", "약관"])),
+        ]
+    return []
+
+
+def disclosure_check(check_id: str, label: str, present: bool) -> dict[str, Any]:
+    return {
+        "check_id": check_id,
+        "label": label,
+        "status": "PRESENT" if present else "MISSING",
+        "present": present,
+    }
+
+
+def any_token(text: str, tokens: list[str]) -> bool:
+    return any(token in text for token in tokens)
 
 
 def select_product_documents(product: str) -> list[dict[str, Any]]:

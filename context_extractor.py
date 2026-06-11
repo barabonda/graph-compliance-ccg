@@ -75,6 +75,7 @@ EXTRACTION_SCHEMA: dict[str, Any] = {
                     "local_meaning": {"type": "string"},
                     "context_effect": {"type": "string"},
                     "risk_level": {"type": "string", "enum": ["LOW", "MEDIUM", "HIGH"]},
+                    "prominence_tier": {"type": "string", "enum": ["headline", "subcopy", "body", "footnote", "unknown"]},
                 },
                 "required": [
                     "index",
@@ -85,6 +86,7 @@ EXTRACTION_SCHEMA: dict[str, Any] = {
                     "local_meaning",
                     "context_effect",
                     "risk_level",
+                    "prominence_tier",
                 ],
             },
         },
@@ -177,8 +179,9 @@ EXTRACTION_SCHEMA: dict[str, Any] = {
                                 "meaning": {"type": "string"},
                                 "risk_reason": {"type": "string"},
                                 "confidence": {"type": "number"},
+                                "prominence_tier": {"type": "string", "enum": ["headline", "subcopy", "body", "footnote", "unknown"]},
                             },
-                            "required": ["text", "role", "start", "end", "meaning", "risk_reason", "confidence"],
+                            "required": ["text", "role", "start", "end", "meaning", "risk_reason", "confidence", "prominence_tier"],
                         },
                     },
                     "entities": {
@@ -275,6 +278,10 @@ class LLMContextExtractor:
                 "segments such as '고령층 고객', '중위험 투자자', or '소상공인' may remain target_consumer "
                 "entities because they define an actual audience segment. "
                 "SentenceUnit role must distinguish neutral launch notices from benefit claims and disclosures. "
+                "Classify each SentenceUnit and ClaimQualifier prominence_tier as headline, subcopy, body, "
+                "footnote, or unknown. Use headline for leading/large/emphasized benefit copy, subcopy for "
+                "supporting copy near the headline, body for ordinary sentences, and footnote for small-print, "
+                "asterisked, parenthetical, bottom, or disclaimer-like text. "
                 "For example, 'JB 특판예금 출시.' is usually launch_notice and should not become a risky "
                 "standalone claim unless the sentence itself contains a material benefit or misleading claim. "
                 "InterSentenceRelation should capture how sentences interact: a later '조건 없이 안정적인 고수익' "
@@ -318,6 +325,7 @@ class LLMContextExtractor:
                     local_meaning=item["local_meaning"],
                     context_effect=item["context_effect"],
                     risk_level=item["risk_level"],
+                    prominence_tier=item.get("prominence_tier") or "unknown",
                 )
             )
         relations_by_index = {
@@ -368,6 +376,7 @@ class LLMContextExtractor:
                     meaning=qualifier["meaning"],
                     risk_reason=qualifier["risk_reason"],
                     confidence=float(qualifier["confidence"]),
+                    prominence_tier=qualifier.get("prominence_tier") or "unknown",
                 )
                 for qualifier in item["qualifiers"]
             ]

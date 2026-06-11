@@ -47,6 +47,10 @@
               <option value="bank_event_page_text">은행 이벤트 페이지</option>
             </select>
           </label>
+          <label class="field selected-product-field">
+            <span>선택 상품명</span>
+            <input id="selectedProductInput" type="text" placeholder="예: (26년 JUMP UP) 특판 예금" />
+          </label>
           <label class="field text-field">
             <span>광고 문안</span>
             <textarea id="textInput" rows="5"></textarea>
@@ -85,12 +89,12 @@
 
       <section class="tabs">
         <div class="tab-list" role="tablist">
-          <button class="tab-button is-active" data-tab="overall" type="button">Overall Context</button>
-          <button class="tab-button" data-tab="sentences" type="button">Sentence Map</button>
-          <button class="tab-button" data-tab="claims" type="button">Claim Cards</button>
-          <button class="tab-button" data-tab="graph" type="button">Evidence Graph</button>
-          <button class="tab-button" data-tab="productFacts" type="button">Product Facts</button>
-          <button class="tab-button" data-tab="audit" type="button">Audit / Trace</button>
+          <button class="tab-button is-active" data-tab="overall" type="button">전체 맥락 <span>Overall</span></button>
+          <button class="tab-button" data-tab="sentences" type="button">문장 지도 <span>Sentence Map</span></button>
+          <button class="tab-button" data-tab="claims" type="button">문구 카드 <span>Claim Cards</span></button>
+          <button class="tab-button" data-tab="graph" type="button">근거 경로 <span>Evidence Graph</span></button>
+          <button class="tab-button" data-tab="productFacts" type="button">상품 사실 <span>Product Facts</span></button>
+          <button class="tab-button" data-tab="audit" type="button">감사 추적 <span>Audit / Trace</span></button>
         </div>
         <div id="overallTab" class="tab-panel is-active"></div>
         <div id="sentencesTab" class="tab-panel"></div>

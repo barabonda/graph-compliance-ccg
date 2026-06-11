@@ -9,6 +9,7 @@ from typing import Any, Literal
 Verdict = Literal["COMPLIANT", "NON_COMPLIANT", "INSUFFICIENT", "NOT_APPLICABLE"]
 FinalVerdict = Literal["pass_candidate", "revise", "reject", "needs_review"]
 SupportLevel = Literal["STRONG", "WEAK"]
+ProminenceTier = Literal["headline", "subcopy", "body", "footnote", "unknown"]
 
 
 @dataclass(frozen=True)
@@ -42,6 +43,8 @@ class ReviewInput:
     channel: str = "bank_event_page_text"
     source_type: str = ""
     product_group: str = "auto"
+    selected_product_id: str = ""
+    selected_product_name: str = ""
 
 
 @dataclass(frozen=True)
@@ -101,6 +104,7 @@ class SentenceUnit:
     local_meaning: str
     context_effect: str
     risk_level: str
+    prominence_tier: ProminenceTier = "unknown"
 
 
 @dataclass(frozen=True)
@@ -143,6 +147,7 @@ class ClaimQualifier:
     meaning: str
     risk_reason: str
     confidence: float
+    prominence_tier: ProminenceTier = "unknown"
 
 
 @dataclass(frozen=True)
@@ -297,6 +302,7 @@ class ClaimFact:
     qualifier: str
     evidence_text: str
     confidence: float
+    prominence_tier: ProminenceTier = "unknown"
 
 
 @dataclass(frozen=True)
@@ -308,6 +314,7 @@ class ComparisonResult:
         "SUPPORTED",
         "CONTRADICTED",
         "CONDITION_MISSING",
+        "PROMINENCE_INSUFFICIENT",
         "NO_PRODUCT_FACT",
         "NEEDS_PRODUCT_SELECTION",
     ]
@@ -337,6 +344,9 @@ class ReviewGraph:
     retrieval_diagnostics: dict[str, dict[str, Any]] = field(default_factory=dict)
     product_context: dict[str, Any] = field(default_factory=dict)
     product_fact_context: dict[str, Any] = field(default_factory=dict)
+    prominence_analysis: dict[str, Any] = field(default_factory=dict)
+    disclosure_links: list[dict[str, Any]] = field(default_factory=list)
+    prominence_diagnostics: list[dict[str, Any]] = field(default_factory=list)
     disclosure_requirements: list[dict[str, Any]] = field(default_factory=list)
     policy_evidence_chains: dict[str, list[dict[str, Any]]] = field(default_factory=dict)
     overall_impression_judgment: dict[str, Any] = field(default_factory=dict)
@@ -369,6 +379,9 @@ class ReviewOutput:
     revision_suggestions: list[dict[str, Any]]
     product_context: dict[str, Any]
     product_fact_context: dict[str, Any]
+    prominence_analysis: dict[str, Any]
+    disclosure_links: list[dict[str, Any]]
+    prominence_diagnostics: list[dict[str, Any]]
     disclosure_requirements: list[dict[str, Any]]
     policy_evidence_chains: dict[str, list[dict[str, Any]]]
     overall_impression_judgment: dict[str, Any]

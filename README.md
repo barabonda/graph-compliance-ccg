@@ -119,9 +119,15 @@ JB dataset extensions add:
   product name is resolved, the workflow reads the top product PDFs
   (`상품주요내용 > 상품설명서 > 약관`), extracts `ProductFact` evidence with
   structured LLM output, extracts advertising `ClaimFact`, and compares them as
-  `SUPPORTED`, `CONTRADICTED`, `CONDITION_MISSING`, `NO_PRODUCT_FACT`, or
+  `SUPPORTED`, `CONTRADICTED`, `CONDITION_MISSING`,
+  `PROMINENCE_INSUFFICIENT`, `NO_PRODUCT_FACT`, or
   `NEEDS_PRODUCT_SELECTION`. Ambiguous products stay in
   `NEEDS_PRODUCT_SELECTION`; the system does not invent missing product facts.
+- `prominence_analysis`, `disclosure_links`, and `prominence_diagnostics` —
+  runtime Disclosure Gate artifacts. They compare benefit claims against
+  condition/protection/risk disclosures and flag cases where a disclosure exists
+  but is less prominent than the benefit claim. This is evidence engineering for
+  the judge and reviewer UI, not a deterministic final verdict path.
 - `disclosure_requirements` — required-disclosure candidates from the bank ad
   review standards and financial-ad guideline, such as depositor protection,
   rate/condition basis, fees, and review-number display.
@@ -147,6 +153,12 @@ product documents. It resolves the reviewed product from the ad text and JB
 product metadata, reads only the selected PDF documents for that product, and
 stores the extracted `ProductFact`, `ClaimFact`, and `ComparisonResult` nodes
 under the current `review_run_id`.
+
+`SUPPORTED` means the product document supports the fact itself. It does not
+automatically mean the ad is ready to publish. If conditions, period, tax basis,
+depositor-protection scope, or other required disclosures are absent or buried
+in a lower prominence tier, the Disclosure Gate may surface
+`CONDITION_MISSING` or `PROMINENCE_INSUFFICIENT`.
 
 ## Hierarchical Context Graph
 

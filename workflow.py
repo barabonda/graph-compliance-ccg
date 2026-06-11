@@ -19,6 +19,7 @@ from persistence import Neo4jReviewWriter, ReviewWriter
 from policy_evidence import build_policy_evidence_chains
 from planner import LLMCUPlanner
 from product_facts import ProductFactAnalyzer
+from prominence import build_prominence_artifacts
 from retriever import Neo4jPolicyRetriever, PolicyRetriever
 from revision import LLMRevisionSuggester
 from router import build_output
@@ -215,6 +216,29 @@ class GraphComplianceCCGWorkflow:
                 "matched_product": product_fact_context.get("matched_product", ""),
                 "extraction_status": product_fact_context.get("extraction_status", ""),
                 "reason": product_fact_context.get("reason", ""),
+            },
+        )
+
+        yield workflow_event("step_started", "Prominence disclosure gate", review_run_id=review_run_id, summary="Compare disclosure presence and display prominence against benefit claims.")
+        prominence_analysis, disclosure_links, prominence_diagnostics, product_fact_context = build_prominence_artifacts(
+            review_input=review_input,
+            sentence_units=extraction.sentence_units,
+            claims=claims,
+            product_fact_context=product_fact_context,
+        )
+        yield workflow_event(
+            "step_completed",
+            "Prominence disclosure gate",
+            review_run_id=review_run_id,
+            summary=(
+                f"{len(disclosure_links)} disclosure links · "
+                f"{len(prominence_diagnostics)} diagnostics"
+            ),
+            counts={
+                "disclosure_links": len(disclosure_links),
+                "prominence_diagnostics": len(prominence_diagnostics),
+                "weak_disclosures": prominence_analysis.get("weak_disclosure_count", 0),
+                "missing_disclosures": prominence_analysis.get("missing_disclosure_count", 0),
             },
         )
 
@@ -441,6 +465,9 @@ class GraphComplianceCCGWorkflow:
             retrieval_diagnostics=retrieval_diagnostics,
             product_context=product_context,
             product_fact_context=product_fact_context,
+            prominence_analysis=prominence_analysis,
+            disclosure_links=disclosure_links,
+            prominence_diagnostics=prominence_diagnostics,
             disclosure_requirements=disclosure_requirements,
             policy_evidence_chains=policy_evidence_chains,
             overall_impression_judgment=overall_impression_judgment,
@@ -468,6 +495,8 @@ def review_input_from_payload(payload: dict[str, Any]) -> ReviewInput:
         channel=str(payload.get("channel", "bank_event_page_text")),
         source_type=str(payload.get("source_type", "")),
         product_group=str(payload.get("product_group", "auto")),
+        selected_product_id=str(payload.get("selected_product_id", "")),
+        selected_product_name=str(payload.get("selected_product_name", "")),
         workspace_id=str(payload.get("workspace_id", "graphcompliance_mvp_jb_20260530")),
     )
 

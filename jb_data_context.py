@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import logging
 import os
+import re
 from functools import lru_cache
 from pathlib import Path
 from typing import Any
@@ -105,11 +106,16 @@ DISCLOSURE_REQUIREMENTS: dict[str, list[dict[str, str]]] = {
 def build_product_context(review_input: ReviewInput, claims: list[Claim]) -> tuple[dict[str, Any], list[dict[str, Any]]]:
     product_group = normalize_product_group(review_input.product_group, review_input.content_text)
     products = match_products(review_input.content_text, claims, product_group)
+    selected_product = selected_product_match(review_input, products, product_group)
+    if selected_product:
+        products = [selected_product, *[product for product in products if product.get("product") != selected_product.get("product")]]
     requirements = requirements_for_group(product_group)
     source = "Neo4j Product Graph" if any(product.get("source") == PRODUCT_GRAPH_SOURCE for product in products) else "JB 금융상품 데이터셋 · 전북은행 상품문서 메타데이터.xlsx"
     return (
         {
             "product_group": product_group,
+            "selected_product_id": review_input.selected_product_id,
+            "selected_product_name": review_input.selected_product_name,
             "matched_products": products[:12],
             "document_count": sum(int(product.get("document_count", 0)) for product in products),
             "source": source,
@@ -158,13 +164,123 @@ def match_products(text: str, claims: list[Claim], product_group: str) -> list[d
     needles.update(entity.name for claim in claims for entity in claim.entities)
     joined = " ".join(needles)
     matches: list[dict[str, Any]] = []
+    family_matches: list[dict[str, Any]] = []
     for product, meta in rows.items():
         if product and product in joined and (product_group == "auto" or meta["product_group"] == product_group):
             matches.append({**meta, "product": product, "match_basis": "exact_product_name"})
     if matches:
         return sorted(matches, key=lambda item: (-int(item["document_count"]), item["product"]))
+    for product, meta in rows.items():
+        family_name = product_family_name(product)
+        if (
+            family_name
+            and family_name != product
+            and family_name in joined
+            and (product_group == "auto" or meta["product_group"] == product_group)
+        ):
+            family_matches.append({**meta, "product": product, "match_basis": "exact_product_family"})
+    if family_matches:
+        return [preferred_product_variant(family_matches, joined)]
     group_rows = [meta for meta in rows.values() if product_group != "auto" and meta["product_group"] == product_group]
     return sorted(group_rows, key=lambda item: (-int(item["document_count"]), item["product"]))[:5]
+
+
+def selected_product_match(
+    review_input: ReviewInput,
+    current_matches: list[dict[str, Any]],
+    product_group: str,
+) -> dict[str, Any] | None:
+    selected_name = review_input.selected_product_name.strip()
+    selected_id = review_input.selected_product_id.strip()
+    if not selected_name and not selected_id:
+        return None
+
+    candidates = [*current_matches]
+    rows = load_product_rows()
+    candidates.extend({**meta, "match_basis": "selected_product"} for meta in rows.values())
+
+    for candidate in candidates:
+        candidate_name = str(candidate.get("product") or "")
+        candidate_ids = {str(value) for value in candidate.get("source_ids", [])}
+        if selected_name and candidate_name == selected_name:
+            return selected_product_payload(candidate, product_group)
+        if selected_id and selected_id in candidate_ids:
+            return selected_product_payload(candidate, product_group)
+
+    if selected_name:
+        family_matches = [
+            candidate
+            for candidate in candidates
+            if selected_product_matches_family(selected_name, str(candidate.get("product") or ""))
+        ]
+        scoped_family_matches = [
+            candidate
+            for candidate in family_matches
+            if product_group == "auto" or candidate.get("product_group") in {product_group, "", None}
+        ]
+        if scoped_family_matches:
+            return selected_product_payload(
+                preferred_product_variant(scoped_family_matches, f"{review_input.content_text} {selected_name}"),
+                product_group,
+            )
+    return {
+        "product": selected_name or selected_id,
+        "product_group": product_group,
+        "major": "",
+        "subcategory": "",
+        "category": "",
+        "document_count": 0,
+        "document_labels": [],
+        "source_ids": [selected_id] if selected_id else [],
+        "documents": [],
+        "match_basis": "selected_product_not_found",
+    }
+
+
+def selected_product_payload(candidate: dict[str, Any], product_group: str) -> dict[str, Any]:
+    return {
+        **candidate,
+        "product_group": candidate.get("product_group") or product_group,
+        "match_basis": "selected_product",
+        "selected_product_alias": product_family_name(str(candidate.get("product") or "")),
+    }
+
+
+def product_family_name(product_name: str) -> str:
+    """Return the consumer-facing family name before product variant suffixes."""
+    return re.sub(r"\([^)]*\)", "", product_name).strip()
+
+
+def normalized_product_name(product_name: str) -> str:
+    return re.sub(r"[\s()（）·._-]+", "", product_name).lower()
+
+
+def selected_product_matches_family(selected_name: str, candidate_name: str) -> bool:
+    selected = normalized_product_name(selected_name)
+    candidate = normalized_product_name(candidate_name)
+    family = normalized_product_name(product_family_name(candidate_name))
+    return bool(selected and (selected == candidate or selected == family))
+
+
+def preferred_product_variant(candidates: list[dict[str, Any]], context_text: str) -> dict[str, Any]:
+    def score(candidate: dict[str, Any]) -> tuple[int, int, int, str]:
+        name = str(candidate.get("product") or "")
+        context = context_text.lower()
+        variant_score = 0
+        if "월이자" in context and "월이자" in name:
+            variant_score += 20
+        if ("만기" in context or "일시" in context) and "만기일시" in name:
+            variant_score += 20
+        if "만기일시" in name:
+            variant_score += 5
+        return (
+            variant_score,
+            int(candidate.get("document_count") or 0),
+            len(candidate.get("source_ids") or []),
+            name,
+        )
+
+    return sorted(candidates, key=score, reverse=True)[0]
 
 
 def match_products_from_neo4j(text: str, claims: list[Claim], product_group: str) -> list[dict[str, Any]]:
@@ -194,6 +310,17 @@ def match_products_from_neo4j(text: str, claims: list[Claim], product_group: str
     ]
     if exact_matches:
         return sorted(exact_matches, key=lambda item: (-int(item["document_count"]), item["product"]))
+
+    family_matches = [
+        {**meta, "match_basis": "exact_product_family"}
+        for product, meta in rows.items()
+        if product_family_name(product)
+        and product_family_name(product) != product
+        and product_family_name(product) in joined
+        and (product_group == "auto" or meta["product_group"] == product_group)
+    ]
+    if family_matches:
+        return [preferred_product_variant(family_matches, joined)]
 
     if product_group == "auto":
         return []

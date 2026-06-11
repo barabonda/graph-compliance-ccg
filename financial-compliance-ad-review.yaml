@@ -197,6 +197,9 @@ relationships:
   HAS_EXCEPTION_REVIEW:
     from: [LLMJudgment]
     to: [ExceptionReview]
+  DELEGATES_TO:
+    from: [ComplianceUnit, LegalChunk, Premise]
+    to: [ComplianceUnit, LegalChunk, Premise]
 
 agent_tools:
   - name: get_policy_hypernyms
@@ -229,7 +232,7 @@ agent_tools:
     description: Diagnostic read-only closure for CU exception/reference review.
     cypher: |
       MATCH (cu:ComplianceUnit {id: $cu_id, workspace_id: $workspace_id})
-      MATCH path = (cu)-[:REFERS_TO|DERIVES|GROUNDED_IN|HAS_SOURCE_CHUNK|HAS_EXCEPTION|REQUIRES_EVIDENCE*1..4]->(node)
+      MATCH path = (cu)-[:REFERS_TO|DELEGATES_TO|DERIVES|GROUNDED_IN|HAS_SOURCE_CHUNK|HAS_EXCEPTION|REQUIRES_EVIDENCE*1..4]->(node)
       RETURN path
       LIMIT 40
     parameters:

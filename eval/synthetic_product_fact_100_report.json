@@ -1,0 +1,43 @@
+{
+  "record_count": 100,
+  "source_type_counts": {
+    "synthetic_product_fact_clean": 20,
+    "synthetic_product_fact_hard_case": 20,
+    "synthetic_product_fact_mutation": 60
+  },
+  "product_group_counts": {
+    "deposit": 100
+  },
+  "channel_counts": {
+    "sns": 35,
+    "web_page": 65
+  },
+  "violation_type_counts": {
+    "DEPOSIT_RATE_CONDITION_MISSING": 20,
+    "DEPOSIT_UNIVERSAL_SCOPE_MISLEADING": 20,
+    "RETURN_GUARANTEE_MISLEADING": 20
+  },
+  "risk_level_counts": {
+    "high": 40,
+    "low": 40,
+    "medium": 20
+  },
+  "expected_routing_counts": {
+    "pass_candidate": 40,
+    "reject": 20,
+    "revise": 40
+  },
+  "clean_count": 20,
+  "mutation_count": 60,
+  "hard_case_count": 20,
+  "product_fact_total": 3525,
+  "source_document_total": 290,
+  "average_product_facts_per_record": 35.25,
+  "average_source_documents_per_record": 2.9,
+  "duplicate_ids": [],
+  "span_errors": [],
+  "product_fact_errors": [],
+  "label_errors": [],
+  "blocking_error_count": 0,
+  "blocking_errors": []
+}
