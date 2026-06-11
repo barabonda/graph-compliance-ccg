@@ -71,6 +71,17 @@ PYTHONPATH=examples/graph-compliance-ccg \
 uvicorn server:app --app-dir examples/graph-compliance-ccg --port 8770
 ```
 
+Frontend (Next.js review console, proxies `/api/*` to the FastAPI server):
+
+```bash
+cd examples/graph-compliance-ccg/frontend
+npm install
+npm run dev   # http://localhost:3000
+```
+
+The legacy vanilla console remains served by FastAPI at `/console`. See
+[frontend/README.md](frontend/README.md) for the new console architecture.
+
 `POST /api/review` accepts:
 
 ```json
