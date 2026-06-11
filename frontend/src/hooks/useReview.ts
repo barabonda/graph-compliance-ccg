@@ -26,6 +26,13 @@ type Action =
   | { type: "toggle_principle"; principle: PrincipleKey }
   | { type: "load_sample"; result: ReviewOutput; reviewedText: string };
 
+/**
+ * No stream event for this long → treat the connection as dead.
+ * Backend LLM calls are capped at CCG_OPENAI_TIMEOUT_SECONDS (120s) x retries,
+ * so a healthy run never goes silent for 5 minutes.
+ */
+const STREAM_STALL_MS = 300_000;
+
 const initialState: ReviewState = {
   status: "idle",
   result: null,
@@ -91,11 +98,27 @@ export function useReview() {
     abortRef.current = controller;
     dispatch({ type: "start" });
 
+    // Stall watchdog: a silently dropped stream otherwise leaves the UI on
+    // "running" forever. The slowest single step (product fact extraction)
+    // is bounded by the backend LLM timeout, so a long silence means the
+    // connection is dead, not that work is in progress.
+    let stalled = false;
+    let watchdog: ReturnType<typeof setTimeout> | undefined;
+    const armWatchdog = () => {
+      clearTimeout(watchdog);
+      watchdog = setTimeout(() => {
+        stalled = true;
+        controller.abort();
+      }, STREAM_STALL_MS);
+    };
+    armWatchdog();
+
     let result: ReviewOutput | null = null;
     try {
       await streamReview(
         payload,
         (event) => {
+          armWatchdog();
           dispatch({ type: "event", event });
           if (event.event === "result" && event.result) {
             result = event.result;
@@ -104,12 +127,26 @@ export function useReview() {
         controller.signal,
       );
       if (!result) {
-        throw new ReviewApiError("review_stream_finished_without_result", "결과 이벤트가 수신되지 않았습니다.");
+        throw new ReviewApiError(
+          "review_stream_finished_without_result",
+          "스트림이 결과 이벤트 없이 종료됐습니다. 네트워크가 끊겼을 수 있으니 다시 실행해 주세요.",
+        );
       }
       dispatch({ type: "done", result, reviewedText: payload.content_text });
       return true;
     } catch (error) {
-      if (controller.signal.aborted) return false;
+      if (controller.signal.aborted) {
+        if (stalled) {
+          dispatch({
+            type: "fail",
+            error: {
+              code: "review_stream_stalled",
+              message: `${Math.round(STREAM_STALL_MS / 1000)}초 동안 진행 이벤트가 없어 연결이 끊긴 것으로 판단했습니다. 백엔드는 계속 처리 중일 수 있으니 잠시 후 다시 실행해 주세요.`,
+            },
+          });
+        }
+        return false;
+      }
       if (error instanceof ReviewApiError) {
         dispatch({ type: "fail", error: { code: error.code, message: error.message, cause: error.cause } });
       } else {
@@ -119,6 +156,8 @@ export function useReview() {
         });
       }
       return false;
+    } finally {
+      clearTimeout(watchdog);
     }
   }, []);
 
