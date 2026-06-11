@@ -21,7 +21,13 @@ class LLMGateway:
     def __init__(self, *, model: str | None = None, client: Any | None = None) -> None:
         if client is None and not os.environ.get("OPENAI_API_KEY"):
             raise RuntimeError("OPENAI_API_KEY is required for graph-compliance-ccg; no fallback is available.")
-        self.client = client or OpenAI()
+        # Without an explicit timeout the SDK waits up to 600s per request
+        # (x retries) on a stalled connection, freezing workflow steps that
+        # are designed to degrade on failure (e.g. product fact extraction).
+        self.client = client or OpenAI(
+            timeout=float(os.environ.get("CCG_OPENAI_TIMEOUT_SECONDS", "120")),
+            max_retries=int(os.environ.get("CCG_OPENAI_MAX_RETRIES", "1")),
+        )
         self.model = model or os.environ.get("OPENAI_MODEL", DEFAULT_MODEL)
 
     def structured(self, *, name: str, system: str, user: str, schema: dict[str, Any]) -> dict[str, Any]:
