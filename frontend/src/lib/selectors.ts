@@ -590,9 +590,15 @@ export function annotateText(text: string, candidates: HighlightCandidate[]): An
 
 export interface IssueCardModel {
   id: string;
+  /** 화면용 순번 코드 (C1, C2 … / 고지 D1 … / Track B). 내부 해시 id 대체. */
+  code: string;
   kind: "anchor" | "disclosure" | "trackB";
   tone: HighlightTone;
   anchorId?: string;
+  /** 사람 말 위반 유형, e.g. `단정·보장 표현`. */
+  label: string;
+  /** 대상 문구 인용 (anchor 카드) 또는 고지 라벨. */
+  quote: string;
   /** Human-first title, e.g. `단정·보장 표현 — “확정 제공”`. */
   title: string;
   /** Basis line, e.g. `시행령 §20①4 · 광고에서 단정적 판단/오인 유발 표현`. */
@@ -627,9 +633,12 @@ export function buildIssueCards(result: ReviewOutput): IssueCardModel[] {
     const risky = effective.filter((item) => ["NON_COMPLIANT", "INSUFFICIENT"].includes(item.verdict));
     const card: IssueCardModel = {
       id: anchor.anchor_id,
+      code: "",
       kind: "anchor",
       tone,
       anchorId: anchor.anchor_id,
+      label,
+      quote: shorten(quote, 32),
       title: `${label} — “${shorten(quote, 24)}”`,
       basis,
       rationale: issues[0]?.rationale || risky[0]?.why || "",
@@ -657,8 +666,11 @@ export function buildIssueCards(result: ReviewOutput): IssueCardModel[] {
     );
     cards.push({
       id: `disclosure_${check.check_id}`,
+      code: "",
       kind: "disclosure",
       tone: "review",
+      label: "필수 고지 누락",
+      quote: check.label,
       title: `필수 고지 누락 — ${check.label}`,
       basis: String(requirement?.source ?? "은행 광고심의 기준"),
       rationale: String(requirement?.why ?? "문안에서 해당 고지가 확인되지 않았습니다."),
@@ -672,15 +684,29 @@ export function buildIssueCards(result: ReviewOutput): IssueCardModel[] {
     const gradeLabel = score >= 0.7 ? "높음" : score >= 0.4 ? "중간" : "낮음";
     cards.push({
       id: "trackB",
+      code: "B",
       kind: "trackB",
       tone: score >= 0.7 ? "risk" : score >= 0.4 ? "review" : "keep",
+      label: "소비자 오인 (Track B)",
+      quote: `오인 위험 ${gradeLabel}`,
       title: `소비자 오인 (Track B) — 오인 위험 ${gradeLabel}`,
       basis: trackB.standard ?? "전체적·궁극적 인상 기준",
       rationale: trackB.why || trackB.representative_consumer_impression || "",
     });
   }
 
-  return cards.sort((a, b) => TONE_RANK[b.tone] - TONE_RANK[a.tone]);
+  // 표시 순서: 표현 이슈(C) → 전체 인상(B) → 필수 고지 누락(D), 각 그룹 내 위험도 내림차순.
+  const KIND_ORDER: Record<IssueCardModel["kind"], number> = { anchor: 0, trackB: 1, disclosure: 2 };
+  const sorted = cards.sort(
+    (a, b) => KIND_ORDER[a.kind] - KIND_ORDER[b.kind] || TONE_RANK[b.tone] - TONE_RANK[a.tone],
+  );
+  let claimIndex = 0;
+  let disclosureIndex = 0;
+  for (const card of sorted) {
+    if (card.kind === "anchor") card.code = `C${++claimIndex}`;
+    if (card.kind === "disclosure") card.code = `D${++disclosureIndex}`;
+  }
+  return sorted;
 }
 
 function mergeBasis(primary: string, secondary: string): string {

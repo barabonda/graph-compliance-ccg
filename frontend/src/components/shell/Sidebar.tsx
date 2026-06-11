@@ -2,16 +2,17 @@
 
 import type { ReviewOutput } from "@/lib/types";
 import { buildIssueCards } from "@/lib/selectors";
+import { Icon } from "../Icon";
 
 export type ViewKey = "new" | "review" | "graph" | "product" | "context" | "audit";
 
 const NAV: { key: ViewKey; label: string; sub: string; icon: string }[] = [
-  { key: "new", label: "새 심사", sub: "문안 접수 · 실행", icon: "✚" },
-  { key: "review", label: "심사 콘솔", sub: "광고 원문 · 위험", icon: "☰" },
-  { key: "graph", label: "근거 경로", sub: "설명 그래프", icon: "⤳" },
-  { key: "product", label: "상품 사실", sub: "문서 대조", icon: "▤" },
-  { key: "context", label: "컨텍스트", sub: "전체 인상 · 문장", icon: "◫" },
-  { key: "audit", label: "감사 로그", sub: "추적 · 단계", icon: "≣" },
+  { key: "new", label: "새 심사", sub: "문안 접수 · 실행", icon: "plus" },
+  { key: "review", label: "심사 콘솔", sub: "광고 원문 · 위험", icon: "review" },
+  { key: "graph", label: "근거 경로", sub: "설명 그래프", icon: "graph" },
+  { key: "product", label: "상품 사실", sub: "문서 대조", icon: "layers" },
+  { key: "context", label: "컨텍스트", sub: "전체 인상 · 문장", icon: "eye" },
+  { key: "audit", label: "감사 로그", sub: "추적 · 단계", icon: "audit" },
 ];
 
 interface Props {
@@ -59,11 +60,11 @@ export function Sidebar({ view, setView, result, resolvedCount }: Props) {
             >
               {active && <span className="absolute top-2 bottom-2 -left-2.5 w-[3px] rounded-full bg-brand" />}
               <span
-                className={`grid h-8 w-8 shrink-0 place-items-center rounded-lg text-[15px] ${
-                  active ? "bg-brand text-white" : "bg-surface-3 text-ink-3"
+                className={`grid h-8 w-8 shrink-0 place-items-center rounded-lg ${
+                  active ? "bg-brand" : "bg-surface-3"
                 }`}
               >
-                {item.icon}
+                <Icon name={item.icon} size={18} color={active ? "#fff" : "var(--ink-3)"} />
               </span>
               <span className="min-w-0">
                 <span className={`block text-[13px] font-bold ${active ? "text-brand-2" : "text-ink"}`}>{item.label}</span>

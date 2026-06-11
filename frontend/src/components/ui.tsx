@@ -106,3 +106,26 @@ export function KeyValueText({ items }: { items: [string, ReactNode][] }) {
 export function SectionDivider() {
   return <hr className="my-3 border-line" />;
 }
+
+/** 진행/신뢰도 막대 — 수치는 title hover로만 노출. */
+export function Meter({
+  value,
+  color = "var(--brand)",
+  height = 6,
+  title,
+}: {
+  value: number;
+  color?: string;
+  height?: number;
+  title?: string;
+}) {
+  const pct = Math.max(0, Math.min(100, value));
+  return (
+    <div title={title} className="w-full overflow-hidden rounded-full bg-surface-3" style={{ height }}>
+      <div
+        className="h-full rounded-full transition-[width] duration-500"
+        style={{ width: `${pct}%`, background: color }}
+      />
+    </div>
+  );
+}
