@@ -125,7 +125,12 @@ export default function Page() {
                 <ExecSummary result={result} resolved={resolved} />
                 <div
                   className="grid min-h-0 flex-1 overflow-hidden rounded-[14px] border border-line bg-surface shadow-panel"
-                  style={{ gridTemplateColumns: "minmax(300px,1.12fr) minmax(244px,.8fr) minmax(310px,1.1fr)" }}
+                  style={{
+                    gridTemplateColumns: "minmax(300px,1.12fr) minmax(244px,.8fr) minmax(310px,1.1fr)",
+                    // 암시적 행이 auto로 내용만큼 늘어나면 페인 내부 스크롤이 죽는다 —
+                    // 행 트랙을 컨테이너 높이에 고정해 각 페인이 독립 스크롤되게 한다.
+                    gridTemplateRows: "minmax(0, 1fr)",
+                  }}
                 >
                   <AdPane
                     result={result}
