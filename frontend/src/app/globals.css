@@ -1,143 +1,182 @@
 @import "tailwindcss";
 
+/*
+ * Design tokens — cool neutral / blue-gray fintech palette
+ * (준법 리스크 Agent 디자인 시안 기반)
+ */
 :root {
-  --background: #f5f6f8;
-  --panel: #ffffff;
-  --panel-soft: #f9fafb;
-  --foreground: #111827;
-  --muted: #687385;
-  --line: #d9dee7;
-  --line-strong: #b9c0cc;
-  --accent: #2563eb;
-  --ok: #15803d;
-  --warn: #b7791f;
-  --danger: #b91c1c;
-  --violet: #6d28d9;
-  --cyan: #0e7490;
+  --bg: #eef1f5;
+  --surface: #ffffff;
+  --surface-2: #f6f8fb;
+  --surface-3: #eff3f8;
+  --line: #e1e7ef;
+  --line-2: #d4dce6;
+  --ink: #1b2430;
+  --ink-2: #46546a;
+  --ink-3: #6b7b92;
+  --ink-4: #97a4b6;
+  --brand: #2f6df0;
+  --brand-2: #1d52c7;
+  --brand-tint: #eaf1ff;
+  --brand-tint2: #dbe7ff;
+
+  /* AI 판정(권고형) / 심사자 결정 톤 */
+  --pass: #0f9d6b;
+  --pass-bg: #e3f6ee;
+  --review: #2f6df0;
+  --review-bg: #e7f0ff;
+  --revise: #d98a0b;
+  --revise-bg: #fbf1dc;
+  --reject: #d6453a;
+  --reject-bg: #fbe7e5;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-panel: var(--panel);
-  --color-panel-soft: var(--panel-soft);
-  --color-foreground: var(--foreground);
-  --color-muted: var(--muted);
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-surface-3: var(--surface-3);
   --color-line: var(--line);
-  --color-line-strong: var(--line-strong);
-  --color-accent: var(--accent);
-  --color-ok: var(--ok);
-  --color-warn: var(--warn);
-  --color-danger: var(--danger);
-  --color-violet: var(--violet);
-  --color-cyan: var(--cyan);
-  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system,
-    "Apple SD Gothic Neo", "Pretendard", "Segoe UI", sans-serif;
-  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
-  --shadow-panel: 0 10px 24px rgba(15, 23, 42, 0.08);
+  --color-line-2: var(--line-2);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-ink-3: var(--ink-3);
+  --color-ink-4: var(--ink-4);
+  --color-brand: var(--brand);
+  --color-brand-2: var(--brand-2);
+  --color-brand-tint: var(--brand-tint);
+  --color-brand-tint2: var(--brand-tint2);
+  --color-pass: var(--pass);
+  --color-pass-bg: var(--pass-bg);
+  --color-review: var(--review);
+  --color-review-bg: var(--review-bg);
+  --color-revise: var(--revise);
+  --color-revise-bg: var(--revise-bg);
+  --color-reject: var(--reject);
+  --color-reject-bg: var(--reject-bg);
+  --font-sans: "Pretendard Variable", Pretendard, var(--font-geist-sans), -apple-system, system-ui,
+    "Apple SD Gothic Neo", sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  --shadow-card: 0 1px 2px rgba(20, 32, 50, 0.06), 0 1px 1px rgba(20, 32, 50, 0.04);
+  --shadow-panel: 0 4px 16px rgba(22, 34, 54, 0.08), 0 1px 3px rgba(22, 34, 54, 0.06);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
+  background: var(--bg);
+  color: var(--ink);
   font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  font-feature-settings: "tnum" 1;
+  letter-spacing: -0.01em;
+}
+
+::selection {
+  background: var(--brand-tint2);
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background: #c6d0dd;
+  border-radius: 8px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #aab8c8;
+  background-clip: padding-box;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
 }
 
 /*
- * Annotated ad copy — two layers over the original text.
+ * Annotated ad copy — highlighter("형광펜") marks, not error squiggles.
  *
- * Area layer (claim/disclosure sentence): soft background wash. The reading
- * context — what the judgment is about.
- * Token layer (qualifier expression): underline + chip. The thing the
- * reviewer acts on.
+ * Area layer (claim/disclosure sentence): soft background wash.
+ * Token layer (qualifier expression): stronger wash + bottom finishing line.
+ * Text color stays the body ink — colored text reads like an error.
  *
- * Fixed 4-tone system with shape encoding (never color-only):
- *   risk         red    wavy underline      위반 의심 표현
- *   review       amber  dotted underline    검토 필요
- *   keep         green  solid underline     유지해야 할 고지
- *   keep-warning green bg + amber dashes    고지 있음 · 위계 낮음
- *   scope        gray   no underline        범위/검토됨
+ * Tone system (color + border-style dual encoding):
+ *   risk         red wash,   solid bottom line     위반 의심 표현
+ *   review       amber wash, dotted bottom line    검토 필요
+ *   keep         green wash, solid bottom line     유지해야 할 고지
+ *   keep-warning green wash, amber dashed line     고지 있음 · 위계 낮음
+ *   scope        gray wash,  no line               범위/검토됨
+ *   resolved     desaturated + check               처리됨
  */
 .hl {
   position: relative;
   display: inline;
   border: 0;
-  padding: 1px 0;
+  padding: 1.5px 1px;
   background: transparent;
   font: inherit;
   cursor: pointer;
-  transition: filter 120ms ease;
+  border-radius: 4px;
+  transition:
+    background-color 140ms ease,
+    box-shadow 140ms ease;
+}
+
+/* Area layer — faint context wash */
+.hl-area-risk {
+  background: rgba(214, 69, 58, 0.07);
+}
+.hl-area-review {
+  background: rgba(217, 138, 11, 0.09);
+}
+.hl-area-keep {
+  background: rgba(15, 157, 107, 0.08);
+}
+.hl-area-keep-warning {
+  background: rgba(15, 157, 107, 0.08);
+  border-bottom: 1.5px dashed var(--revise);
+  padding-bottom: 1px;
+}
+.hl-area-scope {
+  background: rgba(107, 123, 146, 0.07);
+}
+
+/* Token layer — highlighter mark + finishing line (no wavy, no colored text) */
+.hl-token-risk {
+  background: rgba(214, 69, 58, 0.14);
+  border-bottom: 2px solid var(--reject);
+  font-weight: 700;
+}
+.hl-token-review {
+  background: rgba(217, 138, 11, 0.16);
+  border-bottom: 2px dotted var(--revise);
+  font-weight: 600;
+}
+.hl-token-keep,
+.hl-token-keep-warning {
+  background: rgba(15, 157, 107, 0.13);
+  border-bottom: 2px solid var(--pass);
+  font-weight: 600;
 }
 
 .hl:hover {
-  filter: brightness(0.94);
+  filter: brightness(0.95);
 }
 
-/* Area layer — backgrounds */
-.hl-area-risk {
-  background: rgba(185, 28, 28, 0.07);
-}
-
-.hl-area-review {
-  background: rgba(183, 121, 31, 0.09);
-}
-
-.hl-area-keep {
-  background: rgba(21, 128, 61, 0.08);
-}
-
-.hl-area-keep-warning {
-  /* bottom-only dash: inline fragments wrap across lines, so a full border
-     box breaks into floating dash pieces — an underline-style warning reads
-     cleanly on every fragment. */
-  background: rgba(21, 128, 61, 0.08);
-  border-bottom: 1.5px dashed var(--warn);
-  padding-bottom: 1px;
-}
-
-.hl-area-scope {
-  background: rgba(104, 115, 133, 0.07);
-}
-
-/* Token layer — underlines (shape encodes tone alongside color) */
-.hl-token-risk {
-  text-decoration-line: underline;
-  text-decoration-style: wavy;
-  text-decoration-color: var(--danger);
-  text-decoration-thickness: 1.5px;
-  text-underline-offset: 4px;
-  font-weight: 700;
-  color: var(--danger);
-}
-
-.hl-token-review {
-  text-decoration-line: underline;
-  text-decoration-style: dotted;
-  text-decoration-color: var(--warn);
-  text-decoration-thickness: 2px;
-  text-underline-offset: 4px;
-  font-weight: 600;
-}
-
-.hl-token-keep,
-.hl-token-keep-warning {
-  text-decoration-line: underline;
-  text-decoration-style: solid;
-  text-decoration-color: var(--ok);
-  text-decoration-thickness: 2px;
-  text-underline-offset: 4px;
-  font-weight: 600;
-  color: var(--ok);
-}
-
-/* Selection — blue is reserved for selection, never for semantics.
-   Background wash only: no extra line, so tone underlines stay readable. */
+/* Selection — tone-colored ring, like the design's selected card */
 .hl.is-selected {
-  background: rgba(37, 99, 235, 0.1);
+  box-shadow: inset 0 0 0 1.5px rgba(47, 109, 240, 0.55);
+  background: var(--brand-tint);
 }
 
-/* Inline annotation labels — plain colored text, shown only for the
-   selected issue and disclosure ("지킬 것") areas. Everything else stays a
-   clean document; details live in hover tooltips and the issue panel. */
+/* Resolved (수정안 적용) — desaturate, keep legible */
+.hl.is-resolved {
+  background: var(--surface-3);
+  border-bottom-color: var(--ink-4);
+  color: var(--ink-3);
+  font-weight: 500;
+}
+
+/* Inline annotation labels — selected issue + disclosure spans only */
 .ann-label {
   display: inline;
   margin: 0 3px;
@@ -148,60 +187,72 @@ body {
   white-space: nowrap;
   cursor: pointer;
 }
-
 .ann-label:hover {
   text-decoration: underline;
 }
-
 .ann-label-risk {
-  color: var(--danger);
+  color: var(--reject);
 }
-
 .ann-label-review {
-  color: var(--warn);
+  color: var(--revise);
 }
-
 .ann-label-keep {
-  color: var(--ok);
+  color: var(--pass);
 }
-
 .ann-label-keep-warning {
-  color: var(--warn);
+  color: var(--revise);
 }
-
 .ann-label-scope {
-  color: var(--muted);
+  color: var(--ink-4);
 }
 
-/* Legend swatches mirroring the token/area encoding */
+/* Legend swatches mirroring the mark encoding */
 .legend-token-risk {
-  text-decoration: underline wavy var(--danger) 1.5px;
-  text-underline-offset: 3px;
-  color: var(--danger);
+  background: rgba(214, 69, 58, 0.14);
+  border-bottom: 2px solid var(--reject);
+  padding: 0 3px;
   font-weight: 700;
 }
-
 .legend-token-review {
-  text-decoration: underline dotted var(--warn) 2px;
-  text-underline-offset: 3px;
+  background: rgba(217, 138, 11, 0.16);
+  border-bottom: 2px dotted var(--revise);
+  padding: 0 3px;
   font-weight: 600;
 }
-
 .legend-token-keep {
-  text-decoration: underline solid var(--ok) 2px;
-  text-underline-offset: 3px;
-  color: var(--ok);
+  background: rgba(15, 157, 107, 0.13);
+  border-bottom: 2px solid var(--pass);
+  padding: 0 3px;
   font-weight: 600;
 }
-
 .legend-area-keep-warning {
-  background: rgba(21, 128, 61, 0.08);
-  border-top: 1.5px dashed var(--warn);
-  border-bottom: 1.5px dashed var(--warn);
+  background: rgba(15, 157, 107, 0.08);
+  border-bottom: 1.5px dashed var(--revise);
+  padding: 0 3px;
+}
+.legend-area-scope {
+  background: rgba(107, 123, 146, 0.1);
   padding: 0 3px;
 }
 
-.legend-area-scope {
-  background: rgba(104, 115, 133, 0.1);
-  padding: 0 3px;
+@keyframes toastIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 12px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+@keyframes nodeIn {
+  from {
+    opacity: 0;
+    transform: translateY(7px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }

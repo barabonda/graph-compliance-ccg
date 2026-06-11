@@ -42,12 +42,12 @@ export function ReviewForm({ running, onSubmit, onLoadSample }: Props) {
   };
 
   const fieldClass =
-    "w-full rounded-md border border-line bg-panel px-3 py-2 text-sm text-foreground outline-none focus:border-accent focus:ring-2 focus:ring-accent/20";
+    "w-full rounded-md border border-line bg-surface px-3 py-2 text-sm text-ink outline-none focus:border-brand focus:ring-2 focus:ring-brand/20";
 
   return (
     <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-3 md:grid-cols-12">
       <label className="md:col-span-4">
-        <span className="mb-1 block text-xs font-bold text-muted">제목</span>
+        <span className="mb-1 block text-xs font-bold text-ink-3">제목</span>
         <input
           className={fieldClass}
           type="text"
@@ -57,7 +57,7 @@ export function ReviewForm({ running, onSubmit, onLoadSample }: Props) {
         />
       </label>
       <label className="md:col-span-2">
-        <span className="mb-1 block text-xs font-bold text-muted">상품군</span>
+        <span className="mb-1 block text-xs font-bold text-ink-3">상품군</span>
         <select className={fieldClass} value={productGroup} onChange={(event) => setProductGroup(event.target.value)}>
           {PRODUCT_GROUPS.map((item) => (
             <option key={item.value} value={item.value}>
@@ -67,7 +67,7 @@ export function ReviewForm({ running, onSubmit, onLoadSample }: Props) {
         </select>
       </label>
       <label className="md:col-span-3">
-        <span className="mb-1 block text-xs font-bold text-muted">채널</span>
+        <span className="mb-1 block text-xs font-bold text-ink-3">채널</span>
         <select className={fieldClass} value={channel} onChange={(event) => setChannel(event.target.value)}>
           {CHANNELS.map((item) => (
             <option key={item.value} value={item.value}>
@@ -77,7 +77,7 @@ export function ReviewForm({ running, onSubmit, onLoadSample }: Props) {
         </select>
       </label>
       <label className="md:col-span-3">
-        <span className="mb-1 block text-xs font-bold text-muted">선택 상품명</span>
+        <span className="mb-1 block text-xs font-bold text-ink-3">선택 상품명</span>
         <input
           className={fieldClass}
           type="text"
@@ -87,7 +87,7 @@ export function ReviewForm({ running, onSubmit, onLoadSample }: Props) {
         />
       </label>
       <label className="md:col-span-12">
-        <span className="mb-1 block text-xs font-bold text-muted">광고 문안</span>
+        <span className="mb-1 block text-xs font-bold text-ink-3">광고 문안</span>
         <textarea
           className={`${fieldClass} min-h-28 resize-y`}
           value={text}
@@ -103,7 +103,7 @@ export function ReviewForm({ running, onSubmit, onLoadSample }: Props) {
               key={example.label}
               type="button"
               onClick={() => fillExample(example)}
-              className="rounded-full border border-line bg-panel-soft px-3 py-1 text-xs font-semibold text-muted hover:border-accent hover:text-accent"
+              className="rounded-full border border-line bg-surface-2 px-3 py-1 text-xs font-semibold text-ink-3 hover:border-brand hover:text-brand"
             >
               {example.label}
             </button>
@@ -112,7 +112,7 @@ export function ReviewForm({ running, onSubmit, onLoadSample }: Props) {
             <button
               type="button"
               onClick={onLoadSample}
-              className="rounded-full border border-dashed border-line px-3 py-1 text-xs font-semibold text-muted hover:border-accent hover:text-accent"
+              className="rounded-full border border-dashed border-line px-3 py-1 text-xs font-semibold text-ink-3 hover:border-brand hover:text-brand"
               title="백엔드 호출 없이 저장된 샘플 리뷰 결과를 불러옵니다"
             >
               샘플 결과 보기
@@ -122,7 +122,7 @@ export function ReviewForm({ running, onSubmit, onLoadSample }: Props) {
         <button
           type="submit"
           disabled={running || !text.trim()}
-          className="rounded-md bg-accent px-6 py-2 text-sm font-bold text-white shadow-sm transition hover:bg-accent/90 disabled:cursor-not-allowed disabled:opacity-50"
+          className="rounded-md bg-brand px-6 py-2 text-sm font-bold text-white shadow-sm transition hover:bg-brand/90 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {running ? "Reviewing..." : "Review"}
         </button>

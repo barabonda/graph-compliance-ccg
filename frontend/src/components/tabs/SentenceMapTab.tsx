@@ -24,7 +24,7 @@ export function SentenceMapTab({ result, onSelectAnchor }: Props) {
           sentences.map((sentence) => {
             const claims = claimsForSentence(result, sentence.sentence_id);
             return (
-              <article key={sentence.sentence_id} className="rounded-lg border border-line bg-panel p-3">
+              <article key={sentence.sentence_id} className="rounded-lg border border-line bg-surface p-3">
                 <div className="mb-2 flex items-start justify-between gap-2">
                   <strong className="text-[13px] leading-snug">{sentence.text || "-"}</strong>
                   <Badge
@@ -69,7 +69,7 @@ export function SentenceMapTab({ result, onSelectAnchor }: Props) {
         <h3 className="text-sm font-bold">InterSentenceRelation</h3>
         {relations.length ? (
           relations.map((relation) => (
-            <article key={relation.relation_id} className="rounded-lg border border-line bg-panel p-3">
+            <article key={relation.relation_id} className="rounded-lg border border-line bg-surface p-3">
               <div className="mb-2 flex items-center justify-between gap-2">
                 <strong className="text-[13px]">{relation.relation_type || "OTHER"}</strong>
                 <Tag>문장 간 영향</Tag>

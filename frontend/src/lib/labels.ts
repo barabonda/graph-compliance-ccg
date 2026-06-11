@@ -13,12 +13,29 @@ export const PRINCIPLES = [
 
 export type PrincipleKey = (typeof PRINCIPLES)[number]["key"];
 
+/** AI 판정은 항상 권고형 어미 — 확정형(승인/반려)은 심사자 결정 전용. */
 export const VERDICT_LABELS: Record<FinalVerdict, [string, string]> = {
   pass_candidate: ["통과 후보", "현재 문안 기준 중대한 위반 신호 없음"],
   needs_review: ["검토 필요", "근거 또는 정책 매칭 확인 필요"],
-  revise: ["수정 필요", "일부 표현 또는 고지 보완 필요"],
-  reject: ["반려", "명백한 위반 가능성이 있어 배포 전 수정 필요"],
+  revise: ["수정 권고", "일부 표현 또는 고지 보완 필요"],
+  reject: ["반려 권고", "명백한 위반 가능성이 있어 배포 전 수정 필요"],
 };
+
+/** 심사자 결정 어휘(확정형) — 로컬 데모 상태로만 기록. */
+export const DECISIONS = {
+  approve: { label: "승인", color: "var(--pass)", bg: "var(--pass-bg)" },
+  revise: { label: "보완요청", color: "var(--revise)", bg: "var(--revise-bg)" },
+  reject: { label: "반려", color: "var(--reject)", bg: "var(--reject-bg)" },
+} as const;
+
+export type DecisionKey = keyof typeof DECISIONS;
+
+/** 점수 1차 노출 금지 — 등급으로 표기하고 수치는 hover로. */
+export function riskGrade(score: number): { label: string; tone: "pass" | "review" | "reject" } {
+  if (score >= 0.7) return { label: "높음", tone: "reject" };
+  if (score >= 0.4) return { label: "중간", tone: "review" };
+  return { label: "낮음", tone: "pass" };
+}
 
 export const JUDGMENT_STATUS: Record<string, string> = {
   NON_COMPLIANT: "위반 가능성",

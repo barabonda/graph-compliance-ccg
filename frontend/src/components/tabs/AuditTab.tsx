@@ -85,15 +85,15 @@ export function AuditTab({ result, events }: Props) {
           return (
             <article
               key={index}
-              className={`rounded-lg border bg-panel p-3 ${
-                event.event === "error" ? "border-danger/50" : event.event === "result" ? "border-ok/50" : "border-line"
+              className={`rounded-lg border bg-surface p-3 ${
+                event.event === "error" ? "border-reject/50" : event.event === "result" ? "border-pass/50" : "border-line"
               }`}
             >
               <div className="flex items-center justify-between gap-2">
                 <strong className="text-[13px]">{event.step ?? event.event}</strong>
                 <Badge tone={badge.tone}>{badge.text}</Badge>
               </div>
-              {event.summary && <p className="mt-1 text-xs text-muted">{event.summary}</p>}
+              {event.summary && <p className="mt-1 text-xs text-ink-3">{event.summary}</p>}
               {event.counts && (
                 <div className="mt-1.5 flex flex-wrap gap-1.5">
                   {Object.entries(event.counts).map(([key, value]) => (
@@ -104,22 +104,22 @@ export function AuditTab({ result, events }: Props) {
                 </div>
               )}
               {event.detail != null && (
-                <details open className="mt-2 text-xs text-muted">
+                <details open className="mt-2 text-xs text-ink-3">
                   <summary className="cursor-pointer font-semibold">error detail</summary>
-                  <pre className="mt-1 overflow-x-auto rounded bg-panel-soft p-2 font-mono text-[11px] whitespace-pre-wrap">
+                  <pre className="mt-1 overflow-x-auto rounded bg-surface-2 p-2 font-mono text-[11px] whitespace-pre-wrap">
                     {JSON.stringify(event.detail, null, 2)}
                   </pre>
                 </details>
               )}
               {event.sample != null && (
-                <details className="mt-2 text-xs text-muted">
+                <details className="mt-2 text-xs text-ink-3">
                   <summary className="cursor-pointer font-semibold">sample</summary>
-                  <pre className="mt-1 overflow-x-auto rounded bg-panel-soft p-2 font-mono text-[11px] whitespace-pre-wrap">
+                  <pre className="mt-1 overflow-x-auto rounded bg-surface-2 p-2 font-mono text-[11px] whitespace-pre-wrap">
                     {JSON.stringify(event.sample, null, 2)}
                   </pre>
                 </details>
               )}
-              {event.received_at && <div className="mt-1.5 text-right text-[11px] text-muted">{event.received_at}</div>}
+              {event.received_at && <div className="mt-1.5 text-right text-[11px] text-ink-3">{event.received_at}</div>}
             </article>
           );
         })}
@@ -131,12 +131,12 @@ export function AuditTab({ result, events }: Props) {
     return (
       <div className="space-y-2">
         {buildAuditSteps(result).map((step) => (
-          <article key={step.name} className="rounded-lg border border-line bg-panel p-3">
+          <article key={step.name} className="rounded-lg border border-line bg-surface p-3">
             <div className="flex items-center justify-between gap-2">
               <strong className="text-[13px]">{step.name}</strong>
               <Badge tone={step.ok ? "pass" : "review"}>{step.ok ? "success" : "check"}</Badge>
             </div>
-            <p className="mt-1 text-xs text-muted">{step.summary}</p>
+            <p className="mt-1 text-xs text-ink-3">{step.summary}</p>
           </article>
         ))}
       </div>

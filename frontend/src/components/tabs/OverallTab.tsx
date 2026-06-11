@@ -41,7 +41,7 @@ export function OverallTab({ result }: { result: ReviewOutput | null }) {
               <Tag>위험 축 없음</Tag>
             )}
           </div>
-          <p className="text-xs leading-relaxed text-muted">
+          <p className="text-xs leading-relaxed text-ink-3">
             이 레이어는 광고 전체를 먼저 읽고, 문장별 판단이 전체 인상에 어떻게 기여하는지 judge evidence window에
             전달합니다.
           </p>
@@ -51,14 +51,14 @@ export function OverallTab({ result }: { result: ReviewOutput | null }) {
         {influences.length ? (
           <div className="grid gap-2 md:grid-cols-2 xl:grid-cols-3">
             {influences.map((item) => (
-              <article key={item.influence_id} className="rounded-md border border-line bg-panel-soft p-3">
+              <article key={item.influence_id} className="rounded-md border border-line bg-surface-2 p-3">
                 <div className="mb-1 flex items-center justify-between gap-2">
                   <strong className="text-[13px]">{item.influence_type || "influence"}</strong>
                   <Tag>
                     {item.risk_delta || "NEUTRAL"} · {Number(item.confidence ?? 0).toFixed(2)}
                   </Tag>
                 </div>
-                <p className="text-xs leading-relaxed text-muted">{item.effect || "-"}</p>
+                <p className="text-xs leading-relaxed text-ink-3">{item.effect || "-"}</p>
               </article>
             ))}
           </div>

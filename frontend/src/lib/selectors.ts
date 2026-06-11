@@ -668,11 +668,13 @@ export function buildIssueCards(result: ReviewOutput): IssueCardModel[] {
   const trackB = result.overall_impression_judgment ?? {};
   if (trackB.verdict) {
     const score = Number(trackB.misleading_risk_score ?? 0);
+    // 점수 1차 노출 금지 — 등급으로만 표기 (수치는 상세 hover에서).
+    const gradeLabel = score >= 0.7 ? "높음" : score >= 0.4 ? "중간" : "낮음";
     cards.push({
       id: "trackB",
       kind: "trackB",
-      tone: score >= 0.75 ? "risk" : score >= 0.45 ? "review" : "keep",
-      title: `소비자 오인 (Track B) — ${trackB.verdict} ${score.toFixed(2)}`,
+      tone: score >= 0.7 ? "risk" : score >= 0.4 ? "review" : "keep",
+      title: `소비자 오인 (Track B) — 오인 위험 ${gradeLabel}`,
       basis: trackB.standard ?? "전체적·궁극적 인상 기준",
       rationale: trackB.why || trackB.representative_consumer_impression || "",
     });

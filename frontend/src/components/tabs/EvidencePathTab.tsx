@@ -104,17 +104,17 @@ export function EvidencePathTab({ result, selectedAnchorId }: Props) {
       </div>
       <ol className="grid gap-2 md:grid-cols-2 xl:grid-cols-4">
         {steps.map((step, index) => (
-          <li key={step.label} className="relative rounded-lg border border-line bg-panel p-3">
+          <li key={step.label} className="relative rounded-lg border border-line bg-surface p-3">
             <div className="mb-1 flex items-center gap-2">
-              <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-accent text-[11px] font-bold text-white">
+              <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-brand text-[11px] font-bold text-white">
                 {index + 1}
               </span>
               <strong className="text-[13px]">{step.label}</strong>
             </div>
-            <p className="text-xs leading-relaxed whitespace-pre-line text-foreground/90">{shorten(step.text, 180)}</p>
-            <span className="mt-1 block text-[11px] text-muted">{step.caption}</span>
+            <p className="text-xs leading-relaxed whitespace-pre-line text-ink/90">{shorten(step.text, 180)}</p>
+            <span className="mt-1 block text-[11px] text-ink-3">{step.caption}</span>
             {index < steps.length - 1 && (
-              <span className="absolute top-1/2 -right-2 hidden -translate-y-1/2 text-line-strong xl:inline">→</span>
+              <span className="absolute top-1/2 -right-2 hidden -translate-y-1/2 text-line-2 xl:inline">→</span>
             )}
           </li>
         ))}

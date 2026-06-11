@@ -3,11 +3,11 @@ import type { ReactNode } from "react";
 export type BadgeTone = "pass" | "review" | "revise" | "reject" | "neutral";
 
 const BADGE_TONES: Record<BadgeTone, string> = {
-  pass: "bg-ok/10 text-ok border-ok/30",
-  review: "bg-warn/10 text-warn border-warn/30",
-  revise: "bg-violet/10 text-violet border-violet/30",
-  reject: "bg-danger/10 text-danger border-danger/30",
-  neutral: "bg-panel-soft text-muted border-line",
+  pass: "bg-pass/10 text-pass border-pass/30",
+  review: "bg-revise/10 text-revise border-revise/30",
+  revise: "bg-revise/10 text-revise border-revise/30",
+  reject: "bg-reject/10 text-reject border-reject/30",
+  neutral: "bg-surface-2 text-ink-3 border-line",
 };
 
 export function Badge({ tone = "neutral", children }: { tone?: BadgeTone; children: ReactNode }) {
@@ -31,16 +31,16 @@ export function Tag({
 }) {
   const toneClass =
     tone === "ok"
-      ? "border-ok/40 text-ok"
+      ? "border-pass/40 text-pass"
       : tone === "review"
-        ? "border-warn/40 text-warn"
+        ? "border-revise/40 text-revise"
         : tone === "danger"
-          ? "border-danger/40 text-danger"
-          : "border-line text-muted";
-  const base = `inline-flex max-w-full items-center truncate rounded border bg-panel-soft px-1.5 py-0.5 text-[11px] font-medium ${toneClass}`;
+          ? "border-reject/40 text-reject"
+          : "border-line text-ink-3";
+  const base = `inline-flex max-w-full items-center truncate rounded border bg-surface-2 px-1.5 py-0.5 text-[11px] font-medium ${toneClass}`;
   if (onClick) {
     return (
-      <button type="button" onClick={onClick} className={`${base} cursor-pointer hover:border-accent hover:text-accent`}>
+      <button type="button" onClick={onClick} className={`${base} cursor-pointer hover:border-brand hover:text-brand`}>
         {children}
       </button>
     );
@@ -60,10 +60,10 @@ export function Card({
   className?: string;
 }) {
   return (
-    <article className={`rounded-lg border border-line bg-panel p-4 ${className}`}>
+    <article className={`rounded-lg border border-line bg-surface p-4 ${className}`}>
       {(title || actions) && (
         <div className="mb-2 flex items-start justify-between gap-2">
-          {title && <h3 className="text-sm font-bold text-foreground">{title}</h3>}
+          {title && <h3 className="text-sm font-bold text-ink">{title}</h3>}
           {actions}
         </div>
       )}
@@ -74,7 +74,7 @@ export function Card({
 
 export function EmptyState({ children }: { children: ReactNode }) {
   return (
-    <div className="rounded-lg border border-dashed border-line bg-panel-soft px-4 py-6 text-center text-sm text-muted">
+    <div className="rounded-lg border border-dashed border-line bg-surface-2 px-4 py-6 text-center text-sm text-ink-3">
       {children}
     </div>
   );
@@ -82,19 +82,19 @@ export function EmptyState({ children }: { children: ReactNode }) {
 
 export function MetricCell({ label, value }: { label: string; value: ReactNode }) {
   return (
-    <div className="min-w-20 rounded-lg border border-line bg-panel-soft px-3 py-2 text-center">
-      <span className="block text-[11px] font-semibold tracking-wide text-muted uppercase">{label}</span>
-      <div className="text-lg font-extrabold text-foreground">{value}</div>
+    <div className="min-w-20 rounded-lg border border-line bg-surface-2 px-3 py-2 text-center">
+      <span className="block text-[11px] font-semibold tracking-wide text-ink-3 uppercase">{label}</span>
+      <div className="text-lg font-extrabold text-ink">{value}</div>
     </div>
   );
 }
 
 export function KeyValueText({ items }: { items: [string, ReactNode][] }) {
   return (
-    <div className="space-y-2 text-[13px] leading-relaxed text-foreground/90">
+    <div className="space-y-2 text-[13px] leading-relaxed text-ink/90">
       {items.map(([label, value]) => (
         <p key={label}>
-          <b className="mr-1 text-foreground">{label}</b>
+          <b className="mr-1 text-ink">{label}</b>
           <br />
           {value ?? "-"}
         </p>
