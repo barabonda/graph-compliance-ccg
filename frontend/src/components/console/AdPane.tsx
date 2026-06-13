@@ -3,14 +3,12 @@
 import { useMemo, useState } from "react";
 import { PRODUCT_GROUPS } from "@/lib/labels";
 import {
-  type AdLine,
   type AnnotatedText,
   buildAdLines,
   buildCorrectedCopy,
   buildDocumentDiff,
   conditionalDisclosures,
   correctedDocument,
-  revisionFor,
 } from "@/lib/selectors";
 import type { ReviewOutput } from "@/lib/types";
 import { Icon } from "../Icon";
@@ -92,75 +90,6 @@ function LineText({
 }
 
 /** 선택된 이슈의 인라인 수정안 카드 — 화살표 아래 before→after. */
-function InlineRevision({
-  result,
-  anchorId,
-  resolved,
-  onToggleResolve,
-}: {
-  result: ReviewOutput;
-  anchorId: string;
-  resolved: Set<string>;
-  onToggleResolve: (id: string) => void;
-}) {
-  const revision = revisionFor(result, anchorId);
-  if (!revision) return null;
-  const isResolved = resolved.has(anchorId);
-  return (
-    <div className="mt-1.5 mb-1 flex gap-2.5 pl-1">
-      <div className="flex flex-col items-center pt-1">
-        <Icon name="arrowR" size={15} color="var(--brand)" style={{ transform: "rotate(90deg)" }} />
-      </div>
-      <div className="flex-1 overflow-hidden rounded-[11px] border border-brand-tint2 bg-surface">
-        <div className="flex items-center justify-between gap-2 border-b border-line bg-brand-tint px-3 py-1.5">
-          <span className="flex items-center gap-1.5 text-[11px] font-bold text-brand-2">
-            <Icon name="spark" size={13} color="var(--brand)" /> 수정 제안 (권고)
-          </span>
-          <span className="font-mono text-[10px] text-ink-4">Revision LLM</span>
-        </div>
-        <div className="space-y-2 px-3 py-2.5">
-          <div>
-            <div className="mb-0.5 flex items-center gap-1.5">
-              <span className="h-1.5 w-1.5 rounded-full bg-reject" />
-              <span className="text-[10px] font-bold tracking-wider text-reject">BEFORE</span>
-            </div>
-            <div className="text-[13px] leading-relaxed text-[#8a2e26] line-through decoration-[#d6453a66]">
-              {revision.before}
-            </div>
-          </div>
-          <div>
-            <div className="mb-0.5 flex items-center gap-1.5">
-              <span className="h-1.5 w-1.5 rounded-full bg-pass" />
-              <span className="text-[10px] font-bold tracking-wider text-pass">AFTER · 교체 문안</span>
-            </div>
-            <div className="text-[13px] leading-relaxed font-medium text-[#0c6b4a]">{revision.after}</div>
-          </div>
-          {/* 조언은 교체 문안(AFTER)과 분리해서 표시 — 광고에 붙는 카피가 아님 */}
-          {revision.notes_for_reviewer?.trim() ? (
-            <div className="rounded-md border-l-2 border-line bg-surface-2 px-2.5 py-1.5">
-              <div className="mb-0.5 flex items-center gap-1.5">
-                <Icon name="flag" size={12} color="var(--ink-3)" />
-                <span className="text-[10px] font-bold tracking-wider text-ink-3">심사자 조언</span>
-              </div>
-              <div className="text-[12px] leading-relaxed text-ink-2">{revision.notes_for_reviewer}</div>
-            </div>
-          ) : null}
-          <button
-            type="button"
-            onClick={() => onToggleResolve(anchorId)}
-            className={`mt-0.5 flex items-center gap-1.5 rounded-md px-3 py-1.5 text-[12.5px] font-bold ${
-              isResolved ? "bg-surface-3 text-ink-2" : "bg-brand text-white"
-            }`}
-          >
-            <Icon name={isResolved ? "x" : "check"} size={14} />
-            {isResolved ? "적용 취소" : "수정안 적용"}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 export function AdPane({
   result,
   reviewedText,
@@ -183,13 +112,6 @@ export function AdPane({
         : buildCorrectedCopy(result, reviewedText, resolved),
     [result, reviewedText, resolved, correctedDoc],
   );
-  const selectedSentenceId = useMemo(() => {
-    if (!selectedAnchorId) return "";
-    const anchor = result.context_anchors?.find((item) => item.anchor_id === selectedAnchorId);
-    if (!anchor) return "";
-    return result.claims?.find((c) => c.claim_id === anchor.claim_id)?.sentence_id ?? "";
-  }, [result, selectedAnchorId]);
-
   const conditional = conditionalDisclosures(result, reviewedText);
   const actionable = (result.anchor_display ?? []).filter((item) => item.display_role === "actionable").length;
   const productGroup =
@@ -197,13 +119,6 @@ export function AdPane({
     result.product_context?.product_group ??
     "";
   const matchedProduct = result.product_fact_context?.matched_product;
-
-  // 선택된 이슈가 어느 줄에도 매칭 안 되면(문장 없음) 마지막 줄 뒤에 보여준다.
-  const selectionInLines = lines.some((line) => line.sentenceId && line.sentenceId === selectedSentenceId);
-  const showRevision = (line: AdLine, isLast: boolean) =>
-    mode === "original" &&
-    selectedAnchorId &&
-    ((line.sentenceId && line.sentenceId === selectedSentenceId) || (!selectionInLines && isLast));
 
   return (
     <div className="flex h-full min-w-0 flex-col">
@@ -251,7 +166,7 @@ export function AdPane({
 
           {mode === "original" ? (
             <div className="px-5.5 py-5 text-[16px] leading-[1.95] break-keep text-ink">
-              {lines.map((line, index) => (
+              {lines.map((line) => (
                 <div key={line.key}>
                   <span className="whitespace-pre-wrap">
                     <LineText
@@ -261,14 +176,6 @@ export function AdPane({
                       onSelectAnchor={onSelectAnchor}
                     />
                   </span>
-                  {showRevision(line, index === lines.length - 1) && (
-                    <InlineRevision
-                      result={result}
-                      anchorId={selectedAnchorId}
-                      resolved={resolved}
-                      onToggleResolve={onToggleResolve}
-                    />
-                  )}
                 </div>
               ))}
             </div>
@@ -317,7 +224,7 @@ export function AdPane({
           <>
             <div className="mt-3.5 flex flex-wrap items-center gap-x-3 gap-y-1.5 text-[12px] text-ink-3">
               <Icon name="alert" size={14} color="var(--ink-4)" />
-              표시 구간을 클릭하면 그 자리에 수정안이 펼쳐지고, 우측에서 판정 근거를 확인할 수 있습니다.
+              표시 구간을 클릭하면 우측 판정 상세에서 근거와 수정안을 확인할 수 있습니다.
             </div>
             <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-[11px] text-ink-3" aria-label="범례">
               <span><i className="legend-token-risk not-italic">위반 의심</i></span>

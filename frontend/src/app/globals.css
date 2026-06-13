@@ -156,10 +156,11 @@ body {
   filter: brightness(0.95);
 }
 
-/* Selection — tone-colored ring, like the design's selected card */
+/* Selection — one continuous brand wash across the whole claim. No per-segment
+   ring (that boxed each token and shattered the selection into blue squares). */
 .hl.is-selected {
-  box-shadow: inset 0 0 0 1.5px rgba(47, 109, 240, 0.55);
   background: var(--brand-tint);
+  border-bottom: 2px solid var(--brand);
 }
 
 /* Resolved (수정안 적용) — desaturate, keep legible */
