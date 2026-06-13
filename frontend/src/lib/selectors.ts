@@ -653,7 +653,10 @@ export function buildAdLines(result: ReviewOutput, text: string): AdLine[] {
 }
 
 /** anchor의 수정안(before/after). 제안이 없으면 safeAlternative로 대체. */
-export function revisionFor(result: ReviewOutput, anchorId: string): { before: string; after: string } | null {
+export function revisionFor(
+  result: ReviewOutput,
+  anchorId: string,
+): { before: string; after: string; notes_for_reviewer?: string } | null {
   const anchor = result.context_anchors?.find((item) => item.anchor_id === anchorId);
   if (!anchor) return null;
   const display = anchorDisplay(result, anchorId);
@@ -661,7 +664,11 @@ export function revisionFor(result: ReviewOutput, anchorId: string): { before: s
   const tone = verdictTone(display?.display_verdict ?? "ANCHOR");
   if (tone !== "risk" && tone !== "review") return null;
   const suggestion = (result.revision_suggestions ?? []).find((item) => item.anchor_id === anchorId);
-  return { before: suggestion?.before ?? anchor.span.text, after: suggestion?.after ?? safeAlternative(anchor.span.text) };
+  return {
+    before: suggestion?.before ?? anchor.span.text,
+    after: suggestion?.after ?? safeAlternative(anchor.span.text),
+    notes_for_reviewer: suggestion?.notes_for_reviewer,
+  };
 }
 
 /** 선택된 anchor가 이 문장에 속하는지 (claim.sentence_id 기준). */
@@ -724,9 +731,17 @@ export function buildCorrectedCopy(
 
 export interface IssueCardModel {
   id: string;
-  /** 화면용 순번 코드 (C1, C2 … / 고지 D1 … / Track B). 내부 해시 id 대체. */
+  /** 화면용 순번 코드 (C1, C2 … / 고지 D1 … / 종합 심사 B). 내부 해시 id 대체. */
   code: string;
   kind: "anchor" | "disclosure" | "trackB";
+  /** 판정 층: A=개별 심사(표현·고지를 조항별로), B=종합 심사(전체 인상). */
+  track: "A" | "B";
+  /** 위반 가능성 등급 (수치는 hover). */
+  grade: "낮음" | "중간" | "높음";
+  /** 원 점수 (hover 표기용, 0–1). */
+  score?: number;
+  /** 요건별 충족 요약, e.g. `요건 4개 중 2개 미충족`. */
+  criteriaSummary?: string;
   tone: HighlightTone;
   anchorId?: string;
   /** 사람 말 위반 유형, e.g. `단정·보장 표현`. */
@@ -739,6 +754,11 @@ export interface IssueCardModel {
   basis: string;
   /** One-line rationale shown when the card is selected/expanded. */
   rationale: string;
+}
+
+/** 0–1 점수를 위반 가능성 등급으로. 수치는 hover에서만 노출. */
+function gradeFromScore(score: number): "낮음" | "중간" | "높음" {
+  return score >= 0.7 ? "높음" : score >= 0.4 ? "중간" : "낮음";
 }
 
 export function buildIssueCards(result: ReviewOutput): IssueCardModel[] {
@@ -765,10 +785,19 @@ export function buildIssueCards(result: ReviewOutput): IssueCardModel[] {
       .filter(Boolean)
       .join(" · ");
     const risky = effective.filter((item) => ["NON_COMPLIANT", "INSUFFICIENT"].includes(item.verdict));
+    const anchorScore = Number(display?.score ?? risky[0]?.score ?? 0);
+    const findings = risky[0]?.criteria_findings ?? [];
+    const unmet = findings.filter((finding) => !finding.satisfied).length;
+    // 미충족이 있을 때만 노출. INSUFFICIENT(증거 불충분)에서 '0개 미충족'은 오해 소지.
+    const criteriaSummary = unmet > 0 ? `요건 ${findings.length}개 중 ${unmet}개 미충족` : undefined;
     const card: IssueCardModel = {
       id: anchor.anchor_id,
       code: "",
       kind: "anchor",
+      track: "A",
+      grade: gradeFromScore(anchorScore),
+      score: anchorScore,
+      criteriaSummary,
       tone,
       anchorId: anchor.anchor_id,
       label,
@@ -802,6 +831,8 @@ export function buildIssueCards(result: ReviewOutput): IssueCardModel[] {
       id: `disclosure_${check.check_id}`,
       code: "",
       kind: "disclosure",
+      track: "A",
+      grade: "중간",
       tone: "review",
       label: "필수 고지 누락",
       quote: check.label,
@@ -820,10 +851,13 @@ export function buildIssueCards(result: ReviewOutput): IssueCardModel[] {
       id: "trackB",
       code: "B",
       kind: "trackB",
+      track: "B",
+      grade: gradeLabel,
+      score,
       tone: score >= 0.7 ? "risk" : score >= 0.4 ? "review" : "keep",
-      label: "소비자 오인 (Track B)",
+      label: "소비자 오인 · 종합 심사",
       quote: `오인 위험 ${gradeLabel}`,
-      title: `소비자 오인 (Track B) — 오인 위험 ${gradeLabel}`,
+      title: `소비자 오인 · 종합 심사 — 오인 위험 ${gradeLabel}`,
       basis: trackB.standard ?? "전체적·궁극적 인상 기준",
       rationale: trackB.why || trackB.representative_consumer_impression || "",
     });
@@ -999,7 +1033,7 @@ export function buildComplianceGates(result: ReviewOutput): ComplianceGate[] {
     },
     {
       step: 5,
-      name: "전체 인상 (Track B)",
+      name: "종합 심사 (전체 인상)",
       detail: "개별 표현이 통과해도 전체적 인상의 오인 위험을 판단합니다.",
       meta: `오인 위험 ${trackBGrade}`,
       status: trackBScore >= 0.7 ? "fail" : trackBScore >= 0.4 ? "warn" : "ok",

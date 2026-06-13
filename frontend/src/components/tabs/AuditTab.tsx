@@ -55,7 +55,7 @@ function buildAuditSteps(result: ReviewOutput): AuditStep[] {
     },
     { name: "Exception override", ok: true, summary: `${result.exception_reviews?.length ?? 0} exception reviews` },
     {
-      name: "Track B overall impression",
+      name: "Overall impression review",
       ok: Boolean(result.overall_impression_judgment?.verdict),
       summary: `${result.overall_impression_judgment?.verdict ?? "pending"} · ${Number(
         result.overall_impression_judgment?.misleading_risk_score ?? 0,

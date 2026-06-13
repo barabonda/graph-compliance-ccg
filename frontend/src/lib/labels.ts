@@ -192,6 +192,16 @@ export function productFactStatusTone(status?: string): "pass" | "review" | "rej
   return "review";
 }
 
+/**
+ * 준법 도메인 심사 층 명칭. 내부 용어(Track A/B)를 화면에 노출하지 않는다.
+ * - 개별 심사: 각 표현·고지를 조항별로 대조 (규칙 게이팅 + LLM 해석)
+ * - 종합 심사: 광고 전체 인상의 오인 위험 (전체적·궁극적 인상 기준)
+ */
+export const REVIEW_LAYER = {
+  individual: { name: "개별 심사", sub: "표현·고지를 조항별로" },
+  holistic: { name: "종합 심사", sub: "광고 전체 인상 기준" },
+} as const;
+
 export function trackBBadgeTone(verdict?: string, score?: number): "pass" | "review" | "reject" {
   const value = Number(score ?? 0);
   if (verdict === "HIGH" || value >= 0.75) return "reject";

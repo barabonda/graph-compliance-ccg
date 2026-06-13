@@ -133,10 +133,20 @@ function InlineRevision({
           <div>
             <div className="mb-0.5 flex items-center gap-1.5">
               <span className="h-1.5 w-1.5 rounded-full bg-pass" />
-              <span className="text-[10px] font-bold tracking-wider text-pass">AFTER</span>
+              <span className="text-[10px] font-bold tracking-wider text-pass">AFTER · 교체 문안</span>
             </div>
             <div className="text-[13px] leading-relaxed font-medium text-[#0c6b4a]">{revision.after}</div>
           </div>
+          {/* 조언은 교체 문안(AFTER)과 분리해서 표시 — 광고에 붙는 카피가 아님 */}
+          {revision.notes_for_reviewer?.trim() ? (
+            <div className="rounded-md border-l-2 border-line bg-surface-2 px-2.5 py-1.5">
+              <div className="mb-0.5 flex items-center gap-1.5">
+                <Icon name="flag" size={12} color="var(--ink-3)" />
+                <span className="text-[10px] font-bold tracking-wider text-ink-3">심사자 조언</span>
+              </div>
+              <div className="text-[12px] leading-relaxed text-ink-2">{revision.notes_for_reviewer}</div>
+            </div>
+          ) : null}
           <button
             type="button"
             onClick={() => onToggleResolve(anchorId)}

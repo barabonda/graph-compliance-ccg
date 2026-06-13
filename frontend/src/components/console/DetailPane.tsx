@@ -56,7 +56,7 @@ function TrackBDetail({ result }: { result: ReviewOutput }) {
   const color = grade.tone === "reject" ? "var(--reject)" : grade.tone === "review" ? "var(--revise)" : "var(--pass)";
   return (
     <div className="flex h-full flex-col">
-      <PaneHeader icon="target" title="판정 상세" sub="소비자 오인 · Track B" />
+      <PaneHeader icon="target" title="판정 상세" sub="소비자 오인 · 종합 심사" />
       <div className="flex-1 overflow-y-auto px-4.5 pt-4 pb-6" style={{ animation: "nodeIn .3s" }}>
         <div className="mb-2 flex items-center gap-2">
           <span className="h-2 w-2 rounded-full" style={{ background: color }} />
@@ -72,10 +72,10 @@ function TrackBDetail({ result }: { result: ReviewOutput }) {
         </div>
         <div className="mt-3 flex items-center gap-3">
           <span
-            className="shrink-0 rounded-md px-2 py-1 font-mono text-[11px] font-extrabold tracking-wide"
+            className="shrink-0 rounded-md px-2 py-1 text-[11px] font-bold whitespace-nowrap"
             style={{ color, background: grade.tone === "reject" ? "var(--reject-bg)" : grade.tone === "review" ? "var(--revise-bg)" : "var(--pass-bg)" }}
           >
-            TRACK B
+            종합 심사
           </span>
           <div className="flex-1">
             <div className="mb-1 flex justify-between text-[11px]">

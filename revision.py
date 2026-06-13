@@ -44,6 +44,42 @@ GENERIC_INSTRUCTION_PREFIXES = (
     "필수고지를 함께 표시",
 )
 
+# `after`(교체 문안)에 조언/지시문이 새는 것을 막는다. 광고에 그대로 붙일 수 있는
+# 카피가 아니라 '~하세요/병기/표시' 같은 지시면 제안이 아니라 조언이다 →
+# notes_for_reviewer로 가야 하므로 after에서는 걸러낸다.
+INSTRUCTION_ENDINGS = (
+    "하세요",
+    "하십시오",
+    "해야 합니다",
+    "해야 한다",
+    "바랍니다",
+    "권장합니다",
+    "권장됩니다",
+    "필요합니다",
+    "표시",
+    "병기",
+    "기재",
+)
+INSTRUCTION_MARKERS = (
+    "필수고지를",
+    "고지를 함께",
+    "조건을 함께",
+    "함께 표시",
+    "함께 기재",
+    "유의사항을 추가",
+    "다음 고지를",
+    "삭제하",
+    "추가하",
+)
+
+
+def is_instruction_like(text: str) -> bool:
+    """광고 카피가 아니라 심사자 조언/지시문인지 판별."""
+    stripped = text.strip().rstrip(".。!! ")
+    if stripped.endswith(INSTRUCTION_ENDINGS):
+        return True
+    return any(marker in stripped for marker in INSTRUCTION_MARKERS)
+
 REVISION_SCHEMA: dict[str, Any] = {
     "type": "object",
     "additionalProperties": False,
@@ -117,12 +153,21 @@ class LLMRevisionSuggester:
             schema=REVISION_SCHEMA,
             system=(
                 "You write Korean financial-ad compliance revision suggestions. "
-                "Use only the provided original ad text, actionable anchor, effective judgment, CUPlanItem, "
-                "and exception review. Do not cite outside law. Do not revise product names or scope anchors. "
-                "Preserve accurate required disclosures when they mitigate risk. Return practical marketer-facing copy. "
+                "Use only the provided original ad text, actionable anchors, effective judgments, CUPlanItems, "
+                "and exception reviews. Do not cite outside law. Do not revise product names or scope anchors. "
+                "Preserve accurate required disclosures when they mitigate risk. Return practical marketer-facing copy.\n"
+                "WHOLE-AD COHERENCE: you receive ALL risky spans of one ad at once, and the individual edits "
+                "are assembled back into a SINGLE final ad draft. Make the edits mutually coherent — keep one "
+                "consistent tone and voice across spans, do NOT repeat the same disclosure in multiple spans, "
+                "and place each required disclosure once in the single most natural span. Each `after` must read "
+                "naturally when all edits are applied together to form the final ad.\n"
+                "SEPARATE PROPOSAL FROM ADVICE: `after` MUST be clean replacement ad copy that can be pasted "
+                "directly into the ad. It must NEVER be an instruction or advisory phrasing (e.g. "
+                "'조건을 함께 표시하세요', '필수고지를 병기', 'add disclosures', 'show conditions'). Put ALL reviewer "
+                "guidance, rationale, and instructions in `notes_for_reviewer` ONLY. If a risky span has no clean "
+                "replacement copy and only advice applies, omit that span (do not put advice in `after`).\n"
                 "Create suggestions only for the risky span itself. If an anchor is merely a product launch, title, "
-                "brand mention, or neutral scope sentence, omit it. The after field must be replacement ad copy, "
-                "not an instruction such as 'add disclosures' or 'show conditions'."
+                "brand mention, or neutral scope sentence, omit it."
             ),
             user=(
                 "[original_ad]\n"
@@ -165,5 +210,8 @@ def suggestion_is_usable(suggestion: dict[str, Any], anchor_text_by_id: dict[str
     if not after or after == before or after == anchor_text:
         return False
     if any(after.startswith(prefix) for prefix in GENERIC_INSTRUCTION_PREFIXES):
+        return False
+    # 조언/지시문이 교체 문안(after)으로 샌 경우는 제안에서 제외(조언은 notes로).
+    if is_instruction_like(after):
         return False
     return True

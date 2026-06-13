@@ -6,6 +6,10 @@ For the current implementation state, Neo4j graph counts, operating commands,
 quality guardrails, and future goals, see
 [docs/GRAPHCOMPLIANCE_CCG_HANDOFF.md](../../docs/GRAPHCOMPLIANCE_CCG_HANDOFF.md).
 
+For the reasoning architecture — how rule/graph (deterministic) and LLM
+(interpretive) lanes split the work across data → process → result, with
+diagrams — see [docs/REASONING_ARCHITECTURE.md](docs/REASONING_ARCHITECTURE.md).
+
 This app does not use deterministic review fallback. If `OPENAI_API_KEY` or Neo4j
 credentials are missing, the run fails instead of silently replacing LLM context
 engineering with rules.
