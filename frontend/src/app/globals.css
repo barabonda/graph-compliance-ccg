@@ -115,37 +115,40 @@ body {
   background: transparent;
   font: inherit;
   cursor: pointer;
-  border-radius: 4px;
+  border-radius: 2px;
   transition:
     background-color 140ms ease,
     box-shadow 140ms ease;
 }
 
-/* Area layer — disabled. Full-sentence washes were the main visual noise;
-   only the specific risky/disclosure phrase is marked (token layer below). */
-.hl-area-risk,
-.hl-area-review,
+/* Area layer — a violating claim shows as ONE continuous soft run over the
+   whole claim span (matches the legal theory: 결합 단정). The run covers the
+   plain words between qualifiers too, so it reads as one unit, not word-boxes.
+   Disclosure(keep)·scope stay unwashed. */
+.hl-area-risk {
+  background: rgba(214, 69, 58, 0.1);
+  border-bottom: 2px solid rgba(214, 69, 58, 0.55);
+}
+.hl-area-review {
+  background: rgba(217, 138, 11, 0.11);
+  border-bottom: 2px solid rgba(217, 138, 11, 0.6);
+}
 .hl-area-keep,
 .hl-area-keep-warning,
 .hl-area-scope {
   background: transparent;
 }
 
-/* Token layer — mark only the phrase that matters.
-   위험/검토: soft tint + finishing line. 고지: thin underline only (no fill). scope: none. */
+/* Token layer — emphasize the exact risky phrase by weight only; no separate
+   box (the continuous area run already marks the claim). 고지는 얇은 밑줄만. */
 .hl-token-risk {
-  background: rgba(214, 69, 58, 0.12);
-  border-bottom: 2px solid var(--reject);
-  font-weight: 600;
+  font-weight: 700;
 }
 .hl-token-review {
-  background: rgba(217, 138, 11, 0.13);
-  border-bottom: 2px solid var(--revise);
   font-weight: 600;
 }
 .hl-token-keep,
 .hl-token-keep-warning {
-  background: transparent;
   border-bottom: 1.5px solid rgba(15, 157, 107, 0.5);
 }
 
@@ -199,14 +202,14 @@ body {
 
 /* Legend swatches mirroring the mark encoding */
 .legend-token-risk {
-  background: rgba(214, 69, 58, 0.14);
-  border-bottom: 2px solid var(--reject);
+  background: rgba(214, 69, 58, 0.1);
+  border-bottom: 2px solid rgba(214, 69, 58, 0.55);
   padding: 0 3px;
   font-weight: 700;
 }
 .legend-token-review {
-  background: rgba(217, 138, 11, 0.13);
-  border-bottom: 2px solid var(--revise);
+  background: rgba(217, 138, 11, 0.11);
+  border-bottom: 2px solid rgba(217, 138, 11, 0.6);
   padding: 0 3px;
   font-weight: 600;
 }

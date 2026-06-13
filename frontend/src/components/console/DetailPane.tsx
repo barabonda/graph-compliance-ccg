@@ -363,7 +363,7 @@ export function DetailPane({ result, selectedAnchorId, resolved, onToggleResolve
           </span>
           <div className="flex-1">
             <div className="mb-1 flex justify-between text-[11px]">
-              <span className="font-semibold text-ink-3">위반 신뢰도</span>
+              <span className="font-semibold text-ink-3">위반 가능성</span>
               <span className="font-bold" style={{ color: headColor }}>
                 {grade.label}
               </span>
@@ -395,7 +395,7 @@ export function DetailPane({ result, selectedAnchorId, resolved, onToggleResolve
                             color: cf.satisfied ? "var(--reject)" : "var(--ink-4)",
                           }}
                         >
-                          {cf.satisfied ? "✓" : "—"}
+                          {cf.satisfied ? "●" : "○"}
                         </span>
                         <div className="min-w-0">
                           <span className="text-[12.5px] font-bold text-ink">{cf.criterion}</span>

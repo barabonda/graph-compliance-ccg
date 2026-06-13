@@ -832,7 +832,9 @@ export function buildIssueCards(result: ReviewOutput): IssueCardModel[] {
       (a, b) => tokenPriority(b.role, tone) - tokenPriority(a.role, tone),
     );
     const label = humanAnchorLabel(result, anchor) || (tone === "risk" ? "위험 표현" : "검토 필요");
-    const quote = qualifiers[0]?.text || anchor.span.text;
+    // 카드 인용은 실제 판정 근거(claim 전체)를 보여준다. 단일 qualifier("보장")만
+    // 띄우면 결합 단정의 맥락이 사라져 무슨 위반인지 알기 어렵다.
+    const quote = anchor.span.text || qualifiers[0]?.text || "";
     const basis = [basisSummary(result, anchor.anchor_id), issues[0]?.risk_title]
       .filter(Boolean)
       .join(" · ");
