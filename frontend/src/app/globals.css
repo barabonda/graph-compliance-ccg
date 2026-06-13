@@ -121,41 +121,32 @@ body {
     box-shadow 140ms ease;
 }
 
-/* Area layer — faint context wash */
-.hl-area-risk {
-  background: rgba(214, 69, 58, 0.07);
-}
-.hl-area-review {
-  background: rgba(217, 138, 11, 0.09);
-}
-.hl-area-keep {
-  background: rgba(15, 157, 107, 0.08);
-}
-.hl-area-keep-warning {
-  background: rgba(15, 157, 107, 0.08);
-  border-bottom: 1.5px dashed var(--revise);
-  padding-bottom: 1px;
-}
+/* Area layer — disabled. Full-sentence washes were the main visual noise;
+   only the specific risky/disclosure phrase is marked (token layer below). */
+.hl-area-risk,
+.hl-area-review,
+.hl-area-keep,
+.hl-area-keep-warning,
 .hl-area-scope {
-  background: rgba(107, 123, 146, 0.07);
+  background: transparent;
 }
 
-/* Token layer — highlighter mark + finishing line (no wavy, no colored text) */
+/* Token layer — mark only the phrase that matters.
+   위험/검토: soft tint + finishing line. 고지: thin underline only (no fill). scope: none. */
 .hl-token-risk {
-  background: rgba(214, 69, 58, 0.14);
+  background: rgba(214, 69, 58, 0.12);
   border-bottom: 2px solid var(--reject);
-  font-weight: 700;
+  font-weight: 600;
 }
 .hl-token-review {
-  background: rgba(217, 138, 11, 0.16);
-  border-bottom: 2px dotted var(--revise);
+  background: rgba(217, 138, 11, 0.13);
+  border-bottom: 2px solid var(--revise);
   font-weight: 600;
 }
 .hl-token-keep,
 .hl-token-keep-warning {
-  background: rgba(15, 157, 107, 0.13);
-  border-bottom: 2px solid var(--pass);
-  font-weight: 600;
+  background: transparent;
+  border-bottom: 1.5px solid rgba(15, 157, 107, 0.5);
 }
 
 .hl:hover {
@@ -214,24 +205,14 @@ body {
   font-weight: 700;
 }
 .legend-token-review {
-  background: rgba(217, 138, 11, 0.16);
-  border-bottom: 2px dotted var(--revise);
+  background: rgba(217, 138, 11, 0.13);
+  border-bottom: 2px solid var(--revise);
   padding: 0 3px;
   font-weight: 600;
 }
 .legend-token-keep {
-  background: rgba(15, 157, 107, 0.13);
-  border-bottom: 2px solid var(--pass);
-  padding: 0 3px;
-  font-weight: 600;
-}
-.legend-area-keep-warning {
-  background: rgba(15, 157, 107, 0.08);
-  border-bottom: 1.5px dashed var(--revise);
-  padding: 0 3px;
-}
-.legend-area-scope {
-  background: rgba(107, 123, 146, 0.1);
+  background: transparent;
+  border-bottom: 1.5px solid rgba(15, 157, 107, 0.5);
   padding: 0 3px;
 }
 

@@ -70,12 +70,8 @@ function LineText({
           <span key={`${segment.key}_text`}>{segment.text}</span>
         );
         const chip = segment.areaChip;
-        const showLabel =
-          chip &&
-          (segment.area?.id?.startsWith("disclosure_") ||
-            chip.tone === "keep" ||
-            chip.tone === "keep-warning" ||
-            (selectedAnchorId && chip.anchorId === selectedAnchorId));
+        // 상시 인라인 라벨은 노이즈 → 선택한 구간에만 라벨을 보여준다.
+        const showLabel = chip && selectedAnchorId && chip.anchorId === selectedAnchorId;
         const label = showLabel ? (
           <button
             key={`${segment.key}_label`}
@@ -314,7 +310,6 @@ export function AdPane({
               <span><i className="legend-token-risk not-italic">위반 의심</i></span>
               <span><i className="legend-token-review not-italic">검토 필요</i></span>
               <span><i className="legend-token-keep not-italic">유지 고지</i></span>
-              <span><i className="legend-area-keep-warning not-italic">고지 있음 · 위계 낮음</i></span>
             </div>
             {conditional.length > 0 && (
               <div className="mt-3 rounded-lg border border-line bg-surface-2 px-3 py-2 text-xs text-ink-3">
