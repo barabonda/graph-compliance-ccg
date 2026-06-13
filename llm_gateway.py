@@ -20,7 +20,7 @@ import os
 import time
 from typing import Any
 
-from openai import OpenAI
+from openai import BadRequestError, OpenAI
 
 
 DEFAULT_MODEL = "gpt-5.4-nano"
@@ -153,24 +153,39 @@ class LLMGateway:
         schema: dict[str, Any],
         effective_model: str,
     ) -> str:
-        # Ollama-compatible Chat Completions: json_object forces valid JSON but
-        # not schema conformance, so inject the schema into the system prompt.
-        system_with_contract = (
-            f"{system}\n\n[output_contract]\n"
-            f"name: {name}\n"
-            "반드시 아래 JSON Schema를 만족하는 단일 JSON 객체만 출력하세요. "
-            "마크다운 코드펜스나 설명 문장은 절대 출력하지 마세요.\n"
-            f"{json.dumps(schema, ensure_ascii=False)}"
-        )
-        response = client.chat.completions.create(
-            model=effective_model,
-            messages=[
-                {"role": "system", "content": system_with_contract},
-                {"role": "user", "content": user},
-            ],
-            temperature=0,
-            response_format={"type": "json_object"},
-        )
+        # Ollama-compatible Chat Completions supports schema-enforced structured
+        # output via response_format json_schema (grammar-constrained), which
+        # holds required keys far better than json_object. Fall back to
+        # json_object if the endpoint rejects json_schema.
+        messages = [
+            {"role": "system", "content": system},
+            {"role": "user", "content": user},
+        ]
+        try:
+            response = client.chat.completions.create(
+                model=effective_model,
+                messages=messages,
+                temperature=0,
+                response_format={
+                    "type": "json_schema",
+                    "json_schema": {"name": name, "schema": schema, "strict": True},
+                },
+            )
+        except BadRequestError:
+            LOGGER.warning("llm.chat json_schema unsupported; falling back to json_object name=%s", name)
+            messages[0] = {
+                "role": "system",
+                "content": (
+                    f"{system}\n\n[output_contract]\n반드시 아래 JSON Schema를 만족하는 단일 JSON 객체만 "
+                    f"출력하세요. 마크다운/설명 금지.\n{json.dumps(schema, ensure_ascii=False)}"
+                ),
+            }
+            response = client.chat.completions.create(
+                model=effective_model,
+                messages=messages,
+                temperature=0,
+                response_format={"type": "json_object"},
+            )
         content = response.choices[0].message.content or ""
         return _strip_json_fence(content)
 

@@ -574,4 +574,6 @@ export interface ReviewRequest {
   product_group: string;
   selected_product_name?: string;
   workspace_id: string;
+  /** 선택 LLM 모델(빈 값=.env 기본). 백엔드가 게이트웨이 모델을 오버라이드. */
+  llm_model?: string;
 }

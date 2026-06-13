@@ -193,6 +193,17 @@ export function disclosureMeta(checkId: string): { desc: string; required: boole
   return DISCLOSURE_META[checkId] ?? { desc: "필수 기재 고지 항목입니다.", required: true };
 }
 
+// LLM 모델 선택. 빈 값 = .env 기본(클라우드/로컬은 LLM_BASE_URL이 결정).
+// 로컬(Ollama) 모델 태그는 그대로 전달된다.
+export const LLM_MODELS = [
+  { value: "", label: "기본 (.env)" },
+  { value: "ax-4.0-light", label: "ax-4.0-light · 7.3B 빠름" },
+  { value: "midm-2.0-base", label: "midm-2.0-base · 11.5B" },
+  { value: "exaone4-32b", label: "exaone4-32b · 32B 정밀" },
+  { value: "qwen3.5:9b", label: "qwen3.5:9b · 다국어" },
+  { value: "gemma4", label: "gemma4 · 8B" },
+] as const;
+
 export const PRODUCT_GROUPS = [
   { value: "auto", label: "자동" },
   { value: "deposit", label: "예금" },

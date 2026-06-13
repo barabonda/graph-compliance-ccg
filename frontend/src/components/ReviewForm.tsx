@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import { CHANNELS, EXAMPLES, PRODUCT_GROUPS, WORKSPACE_ID, type ExamplePreset } from "@/lib/labels";
+import { CHANNELS, EXAMPLES, LLM_MODELS, PRODUCT_GROUPS, WORKSPACE_ID, type ExamplePreset } from "@/lib/labels";
 import type { ReviewRequest } from "@/lib/types";
 
 interface Props {
@@ -19,6 +19,7 @@ export function ReviewForm({ running, onSubmit, onLoadSample, onLoadProductSampl
   const [channel, setChannel] = useState(DEFAULT_EXAMPLE.channel);
   const [selectedProduct, setSelectedProduct] = useState(DEFAULT_EXAMPLE.selectedProduct);
   const [text, setText] = useState(DEFAULT_EXAMPLE.text);
+  const [llmModel, setLlmModel] = useState("");
 
   const fillExample = (example: ExamplePreset) => {
     setTitle(example.title);
@@ -39,6 +40,7 @@ export function ReviewForm({ running, onSubmit, onLoadSample, onLoadProductSampl
       product_group: productGroup,
       selected_product_name: selectedProduct.trim(),
       workspace_id: WORKSPACE_ID,
+      llm_model: llmModel || undefined,
     });
   };
 
@@ -67,7 +69,7 @@ export function ReviewForm({ running, onSubmit, onLoadSample, onLoadProductSampl
           ))}
         </select>
       </label>
-      <label className="md:col-span-3">
+      <label className="md:col-span-2">
         <span className="mb-1 block text-xs font-bold text-ink-3">채널</span>
         <select className={fieldClass} value={channel} onChange={(event) => setChannel(event.target.value)}>
           {CHANNELS.map((item) => (
@@ -77,7 +79,7 @@ export function ReviewForm({ running, onSubmit, onLoadSample, onLoadProductSampl
           ))}
         </select>
       </label>
-      <label className="md:col-span-3">
+      <label className="md:col-span-2">
         <span className="mb-1 block text-xs font-bold text-ink-3">선택 상품명</span>
         <input
           className={fieldClass}
@@ -86,6 +88,16 @@ export function ReviewForm({ running, onSubmit, onLoadSample, onLoadProductSampl
           onChange={(event) => setSelectedProduct(event.target.value)}
           placeholder="예: (26년 JUMP UP) 특판 예금"
         />
+      </label>
+      <label className="md:col-span-2">
+        <span className="mb-1 block text-xs font-bold text-ink-3">모델</span>
+        <select className={fieldClass} value={llmModel} onChange={(event) => setLlmModel(event.target.value)}>
+          {LLM_MODELS.map((item) => (
+            <option key={item.value} value={item.value}>
+              {item.label}
+            </option>
+          ))}
+        </select>
       </label>
       <label className="md:col-span-12">
         <span className="mb-1 block text-xs font-bold text-ink-3">광고 문안</span>

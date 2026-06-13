@@ -18,6 +18,7 @@ from neo4j.exceptions import AuthError, ServiceUnavailable
 from openai import APIConnectionError, APIStatusError, AuthenticationError, BadRequestError, RateLimitError
 
 from env_loader import load_local_env
+from llm_gateway import LLMGateway
 from workflow import GraphComplianceCCGWorkflow, review_input_from_payload
 from utils import to_jsonable
 
@@ -31,6 +32,18 @@ app = FastAPI(title="GraphCompliance CCG", version="0.1.0")
 CONSOLE_DIR = Path(__file__).resolve().parent / "console"
 
 
+def workflow_for(payload: dict[str, Any]) -> GraphComplianceCCGWorkflow:
+    """선택한 모델(payload.llm_model)이 있으면 그 모델로 게이트웨이를 구성한다.
+
+    클라우드↔로컬 전환은 .env(LLM_BASE_URL)가 정하고, 이 값은 활성 경로 안에서
+    모델만 오버라이드한다(빈 값이면 .env 기본 모델 사용).
+    """
+    model = str(payload.get("llm_model") or "").strip()
+    if model:
+        return GraphComplianceCCGWorkflow(llm=LLMGateway(model=model))
+    return GraphComplianceCCGWorkflow()
+
+
 @app.get("/health")
 def health() -> dict[str, str]:
     return {"status": "ok"}
@@ -39,7 +52,7 @@ def health() -> dict[str, str]:
 @app.post("/api/review")
 def review(payload: dict[str, Any]) -> dict[str, Any]:
     try:
-        workflow = GraphComplianceCCGWorkflow()
+        workflow = workflow_for(payload)
         output = workflow.review(review_input_from_payload(payload))
         return to_jsonable(output)
     except ServiceUnavailable as exc:
@@ -85,7 +98,7 @@ def review_stream(payload: dict[str, Any]) -> StreamingResponse:
 
         def worker() -> None:
             try:
-                workflow = GraphComplianceCCGWorkflow()
+                workflow = workflow_for(payload)
                 review_input = review_input_from_payload(payload)
                 for event in workflow.review_events(review_input):
                     event_queue.put(to_jsonable(event))
