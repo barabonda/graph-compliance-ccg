@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import json
+import logging
+import os
 from pathlib import Path
 from typing import Any
 
@@ -18,6 +20,10 @@ from utils import to_jsonable
 
 
 load_local_env(Path.cwd() / ".env")
+logging.basicConfig(
+    level=getattr(logging, os.environ.get("CCG_LOG_LEVEL", "INFO").upper(), logging.INFO),
+    format="%(asctime)s %(levelname)s %(name)s %(message)s",
+)
 app = FastAPI(title="GraphCompliance CCG", version="0.1.0")
 CONSOLE_DIR = Path(__file__).resolve().parent / "console"
 
@@ -108,6 +114,44 @@ def review_stream(payload: dict[str, Any]) -> StreamingResponse:
             yield stream_error_event(str(detail.get("error") or "review_runtime_error"), detail)
 
     return StreamingResponse(event_lines(), media_type="application/x-ndjson")
+
+
+@app.get("/api/product-doc/{document_id}")
+def product_doc(document_id: str) -> FileResponse:
+    """Serve a JB product disclosure PDF by its document id (source_id).
+
+    The reviewer needs to verify the original document. We resolve the path
+    from the disclosure metadata (never from a client-supplied path) and
+    confirm the resolved file stays inside the disclosure root and is a PDF,
+    so this cannot be used for path traversal. The browser PDF viewer opens
+    inline; the caller appends `#page=N` to jump to the cited page.
+    """
+    from pathlib import Path as _Path
+
+    from product_facts import load_disclosure_metadata, resolve_document_path
+
+    row = next(
+        (item for item in load_disclosure_metadata() if str(item.get("source_id") or "") == document_id),
+        None,
+    )
+    if row is None:
+        raise HTTPException(status_code=404, detail={"error": "document_not_found", "message": "Unknown document id."})
+
+    path = resolve_document_path(str(row.get("relative_path") or "")).resolve()
+    root = _Path(os.environ.get("JB_PRODUCT_DISCLOSURE_ROOT", "")).resolve() if os.environ.get(
+        "JB_PRODUCT_DISCLOSURE_ROOT"
+    ) else path.parents[2] if len(path.parents) >= 3 else path.parent
+    if path.suffix.lower() != ".pdf" or not path.exists():
+        raise HTTPException(status_code=404, detail={"error": "document_missing", "message": "PDF not available."})
+    if os.environ.get("JB_PRODUCT_DISCLOSURE_ROOT") and root not in path.parents:
+        raise HTTPException(status_code=403, detail={"error": "document_outside_root", "message": "Path not allowed."})
+
+    # Korean filenames can't go in a latin-1 HTTP header; RFC 5987 encode them
+    # and keep the disposition inline so the browser PDF viewer opens it.
+    from urllib.parse import quote
+
+    disposition = f"inline; filename*=UTF-8''{quote(str(row.get('file_name') or path.name))}"
+    return FileResponse(path, media_type="application/pdf", headers={"Content-Disposition": disposition})
 
 
 @app.get("/")

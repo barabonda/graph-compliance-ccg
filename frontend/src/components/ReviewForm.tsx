@@ -8,11 +8,12 @@ interface Props {
   running: boolean;
   onSubmit: (payload: ReviewRequest) => void;
   onLoadSample?: () => void;
+  onLoadProductSample?: () => void;
 }
 
 const DEFAULT_EXAMPLE = EXAMPLES[1];
 
-export function ReviewForm({ running, onSubmit, onLoadSample }: Props) {
+export function ReviewForm({ running, onSubmit, onLoadSample, onLoadProductSample }: Props) {
   const [title, setTitle] = useState(DEFAULT_EXAMPLE.title);
   const [productGroup, setProductGroup] = useState(DEFAULT_EXAMPLE.product);
   const [channel, setChannel] = useState(DEFAULT_EXAMPLE.channel);
@@ -116,6 +117,16 @@ export function ReviewForm({ running, onSubmit, onLoadSample }: Props) {
               title="백엔드 호출 없이 저장된 샘플 리뷰 결과를 불러옵니다"
             >
               샘플 결과 보기
+            </button>
+          )}
+          {onLoadProductSample && (
+            <button
+              type="button"
+              onClick={onLoadProductSample}
+              className="rounded-full border border-dashed border-line px-3 py-1 text-xs font-semibold text-ink-3 hover:border-brand hover:text-brand"
+              title="상품문서 대조가 채워진 샘플(상품 사실 화면)"
+            >
+              샘플 · 상품대조
             </button>
           )}
         </div>

@@ -32,6 +32,10 @@ type Action =
  */
 const STREAM_STALL_WARNING_MS = Number(process.env.NEXT_PUBLIC_REVIEW_STREAM_STALL_WARNING_MS ?? 300_000);
 const STREAM_HARD_ABORT_MS = Number(process.env.NEXT_PUBLIC_REVIEW_STREAM_HARD_ABORT_MS ?? 1_200_000);
+/** While the stream is quiet, probe /health on this cadence. */
+const HEALTH_PROBE_INTERVAL_MS = 15_000;
+/** Only probe after this much silence so fast steps don't trigger checks. */
+const HEALTH_PROBE_SILENCE_MS = 20_000;
 
 const initialState: ReviewState = {
   status: "idle",
@@ -102,6 +106,7 @@ export function useReview() {
     // but do not abort early. Some valid review runs return after the old
     // five-minute threshold.
     let hardStalled = false;
+    let backendDead = false;
     let softWarningCount = 0;
     let warningWatchdog: ReturnType<typeof setTimeout> | undefined;
     let hardWatchdog: ReturnType<typeof setTimeout> | undefined;
@@ -123,6 +128,7 @@ export function useReview() {
       }, STREAM_STALL_WARNING_MS);
     };
     const armWatchdog = () => {
+      lastEventAt = Date.now();
       scheduleSoftWarning();
       clearTimeout(hardWatchdog);
       hardWatchdog = setTimeout(() => {
@@ -130,6 +136,35 @@ export function useReview() {
         controller.abort();
       }, STREAM_HARD_ABORT_MS);
     };
+
+    // Health probe: a dead/restarted backend leaves the NDJSON stream open
+    // but silent, which otherwise looks identical to a slow step until the
+    // hard-abort timeout. While the stream is quiet, poll /health; two
+    // consecutive failures mean the server is gone — fail fast and clearly
+    // instead of hanging for the full hard-abort window.
+    let lastEventAt = Date.now();
+    let healthFailures = 0;
+    const healthProbe = setInterval(() => {
+      if (Date.now() - lastEventAt < HEALTH_PROBE_SILENCE_MS) {
+        healthFailures = 0;
+        return;
+      }
+      void fetch("/health", { cache: "no-store", signal: AbortSignal.timeout(5_000) })
+        .then((response) => {
+          healthFailures = response.ok ? 0 : healthFailures + 1;
+          if (healthFailures >= 2) {
+            backendDead = true;
+            controller.abort();
+          }
+        })
+        .catch(() => {
+          healthFailures += 1;
+          if (healthFailures >= 2) {
+            backendDead = true;
+            controller.abort();
+          }
+        });
+    }, HEALTH_PROBE_INTERVAL_MS);
     armWatchdog();
 
     let result: ReviewOutput | null = null;
@@ -155,7 +190,16 @@ export function useReview() {
       return true;
     } catch (error) {
       if (controller.signal.aborted) {
-        if (hardStalled) {
+        if (backendDead) {
+          dispatch({
+            type: "fail",
+            error: {
+              code: "backend_unreachable",
+              message:
+                "백엔드 서버가 응답하지 않습니다(연결 끊김). 분석 도중 서버가 종료됐을 수 있습니다. 서버를 재시작한 뒤 다시 실행해 주세요.",
+            },
+          });
+        } else if (hardStalled) {
           dispatch({
             type: "fail",
             error: {
@@ -178,6 +222,7 @@ export function useReview() {
     } finally {
       clearTimeout(warningWatchdog);
       clearTimeout(hardWatchdog);
+      clearInterval(healthProbe);
     }
   }, []);
 

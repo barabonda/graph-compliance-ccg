@@ -59,6 +59,18 @@ export default function Page() {
     setView("review");
   }, [loadSample]);
 
+  /** 상품문서 대조가 채워진 샘플 — 상품 사실 화면 데모용. */
+  const handleLoadProductSample = useCallback(async () => {
+    const { default: sample } = await import("@/fixtures/sample-productfacts.json");
+    const text =
+      "JB시니어우대예금 특판 안내. 최고 연 5.0% 금리를 확정 제공하며 안정적으로 목돈을 관리할 수 있습니다. 기본금리와 우대금리는 가입기간, 우대조건 충족 여부에 따라 달라질 수 있습니다. 이 예금은 예금자보호법에 따라 원금과 이자를 합하여 1인당 최고 1억원까지 보호됩니다.";
+    loadSample(sample as unknown as ReviewOutput, text);
+    setMeta({ title: "JB시니어우대예금 특판 안내", channelLabel: "웹페이지" });
+    setResolved(new Set());
+    setDecision(null);
+    setView("product");
+  }, [loadSample]);
+
   const handleToggleResolve = useCallback((id: string) => {
     setResolved((prev) => {
       const next = new Set(prev);
@@ -103,6 +115,7 @@ export default function Page() {
                   running={state.status === "running"}
                   onSubmit={handleSubmit}
                   onLoadSample={handleLoadSample}
+                  onLoadProductSample={handleLoadProductSample}
                 />
                 {state.error && (
                   <div className="mt-3 rounded-md border border-reject/40 bg-reject/5 px-3 py-2 text-sm text-reject">
