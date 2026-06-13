@@ -121,46 +121,41 @@ body {
     box-shadow 140ms ease;
 }
 
-/* Area layer — a violating claim shows as ONE continuous soft run over the
-   whole claim span (matches the legal theory: 결합 단정). The run covers the
-   plain words between qualifiers too, so it reads as one unit, not word-boxes.
-   Disclosure(keep)·scope stay unwashed. */
+/* One highlight per claim/disclosure span (token layer dropped). Default =
+   tone-colored underline only, NO background. Background appears ONLY on the
+   selected span, in the SAME tone color (never brand blue). This kills the
+   per-word patchwork and the stray blue boxes. */
 .hl-area-risk {
-  background: rgba(214, 69, 58, 0.1);
-  border-bottom: 2px solid rgba(214, 69, 58, 0.55);
+  border-bottom: 2px solid var(--reject);
 }
 .hl-area-review {
-  background: rgba(217, 138, 11, 0.11);
-  border-bottom: 2px solid rgba(217, 138, 11, 0.6);
+  border-bottom: 2px solid var(--revise);
 }
 .hl-area-keep,
-.hl-area-keep-warning,
+.hl-area-keep-warning {
+  border-bottom: 1.5px solid rgba(15, 157, 107, 0.55);
+}
 .hl-area-scope {
   background: transparent;
 }
 
-/* Token layer — emphasize the exact risky phrase by weight only; no separate
-   box (the continuous area run already marks the claim). 고지는 얇은 밑줄만. */
-.hl-token-risk {
-  font-weight: 700;
-}
-.hl-token-review {
-  font-weight: 600;
-}
-.hl-token-keep,
-.hl-token-keep-warning {
-  border-bottom: 1.5px solid rgba(15, 157, 107, 0.5);
-}
-
 .hl:hover {
-  filter: brightness(0.95);
+  background: rgba(0, 0, 0, 0.035);
 }
 
-/* Selection — one continuous brand wash across the whole claim. No per-segment
-   ring (that boxed each token and shattered the selection into blue squares). */
-.hl.is-selected {
-  background: var(--brand-tint);
-  border-bottom: 2px solid var(--brand);
+/* Selection — tone-colored wash on the selected span (continuous, not blue). */
+.hl-area-risk.is-selected {
+  background: rgba(214, 69, 58, 0.13);
+}
+.hl-area-review.is-selected {
+  background: rgba(217, 138, 11, 0.14);
+}
+.hl-area-keep.is-selected,
+.hl-area-keep-warning.is-selected {
+  background: rgba(15, 157, 107, 0.13);
+}
+.hl-area-scope.is-selected {
+  background: var(--surface-3);
 }
 
 /* Resolved (수정안 적용) — desaturate, keep legible */

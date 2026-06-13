@@ -471,10 +471,12 @@ export function highlightCandidates(
   // Multiple anchors (claim_anchor + risk_anchor) can alias the same claim,
   // producing identical spans twice. Keep only the strongest per span+label
   // so chip "+N" counts reflect genuinely different annotations.
+  // 레퍼런스 방식: claim(앵커)·고지 '한 span' 단위로만 하이라이트한다. 개별
+  // qualifier 토큰 레이어는 빼서 단어별 패치워크/색 충돌을 없앤다.
+  void tokens;
   return [
     ...dedupeBySpan(claimAreas),
     ...dedupeBySpan(disclosureAreas),
-    ...dedupeBySpan(tokens),
   ];
 }
 
