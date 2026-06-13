@@ -290,6 +290,8 @@ export interface RunSummary {
   cu_ids: string[];
   /** 사람이 읽는 CU 라벨(risk_title 등). 해시 cu_id 대체 표시용. */
   cu_labels?: string[];
+  /** 실행자 가명. */
+  actor?: string;
   /** 실제 실행이 아니라 데모용으로 수동 주입된 기록. */
   seed?: boolean;
 }
@@ -597,4 +599,6 @@ export interface ReviewRequest {
   workspace_id: string;
   /** 선택 LLM 모델(빈 값=.env 기본). 백엔드가 게이트웨이 모델을 오버라이드. */
   llm_model?: string;
+  /** 실행자 가명(브라우저별). 실행 기록에 누가 돌렸는지 표시. */
+  actor?: string;
 }

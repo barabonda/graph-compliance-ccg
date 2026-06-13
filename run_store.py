@@ -34,6 +34,7 @@ def _summary(
     model: str,
     content_text: str,
     seed: bool,
+    actor: str,
 ) -> dict[str, Any]:
     issues = output.get("detected_issues") or []
     checks = ((output.get("product_fact_context") or {}).get("disclosure_checks")) or []
@@ -59,6 +60,7 @@ def _summary(
         "model": model,
         "content_text": content_text,
         "seed": seed,
+        "actor": actor,
         "final_verdict": str(output.get("final_verdict") or ""),
         "misleading_verdict": str(track_b.get("verdict") or ""),
         "issue_count": len(issues),
@@ -78,6 +80,7 @@ def record_run(
     model: str = "",
     content_text: str = "",
     seed: bool = False,
+    actor: str = "",
 ) -> None:
     """심사 결과 스냅샷을 저장(best-effort). seed=True는 데모용 수동 주입 표시."""
     run_id = str(output.get("review_run_id") or "").strip()
@@ -96,6 +99,7 @@ def record_run(
             model=model,
             content_text=content_text,
             seed=seed,
+            actor=actor,
         )
         with INDEX_PATH.open("a", encoding="utf-8") as handle:
             handle.write(json.dumps(summary, ensure_ascii=False) + "\n")

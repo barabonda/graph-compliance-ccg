@@ -8,6 +8,7 @@ import { ExecSummary } from "@/components/console/ExecSummary";
 import { GraphView } from "@/components/console/GraphView";
 import { RiskList } from "@/components/console/RiskList";
 import { ReviewForm } from "@/components/ReviewForm";
+import { ReviewSidePanel } from "@/components/ReviewSidePanel";
 import { ContextBar } from "@/components/shell/ContextBar";
 import { Sidebar, type ViewKey } from "@/components/shell/Sidebar";
 import { Toast } from "@/components/shell/Toast";
@@ -124,31 +125,44 @@ export default function Page() {
         />
         <div className="min-h-0 flex-1 overflow-y-auto p-4">
           {view === "new" && (
-            <div className="mx-auto flex max-w-4xl flex-col gap-4">
-              <section className="rounded-[14px] border border-line bg-surface p-5 shadow-card">
-                <h2 className="mb-1 text-base font-extrabold">새 심사</h2>
-                <p className="mb-4 text-xs text-ink-3">
-                  광고 문안을 접수하면 정책 그래프 대조 → 표현 심사 → 전체 인상 → 상품 사실 대조 순으로 분석합니다.
+            <div className="mx-auto max-w-6xl">
+              <div className="mb-4">
+                <h2 className="flex items-center gap-2 text-[20px] font-extrabold tracking-tight text-ink">
+                  새 심사
+                  <span className="rounded-full bg-brand-tint px-2 py-0.5 text-[12px] font-bold text-brand-2">
+                    AI 사전심의
+                  </span>
+                </h2>
+                <p className="mt-1 text-[13px] leading-relaxed text-ink-3">
+                  금융광고 문안을 법령·심의기준·상품설명서 사실과 대조하고, 규칙 기반 판정과 LLM 해석을 결합해
+                  설명가능한 사전 검토를 지원합니다.
                 </p>
-                <ReviewForm
-                  running={state.status === "running"}
-                  onSubmit={handleSubmit}
-                  onLoadSample={handleLoadSample}
-                  onLoadProductSample={handleLoadProductSample}
-                />
-                {state.error && (
-                  <div className="mt-3 rounded-md border border-reject/40 bg-reject/5 px-3 py-2 text-sm text-reject">
-                    <strong>{state.error.code}</strong>: {state.error.message}
-                    {state.error.cause && <div className="mt-1 text-xs opacity-80">원인: {state.error.cause}</div>}
-                  </div>
-                )}
-              </section>
-              {(state.status === "running" || (state.events.length > 0 && !result)) && (
-                <section className="rounded-[14px] border border-line bg-surface p-5 shadow-card">
-                  <h3 className="mb-3 text-sm font-bold">분석 파이프라인</h3>
-                  <AuditTab result={null} events={state.events} />
-                </section>
-              )}
+              </div>
+              <div className="grid gap-4 lg:grid-cols-[1.55fr_1fr]">
+                <div className="flex flex-col gap-4">
+                  <section className="rounded-[14px] border border-line bg-surface p-5 shadow-card">
+                    <ReviewForm
+                      running={state.status === "running"}
+                      onSubmit={handleSubmit}
+                      onLoadSample={handleLoadSample}
+                      onLoadProductSample={handleLoadProductSample}
+                    />
+                    {state.error && (
+                      <div className="mt-3 rounded-md border border-reject/40 bg-reject/5 px-3 py-2 text-sm text-reject">
+                        <strong>{state.error.code}</strong>: {state.error.message}
+                        {state.error.cause && <div className="mt-1 text-xs opacity-80">원인: {state.error.cause}</div>}
+                      </div>
+                    )}
+                  </section>
+                  {(state.status === "running" || (state.events.length > 0 && !result)) && (
+                    <section className="rounded-[14px] border border-line bg-surface p-5 shadow-card">
+                      <h3 className="mb-3 text-sm font-bold">실시간 진행</h3>
+                      <AuditTab result={null} events={state.events} />
+                    </section>
+                  )}
+                </div>
+                <ReviewSidePanel onOpenRun={handleOpenRun} refreshKey={result?.review_run_id} />
+              </div>
             </div>
           )}
 

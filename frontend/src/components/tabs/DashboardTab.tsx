@@ -109,11 +109,16 @@ export function DashboardTab({ onOpenRun }: Props) {
 
   if (runs === null) return <EmptyState>실행 기록을 불러오는 중…</EmptyState>;
 
-  const total = runs.length;
-  const count = (verdict: string) => runs.filter((run) => run.final_verdict === verdict).length;
+  // 집계는 실제 실행만(데모 시드 제외). 표에는 데모도 표시하되 '데모' 배지로 구분.
+  const realRuns = runs.filter((run) => !run.seed);
+  const demoCount = runs.length - realRuns.length;
+  const total = realRuns.length;
+  const count = (verdict: string) => realRuns.filter((run) => run.final_verdict === verdict).length;
   const rejectRate = total ? Math.round((count("reject") / total) * 100) : 0;
   const passRate = total ? Math.round((count("pass_candidate") / total) * 100) : 0;
-  const avgIssues = total ? (runs.reduce((sum, run) => sum + (run.issue_count || 0), 0) / total).toFixed(1) : "0";
+  const avgIssues = total
+    ? (realRuns.reduce((sum, run) => sum + (run.issue_count || 0), 0) / total).toFixed(1)
+    : "0";
   const verdictBars = VERDICT_ORDER.map((key) => ({
     key: VERDICT_LABELS[key][0],
     value: count(key),
@@ -125,7 +130,10 @@ export function DashboardTab({ onOpenRun }: Props) {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-[18px] font-extrabold tracking-tight text-ink">운영 대시보드</h2>
-          <p className="mt-0.5 text-[12px] text-ink-3">실행 기록과 집계 · 행을 클릭하면 그 실행의 시점 데이터를 콘솔에서 디버깅합니다.</p>
+          <p className="mt-0.5 text-[12px] text-ink-3">
+            실행 기록과 집계 · 행을 클릭하면 그 실행의 시점 데이터를 콘솔에서 디버깅합니다.
+            {demoCount ? ` (집계는 실제 실행 ${total}건만 · 데모 ${demoCount}건 제외)` : ""}
+          </p>
         </div>
         <button
           type="button"
@@ -147,9 +155,9 @@ export function DashboardTab({ onOpenRun }: Props) {
 
       <div className="grid gap-3 lg:grid-cols-2">
         <BarList title="라우팅 분포" items={verdictBars} color="var(--brand)" />
-        <BarList title="자주 걸리는 원칙" items={topCounts(runs, (r) => r.principles).map((i) => ({ ...i, tint: principleColor(i.key) }))} color="var(--brand)" />
-        <BarList title="자주 누락되는 필수 고지" items={topCounts(runs, (r) => r.missing_disclosures)} color="var(--revise)" />
-        <BarList title="자주 걸리는 심의 항목 (CU)" items={topCounts(runs, (r) => r.cu_labels ?? [])} color="var(--brand-2)" />
+        <BarList title="자주 걸리는 원칙" items={topCounts(realRuns, (r) => r.principles).map((i) => ({ ...i, tint: principleColor(i.key) }))} color="var(--brand)" />
+        <BarList title="자주 누락되는 필수 고지" items={topCounts(realRuns, (r) => r.missing_disclosures)} color="var(--revise)" />
+        <BarList title="자주 걸리는 심의 항목 (CU)" items={topCounts(realRuns, (r) => r.cu_labels ?? [])} color="var(--brand-2)" />
       </div>
 
       <div className="overflow-hidden rounded-[12px] border border-line bg-surface shadow-card">
@@ -164,6 +172,7 @@ export function DashboardTab({ onOpenRun }: Props) {
                 <tr className="text-[11px] text-ink-4">
                   <th className="px-4 py-2 text-left font-bold">시각</th>
                   <th className="px-4 py-2 text-left font-bold">제목</th>
+                  <th className="px-3 py-2 text-left font-bold">심사자</th>
                   <th className="px-3 py-2 text-left font-bold">모델</th>
                   <th className="px-3 py-2 text-left font-bold">AI 권고</th>
                   <th className="px-3 py-2 text-right font-bold">위험</th>
@@ -191,6 +200,7 @@ export function DashboardTab({ onOpenRun }: Props) {
                         </span>
                       </span>
                     </td>
+                    <td className="px-3 py-2 whitespace-nowrap text-ink-3">{run.actor || "—"}</td>
                     <td className="px-3 py-2 whitespace-nowrap font-mono text-[11px] text-ink-3">{run.model || ".env"}</td>
                     <td className="px-3 py-2 whitespace-nowrap">
                       <span className="font-bold" style={{ color: VERDICT_TONE[run.final_verdict] ?? "var(--ink-2)" }}>

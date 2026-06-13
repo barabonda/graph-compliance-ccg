@@ -63,6 +63,7 @@ def review(payload: dict[str, Any]) -> dict[str, Any]:
             product_group=str(payload.get("product_group") or ""),
             model=str(payload.get("llm_model") or ""),
             content_text=str(payload.get("content_text") or ""),
+            actor=str(payload.get("actor") or ""),
         )
         return jsonable
     except ServiceUnavailable as exc:
@@ -120,6 +121,7 @@ def review_stream(payload: dict[str, Any]) -> StreamingResponse:
                             product_group=str(payload.get("product_group") or ""),
                             model=str(payload.get("llm_model") or ""),
                             content_text=str(payload.get("content_text") or ""),
+                            actor=str(payload.get("actor") or ""),
                         )
                     event_queue.put(jsonable)
             except Exception as exc:  # noqa: BLE001 - converted into a structured stream error below.
