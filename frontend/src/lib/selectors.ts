@@ -15,6 +15,8 @@ import {
 } from "./labels";
 import type {
   AnchorDisplay,
+  AggregationRow,
+  ChainNode,
   Claim,
   ClaimFact,
   ClaimQualifier,
@@ -1096,4 +1098,90 @@ export function chainsForAnchor(rows: PolicyEvidenceChain[] | undefined, anchorI
 export function chainNodeLabel(node: Record<string, unknown> | undefined | null): string {
   if (!node) return "-";
   return String(node.title ?? node.name ?? node.label ?? node.article ?? node.id ?? JSON.stringify(node));
+}
+
+// ---------------------------------------------------------------------------
+// 법령 위임 사슬 — 온톨로지 DELEGATES_TO 위계를 심사원이 읽는 형태로.
+//   법률 → 시행령 → 감독규정 → 심의기준 (위임 단계)
+// ---------------------------------------------------------------------------
+
+/** node_type/role → 위임 위계 단계(낮을수록 상위 법령) + 한국어 레이어 라벨. */
+export function delegationTierOf(node: ChainNode): { tier: number; layer: string } {
+  const role = String(node.role ?? "");
+  const type = String(node.node_type ?? "");
+  const label = String(node.label ?? "");
+  // 라벨에서 법령 단계 추론 (role/type가 비어도 동작하도록 fallback).
+  const text = `${role} ${label}`;
+  if (/심의기준|self.?regul|supervisory_standard|협회/i.test(text)) return { tier: 3, layer: "심의기준" };
+  if (/감독규정|supervisory/i.test(text)) return { tier: 2, layer: "감독규정" };
+  if (/시행령|enforcement_decree|decree|시행세칙/i.test(text)) return { tier: 1, layer: "시행령" };
+  if (type === "SalesPrinciple" || role === "principle") return { tier: 9, layer: "판매원칙" };
+  if (/법률|^법|root_article|article/i.test(text)) return { tier: 0, layer: "법률" };
+  if (type === "DelegatedStandard") return { tier: 2, layer: "위임기준" };
+  return { tier: 5, layer: type || "근거" };
+}
+
+export interface DelegationStep {
+  layer: string; // 법률 / 시행령 / 감독규정 / 심의기준 / 판매원칙
+  label: string;
+  why?: string;
+}
+
+/**
+ * legal_basis_chain을 법령 위임 단계 순서(법률→시행령→감독규정→심의기준)로 정렬한
+ * 사슬로 변환. 판매원칙(SalesPrinciple)은 별도로 분리해 반환.
+ */
+export function delegationChain(chain: PolicyEvidenceChain): {
+  steps: DelegationStep[];
+  principles: string[];
+} {
+  const whyByTarget = new Map<string, string>();
+  for (const edge of chain.delegation_edges ?? []) {
+    if (edge.target_id && edge.why) whyByTarget.set(edge.target_id, edge.why);
+    if (edge.target_node?.id && edge.why) whyByTarget.set(String(edge.target_node.id), edge.why);
+  }
+  const principles: string[] = [];
+  const steps: DelegationStep[] = [];
+  const seen = new Set<string>();
+  for (const node of chain.basis_nodes ?? []) {
+    const { tier, layer } = delegationTierOf(node);
+    const label = chainNodeLabel(node);
+    if (layer === "판매원칙") {
+      if (!principles.includes(label)) principles.push(label);
+      continue;
+    }
+    const key = `${layer}:${label}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    steps.push({ layer, label, why: whyByTarget.get(String(node.id ?? "")) });
+    void tier;
+  }
+  steps.sort((a, b) => layerTier(a.layer) - layerTier(b.layer));
+  return { steps, principles };
+}
+
+function layerTier(layer: string): number {
+  return { 법률: 0, 시행령: 1, 위임기준: 2, 감독규정: 2, 심의기준: 3 }[layer] ?? 5;
+}
+
+/** anchor의 FOUND legal_basis_chain들을 위임 사슬로. */
+export function delegationChainsForAnchor(result: ReviewOutput, anchorId: string): {
+  steps: DelegationStep[];
+  principles: string[];
+  summary: string;
+}[] {
+  return chainsForAnchor(result.policy_evidence_chains?.legal_basis_chains, anchorId)
+    .filter((chain) => chain.status === "FOUND")
+    .map((chain) => ({ ...delegationChain(chain), summary: String(chain.summary ?? "") }));
+}
+
+/** 조항/원칙 집계 행을 anchor의 문구로 필터. */
+export function aggregationForAnchor(result: ReviewOutput, anchor: ContextAnchor): AggregationRow[] {
+  const inAnchor = (rows: AggregationRow[]) =>
+    rows.filter((row) => (row.anchor_spans ?? []).includes(anchor.span.text));
+  const articles = inAnchor(result.article_aggregation ?? []);
+  const principles = inAnchor(result.principle_aggregation ?? []).filter(
+    (row) => !articles.some((a) => a.key === row.key),
+  );
+  return [...articles, ...principles];
 }

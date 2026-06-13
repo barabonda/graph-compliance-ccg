@@ -384,7 +384,19 @@ export interface ChainNode {
   label?: string;
   article?: string;
   id?: string;
+  /** ArticleClause | SalesPrinciple | DelegatedStandard … (온톨로지 레이어 구분). */
+  node_type?: string;
+  /** root_article | principle | delegated_enforcement_decree | delegated_supervisory_standard … */
+  role?: string;
   [key: string]: unknown;
+}
+
+export interface DelegationEdge {
+  relationship_type?: string;
+  source_id?: string;
+  target_id?: string;
+  target_node?: ChainNode;
+  why?: string;
 }
 
 export interface PolicyEvidenceChain {
@@ -395,6 +407,7 @@ export interface PolicyEvidenceChain {
   basis_nodes?: ChainNode[];
   disclosure_nodes?: ChainNode[];
   exception_nodes?: ChainNode[];
+  delegation_edges?: DelegationEdge[];
   provenance_snippets?: { text?: string; summary?: string }[];
   [key: string]: unknown;
 }
