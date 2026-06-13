@@ -12,11 +12,10 @@ import {
   productClaimFactsForAnchor,
   productComparisonsForClaimFact,
   safeAlternative,
-  shorten,
 } from "@/lib/selectors";
 import type { ReviewOutput } from "@/lib/types";
 import { Icon } from "../Icon";
-import { Meter, Tag } from "../ui";
+import { Expandable, KeyValueText, Meter, Tag } from "../ui";
 import { DetailRow, PaneHeader } from "./common";
 import { TONE_BG, TONE_COLOR, TONE_WORD_SHORT } from "./RiskList";
 
@@ -281,43 +280,99 @@ export function DetailPane({ result, selectedAnchorId, resolved, onToggleResolve
           </DetailRow>
         )}
 
-        {/* 연결된 심의 기준 (CU) */}
+        {/* 연결된 심의 기준 (CU) — 클릭하면 전체 조건/근거 펼침 */}
         {topPlan && (
           <DetailRow icon="layers" label="연결된 심의 기준">
-            <div className="flex items-start gap-2.5 rounded-[10px] border border-line bg-surface-2 p-3">
-              <span className="shrink-0 rounded-md bg-brand px-1.5 py-0.5 font-mono text-[11px] font-bold text-white">
-                CU
-              </span>
-              <div className="min-w-0">
-                <div className="text-[13.5px] font-bold text-ink">{topPlan.risk_title || topPlan.principle}</div>
-                <div className="mt-1 text-[12.5px] leading-relaxed text-ink-2">
-                  {shorten(topPlan.constraint || topPlan.context, 220)}
+            <Expandable
+              header={
+                <div className="flex items-start gap-2.5">
+                  <span className="shrink-0 rounded-md bg-brand px-1.5 py-0.5 font-mono text-[11px] font-bold text-white">
+                    CU
+                  </span>
+                  <div className="min-w-0">
+                    <div className="text-[13.5px] font-bold text-ink">{topPlan.risk_title || topPlan.principle}</div>
+                    <div className="mt-0.5 line-clamp-1 text-[12px] text-ink-3">
+                      {topPlan.constraint || topPlan.context}
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </div>
+              }
+            >
+              <KeyValueText
+                items={[
+                  ["원칙", topPlan.principle || "-"],
+                  ["대상", topPlan.subject || "-"],
+                  ["요건/제약", topPlan.constraint || topPlan.context || "-"],
+                  ["맥락", topPlan.context || "-"],
+                ]}
+              />
+            </Expandable>
           </DetailRow>
         )}
 
-        {/* 근거 조문 */}
+        {/* 근거 조문 — 조문별로 묶어 클릭 시 원문/맥락 펼침 */}
         <DetailRow icon="clause" label="근거 조문">
           <div className="space-y-2">
-            {articles.slice(0, 3).map((article, index) => {
-              const evidence = plans.find((item) => item.source_article === article)?.evidence_texts?.[0];
+            {articles.slice(0, 4).map((article) => {
+              const articlePlans = plans.filter((item) => item.source_article === article);
+              const evidenceTexts = [
+                ...new Set(articlePlans.flatMap((item) => item.evidence_texts ?? []).filter(Boolean)),
+              ];
+              const evidenceIds = [
+                ...new Set(articlePlans.flatMap((item) => item.legal_evidence_ids ?? []).filter(Boolean)),
+              ];
+              const principle = articlePlans.find((item) => item.principle)?.principle;
+              const constraint = articlePlans.find((item) => item.constraint)?.constraint;
+              const hasDetail = evidenceTexts.length > 0 || Boolean(constraint) || evidenceIds.length > 0;
               return (
-                <div key={article} className="rounded-[10px] border border-line p-3">
-                  <div className="mb-1.5 flex items-center gap-2">
-                    <span className="font-mono text-[11.5px] font-bold text-brand-2">{article}</span>
-                  </div>
-                  {index === 0 && evidence && (
-                    <div className="border-l-2 border-line-2 pl-2.5 text-[12.5px] leading-relaxed text-ink-2">
-                      “{shorten(evidence, 220)}”
+                <Expandable
+                  key={article}
+                  disabled={!hasDetail}
+                  header={
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="font-mono text-[11.5px] font-bold text-brand-2">{article}</span>
+                      {principle && <Tag>{principle}</Tag>}
+                      {!hasDetail && <span className="text-[11px] text-ink-4">원문 미수록</span>}
                     </div>
-                  )}
-                </div>
+                  }
+                >
+                  <div className="space-y-2.5">
+                    {constraint && (
+                      <div>
+                        <div className="mb-1 text-[10.5px] font-bold tracking-wider text-ink-4">요건</div>
+                        <p className="m-0 text-[12.5px] leading-relaxed text-ink-2">{constraint}</p>
+                      </div>
+                    )}
+                    {evidenceTexts.length > 0 && (
+                      <div>
+                        <div className="mb-1 text-[10.5px] font-bold tracking-wider text-ink-4">조문/근거 원문</div>
+                        <div className="space-y-2">
+                          {evidenceTexts.slice(0, 4).map((text, index) => (
+                            <div
+                              key={index}
+                              className="border-l-2 border-line-2 pl-2.5 text-[12.5px] leading-relaxed text-ink-2"
+                            >
+                              “{text}”
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    {evidenceIds.length > 0 && (
+                      <div className="flex flex-wrap gap-1.5">
+                        {evidenceIds.slice(0, 8).map((id) => (
+                          <span key={id} className="font-mono text-[10px] text-ink-4">
+                            {id}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </Expandable>
               );
             })}
             {legalChains.length > 0 && (
-              <div className="flex flex-wrap gap-1.5">
+              <div className="flex flex-wrap gap-1.5 pt-0.5">
                 {legalChains
                   .flatMap((chain) => chain.basis_nodes ?? [])
                   .slice(0, 5)
@@ -329,30 +384,40 @@ export function DetailPane({ result, selectedAnchorId, resolved, onToggleResolve
           </div>
         </DetailRow>
 
-        {/* 예외 · 고지 검토 */}
+        {/* 예외 · 고지 검토 — 완화 사유 클릭 펼침 */}
         <DetailRow icon="shield" label="예외 · 고지 검토">
           {exceptions.length ? (
             <div className="space-y-2">
               {exceptions.map((review) => (
-                <div
+                <Expandable
                   key={review.exception_review_id}
-                  className="flex items-start gap-2.5 rounded-[10px] border p-3"
-                  style={{
-                    borderColor: review.applies ? "#e7d3a6" : "var(--line)",
-                    background: review.applies ? "var(--revise-bg)" : "var(--surface-2)",
-                  }}
+                  tone={review.applies ? "#e7d3a6" : "var(--line)"}
+                  header={
+                    <div className="flex items-center gap-2">
+                      <span
+                        className="shrink-0 rounded-full px-2 py-0.5 text-[11px] font-bold whitespace-nowrap"
+                        style={{
+                          color: review.applies ? "var(--revise)" : "var(--ink-3)",
+                          background: review.applies ? "var(--revise-bg)" : "var(--surface-3)",
+                        }}
+                      >
+                        {review.applies ? `완화 가능 · ${review.effect}` : "완화 불가"}
+                      </span>
+                      <span className="line-clamp-1 text-[12px] text-ink-3">{review.why}</span>
+                    </div>
+                  }
                 >
-                  <span
-                    className="shrink-0 rounded-full px-2 py-0.5 text-[11px] font-bold whitespace-nowrap"
-                    style={{
-                      color: review.applies ? "var(--revise)" : "var(--ink-3)",
-                      background: review.applies ? "#fff" : "var(--surface-3)",
-                    }}
-                  >
-                    {review.applies ? `완화 가능 · ${review.effect}` : "완화 불가"}
-                  </span>
                   <p className="m-0 text-[12.5px] leading-relaxed text-ink-2">{review.why}</p>
-                </div>
+                  {(review.closure_evidence_ids ?? []).length > 0 && (
+                    <div className="mt-2 flex flex-wrap gap-1.5">
+                      {review.closure_evidence_ids.map((id) => (
+                        <span key={id} className="font-mono text-[10px] text-ink-4">
+                          {id}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </Expandable>
               ))}
             </div>
           ) : (
@@ -366,26 +431,37 @@ export function DetailPane({ result, selectedAnchorId, resolved, onToggleResolve
           )}
         </DetailRow>
 
-        {/* 상품 사실 대조 — 수치 클레임이 있을 때만 */}
+        {/* 상품 사실 대조 — 수치 클레임이 있을 때만, 클릭 시 근거 펼침 */}
         {comparisons.length > 0 && (
           <DetailRow icon="layers" label="상품 사실 대조">
-            <div className="space-y-1.5">
-              {comparisons.slice(0, 3).map((item) => (
-                <div key={item.comparison_id} className="text-[12.5px] leading-relaxed text-ink-2">
-                  <b
-                    className={
-                      item.status === "SUPPORTED"
-                        ? "text-pass"
-                        : item.status === "CONTRADICTED"
-                          ? "text-reject"
-                          : "text-revise"
+            <div className="space-y-2">
+              {comparisons.slice(0, 4).map((item) => {
+                const statusColor =
+                  item.status === "SUPPORTED"
+                    ? "text-pass"
+                    : item.status === "CONTRADICTED"
+                      ? "text-reject"
+                      : "text-revise";
+                return (
+                  <Expandable
+                    key={item.comparison_id}
+                    disabled={!item.evidence_text && !item.rationale}
+                    header={
+                      <div className="flex items-center gap-2">
+                        <b className={`shrink-0 text-[12px] ${statusColor}`}>{item.status}</b>
+                        <span className="line-clamp-1 text-[12.5px] text-ink-2">{item.rationale ?? ""}</span>
+                      </div>
                     }
                   >
-                    {item.status}
-                  </b>{" "}
-                  · {shorten(item.rationale ?? "", 140)}
-                </div>
-              ))}
+                    <KeyValueText
+                      items={[
+                        ["판단", item.rationale || "-"],
+                        ["근거", item.evidence_text || "-"],
+                      ]}
+                    />
+                  </Expandable>
+                );
+              })}
             </div>
           </DetailRow>
         )}

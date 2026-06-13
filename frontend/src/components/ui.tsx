@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 
 export type BadgeTone = "pass" | "review" | "revise" | "reject" | "neutral";
 
@@ -105,6 +105,50 @@ export function KeyValueText({ items }: { items: [string, ReactNode][] }) {
 
 export function SectionDivider() {
   return <hr className="my-3 border-line" />;
+}
+
+/**
+ * 클릭하면 펼쳐지는 카드. 헤더는 항상 보이고, 본문은 토글된다.
+ * 근거 조문 · 연결 CU · 예외 검토처럼 "요약 → 상세" 구조에 사용.
+ */
+export function Expandable({
+  header,
+  children,
+  defaultOpen = false,
+  tone = "var(--line)",
+  disabled = false,
+}: {
+  header: ReactNode;
+  children?: ReactNode;
+  defaultOpen?: boolean;
+  tone?: string;
+  disabled?: boolean;
+}) {
+  const [open, setOpen] = useState(defaultOpen);
+  const hasBody = Boolean(children) && !disabled;
+  return (
+    <div className="overflow-hidden rounded-[10px] border" style={{ borderColor: tone }}>
+      <button
+        type="button"
+        onClick={() => hasBody && setOpen((value) => !value)}
+        className={`flex w-full items-start gap-2 px-3 py-2.5 text-left ${hasBody ? "cursor-pointer hover:bg-surface-2" : "cursor-default"}`}
+      >
+        <div className="min-w-0 flex-1">{header}</div>
+        {hasBody && (
+          <span
+            className="mt-0.5 shrink-0 text-ink-4 transition-transform duration-150"
+            style={{ transform: open ? "rotate(90deg)" : "none" }}
+            aria-hidden
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="m9 6 6 6-6 6" />
+            </svg>
+          </span>
+        )}
+      </button>
+      {open && hasBody && <div className="border-t border-line px-3 py-2.5">{children}</div>}
+    </div>
+  );
 }
 
 /** 진행/신뢰도 막대 — 수치는 title hover로만 노출. */
