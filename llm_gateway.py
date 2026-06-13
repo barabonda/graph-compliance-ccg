@@ -27,6 +27,10 @@ DEFAULT_MODEL = "gpt-5.4-nano"
 DEFAULT_LOCAL_MODEL = "ax-4.0-light"
 LOGGER = logging.getLogger(__name__)
 
+# 로컬(Ollama) 모델 태그. 이 중 하나가 선택되면 OpenAI가 아니라 로컬 엔드포인트로
+# 보낸다 — 클라우드 기본 모드에서도 모델 드롭다운으로 로컬 모델을 쓸 수 있게.
+LOCAL_MODELS = {"ax-4.0-light", "midm-2.0-base", "exaone4-32b", "qwen3.5:9b", "gemma4"}
+
 
 def _timeout_seconds() -> float:
     return float(os.environ.get("CCG_OPENAI_TIMEOUT_SECONDS", "120"))
@@ -36,25 +40,47 @@ def _max_retries() -> int:
     return int(os.environ.get("CCG_OPENAI_MAX_RETRIES", "1"))
 
 
+def _local_base_url() -> str:
+    return (os.environ.get("LOCAL_LLM_BASE_URL") or os.environ.get("LLM_BASE_URL") or "").strip()
+
+
+def _local_api_key() -> str:
+    return os.environ.get("LOCAL_LLM_API_KEY") or os.environ.get("LLM_API_KEY") or "ollama"
+
+
 class LLMGateway:
     def __init__(self, *, model: str | None = None, client: Any | None = None) -> None:
-        local_base_url = (os.environ.get("LLM_BASE_URL") or "").strip()
-        if client is not None:
-            # Injected client (tests / custom): keep the Responses contract as-is.
-            self.client = client
-            self.mode = "responses"
-            self.model = model or os.environ.get("OPENAI_MODEL", DEFAULT_MODEL)
-        elif local_base_url:
-            # Local OpenAI-compatible endpoint (Chat Completions only).
+        requested = (model or "").strip()
+        global_local = (os.environ.get("LLM_BASE_URL") or "").strip()
+        local_base = _local_base_url()
+
+        def _make_local(target_model: str) -> None:
+            if not local_base:
+                raise RuntimeError(
+                    f"'{target_model}'은 로컬 모델인데 로컬 LLM 엔드포인트가 설정되지 않았습니다 "
+                    "(LOCAL_LLM_BASE_URL 또는 LLM_BASE_URL)."
+                )
             self.client = OpenAI(
-                base_url=local_base_url,
-                api_key=os.environ.get("LLM_API_KEY", "ollama"),
+                base_url=local_base,
+                api_key=_local_api_key(),
                 timeout=_timeout_seconds(),
                 max_retries=_max_retries(),
             )
             self.mode = "chat"
-            self.model = model or os.environ.get("LLM_MODEL", DEFAULT_LOCAL_MODEL)
-            LOGGER.info("llm.gateway mode=chat base_url=%s model=%s", local_base_url, self.model)
+            self.model = target_model
+            LOGGER.info("llm.gateway mode=chat base_url=%s model=%s", local_base, self.model)
+
+        if client is not None:
+            # Injected client (tests / custom): keep the Responses contract as-is.
+            self.client = client
+            self.mode = "responses"
+            self.model = requested or os.environ.get("OPENAI_MODEL", DEFAULT_MODEL)
+        elif requested in LOCAL_MODELS:
+            # 선택한 모델이 로컬 태그면 provider도 로컬로(클라우드 기본 모드여도).
+            _make_local(requested)
+        elif global_local:
+            # 전역 로컬 토글(LLM_BASE_URL) — 모든 요청을 로컬로.
+            _make_local(requested or os.environ.get("LLM_MODEL", DEFAULT_LOCAL_MODEL))
         else:
             if not os.environ.get("OPENAI_API_KEY"):
                 raise RuntimeError(
@@ -66,7 +92,7 @@ class LLMGateway:
             # are designed to degrade on failure (e.g. product fact extraction).
             self.client = OpenAI(timeout=_timeout_seconds(), max_retries=_max_retries())
             self.mode = "responses"
-            self.model = model or os.environ.get("OPENAI_MODEL", DEFAULT_MODEL)
+            self.model = requested or os.environ.get("OPENAI_MODEL", DEFAULT_MODEL)
 
     def structured(
         self,

@@ -13,9 +13,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "GraphCompliance CCG · 금융광고 준법심사 콘솔",
+  title: "JB Compliance · 금융광고 준법 사전심의",
   description:
-    "광고 문안의 Claim, PolicyHypernym, CU 판단, 근거, 예외 검토를 한 화면에서 추적하는 LLM 기반 사전심사 콘솔",
+    "JunBub · 금융광고 문안을 법령·심의기준·상품설명서 사실과 대조하고 규칙 기반 판정과 LLM 해석을 결합해 설명가능한 사전 검토를 지원하는 콘솔",
 };
 
 export default function RootLayout({
