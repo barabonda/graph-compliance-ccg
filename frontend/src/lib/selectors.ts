@@ -5,6 +5,7 @@
  */
 
 import {
+  disclosureMeta as disclosureMetaResolved,
   DISCLOSURE_LABELS,
   HUMAN_ACTION_LABELS,
   HUMAN_FEATURE_LABELS,
@@ -797,6 +798,100 @@ export function buildEvidencePath(result: ReviewOutput, anchorId: string): Evide
     disclosure,
     tone,
   };
+}
+
+// ---------------------------------------------------------------------------
+// 예외 · 고지 검토 — Compliance Gate 타임라인 + 고지 충족 시뮬레이션
+// ---------------------------------------------------------------------------
+
+export type GateStatus = "ok" | "warn" | "fail";
+
+export interface ComplianceGate {
+  step: number;
+  name: string;
+  detail: string;
+  meta: string;
+  status: GateStatus;
+}
+
+export interface DisclosureItem {
+  id: string;
+  label: string;
+  desc: string;
+  required: boolean;
+  present: boolean;
+}
+
+export function buildComplianceGates(result: ReviewOutput): ComplianceGate[] {
+  const anchors = result.context_anchors ?? [];
+  const withHypernym = anchors.filter((anchor) => (anchor.hypernyms?.length ?? 0) > 0).length;
+  const cuPlan = result.cu_plan?.length ?? 0;
+  const cards = buildIssueCards(result);
+  const riskCount = cards.filter((card) => card.kind === "anchor" && card.tone === "risk").length;
+  const reviewCount = cards.filter((card) => card.kind === "anchor" && card.tone === "review").length;
+  const checks = result.product_fact_context?.disclosure_checks ?? [];
+  const requiredChecks = checks.filter((check) => disclosureMetaResolved(check.check_id).required);
+  const metRequired = requiredChecks.filter((check) => check.present).length;
+  const trackBScore = Number(result.overall_impression_judgment?.misleading_risk_score ?? 0);
+  const trackBGrade = trackBScore >= 0.7 ? "높음" : trackBScore >= 0.4 ? "중간" : "낮음";
+
+  return [
+    {
+      step: 1,
+      name: "적용 판단",
+      detail: "광고 분류와 사전심의 대상 여부를 확인합니다.",
+      meta: result.routing?.ad_scope === "product_ad" ? "금융상품 광고 · 심의 대상" : (result.routing?.ad_scope ?? "scope 미상"),
+      status: "ok",
+    },
+    {
+      step: 2,
+      name: "정책 정규화",
+      detail: "광고 표현을 승인된 정책어(PolicyHypernym)로 매핑합니다.",
+      meta: `정책어 매칭 ${withHypernym}/${anchors.length}`,
+      status: anchors.length && withHypernym === anchors.length ? "ok" : "warn",
+    },
+    {
+      step: 3,
+      name: "심의 기준 검색",
+      detail: "정책어 기반으로 후보 ComplianceUnit을 검색합니다.",
+      meta: `CU 후보 ${cuPlan}건`,
+      status: cuPlan > 0 ? "ok" : "fail",
+    },
+    {
+      step: 4,
+      name: "표현 심사",
+      detail: "각 표현을 심의 기준에 대조해 위반 여부를 판정합니다.",
+      meta: `위반 의심 ${riskCount} · 검토 ${reviewCount}`,
+      status: riskCount > 0 ? "fail" : reviewCount > 0 ? "warn" : "ok",
+    },
+    {
+      step: 5,
+      name: "전체 인상 (Track B)",
+      detail: "개별 표현이 통과해도 전체적 인상의 오인 위험을 판단합니다.",
+      meta: `오인 위험 ${trackBGrade}`,
+      status: trackBScore >= 0.7 ? "fail" : trackBScore >= 0.4 ? "warn" : "ok",
+    },
+    {
+      step: 6,
+      name: "예외 · 고지 충족",
+      detail: "필수 고지가 병기되면 위반이 완화될 수 있는지 검토합니다.",
+      meta: `필수 고지 ${metRequired}/${requiredChecks.length}`,
+      status: requiredChecks.length && metRequired < requiredChecks.length ? "fail" : "ok",
+    },
+  ];
+}
+
+export function buildDisclosureItems(result: ReviewOutput): DisclosureItem[] {
+  return (result.product_fact_context?.disclosure_checks ?? []).map((check) => {
+    const meta = disclosureMetaResolved(check.check_id);
+    return {
+      id: check.check_id,
+      label: check.label,
+      desc: meta.desc,
+      required: meta.required,
+      present: Boolean(check.present),
+    };
+  });
 }
 
 /** `단정·보장 표현 1건 · 필수 고지 누락 2건` 형태의 상단 요약. */

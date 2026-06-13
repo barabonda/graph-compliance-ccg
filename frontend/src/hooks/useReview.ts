@@ -27,11 +27,11 @@ type Action =
   | { type: "load_sample"; result: ReviewOutput; reviewedText: string };
 
 /**
- * No stream event for this long → treat the connection as dead.
- * Backend LLM calls are capped at CCG_OPENAI_TIMEOUT_SECONDS (120s) x retries,
- * so a healthy run never goes silent for 5 minutes.
+ * Long LLM calls can legitimately stay quiet for several minutes. Treat the
+ * first quiet window as a UX warning, not as proof that the stream died.
  */
-const STREAM_STALL_MS = 300_000;
+const STREAM_STALL_WARNING_MS = Number(process.env.NEXT_PUBLIC_REVIEW_STREAM_STALL_WARNING_MS ?? 300_000);
+const STREAM_HARD_ABORT_MS = Number(process.env.NEXT_PUBLIC_REVIEW_STREAM_HARD_ABORT_MS ?? 1_200_000);
 
 const initialState: ReviewState = {
   status: "idle",
@@ -98,18 +98,37 @@ export function useReview() {
     abortRef.current = controller;
     dispatch({ type: "start" });
 
-    // Stall watchdog: a silently dropped stream otherwise leaves the UI on
-    // "running" forever. The slowest single step (product fact extraction)
-    // is bounded by the backend LLM timeout, so a long silence means the
-    // connection is dead, not that work is in progress.
-    let stalled = false;
-    let watchdog: ReturnType<typeof setTimeout> | undefined;
+    // Watchdog: show a soft warning while long backend LLM calls are silent,
+    // but do not abort early. Some valid review runs return after the old
+    // five-minute threshold.
+    let hardStalled = false;
+    let softWarningCount = 0;
+    let warningWatchdog: ReturnType<typeof setTimeout> | undefined;
+    let hardWatchdog: ReturnType<typeof setTimeout> | undefined;
+    const scheduleSoftWarning = () => {
+      clearTimeout(warningWatchdog);
+      warningWatchdog = setTimeout(() => {
+        softWarningCount += 1;
+        dispatch({
+          type: "event",
+          event: {
+            event: "stream_waiting",
+            step: "Long-running analysis step",
+            summary:
+              "긴 LLM/상품문서 분석 단계가 진행 중입니다. 새 이벤트가 늦어도 연결은 유지하고 결과를 계속 기다립니다.",
+            counts: { waiting_minutes: Math.round((softWarningCount * STREAM_STALL_WARNING_MS) / 60_000) },
+          },
+        });
+        scheduleSoftWarning();
+      }, STREAM_STALL_WARNING_MS);
+    };
     const armWatchdog = () => {
-      clearTimeout(watchdog);
-      watchdog = setTimeout(() => {
-        stalled = true;
+      scheduleSoftWarning();
+      clearTimeout(hardWatchdog);
+      hardWatchdog = setTimeout(() => {
+        hardStalled = true;
         controller.abort();
-      }, STREAM_STALL_MS);
+      }, STREAM_HARD_ABORT_MS);
     };
     armWatchdog();
 
@@ -136,12 +155,12 @@ export function useReview() {
       return true;
     } catch (error) {
       if (controller.signal.aborted) {
-        if (stalled) {
+        if (hardStalled) {
           dispatch({
             type: "fail",
             error: {
               code: "review_stream_stalled",
-              message: `${Math.round(STREAM_STALL_MS / 1000)}초 동안 진행 이벤트가 없어 연결이 끊긴 것으로 판단했습니다. 백엔드는 계속 처리 중일 수 있으니 잠시 후 다시 실행해 주세요.`,
+              message: `${Math.round(STREAM_HARD_ABORT_MS / 1000)}초 동안 진행 이벤트가 없어 연결이 끊긴 것으로 판단했습니다. 백엔드는 계속 처리 중일 수 있으니 잠시 후 다시 실행해 주세요.`,
             },
           });
         }
@@ -157,7 +176,8 @@ export function useReview() {
       }
       return false;
     } finally {
-      clearTimeout(watchdog);
+      clearTimeout(warningWatchdog);
+      clearTimeout(hardWatchdog);
     }
   }, []);
 

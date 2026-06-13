@@ -86,6 +86,28 @@ export const DISCLOSURE_LABELS: Record<string, string> = {
   product_document_notice: "상품설명서",
 };
 
+/** 고지 항목별 한 줄 설명 + 필수 여부 (예외·고지 검토 시뮬레이션용). */
+export const DISCLOSURE_META: Record<string, { desc: string; required: boolean }> = {
+  deposit_rate_condition: {
+    desc: "최고금리/우대금리의 적용 조건과 기준을 함께 표시해야 합니다.",
+    required: true,
+  },
+  deposit_term: { desc: "가입기간·만기 조건을 명시해야 합니다.", required: true },
+  depositor_protection_limit: {
+    desc: "예금자보호법에 따른 보호 한도(부보내용)를 유지 고지해야 합니다.",
+    required: true,
+  },
+  deposit_tax_basis: { desc: "세전/세후 기준을 구분해 오인을 방지합니다.", required: false },
+  product_document_notice: {
+    desc: "상품설명서·약관 확인 안내를 권장합니다.",
+    required: false,
+  },
+};
+
+export function disclosureMeta(checkId: string): { desc: string; required: boolean } {
+  return DISCLOSURE_META[checkId] ?? { desc: "필수 기재 고지 항목입니다.", required: true };
+}
+
 export const PRODUCT_GROUPS = [
   { value: "auto", label: "자동" },
   { value: "deposit", label: "예금" },
