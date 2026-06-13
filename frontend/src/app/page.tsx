@@ -141,6 +141,7 @@ export default function Page() {
                     selectedAnchorId={state.selectedAnchorId}
                     resolved={resolved}
                     onSelectAnchor={selectAnchor}
+                    onToggleResolve={handleToggleResolve}
                   />
                   <RiskList
                     result={result}

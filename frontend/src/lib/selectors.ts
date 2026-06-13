@@ -585,6 +585,137 @@ export function annotateText(text: string, candidates: HighlightCandidate[]): An
 }
 
 // ---------------------------------------------------------------------------
+// 원문 줄 분할 + 인라인 수정안 + 교정본 (심사 콘솔 AdPane).
+// 코드리뷰 패러다임: 문장 단위로 원문을 쌓고, 선택된 이슈의 수정안을 그
+// 문장 바로 아래에 펼친다. 교정본 모드는 적용된 수정안을 원문에 치환한다.
+// ---------------------------------------------------------------------------
+
+export interface AdLine {
+  key: string;
+  /** 이 줄을 차지하는 문장 id (gap 줄이면 빈 문자열). */
+  sentenceId: string;
+  text: string;
+  /** 줄 내부 하이라이트 (offset은 줄 기준). */
+  annotated: AnnotatedText;
+}
+
+/**
+ * SentenceUnit 기준으로 원문을 줄(블록)로 나눈다. 문장 사이 공백/문장부호
+ * gap도 보존한다. sentence_units가 없거나 정렬이 깨지면 전체를 한 줄로.
+ */
+export function buildAdLines(result: ReviewOutput, text: string): AdLine[] {
+  if (!text) return [];
+  const candidates = highlightCandidates(result, text, "");
+  const annotateRange = (start: number, end: number): AnnotatedText => {
+    const slice = text.slice(start, end);
+    const local = candidates
+      .filter((c) => c.start < end && start < c.end)
+      .map((c) => ({ ...c, start: Math.max(0, c.start - start), end: Math.min(end - start, c.end - start) }));
+    return annotateText(slice, local);
+  };
+
+  const sentences = (result.sentence_units ?? [])
+    .map((unit) => ({ unit, span: alignSpan(text, unit.span) }))
+    .filter(({ span }) => Number.isInteger(span.start) && span.start >= 0 && span.end <= text.length && span.end > span.start)
+    .sort((a, b) => a.span.start - b.span.start);
+
+  if (!sentences.length) {
+    return [{ key: "line_full", sentenceId: "", text, annotated: annotateRange(0, text.length) }];
+  }
+
+  const lines: AdLine[] = [];
+  let cursor = 0;
+  for (const { unit, span } of sentences) {
+    if (span.start < cursor) continue; // 겹치는 문장은 건너뛴다
+    if (span.start > cursor) {
+      const gap = text.slice(cursor, span.start);
+      if (gap.trim()) {
+        lines.push({ key: `gap_${cursor}`, sentenceId: "", text: gap, annotated: annotateRange(cursor, span.start) });
+      } else if (gap) {
+        lines.push({ key: `gap_${cursor}`, sentenceId: "", text: gap, annotated: { segments: [{ key: "g", text: gap, area: null, token: null, areaChip: null, tokenChip: null }], visibleCount: 0, hiddenByOverlap: 0 } });
+      }
+    }
+    lines.push({
+      key: `s_${unit.sentence_id}`,
+      sentenceId: unit.sentence_id,
+      text: text.slice(span.start, span.end),
+      annotated: annotateRange(span.start, span.end),
+    });
+    cursor = span.end;
+  }
+  if (cursor < text.length) {
+    const tail = text.slice(cursor);
+    lines.push({ key: `gap_${cursor}`, sentenceId: "", text: tail, annotated: annotateRange(cursor, text.length) });
+  }
+  return lines;
+}
+
+/** anchor의 수정안(before/after). 제안이 없으면 safeAlternative로 대체. */
+export function revisionFor(result: ReviewOutput, anchorId: string): { before: string; after: string } | null {
+  const anchor = result.context_anchors?.find((item) => item.anchor_id === anchorId);
+  if (!anchor) return null;
+  const display = anchorDisplay(result, anchorId);
+  if (display?.display_role !== "actionable") return null;
+  const tone = verdictTone(display?.display_verdict ?? "ANCHOR");
+  if (tone !== "risk" && tone !== "review") return null;
+  const suggestion = (result.revision_suggestions ?? []).find((item) => item.anchor_id === anchorId);
+  return { before: suggestion?.before ?? anchor.span.text, after: suggestion?.after ?? safeAlternative(anchor.span.text) };
+}
+
+/** 선택된 anchor가 이 문장에 속하는지 (claim.sentence_id 기준). */
+export function anchorSentenceId(result: ReviewOutput, anchorId: string): string {
+  const anchor = result.context_anchors?.find((item) => item.anchor_id === anchorId);
+  if (!anchor) return "";
+  return claimById(result, anchor.claim_id)?.sentence_id ?? "";
+}
+
+export interface CorrectedSegment {
+  text: string;
+  changed: boolean;
+}
+
+/** 적용된(resolved) anchor들의 span을 after 문안으로 치환한 교정본. */
+export function buildCorrectedCopy(
+  result: ReviewOutput,
+  text: string,
+  resolvedIds: Set<string>,
+): { segments: CorrectedSegment[]; changedCount: number } {
+  const spans = [...resolvedIds]
+    .map((id) => {
+      const anchor = result.context_anchors?.find((item) => item.anchor_id === id);
+      if (!anchor) return null;
+      const aligned = alignSpan(text, anchor.span);
+      const revision = revisionFor(result, id);
+      if (!revision || !Number.isInteger(aligned.start) || aligned.start < 0 || aligned.end > text.length || aligned.end <= aligned.start) {
+        return null;
+      }
+      return { start: aligned.start, end: aligned.end, after: revision.after };
+    })
+    .filter((s): s is { start: number; end: number; after: string } => Boolean(s))
+    .sort((a, b) => a.start - b.start);
+
+  // 겹치는 치환은 앞선 것만 유지.
+  const merged: typeof spans = [];
+  let lastEnd = -1;
+  for (const span of spans) {
+    if (span.start >= lastEnd) {
+      merged.push(span);
+      lastEnd = span.end;
+    }
+  }
+
+  const segments: CorrectedSegment[] = [];
+  let cursor = 0;
+  for (const span of merged) {
+    if (span.start > cursor) segments.push({ text: text.slice(cursor, span.start), changed: false });
+    segments.push({ text: span.after, changed: true });
+    cursor = span.end;
+  }
+  if (cursor < text.length) segments.push({ text: text.slice(cursor), changed: false });
+  return { segments, changedCount: merged.length };
+}
+
+// ---------------------------------------------------------------------------
 // Issue cards — the right-hand evidence panel read model.
 // One compact card per actionable finding; deep evidence stays in tabs.
 // ---------------------------------------------------------------------------
