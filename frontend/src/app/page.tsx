@@ -4,13 +4,13 @@ import { useCallback, useState } from "react";
 import { AdPane } from "@/components/console/AdPane";
 import { DetailPane } from "@/components/console/DetailPane";
 import { ExecSummary } from "@/components/console/ExecSummary";
+import { GraphView } from "@/components/console/GraphView";
 import { RiskList } from "@/components/console/RiskList";
 import { ReviewForm } from "@/components/ReviewForm";
 import { ContextBar } from "@/components/shell/ContextBar";
 import { Sidebar, type ViewKey } from "@/components/shell/Sidebar";
 import { Toast } from "@/components/shell/Toast";
 import { AuditTab } from "@/components/tabs/AuditTab";
-import { EvidencePathTab } from "@/components/tabs/EvidencePathTab";
 import { OverallTab } from "@/components/tabs/OverallTab";
 import { ProductFactsTab } from "@/components/tabs/ProductFactsTab";
 import { SentenceMapTab } from "@/components/tabs/SentenceMapTab";
@@ -161,8 +161,8 @@ export default function Page() {
             ))}
 
           {view === "graph" && (
-            <div className="rounded-[14px] border border-line bg-surface p-4 shadow-card">
-              <EvidencePathTab result={result} selectedAnchorId={state.selectedAnchorId} />
+            <div className="h-full">
+              <GraphView result={result} selectedAnchorId={state.selectedAnchorId} onSelectAnchor={selectAnchor} />
             </div>
           )}
 

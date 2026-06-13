@@ -715,6 +715,90 @@ function mergeBasis(primary: string, secondary: string): string {
   return primary.includes(extra) ? primary : `${primary} / ${extra}`;
 }
 
+// ---------------------------------------------------------------------------
+// 근거 경로 그래프 — 이 표현이 왜 이 규정으로 갔는지의 설명 체인.
+//   광고 표현 → 위험 유형 → 정책어(Hypernym) → ComplianceUnit → 전제 → 근거 조문
+//   종착: 필요 고지 / 예외
+// ---------------------------------------------------------------------------
+
+export type EvidenceNodeKind = "claim" | "risk" | "policy" | "cu" | "premise" | "clause";
+
+export interface EvidenceNode {
+  kind: EvidenceNodeKind;
+  label: string;
+  /** 보조 식별자 (CU id, 조문 수 등). */
+  sub?: string;
+  connected: boolean;
+}
+
+export interface EvidencePath {
+  anchorId: string;
+  quote: string;
+  riskLabel: string;
+  cuName: string;
+  cuId: string;
+  premise: string;
+  articles: string[];
+  nodes: EvidenceNode[];
+  disclosure: string;
+  /** 자연어 해설에 쓰는 톤(위반 의심/검토 필요). */
+  tone: HighlightTone;
+}
+
+export function buildEvidencePath(result: ReviewOutput, anchorId: string): EvidencePath | null {
+  const anchor = result.context_anchors?.find((item) => item.anchor_id === anchorId);
+  if (!anchor) return null;
+
+  const display = anchorDisplay(result, anchorId);
+  const tone = verdictTone(display?.display_verdict ?? "ANCHOR");
+  const effective = effectiveJudgmentsForAnchor(result, anchorId);
+  const risky = effective.filter((item) => ["NON_COMPLIANT", "INSUFFICIENT"].includes(item.verdict));
+  const plans = planItemsForAnchor(result, anchorId);
+  const topPlan = plans.find((item) => item.plan_item_id === (risky[0] ?? effective[0])?.plan_item_id) ?? plans[0];
+
+  const riskLabel = humanAnchorLabel(result, anchor) || (tone === "risk" ? "위반 의심" : "검토 필요");
+  const policy = anchor.hypernyms?.[0]?.hypernym ?? "";
+  const cuName = topPlan?.risk_title || topPlan?.principle || "";
+  const premise = topPlan?.constraint || topPlan?.context || "";
+  const articles = [...new Set(plans.map((item) => item.source_article).filter(Boolean))];
+
+  const suggestion = (result.revision_suggestions ?? []).find((item) => item.anchor_id === anchorId);
+  const missingCheck = (result.product_fact_context?.disclosure_checks ?? []).find((check) => !check.present);
+  const disclosure =
+    suggestion?.required_disclosures?.[0] ||
+    missingCheck?.label ||
+    disclosureSignals(anchor)[0] ||
+    "추가 고지 없음";
+
+  const nodes: EvidenceNode[] = [
+    { kind: "claim", label: anchor.span.text, connected: true },
+    { kind: "risk", label: riskLabel, connected: true },
+    { kind: "policy", label: policy || "정책어 미매칭", connected: Boolean(policy) },
+    // CU 내부 id는 1차 화면 노출 금지 — 라벨(심의 기준명)만 보인다.
+    { kind: "cu", label: cuName || "CU 미연결", connected: Boolean(cuName) },
+    { kind: "premise", label: premise || "전제 미상", connected: Boolean(premise) },
+    {
+      kind: "clause",
+      label: articles[0] || "법적 근거 미연결",
+      sub: articles.length > 1 ? `외 ${articles.length - 1}건` : undefined,
+      connected: articles.length > 0,
+    },
+  ];
+
+  return {
+    anchorId,
+    quote: anchor.span.text,
+    riskLabel,
+    cuName,
+    cuId: topPlan?.cu_id ?? "",
+    premise,
+    articles,
+    nodes,
+    disclosure,
+    tone,
+  };
+}
+
 /** `단정·보장 표현 1건 · 필수 고지 누락 2건` 형태의 상단 요약. */
 export function issueHeadline(cards: IssueCardModel[]): string {
   const groups = new Map<string, number>();
