@@ -251,6 +251,9 @@ class EvidenceWindow:
     legal_evidence_texts: list[str]
     context_frame: dict[str, Any] = field(default_factory=dict)
     sentence_unit: dict[str, Any] = field(default_factory=dict)
+    # 이 anchor 문장을 한정/완화하는 다른 문장(QUALIFIES/MITIGATES). 혜택 주장이
+    # 별도 문장의 조건으로 한정되는데 anchor만 보면 과도하게 단정으로 보이는 것 방지.
+    related_sentences: list[dict[str, Any]] = field(default_factory=list)
     context_influences: list[dict[str, Any]] = field(default_factory=list)
     policy_evidence_chains: dict[str, Any] = field(default_factory=dict)
 

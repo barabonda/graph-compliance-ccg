@@ -401,6 +401,7 @@ class GraphComplianceCCGWorkflow:
             context_frame=extraction.context_frame,
             sentence_units=extraction.sentence_units,
             context_influences=extraction.context_influences,
+            inter_sentence_relations=extraction.inter_sentence_relations,
             policy_evidence_chains=policy_evidence_chains,
         )
         yield workflow_event("step_completed", "Evidence window build", review_run_id=review_run_id, summary=f"{len(evidence_windows)} evidence windows", counts={"evidence_windows": len(evidence_windows)})

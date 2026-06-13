@@ -5,7 +5,7 @@ from __future__ import annotations
 from typing import Any
 
 from llm_gateway import LLMGateway
-from schemas import CUPlanItem, Claim, ContextAnchor, ContextFrame, ContextInfluence, EvidenceWindow, ExceptionReview, LLMJudgment, SentenceUnit
+from schemas import CUPlanItem, Claim, ContextAnchor, ContextFrame, ContextInfluence, EvidenceWindow, ExceptionReview, InterSentenceRelation, LLMJudgment, SentenceUnit
 from utils import normalize_space, stable_id, to_jsonable
 
 
@@ -114,6 +114,7 @@ class LLMComplianceJudge:
         context_frame: ContextFrame | None = None,
         sentence_units: list[SentenceUnit] | None = None,
         context_influences: list[ContextInfluence] | None = None,
+        inter_sentence_relations: list[InterSentenceRelation] | None = None,
         policy_evidence_chains: dict[str, list[dict[str, Any]]] | None = None,
     ) -> list[EvidenceWindow]:
         anchor_by_id = {anchor.anchor_id: anchor for anchor in anchors}
@@ -124,6 +125,11 @@ class LLMComplianceJudge:
             anchor = anchor_by_id[item.anchor_id]
             claim = claim_by_id.get(anchor.claim_id)
             sentence = sentence_by_id.get(claim.sentence_id) if claim and claim.sentence_id else None
+            related_sentences = build_related_sentences(
+                sentence_id=claim.sentence_id if claim else "",
+                relations=inter_sentence_relations or [],
+                sentence_by_id=sentence_by_id,
+            )
             related_influences = [
                 influence
                 for influence in context_influences or []
@@ -142,6 +148,7 @@ class LLMComplianceJudge:
                     legal_evidence_texts=item.evidence_texts,
                     context_frame=to_jsonable(context_frame) if context_frame else {},
                     sentence_unit=to_jsonable(sentence) if sentence else {},
+                    related_sentences=related_sentences,
                     context_influences=to_jsonable(related_influences),
                     policy_evidence_chains=chains_for_plan_item(policy_evidence_chains or {}, item.plan_item_id),
                 )
@@ -216,7 +223,11 @@ class LLMComplianceJudge:
                 "고지·실제 운영 등)에 따라 해석·적용이 달라질 수 있다'는 취지의 유보를 한 문장. 단정 회피.\n"
                 "판단 원칙: 명시적 모순/단정/보장을 우선. 침묵으로부터 위반을 추론하지 말 것. anchor 자체가 조건·"
                 "유보 표현(세전, 조건에 따라, 달라질 수 있습니다 등)을 말하면 추가 세부 부재는 위반이 아니라 최대 "
-                "INSUFFICIENT. 완화 고지 anchor는 그 고지에 대해 COMPLIANT일 수 있으나 별개의 단정·보장·무조건 "
+                "INSUFFICIENT. evidence_window.related_sentences(QUALIFIES/MITIGATES로 이 anchor를 한정·완화하는 "
+                "다른 문장)가 anchor의 주장을 조건부로 만들면 그 주장을 순수 단정으로 보지 말 것 — 조건이 광고 안에 "
+                "존재하므로 단정성 위반보다는 최대 INSUFFICIENT다. 다만 그 한정 문장이 별도 문장으로 분리되어 혜택 "
+                "문구와 인접하지 않으면 '조건이 혜택과 분리 표시되어 오인 소지(현저성)'로 criteria_findings·conclusion에 "
+                "적되 위반 강도는 낮춰라. 완화 고지 anchor는 그 고지에 대해 COMPLIANT일 수 있으나 별개의 단정·보장·무조건 "
                 "최고금리·과거실적 anchor를 지우지 못합니다. CU가 불공정영업·제재·심의절차·협회워크플로우인데 anchor가 "
                 "그 행위를 기술하지 않으면 NOT_APPLICABLE. evidence_span은 반드시 해당 항목 ContextAnchor의 span "
                 "또는 facts에서 그대로 복사. 모든 산출 텍스트는 한국어."
@@ -294,6 +305,50 @@ class LLMComplianceJudge:
             why=result["why"],
             closure_evidence_ids=result["closure_evidence_ids"],
         )
+
+
+QUALIFYING_RELATIONS = {"QUALIFIES", "MITIGATES"}
+
+
+def build_related_sentences(
+    *,
+    sentence_id: str,
+    relations: list[InterSentenceRelation],
+    sentence_by_id: dict[str, SentenceUnit],
+) -> list[dict[str, Any]]:
+    """이 anchor 문장을 한정/완화하는 다른 문장(QUALIFIES/MITIGATES)을 모은다.
+
+    혜택 주장이 별도 문장의 조건으로 한정되는데 anchor 문장만 보면 과도하게
+    단정으로 보이는 것을 막기 위해, 연결된 조건/완화 문장을 judge에 함께 제시한다.
+    """
+    if not sentence_id:
+        return []
+    related: list[dict[str, Any]] = []
+    seen: set[str] = set()
+    for relation in relations:
+        if relation.relation_type not in QUALIFYING_RELATIONS:
+            continue
+        if sentence_id not in {relation.source_sentence_id, relation.target_sentence_id}:
+            continue
+        other_id = (
+            relation.target_sentence_id
+            if relation.source_sentence_id == sentence_id
+            else relation.source_sentence_id
+        )
+        other = sentence_by_id.get(other_id)
+        if not other or other_id in seen:
+            continue
+        seen.add(other_id)
+        related.append(
+            {
+                "relation_type": relation.relation_type,
+                "text": other.text,
+                "role": other.role,
+                "prominence_tier": getattr(other, "prominence_tier", "") or "",
+                "explanation": relation.explanation,
+            }
+        )
+    return related
 
 
 def build_legal_test(item: CUPlanItem, anchor: ContextAnchor) -> dict[str, Any]:
