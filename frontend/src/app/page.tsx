@@ -221,37 +221,38 @@ export default function Page() {
             />
           )}
 
-          {view === "audit" && (
+          {view === "dashboard" && (
             <div className="flex flex-col gap-4">
               <div className="rounded-[14px] border border-line bg-surface p-4 shadow-card">
-                <AuditTab result={result} events={state.events} />
+                <DashboardTab onOpenRun={handleOpenRun} />
               </div>
-              {/* 컨텍스트 raw(ContextFrame/Influence/SentenceUnit/Relation)는 심사 동선에서
-                  빼고 감사 추적용으로만 펼쳐 본다. 전체 인상 근거 자체는 Track B 상세에 있음. */}
+              {/* 감사 로그(별도 탭 폐지) — 현재 로드된 실행의 단계 추적과 컨텍스트 raw를
+                  운영/디버깅 화면 안에서 펼쳐 본다. */}
               {result && (
-                <Expandable
-                  header={
-                    <span className="text-[13px] font-bold text-ink-2">컨텍스트 기술 상세 (raw) · 감사 추적용</span>
-                  }
-                >
-                  <div className="flex flex-col gap-4 p-4">
-                    <OverallTab result={result} />
-                    <SentenceMapTab
-                      result={result}
-                      onSelectAnchor={(anchorId) => {
-                        selectAnchor(anchorId);
-                        setView("review");
-                      }}
-                    />
-                  </div>
-                </Expandable>
+                <div className="rounded-[14px] border border-line bg-surface p-4 shadow-card">
+                  <Expandable
+                    header={<span className="text-[13px] font-bold text-ink-2">현재 실행 기술 추적 · 감사 로그</span>}
+                  >
+                    <div className="flex flex-col gap-4 p-4">
+                      <AuditTab result={result} events={state.events} />
+                      <Expandable
+                        header={<span className="text-[12.5px] font-bold text-ink-3">컨텍스트 raw (ContextFrame/Influence/문장/관계)</span>}
+                      >
+                        <div className="flex flex-col gap-4 p-4">
+                          <OverallTab result={result} />
+                          <SentenceMapTab
+                            result={result}
+                            onSelectAnchor={(anchorId) => {
+                              selectAnchor(anchorId);
+                              setView("review");
+                            }}
+                          />
+                        </div>
+                      </Expandable>
+                    </div>
+                  </Expandable>
+                </div>
               )}
-            </div>
-          )}
-
-          {view === "dashboard" && (
-            <div className="rounded-[14px] border border-line bg-surface p-4 shadow-card">
-              <DashboardTab onOpenRun={handleOpenRun} />
             </div>
           )}
         </div>

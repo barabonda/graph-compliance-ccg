@@ -1,6 +1,6 @@
 "use client";
 
-import { JUDGMENT_STATUS, judgmentBadgeTone, principleColor, riskGrade } from "@/lib/labels";
+import { humanizeJudgment, JUDGMENT_STATUS, judgmentBadgeTone, principleColor, riskGrade } from "@/lib/labels";
 import {
   aggregationForAnchor,
   buildIssueCards,
@@ -87,7 +87,7 @@ function TrackBDetail({ result }: { result: ReviewOutput }) {
             className="rounded-[10px] p-3.5 text-[13.5px] leading-relaxed break-keep text-ink"
             style={{ background: "var(--surface-2)", border: "1px solid var(--line)" }}
           >
-            {trackB.representative_consumer_impression}
+            {humanizeJudgment(trackB.representative_consumer_impression)}
           </div>
         )}
         {/* 근거 그래프 (혜택 주장 ← 완화/강화) */}
@@ -102,7 +102,7 @@ function TrackBDetail({ result }: { result: ReviewOutput }) {
               {trackB.why && (
                 <div>
                   <div className="mb-1 text-[10.5px] font-bold tracking-wider text-ink-4">판단 이유</div>
-                  <p className="m-0 text-[12.5px] leading-relaxed text-ink-2">{trackB.why}</p>
+                  <p className="m-0 text-[12.5px] leading-relaxed text-ink-2">{humanizeJudgment(trackB.why)}</p>
                 </div>
               )}
               {(trackB.misleading_factors?.length ?? 0) > 0 && (
@@ -110,7 +110,7 @@ function TrackBDetail({ result }: { result: ReviewOutput }) {
                   <div className="mb-1 text-[10.5px] font-bold tracking-wider text-ink-4">오인 요인</div>
                   <ul className="m-0 list-disc space-y-1 pl-4 text-[12px] leading-relaxed text-ink-2">
                     {trackB.misleading_factors!.map((factor, index) => (
-                      <li key={index}>{factor}</li>
+                      <li key={index}>{humanizeJudgment(factor)}</li>
                     ))}
                   </ul>
                 </div>
@@ -340,7 +340,7 @@ export function DetailPane({ result, selectedAnchorId, resolved, onToggleResolve
               {topJudgment?.legal_basis && (
                 <div className="rounded-md border border-line bg-surface-2 px-3 py-2">
                   <span className="text-[10.5px] font-bold tracking-wider text-ink-4">적용 법리</span>
-                  <p className="mt-0.5 text-[13px] leading-relaxed text-ink-2">{topJudgment.legal_basis}</p>
+                  <p className="mt-0.5 text-[13px] leading-relaxed text-ink-2">{humanizeJudgment(topJudgment.legal_basis)}</p>
                 </div>
               )}
               {(topJudgment?.criteria_findings?.length ?? 0) > 0 && (
@@ -363,7 +363,7 @@ export function DetailPane({ result, selectedAnchorId, resolved, onToggleResolve
                           <span className={`ml-1.5 text-[11px] ${cf.satisfied ? "text-reject" : "text-ink-4"}`}>
                             {cf.satisfied ? "충족" : "불충족"}
                           </span>
-                          <p className="mt-0.5 text-[12px] leading-relaxed text-ink-2">{cf.finding}</p>
+                          <p className="mt-0.5 text-[12px] leading-relaxed text-ink-2">{humanizeJudgment(cf.finding)}</p>
                         </div>
                       </li>
                     ))}
@@ -373,13 +373,13 @@ export function DetailPane({ result, selectedAnchorId, resolved, onToggleResolve
               {topJudgment?.conclusion && (
                 <div className="rounded-md border-l-2 border-reject bg-reject-bg/40 px-3 py-2">
                   <span className="text-[10.5px] font-bold tracking-wider text-reject">결론</span>
-                  <p className="mt-0.5 text-[13px] leading-relaxed text-ink-2">{topJudgment.conclusion}</p>
+                  <p className="mt-0.5 text-[13px] leading-relaxed text-ink-2">{humanizeJudgment(topJudgment.conclusion)}</p>
                 </div>
               )}
               {topJudgment?.reservation && (
                 <div className="flex gap-1.5 px-1 text-[11.5px] leading-relaxed text-ink-3">
                   <span className="font-bold text-ink-4">유보</span>
-                  <span>{topJudgment.reservation}</span>
+                  <span>{humanizeJudgment(topJudgment.reservation)}</span>
                 </div>
               )}
             </div>

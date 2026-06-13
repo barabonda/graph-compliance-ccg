@@ -230,7 +230,13 @@ class LLMComplianceJudge:
                 "적되 위반 강도는 낮춰라. 완화 고지 anchor는 그 고지에 대해 COMPLIANT일 수 있으나 별개의 단정·보장·무조건 "
                 "최고금리·과거실적 anchor를 지우지 못합니다. CU가 불공정영업·제재·심의절차·협회워크플로우인데 anchor가 "
                 "그 행위를 기술하지 않으면 NOT_APPLICABLE. evidence_span은 반드시 해당 항목 ContextAnchor의 span "
-                "또는 facts에서 그대로 복사. 모든 산출 텍스트는 한국어."
+                "또는 facts에서 그대로 복사. 모든 산출 텍스트는 한국어.\n"
+                "용어 규칙(준법 심사 도메인): 사용자에게 보이는 산출 텍스트에 내부/개발 용어를 쓰지 말 것 — "
+                "EvidenceWindow·anchor·CUPlanItem·product_facts·source_article 같은 스키마/필드명, 그리고 "
+                "NON_COMPLIANT·INSUFFICIENT·COMPLIANT 같은 영문 verdict enum을 문장에 노출하지 말 것. "
+                "대신 '근거 자료', '해당 문구', '심의 항목', '상품설명서 사실', '근거 조문'과 '위반/근거 부족/적합' "
+                "같은 한국어로 쓴다. 또한 광고 채널과 무관한 표현요소(웹 텍스트 광고에 '음성 속도' 등)를 예시로 "
+                "끌어오지 말고, 실제 매체에 맞는 근거만 든다."
             ),
             user=f"[judgment_payload]\n{{'judgment_items': {judgment_items}}}",
         )

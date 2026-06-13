@@ -13,8 +13,7 @@ const NAV: { key: ViewKey; label: string; sub: string; icon: string }[] = [
   { key: "graph", label: "근거 경로", sub: "설명 그래프", icon: "graph" },
   { key: "exception", label: "예외·고지 검토", sub: "완화 시뮬레이션", icon: "shield" },
   { key: "product", label: "상품 사실", sub: "문서 대조", icon: "layers" },
-  { key: "audit", label: "감사 로그", sub: "추적 · 단계", icon: "audit" },
-  { key: "dashboard", label: "운영 대시보드", sub: "실행 기록 · 집계", icon: "dashboard" },
+  { key: "dashboard", label: "운영 대시보드", sub: "실행 기록 · 감사 추적", icon: "dashboard" },
 ];
 
 interface Props {

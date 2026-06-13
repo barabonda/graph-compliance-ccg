@@ -26,15 +26,29 @@ INDEX_PATH = RUNS_DIR / "index.jsonl"
 
 
 def _summary(
-    output: dict[str, Any], *, title: str, channel: str, product_group: str, model: str, content_text: str
+    output: dict[str, Any],
+    *,
+    title: str,
+    channel: str,
+    product_group: str,
+    model: str,
+    content_text: str,
+    seed: bool,
 ) -> dict[str, Any]:
     issues = output.get("detected_issues") or []
     checks = ((output.get("product_fact_context") or {}).get("disclosure_checks")) or []
     missing = [str(c.get("label") or "") for c in checks if not c.get("present")]
-    principles = sorted(
-        {str(item.get("principle") or "") for item in (output.get("cu_plan") or []) if item.get("principle")}
+    cu_plan = output.get("cu_plan") or []
+    principles = sorted({str(item.get("principle") or "") for item in cu_plan if item.get("principle")})
+    cu_ids = sorted({str(item.get("cu_id") or "") for item in cu_plan if item.get("cu_id")})
+    # 사람이 읽는 CU 라벨(해시 id 대신): risk_title > 원칙+조문 > subject.
+    cu_labels = sorted(
+        {
+            str(item.get("risk_title") or item.get("principle") or item.get("subject") or "")
+            for item in cu_plan
+        }
+        - {""}
     )
-    cu_ids = sorted({str(item.get("cu_id") or "") for item in (output.get("cu_plan") or []) if item.get("cu_id")})
     track_b = output.get("overall_impression_judgment") or {}
     return {
         "id": str(output.get("review_run_id") or ""),
@@ -44,12 +58,14 @@ def _summary(
         "product_group": product_group,
         "model": model,
         "content_text": content_text,
+        "seed": seed,
         "final_verdict": str(output.get("final_verdict") or ""),
         "misleading_verdict": str(track_b.get("verdict") or ""),
         "issue_count": len(issues),
         "missing_disclosures": missing,
         "principles": principles,
         "cu_ids": cu_ids,
+        "cu_labels": cu_labels,
     }
 
 
@@ -61,8 +77,9 @@ def record_run(
     product_group: str = "",
     model: str = "",
     content_text: str = "",
+    seed: bool = False,
 ) -> None:
-    """심사 결과 스냅샷을 저장(best-effort)."""
+    """심사 결과 스냅샷을 저장(best-effort). seed=True는 데모용 수동 주입 표시."""
     run_id = str(output.get("review_run_id") or "").strip()
     if not run_id:
         return
@@ -78,6 +95,7 @@ def record_run(
             product_group=product_group,
             model=model,
             content_text=content_text,
+            seed=seed,
         )
         with INDEX_PATH.open("a", encoding="utf-8") as handle:
             handle.write(json.dumps(summary, ensure_ascii=False) + "\n")

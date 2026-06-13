@@ -149,7 +149,7 @@ export function DashboardTab({ onOpenRun }: Props) {
         <BarList title="라우팅 분포" items={verdictBars} color="var(--brand)" />
         <BarList title="자주 걸리는 원칙" items={topCounts(runs, (r) => r.principles).map((i) => ({ ...i, tint: principleColor(i.key) }))} color="var(--brand)" />
         <BarList title="자주 누락되는 필수 고지" items={topCounts(runs, (r) => r.missing_disclosures)} color="var(--revise)" />
-        <BarList title="자주 걸리는 Compliance Unit" items={topCounts(runs, (r) => r.cu_ids)} color="var(--brand-2)" />
+        <BarList title="자주 걸리는 심의 항목 (CU)" items={topCounts(runs, (r) => r.cu_labels ?? [])} color="var(--brand-2)" />
       </div>
 
       <div className="overflow-hidden rounded-[12px] border border-line bg-surface shadow-card">
@@ -179,8 +179,17 @@ export function DashboardTab({ onOpenRun }: Props) {
                     className="cursor-pointer border-t border-line hover:bg-surface-2"
                   >
                     <td className="px-4 py-2 whitespace-nowrap text-ink-3">{formatTime(run.ts)}</td>
-                    <td className="max-w-[220px] truncate px-4 py-2 font-medium text-ink" title={run.title}>
-                      {run.title || "(제목 없음)"}
+                    <td className="max-w-[240px] px-4 py-2 font-medium text-ink">
+                      <span className="flex items-center gap-1.5">
+                        {run.seed ? (
+                          <span className="shrink-0 rounded bg-surface-3 px-1.5 py-0.5 text-[10px] font-bold text-ink-3">
+                            데모
+                          </span>
+                        ) : null}
+                        <span className="truncate" title={run.title}>
+                          {run.title || "(제목 없음)"}
+                        </span>
+                      </span>
                     </td>
                     <td className="px-3 py-2 whitespace-nowrap font-mono text-[11px] text-ink-3">{run.model || ".env"}</td>
                     <td className="px-3 py-2 whitespace-nowrap">

@@ -288,6 +288,10 @@ export interface RunSummary {
   missing_disclosures: string[];
   principles: string[];
   cu_ids: string[];
+  /** 사람이 읽는 CU 라벨(risk_title 등). 해시 cu_id 대체 표시용. */
+  cu_labels?: string[];
+  /** 실제 실행이 아니라 데모용으로 수동 주입된 기록. */
+  seed?: boolean;
 }
 
 export interface SystemReviewItem {

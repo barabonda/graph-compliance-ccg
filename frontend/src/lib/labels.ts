@@ -14,6 +14,32 @@ const PRINCIPLE_COLORS: { key: string; color: string }[] = [
   { key: "광고규제", color: "#2f6df0" },
 ];
 
+// LLM이 한국어 판정 텍스트에 흘리는 내부/개발 용어 → 준법 도메인 용어로 치환.
+// 모델·과거 산출과 무관하게 표시 직전 정리한다(프롬프트 보강은 별도).
+const DEV_TERM_REPLACEMENTS: [RegExp, string][] = [
+  [/Evidence\s*Window(?:\.facts)?/gi, "근거 자료"],
+  [/evidence[_\s]?window(?:\.facts)?/gi, "근거 자료"],
+  [/\bNON[_\s]?COMPLIANT\b/g, "위반"],
+  [/\bINSUFFICIENT\b/g, "근거 부족"],
+  [/\bNOT[_\s]?APPLICABLE\b/g, "해당 없음"],
+  [/\bCOMPLIANT\b/g, "적합"],
+  [/\bRETRIEVAL[_\s]?FAILURE\b/g, "근거 검색 실패"],
+  [/\bproduct[_\s]?facts?\b/gi, "상품설명서 사실"],
+  [/\bClaim\s*Facts?\b/gi, "광고 주장"],
+  [/\bCUPlan\s*Item\b/gi, "심의 항목"],
+  [/cuplan_item_[a-z0-9]+/gi, "심의 항목"],
+  [/\bsource_article\b/gi, "근거 조문"],
+  [/\banchor\s*span\b/gi, "해당 문구"],
+  [/\banchor\b/gi, "해당 문구"],
+  [/\bComplianceUnit\b/g, "심의 기준"],
+];
+
+export function humanizeJudgment(text: string | undefined | null): string {
+  let out = String(text ?? "");
+  for (const [pattern, replacement] of DEV_TERM_REPLACEMENTS) out = out.replace(pattern, replacement);
+  return out;
+}
+
 export function principleColor(principle: string): string | undefined {
   const value = principle ?? "";
   return PRINCIPLE_COLORS.find((item) => value.includes(item.key))?.color;
