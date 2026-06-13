@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "JB Compliance · 금융광고 준법 사전심의",
+  title: "JB Compliance · CONTENT SAFEGUARD",
   description:
     "JunBub · 금융광고 문안을 법령·심의기준·상품설명서 사실과 대조하고 규칙 기반 판정과 LLM 해석을 결합해 설명가능한 사전 검토를 지원하는 콘솔",
 };

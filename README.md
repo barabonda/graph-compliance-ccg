@@ -1,18 +1,50 @@
-# GraphCompliance CCG
+# JB Compliance · CONTENT SAFEGUARD
 
-LLM-only Policy-Guided Context Engineering app for Korean financial-ad pre-review.
+> Team **JunBub** · JB Fin AI Challenge
 
-For the current implementation state, Neo4j graph counts, operating commands,
-quality guardrails, and future goals, see
-[docs/GRAPHCOMPLIANCE_CCG_HANDOFF.md](../../docs/GRAPHCOMPLIANCE_CCG_HANDOFF.md).
+금융광고 문안을 **법령·심의기준·상품설명서 사실**과 대조하고, **규칙 기반 판정과
+LLM 해석을 결합**해 **설명가능한 사전 검토**를 지원하는 콘솔.
+
+핵심 차별점: 룰베이스가 적용범위를 자르고(상품군별 필수고지 카탈로그·법령 위임
+사슬) 기계적 위반을 직접 판정하면, LLM은 *정리된 문제*만 해석한다(단정·오인 등
+맥락 판단 + 전체 인상 종합). 모든 판정은 근거 조문 원문까지 추적된다.
+
+## 주요 기능
+
+- **심사 콘솔(3-pane)**: 광고 원문 하이라이트(심각도 색 + 물결 밑줄) · 위험 카드
+  (개별 심사 + 종합 심사) · 판정 상세(금감원 회답식 정의→요건→결론→유보).
+- **종합 심사(Track B)**: 흩어진 조각을 모아 전체 인상 오인위험을 그래프로
+  (혜택 주장 ← 완화/강화). 복잡 위반 탐지.
+- **상품 사실 대조**: 광고 주장 ↔ 상품설명서/약관 사실 비교, 누락 필수고지를
+  그래프 카탈로그(`disc_*`)에서 데이터 기반으로 산출.
+- **수정안**: 광고 전체를 일관되게 재작성한 교정본(원문↔교정본 diff). 제안과
+  심사자 조언 분리, 할루시네이션 차단.
+- **운영 대시보드**: 실행 기록·집계, 행 클릭 시 그 실행의 시점 데이터를 콘솔에서
+  디버깅. 감사 추적 포함.
+- **로컬/클라우드 LLM 토글**: 모델 드롭다운에서 클라우드(GPT-5.4-nano)와 로컬
+  Ollama 모델(ax-4.0-light/midm-2.0-base/exaone4-32b/qwen3.5:9b/gemma4)을 골라
+  요청별로 라우팅. 로컬 경로는 Chat Completions + `response_format=json_schema`.
 
 For the reasoning architecture — how rule/graph (deterministic) and LLM
 (interpretive) lanes split the work across data → process → result, with
 diagrams — see [docs/REASONING_ARCHITECTURE.md](docs/REASONING_ARCHITECTURE.md).
+For implementation state and operating commands, see
+[docs/GRAPHCOMPLIANCE_CCG_HANDOFF.md](../../docs/GRAPHCOMPLIANCE_CCG_HANDOFF.md).
 
-This app does not use deterministic review fallback. If `OPENAI_API_KEY` or Neo4j
-credentials are missing, the run fails instead of silently replacing LLM context
-engineering with rules.
+이 앱은 결정론 fallback으로 심사를 대체하지 않는다. LLM 자격증명/Neo4j가 없으면
+규칙으로 조용히 대체하지 않고 실패한다.
+
+## 로컬 LLM (선택)
+
+`.env`에 아래를 두면 모델 드롭다운에서 로컬 모델 선택 시 그 엔드포인트로 라우팅된다
+(클라우드 기본 모드여도). 비우면 클라우드(OpenAI)만 사용.
+
+```bash
+LOCAL_LLM_BASE_URL=http://<ollama-host>:11434/v1   # OpenAI 호환 Chat Completions
+LOCAL_LLM_API_KEY=ollama
+# 전역 로컬 토글(모든 요청을 로컬로)을 원하면:
+# LLM_BASE_URL=http://<ollama-host>:11434/v1
+```
 
 ## Run
 

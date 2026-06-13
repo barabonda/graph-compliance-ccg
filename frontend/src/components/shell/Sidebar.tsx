@@ -43,7 +43,7 @@ export function Sidebar({ view, setView, result, resolvedCount }: Props) {
         </div>
         <div className="min-w-0">
           <div className="text-sm font-extrabold tracking-tight">JB Compliance</div>
-          <div className="font-mono text-[10px] text-ink-4">JunBub · 금융광고 준법 사전심의</div>
+          <div className="font-mono text-[10px] text-ink-4">JunBub · CONTENT SAFEGUARD</div>
         </div>
       </div>
 
