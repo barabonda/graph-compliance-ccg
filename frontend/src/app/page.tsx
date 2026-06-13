@@ -15,7 +15,7 @@ import { AuditTab } from "@/components/tabs/AuditTab";
 import { OverallTab } from "@/components/tabs/OverallTab";
 import { ProductFactsTab } from "@/components/tabs/ProductFactsTab";
 import { SentenceMapTab } from "@/components/tabs/SentenceMapTab";
-import { EmptyState } from "@/components/ui";
+import { EmptyState, Expandable } from "@/components/ui";
 import { useReview } from "@/hooks/useReview";
 import { CHANNELS, DECISIONS, type DecisionKey } from "@/lib/labels";
 import type { ReviewOutput, ReviewRequest } from "@/lib/types";
@@ -193,26 +193,31 @@ export default function Page() {
             </div>
           )}
 
-          {view === "context" && (
+          {view === "audit" && (
             <div className="flex flex-col gap-4">
               <div className="rounded-[14px] border border-line bg-surface p-4 shadow-card">
-                <OverallTab result={result} />
+                <AuditTab result={result} events={state.events} />
               </div>
-              <div className="rounded-[14px] border border-line bg-surface p-4 shadow-card">
-                <SentenceMapTab
-                  result={result}
-                  onSelectAnchor={(anchorId) => {
-                    selectAnchor(anchorId);
-                    setView("review");
-                  }}
-                />
-              </div>
-            </div>
-          )}
-
-          {view === "audit" && (
-            <div className="rounded-[14px] border border-line bg-surface p-4 shadow-card">
-              <AuditTab result={result} events={state.events} />
+              {/* 컨텍스트 raw(ContextFrame/Influence/SentenceUnit/Relation)는 심사 동선에서
+                  빼고 감사 추적용으로만 펼쳐 본다. 전체 인상 근거 자체는 Track B 상세에 있음. */}
+              {result && (
+                <Expandable
+                  header={
+                    <span className="text-[13px] font-bold text-ink-2">컨텍스트 기술 상세 (raw) · 감사 추적용</span>
+                  }
+                >
+                  <div className="flex flex-col gap-4 p-4">
+                    <OverallTab result={result} />
+                    <SentenceMapTab
+                      result={result}
+                      onSelectAnchor={(anchorId) => {
+                        selectAnchor(anchorId);
+                        setView("review");
+                      }}
+                    />
+                  </div>
+                </Expandable>
+              )}
             </div>
           )}
         </div>

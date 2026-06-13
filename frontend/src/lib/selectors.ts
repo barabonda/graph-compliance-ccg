@@ -813,6 +813,93 @@ export function disclosureDocCrossRef(
   return { status: matched.length ? "in_doc" : "not_in_doc", facts: matched.slice(0, 4) };
 }
 
+// ---------------------------------------------------------------------------
+// 전체 인상(Track B) 종합 그래프: 혜택 주장을 중심으로, 그것을 완화/강화하는
+// 문장들을 InterSentenceRelation + 문장 역할로 연결한다. 70개 문장을 평면
+// 나열하는 대신 "혜택 ← 무엇이 완화/강화하나"의 구조만 추린다.
+// ---------------------------------------------------------------------------
+export type OverallNodeKind = "benefit" | "mitigate" | "reinforce" | "prominence" | "fact";
+
+export interface OverallGraphNode {
+  kind: OverallNodeKind;
+  title: string;
+  text: string;
+}
+
+export interface OverallGraphEdge {
+  label: string;
+  node: OverallGraphNode;
+}
+
+export interface OverallImpressionGraphModel {
+  benefit: OverallGraphNode | null;
+  edges: OverallGraphEdge[];
+  conclusion: { grade: "낮음" | "중간" | "높음"; text: string } | null;
+}
+
+const RELATION_KO: Record<string, string> = {
+  QUALIFIES: "조건부 제한",
+  MITIGATES: "위험 완화",
+  REINFORCES: "인상 강화",
+  AMPLIFIES_RISK: "위험 증폭",
+};
+
+// 노드 역할 → 그래프 종류/색. 색은 관계 타입이 아니라 '문장 역할'로 정한다
+// (혜택=위험/빨강, 조건·위험 고지=완화/노랑, 보호 고지=강화/초록).
+const ROLE_NODE: Record<string, { kind: OverallNodeKind; title: string }> = {
+  condition_disclosure: { kind: "mitigate", title: "조건 고지" },
+  risk_disclosure: { kind: "mitigate", title: "위험 고지" },
+  protection_disclosure: { kind: "reinforce", title: "보호 고지" },
+};
+
+export function buildOverallImpressionGraph(result: ReviewOutput): OverallImpressionGraphModel {
+  const tb = result.overall_impression_judgment;
+  const sentences = new Map((result.sentence_units ?? []).map((item) => [item.sentence_id, item]));
+  const relations = result.inter_sentence_relations ?? [];
+
+  const score = Number(tb?.misleading_risk_score ?? 0);
+  const conclusion = tb?.verdict
+    ? { grade: gradeFromScore(score), text: tb.why || tb.representative_consumer_impression || "" }
+    : null;
+
+  // 혜택 주장: benefit_claim 중 관계 연결이 많고 '최고/확정/보장'이 강한 문장.
+  const degree = (id: string) =>
+    relations.filter((rel) => rel.source_sentence_id === id || rel.target_sentence_id === id).length;
+  const salience = (text: string) => (/(최고|확정|보장)/.test(text) ? 2 : 0) + (/%/.test(text) ? 1 : 0);
+  const benefitSentence = (result.sentence_units ?? [])
+    .filter((item) => item.role === "benefit_claim")
+    .sort(
+      (a, b) =>
+        salience(b.text) + degree(b.sentence_id) - (salience(a.text) + degree(a.sentence_id)),
+    )[0];
+  const benefit: OverallGraphNode | null = benefitSentence
+    ? { kind: "benefit", title: "혜택 주장", text: benefitSentence.text }
+    : null;
+
+  // 엣지: benefit_claim ↔ (조건/위험/보호 고지) 관계만, 노드 역할로 완화/강화 분류.
+  const edges: OverallGraphEdge[] = [];
+  const seen = new Set<string>();
+  for (const rel of relations) {
+    const source = sentences.get(rel.source_sentence_id);
+    const target = sentences.get(rel.target_sentence_id);
+    if (!source || !target) continue;
+    const benefitEnd = source.role === "benefit_claim" ? source : target.role === "benefit_claim" ? target : null;
+    if (!benefitEnd) continue;
+    const other = benefitEnd === source ? target : source;
+    const mapping = ROLE_NODE[other.role];
+    if (!mapping || seen.has(other.sentence_id)) continue;
+    seen.add(other.sentence_id);
+    const relKo = RELATION_KO[rel.relation_type] ?? "관계";
+    edges.push({
+      label: `${mapping.title} · ${relKo}`,
+      node: { kind: mapping.kind, title: mapping.title, text: other.text },
+    });
+    if (edges.length >= 5) break;
+  }
+
+  return { benefit, edges, conclusion };
+}
+
 export function buildIssueCards(result: ReviewOutput): IssueCardModel[] {
   const cards: IssueCardModel[] = [];
 

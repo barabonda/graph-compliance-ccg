@@ -4,6 +4,7 @@ import { JUDGMENT_STATUS, judgmentBadgeTone, riskGrade } from "@/lib/labels";
 import {
   aggregationForAnchor,
   buildIssueCards,
+  buildOverallImpressionGraph,
   claimQualifiers,
   clauseEvidenceForAnchor,
   delegationByPrinciple,
@@ -19,6 +20,7 @@ import type { ReviewOutput } from "@/lib/types";
 import { Icon } from "../Icon";
 import { Badge, Expandable, KeyValueText, Meter, Tag } from "../ui";
 import { DelegationChain } from "./DelegationChain";
+import { OverallImpressionGraph } from "./OverallImpressionGraph";
 import { DetailRow, PaneHeader } from "./common";
 import { TONE_BG, TONE_COLOR, TONE_WORD_SHORT } from "./RiskList";
 
@@ -55,126 +57,81 @@ function TrackBDetail({ result }: { result: ReviewOutput }) {
   const score = Number(trackB.misleading_risk_score ?? 0);
   const grade = riskGrade(score);
   const color = grade.tone === "reject" ? "var(--reject)" : grade.tone === "review" ? "var(--revise)" : "var(--pass)";
+  const graph = buildOverallImpressionGraph(result);
+  const syn = trackB.synthesized_evidence;
+  const ROLE_KO: Record<string, string> = {
+    benefit_claim: "혜택",
+    condition_disclosure: "조건 고지",
+    risk_disclosure: "위험 고지",
+    protection_disclosure: "보호 고지",
+  };
   return (
     <div className="flex h-full flex-col">
       <PaneHeader icon="target" title="판정 상세" sub="소비자 오인 · 종합 심사" />
       <div className="flex-1 overflow-y-auto px-4.5 pt-4 pb-6" style={{ animation: "nodeIn .3s" }}>
-        <div className="mb-2 flex items-center gap-2">
-          <span className="h-2 w-2 rounded-full" style={{ background: color }} />
-          <span className="text-[13px] font-bold" style={{ color }}>
-            전체 인상 판단 · 오인 위험 {grade.label}
+        {/* 헤더 등급 (수치는 hover) */}
+        <div className="mb-2 flex items-center justify-between gap-2">
+          <span className="flex items-center gap-2 text-[13px] font-bold" style={{ color }}>
+            <span className="h-2 w-2 rounded-full" style={{ background: color }} />
+            전체 인상 판단
+          </span>
+          <span className="text-[12px] font-bold" style={{ color }} title={`misleading_risk_score ${score.toFixed(2)}`}>
+            오인 위험 {grade.label}
           </span>
         </div>
-        <div
-          className="rounded-[10px] p-3.5 text-[14px] leading-relaxed break-keep"
-          style={{ background: "var(--surface-2)", border: "1px solid var(--line)" }}
-        >
-          {trackB.representative_consumer_impression}
-        </div>
-        <div className="mt-3 flex items-center gap-3">
-          <span
-            className="shrink-0 rounded-md px-2 py-1 text-[11px] font-bold whitespace-nowrap"
-            style={{ color, background: grade.tone === "reject" ? "var(--reject-bg)" : grade.tone === "review" ? "var(--revise-bg)" : "var(--pass-bg)" }}
+        {/* 종합 결론 한 단락 */}
+        {trackB.representative_consumer_impression && (
+          <div
+            className="rounded-[10px] p-3.5 text-[13.5px] leading-relaxed break-keep text-ink"
+            style={{ background: "var(--surface-2)", border: "1px solid var(--line)" }}
           >
-            종합 심사
-          </span>
-          <div className="flex-1">
-            <div className="mb-1 flex justify-between text-[11px]">
-              <span className="font-semibold text-ink-3">오인 위험</span>
-              <span className="font-bold" style={{ color }}>
-                {grade.label}
-              </span>
-            </div>
-            <Meter value={score * 100} color={color} title={`misleading_risk_score ${score.toFixed(2)}`} />
+            {trackB.representative_consumer_impression}
           </div>
+        )}
+        {/* 근거 그래프 (혜택 주장 ← 완화/강화) */}
+        <div className="mt-3">
+          <div className="mb-1.5 text-[10.5px] font-bold tracking-wider text-ink-4">근거 · 혜택 주장과 완화/강화</div>
+          <OverallImpressionGraph graph={graph} />
         </div>
-        <DetailRow icon="alert" label="판단 이유">
-          <p className="m-0 text-[13px] leading-relaxed text-ink-2">{trackB.why || "-"}</p>
-        </DetailRow>
-        <DetailRow icon="layers" label="오인 요인">
-          <ul className="m-0 list-disc space-y-1 pl-4 text-[12.5px] leading-relaxed text-ink-2">
-            {(trackB.misleading_factors ?? []).map((factor, index) => (
-              <li key={index}>{factor}</li>
-            ))}
-          </ul>
-        </DetailRow>
-        {(() => {
-          const syn = trackB.synthesized_evidence;
-          const layers = syn?.sentence_layers ?? [];
-          const gaps = syn?.prominence_gaps ?? [];
-          const contradictions = syn?.fact_contradictions ?? [];
-          if (!layers.length && !gaps.length && !contradictions.length) return null;
-          const ROLE_KO: Record<string, string> = {
-            benefit_claim: "혜택",
-            condition_disclosure: "조건 고지",
-            risk_disclosure: "위험 고지",
-            protection_disclosure: "보호 고지",
-          };
-          return (
-            <DetailRow icon="layers" label="종합한 증거 (흩어진 조각 → 전체 인상)">
-              <div className="space-y-2.5">
-                {layers.length > 0 && (
-                  <div>
-                    <div className="mb-1 text-[10.5px] font-bold tracking-wider text-ink-4">문장 위계</div>
-                    <div className="space-y-1">
-                      {layers.map((l, i) => (
-                        <div key={i} className="flex items-start gap-2 text-[12px]">
-                          <span
-                            className={`shrink-0 rounded px-1.5 py-0.5 text-[10px] font-bold ${
-                              l.role === "benefit_claim" ? "bg-reject-bg text-reject" : "bg-pass-bg text-pass"
-                            }`}
-                          >
-                            {ROLE_KO[l.role ?? ""] ?? l.role}
-                          </span>
-                          <span className="shrink-0 rounded bg-surface-3 px-1 text-[10px] text-ink-3">{l.tier}</span>
-                          <span className="min-w-0 text-ink-2">{l.text}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-                {gaps.length > 0 && (
-                  <div>
-                    <div className="mb-1 text-[10.5px] font-bold tracking-wider text-ink-4">혜택↔고지 위계차</div>
-                    {gaps.map((g, i) => (
-                      <p key={i} className="text-[12px] leading-relaxed text-ink-2">
-                        <span className="font-mono text-[10.5px] text-revise">{g.code}</span> · {g.message}
-                      </p>
+        {/* 점진적 공개 — 문장별 상세는 펼쳐야 보인다 */}
+        <div className="mt-3">
+          <Expandable header={<span className="text-[12px] font-bold text-ink-2">문장별 상세 · 근거 더보기</span>}>
+            <div className="space-y-3 px-3 py-2.5">
+              {trackB.why && (
+                <div>
+                  <div className="mb-1 text-[10.5px] font-bold tracking-wider text-ink-4">판단 이유</div>
+                  <p className="m-0 text-[12.5px] leading-relaxed text-ink-2">{trackB.why}</p>
+                </div>
+              )}
+              {(trackB.misleading_factors?.length ?? 0) > 0 && (
+                <div>
+                  <div className="mb-1 text-[10.5px] font-bold tracking-wider text-ink-4">오인 요인</div>
+                  <ul className="m-0 list-disc space-y-1 pl-4 text-[12px] leading-relaxed text-ink-2">
+                    {trackB.misleading_factors!.map((factor, index) => (
+                      <li key={index}>{factor}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              {(syn?.sentence_layers?.length ?? 0) > 0 && (
+                <div>
+                  <div className="mb-1 text-[10.5px] font-bold tracking-wider text-ink-4">문장 위계</div>
+                  <div className="space-y-1">
+                    {syn!.sentence_layers!.map((layer, index) => (
+                      <div key={index} className="flex items-start gap-2 text-[12px]">
+                        <span className="shrink-0 rounded bg-surface-3 px-1.5 py-0.5 text-[10px] font-bold text-ink-3">
+                          {ROLE_KO[layer.role ?? ""] ?? layer.role}
+                        </span>
+                        <span className="min-w-0 text-ink-2">{layer.text}</span>
+                      </div>
                     ))}
                   </div>
-                )}
-                {contradictions.length > 0 && (
-                  <div>
-                    <div className="mb-1 text-[10.5px] font-bold tracking-wider text-ink-4">광고↔상품문서 사실 모순</div>
-                    {contradictions.map((c, i) => (
-                      <p key={i} className="text-[12px] leading-relaxed text-ink-2">
-                        <span
-                          className={`font-bold ${c.status === "CONTRADICTED" ? "text-reject" : "text-revise"}`}
-                        >
-                          {c.status}
-                        </span>{" "}
-                        · {c.rationale}
-                      </p>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </DetailRow>
-          );
-        })()}
-        <DetailRow icon="graph" label="근거 경로 (Claim → 인상 → 효과)">
-          <div className="space-y-2">
-            {(trackB.evidence_paths ?? []).map((path, index) => (
-              <div key={index} className="rounded-[10px] border border-line p-3 text-[12.5px] leading-relaxed text-ink-2">
-                <b className="text-ink">{path.claim}</b>
-                <br />
-                {path.implicature || path.meaning}
-                <br />→ {path.consumer_effect}
-              </div>
-            ))}
-          </div>
-        </DetailRow>
-        <p className="mt-2 text-[11px] text-ink-4">대법원 ‘전체적·궁극적 인상’ 기준(2017두60109)에 대응하는 판단입니다.</p>
+                </div>
+              )}
+            </div>
+          </Expandable>
+        </div>
+        <p className="mt-3 text-[11px] text-ink-4">대법원 ‘전체적·궁극적 인상’ 기준(2017두60109)에 대응하는 판단입니다.</p>
       </div>
     </div>
   );
