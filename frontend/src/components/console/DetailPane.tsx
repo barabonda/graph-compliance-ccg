@@ -7,6 +7,7 @@ import {
   claimQualifiers,
   clauseEvidenceForAnchor,
   delegationByPrinciple,
+  disclosureDocCrossRef,
   disclosureSignals,
   effectiveJudgmentsForAnchor,
   planItemsForAnchor,
@@ -211,6 +212,51 @@ export function DetailPane({ result, selectedAnchorId, resolved, onToggleResolve
           <DetailRow icon="alert" label="누락 사유">
             <p className="m-0 text-[13px] leading-relaxed text-ink-2">{card.rationale}</p>
           </DetailRow>
+          {(() => {
+            const checkId = card.id.replace(/^disclosure_/, "");
+            const crossRef = disclosureDocCrossRef(result, checkId, card.quote);
+            if (crossRef.status === "no_doc") return null;
+            const inDoc = crossRef.status === "in_doc";
+            return (
+              <DetailRow icon="layers" label="상품설명서 대조">
+                <div
+                  className="rounded-[10px] p-3"
+                  style={{
+                    background: inDoc ? "var(--revise-bg)" : "var(--surface-2)",
+                    border: "1px solid var(--line)",
+                  }}
+                >
+                  <div
+                    className="mb-1 text-[12.5px] font-bold"
+                    style={{ color: inDoc ? "var(--revise)" : "var(--ink-2)" }}
+                  >
+                    {inDoc
+                      ? "상품설명서에는 명시되어 있으나 광고 문안에 없습니다"
+                      : "광고와 상품설명서 모두에서 확인되지 않았습니다"}
+                  </div>
+                  <p className="m-0 mb-2 text-[12px] leading-relaxed text-ink-3">
+                    {inDoc
+                      ? "상품설명서·약관에 근거가 있으므로 해당 내용을 광고 문안에 함께 표시하면 누락이 해소됩니다."
+                      : "상품설명서에서도 근거를 찾지 못했습니다. 표시 가능 여부를 상품 부서와 확인하세요."}
+                  </p>
+                  {crossRef.facts.map((fact) => (
+                    <div
+                      key={fact.fact_id}
+                      className="mt-1 flex items-baseline gap-2 text-[12px] leading-relaxed"
+                    >
+                      <span className="shrink-0 font-semibold text-ink-2">{fact.fact_type}</span>
+                      <span className="min-w-0 text-ink-3">
+                        {fact.value}
+                        {fact.page_or_chunk ? (
+                          <span className="ml-1.5 font-mono text-[10.5px] text-ink-4">· {fact.page_or_chunk}</span>
+                        ) : null}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </DetailRow>
+            );
+          })()}
           <div className="mt-4 flex gap-2">
             <button
               type="button"

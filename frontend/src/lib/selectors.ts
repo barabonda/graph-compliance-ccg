@@ -761,6 +761,51 @@ function gradeFromScore(score: number): "낮음" | "중간" | "높음" {
   return score >= 0.7 ? "높음" : score >= 0.4 ? "중간" : "낮음";
 }
 
+/** 누락 고지(check_id)의 주제가 상품설명서(product_facts)에 있는지 매칭할 토큰. */
+const DISCLOSURE_DOC_TOKENS: Record<string, string[]> = {
+  deposit_tax_basis: ["세전", "세후", "세금"],
+  deposit_rate_condition: ["우대", "고시이율", "기본이자율", "조건"],
+  deposit_term: ["계약기간", "가입기간", "만기", "기간"],
+  depositor_protection_limit: ["예금자보호", "예금보험", "보호한도", "5천만원", "5,000만원"],
+  loan_rate_range: ["대출금리", "금리"],
+  loan_screening: ["심사", "승인"],
+  loan_fee: ["수수료", "중도상환", "부대비용"],
+  investment_loss_risk: ["원금", "손실", "투자위험"],
+  past_performance_warning: ["과거", "수익률", "실적"],
+};
+
+export type DisclosureDocStatus = "in_doc" | "not_in_doc" | "no_doc";
+
+export interface DisclosureDocCrossRef {
+  status: DisclosureDocStatus;
+  facts: ProductFact[];
+}
+
+/**
+ * 광고에 누락된 필수 고지가 상품설명서(product_facts)에는 있는지 교차 확인.
+ * - in_doc: 광고엔 없지만 상품설명서엔 명시 → 광고로 반영하면 됨
+ * - not_in_doc: 상품설명서에서도 확인 안 됨 → 더 깊은 공백
+ * - no_doc: 상품문서 미추출(대조 불가) 또는 대조 대상이 아닌 메타 고지
+ */
+export function disclosureDocCrossRef(
+  result: ReviewOutput,
+  checkId: string,
+  label: string,
+): DisclosureDocCrossRef {
+  const ctx = result.product_fact_context;
+  // 상품설명서·약관 '확인 안내'는 문서 내용이 아니라 메타 고지 → 대조 대상 아님.
+  if (ctx?.extraction_status !== "EXTRACTED" || checkId.includes("document_notice")) {
+    return { status: "no_doc", facts: [] };
+  }
+  const facts = ctx.product_facts ?? [];
+  const tokens = DISCLOSURE_DOC_TOKENS[checkId] ?? [label];
+  const matched = facts.filter((fact) => {
+    const haystack = `${fact.fact_type} ${fact.condition ?? ""} ${fact.value} ${fact.evidence_text ?? ""}`;
+    return tokens.some((token) => haystack.includes(token));
+  });
+  return { status: matched.length ? "in_doc" : "not_in_doc", facts: matched.slice(0, 4) };
+}
+
 export function buildIssueCards(result: ReviewOutput): IssueCardModel[] {
   const cards: IssueCardModel[] = [];
 
