@@ -7,6 +7,7 @@ import { ExceptionView } from "@/components/console/ExceptionView";
 import { ExecSummary } from "@/components/console/ExecSummary";
 import { GraphView } from "@/components/console/GraphView";
 import { RiskList } from "@/components/console/RiskList";
+import { PipelineProgress } from "@/components/PipelineProgress";
 import { ReviewForm } from "@/components/ReviewForm";
 import { ContextBar } from "@/components/shell/ContextBar";
 import { Sidebar, type ViewKey } from "@/components/shell/Sidebar";
@@ -159,6 +160,7 @@ export default function Page() {
               {(state.status === "running" || (state.events.length > 0 && !result)) && (
                 <section className="rounded-[14px] border border-line bg-surface p-5 shadow-card">
                   <h3 className="mb-3 text-sm font-bold">실시간 진행</h3>
+                  <PipelineProgress events={state.events} />
                   <AuditTab result={null} events={state.events} />
                 </section>
               )}
