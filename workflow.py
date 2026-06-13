@@ -6,6 +6,7 @@ from collections.abc import Iterator
 from typing import Any
 from uuid import uuid4
 
+from applicability_gate import summarize_cu_gate
 from claim_modeling import fold_qualifier_anchors_into_parent_claims
 from context_extractor import LLMContextExtractor, build_context_triples
 from cross_encoder_reranker import CUReranker, NoopCUReranker, create_cross_encoder_reranker_from_env
@@ -197,6 +198,7 @@ class GraphComplianceCCGWorkflow:
             review_input=review_input,
             claims=claims,
             product_context=product_context,
+            sentence_units=extraction.sentence_units,
         )
         yield workflow_event(
             "step_completed",
@@ -350,6 +352,15 @@ class GraphComplianceCCGWorkflow:
             candidates_by_anchor=candidates_by_anchor,
             planned_anchor_ids={item.anchor_id for item in cu_plan},
         )
+        applicability_gate = {
+            **(product_fact_context.get("applicability_gate") or {}),
+            "cu_gate": summarize_cu_gate(
+                review_input=review_input,
+                anchors=anchors,
+                candidates_by_anchor=candidates_by_anchor,
+                retrieval_diagnostics=retrieval_diagnostics,
+            ),
+        }
         yield workflow_event(
             "step_completed",
             "LLM CU rerank",
@@ -472,6 +483,7 @@ class GraphComplianceCCGWorkflow:
             retrieval_diagnostics=retrieval_diagnostics,
             product_context=product_context,
             product_fact_context=product_fact_context,
+            applicability_gate=applicability_gate,
             prominence_analysis=prominence_analysis,
             disclosure_links=disclosure_links,
             prominence_diagnostics=prominence_diagnostics,

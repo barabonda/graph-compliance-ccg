@@ -1193,7 +1193,7 @@ function productDisclosurePanel(anchor) {
         <div class="evidence-text">
           ${
             disclosureChecks.length
-              ? `<div class="tag-row">${disclosureChecks.map((item) => `<span class="tag ${item.present ? "status-ok" : "status-review"}">${escapeHtml(item.label)} · ${item.present ? "있음" : "누락"}</span>`).join("")}</div><hr />`
+              ? `<div class="tag-row">${disclosureChecks.map((item) => `<span class="tag ${disclosureStatusClass(item.status)}">${escapeHtml(item.label)} · ${escapeHtml(disclosureStatusLabel(item.status))}</span>`).join("")}</div><hr />`
               : ""
           }
           ${requirements.map((item) => `<b>${escapeHtml(item.label)}</b> · ${escapeHtml(item.source)}<br />${escapeHtml(item.why)}`).join("<hr />") || "-"}
@@ -1249,6 +1249,7 @@ function renderProductFacts() {
   const claimFacts = context.claim_facts || [];
   const productFacts = context.product_facts || [];
   const comparisons = context.comparison_results || [];
+  const disclosureChecks = context.disclosure_checks || [];
   const documents = context.selected_documents || [];
   const summary = productFactSummary(context);
   const prominenceDiagnostics = state.result?.prominence_diagnostics || [];
@@ -1289,6 +1290,14 @@ function renderProductFacts() {
       </article>
     </section>
     <section class="detail-card">
+      <h3>Disclosure Gate · 적용 고지 점검</h3>
+      ${
+        disclosureChecks.length
+          ? `<div class="claim-card-grid">${disclosureChecks.map(disclosureCheckCard).join("")}</div>`
+          : `<div class="empty-state">적용된 고지 기준이 없습니다.</div>`
+      }
+    </section>
+    <section class="detail-card">
       <h3>고지 현저성 진단</h3>
       <div class="evidence-text">
         ${prominenceDiagnostics.length ? prominenceDiagnostics.map((item) => `<b>${escapeHtml(item.diagnostic_code)}</b> · ${escapeHtml(item.severity || "")}<br />${escapeHtml(item.message || "")}<br />${escapeHtml(item.evidence || "")}`).join("<hr />") : "혜택 문구 대비 고지 위계 부족 신호가 없습니다."}
@@ -1314,6 +1323,29 @@ function productSelectionNotice(context) {
         ${candidates.slice(0, 8).map((item) => `<span class="tag">${escapeHtml(item.product || item.name || "상품 후보")}</span>`).join("") || `<span class="tag">상품 후보 없음</span>`}
       </div>
     </section>
+  `;
+}
+
+function disclosureCheckCard(item) {
+  const evidence = (item.product_doc_evidence || [])
+    .map((fact) => `${fact.fact_type || "fact"}: ${fact.value || ""} ${fact.page_or_chunk || ""}`.trim())
+    .join("<br />");
+  return `
+    <article class="fact-card ${disclosureStatusClass(item.status)}">
+      <div class="card-top">
+        <strong>${escapeHtml(item.label || item.check_id || "고지")}</strong>
+        <span class="tag ${disclosureStatusClass(item.status)}">${escapeHtml(disclosureStatusLabel(item.status))}</span>
+      </div>
+      <div class="meta-row">
+        <span class="tag">${escapeHtml(item.check_type || "presence")}</span>
+        <span class="tag">severity ${escapeHtml(item.severity ?? "-")}</span>
+        <span class="tag">${escapeHtml(item.gate_status || "ON")}</span>
+        <span class="tag">${escapeHtml(item.on_missing || "")}</span>
+      </div>
+      ${item.source ? `<p class="evidence-text">${escapeHtml(item.source)}</p>` : ""}
+      ${item.gate_reason ? `<p class="evidence-text">${escapeHtml(item.gate_reason)}</p>` : ""}
+      ${evidence ? `<p class="evidence-text"><b>ProductFact 근거</b><br />${evidence}</p>` : ""}
+    </article>
   `;
 }
 
@@ -1836,9 +1868,28 @@ function productFactById(productFactId) {
 
 function productFactStatusClass(status) {
   if (status === "SUPPORTED" || status === "EXTRACTED") return "pass";
-  if (status === "CONTRADICTED" || status === "FACT_EXTRACTION_FAILED" || status === "TEXT_EXTRACTION_FAILED") return "reject";
-  if (status === "PROMINENCE_INSUFFICIENT" || status === "CONDITION_MISSING") return "review";
+  if (status === "CONTRADICTED" || status === "FACT_EXTRACTION_FAILED" || status === "TEXT_EXTRACTION_FAILED" || status === "PRESENT_BUT_NEGATED") return "reject";
+  if (status === "PROMINENCE_INSUFFICIENT" || status === "CONDITION_MISSING" || status === "IN_PRODUCT_DOC_ONLY" || status === "MISSING" || status === "NOT_TESTED" || status === "UNSUPPORTED_DISCLOSURE_CHECK") return "review";
+  if (status === "SKIPPED_BY_GATE") return "muted";
   return "review";
+}
+
+function disclosureStatusClass(status) {
+  return productFactStatusClass(status);
+}
+
+function disclosureStatusLabel(status) {
+  const labels = {
+    PRESENT: "있음",
+    MISSING: "누락",
+    PRESENT_BUT_NEGATED: "부정 표현",
+    IN_PRODUCT_DOC_ONLY: "문서에만 있음",
+    PROMINENCE_INSUFFICIENT: "위계 낮음",
+    NOT_TESTED: "미검사",
+    SKIPPED_BY_GATE: "적용 제외",
+    UNSUPPORTED_DISCLOSURE_CHECK: "검사 미지원",
+  };
+  return labels[status] || status || "미상";
 }
 
 function comparisonStatusForGraph(status) {

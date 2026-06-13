@@ -11,6 +11,7 @@ from __future__ import annotations
 from copy import deepcopy
 from typing import Any
 
+from disclosure_catalog import DISCLOSURE_PROFILES
 from schemas import Claim, ReviewInput, SentenceUnit
 from utils import stable_id
 
@@ -25,7 +26,7 @@ PROMINENCE_SCORE = {
 
 BENEFIT_ROLES = {"benefit_claim", "comparison_claim", "cta"}
 DISCLOSURE_ROLES = {"condition_disclosure", "protection_disclosure", "risk_disclosure", "review_procedure"}
-CONDITION_CHECK_IDS = {
+LEGACY_CONDITION_CHECK_IDS = {
     "deposit_rate_condition",
     "deposit_term",
     "deposit_tax_basis",
@@ -37,6 +38,11 @@ CONDITION_CHECK_IDS = {
     "investment_loss_risk",
     "past_performance_warning",
 }
+PROMINENCE_REQUIRED_CHECK_IDS = {
+    check_id
+    for check_id, profile in DISCLOSURE_PROFILES.items()
+    if profile.prominence_required
+} | LEGACY_CONDITION_CHECK_IDS
 
 
 def build_prominence_artifacts(
@@ -107,26 +113,35 @@ def build_diagnostics(
     product_fact_context: dict[str, Any],
 ) -> list[dict[str, Any]]:
     diagnostics: list[dict[str, Any]] = []
+    # 혜택 문구 기준으로 묶어, 동등 이상 위계의 관련 고지가 하나라도 있으면
+    # 충족으로 본다. 약한 고지 페어가 따로 있다는 이유만으로 발화하면 같은
+    # 위계 고지를 이미 갖춘 문안까지 전부 위반으로 집계된다.
+    links_by_benefit: dict[str, list[dict[str, Any]]] = {}
     for link in disclosure_links:
-        if link["status"] != "PROMINENCE_INSUFFICIENT":
+        links_by_benefit.setdefault(str(link["benefit_sentence_id"]), []).append(link)
+    for benefit_links in links_by_benefit.values():
+        best_link = min(benefit_links, key=lambda row: row["prominence_gap"])
+        if best_link["prominence_gap"] <= 0:
             continue
         diagnostics.append(
             {
-                "diagnostic_id": stable_id("prominence_diagnostic", link["link_id"]),
+                "diagnostic_id": stable_id("prominence_diagnostic", best_link["link_id"]),
                 "diagnostic_code": "PROMINENCE_INSUFFICIENT",
                 "severity": "MEDIUM",
-                "benefit_sentence_id": link["benefit_sentence_id"],
-                "disclosure_sentence_id": link["disclosure_sentence_id"],
-                "prominence_gap": link["prominence_gap"],
+                "benefit_sentence_id": best_link["benefit_sentence_id"],
+                "disclosure_sentence_id": best_link["disclosure_sentence_id"],
+                "prominence_gap": best_link["prominence_gap"],
                 "message": "고지는 존재하지만 혜택 문구보다 낮은 위계로 표시되어 완화 근거가 약합니다.",
-                "evidence": f"{link['benefit_text']} / {link['disclosure_text']}",
+                "evidence": f"{best_link['benefit_text']} / {best_link['disclosure_text']}",
             }
         )
 
     missing_checks = [
         row
         for row in product_fact_context.get("disclosure_checks", []) or []
-        if row.get("check_id") in CONDITION_CHECK_IDS and row.get("status") == "MISSING"
+        if row.get("check_id") in PROMINENCE_REQUIRED_CHECK_IDS
+        and row.get("gate_status") != "OFF"
+        and row.get("status") in {"MISSING", "PRESENT_BUT_NEGATED", "IN_PRODUCT_DOC_ONLY"}
     ]
     if benefit_sentences and missing_checks:
         for check in missing_checks:

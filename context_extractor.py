@@ -3,6 +3,9 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+import logging
+import os
+import time
 from typing import Any
 
 from llm_gateway import LLMGateway
@@ -21,6 +24,8 @@ from schemas import (
 )
 from utils import stable_id
 
+
+LOGGER = logging.getLogger(__name__)
 
 EXTRACTION_SCHEMA: dict[str, Any] = {
     "type": "object",
@@ -236,6 +241,35 @@ EXTRACTION_SCHEMA: dict[str, Any] = {
     "required": ["context_frame", "sentence_units", "inter_sentence_relations", "context_influences", "claims"],
 }
 
+FRAME_SENTENCE_SCHEMA: dict[str, Any] = {
+    "type": "object",
+    "additionalProperties": False,
+    "properties": {
+        "context_frame": EXTRACTION_SCHEMA["properties"]["context_frame"],
+        "sentence_units": EXTRACTION_SCHEMA["properties"]["sentence_units"],
+    },
+    "required": ["context_frame", "sentence_units"],
+}
+
+CLAIM_CHUNK_SCHEMA: dict[str, Any] = {
+    "type": "object",
+    "additionalProperties": False,
+    "properties": {
+        "claims": EXTRACTION_SCHEMA["properties"]["claims"],
+    },
+    "required": ["claims"],
+}
+
+RELATION_INFLUENCE_SCHEMA: dict[str, Any] = {
+    "type": "object",
+    "additionalProperties": False,
+    "properties": {
+        "inter_sentence_relations": EXTRACTION_SCHEMA["properties"]["inter_sentence_relations"],
+        "context_influences": EXTRACTION_SCHEMA["properties"]["context_influences"],
+    },
+    "required": ["inter_sentence_relations", "context_influences"],
+}
+
 
 @dataclass(frozen=True)
 class HierarchicalContextExtraction:
@@ -254,6 +288,34 @@ class LLMContextExtractor:
         return self.extract_hierarchical(review_input, review_run_id=review_run_id).claims
 
     def extract_hierarchical(self, review_input: ReviewInput, *, review_run_id: str) -> HierarchicalContextExtraction:
+        started = time.perf_counter()
+        timeout_seconds = float(os.environ.get("CCG_CONTEXT_EXTRACTION_TIMEOUT_SECONDS", "360"))
+        model = os.environ.get("CCG_CONTEXT_EXTRACTION_MODEL") or None
+        if os.environ.get("CCG_CONTEXT_EXTRACTION_STAGED", "").lower() in {"1", "true", "yes"}:
+            return self._extract_hierarchical_staged(
+                review_input,
+                review_run_id=review_run_id,
+                timeout_seconds=timeout_seconds,
+                model=model,
+                started=started,
+            )
+        return self._extract_hierarchical_legacy(
+            review_input,
+            review_run_id=review_run_id,
+            timeout_seconds=timeout_seconds,
+            model=model,
+            started=started,
+        )
+
+    def _extract_hierarchical_legacy(
+        self,
+        review_input: ReviewInput,
+        *,
+        review_run_id: str,
+        timeout_seconds: float,
+        model: str | None,
+        started: float,
+    ) -> HierarchicalContextExtraction:
         result = self.llm.structured(
             name="graphcompliance_context_extraction",
             schema=EXTRACTION_SCHEMA,
@@ -298,6 +360,151 @@ class LLMContextExtractor:
                 f"[channel]\n{review_input.channel}\n\n"
                 f"[content_text]\n{review_input.content_text}"
             ),
+            timeout_seconds=timeout_seconds,
+            model=model,
+        )
+        return self._build_extraction_from_result(result, review_run_id=review_run_id, started=started)
+
+    def _extract_hierarchical_staged(
+        self,
+        review_input: ReviewInput,
+        *,
+        review_run_id: str,
+        timeout_seconds: float,
+        model: str | None,
+        started: float,
+    ) -> HierarchicalContextExtraction:
+        frame_sentence_started = time.perf_counter()
+        frame_sentence_result = self.llm.structured(
+            name="graphcompliance_context_sentences",
+            schema=FRAME_SENTENCE_SCHEMA,
+            system=(
+                "You are a Korean financial-advertising context graph extractor. "
+                "Stage 1: build only ContextFrame and ordered SentenceUnit objects. Do not judge compliance. "
+                "Use the original text only; do not invent facts. Split the original ad into reviewable "
+                "sentence or bullet units, preserving source spans. Classify each unit role and prominence. "
+                "Keep local_meaning and context_effect concise; detailed claim explanations are extracted "
+                "in a later stage."
+            ),
+            user=(
+                f"[title]\n{review_input.title}\n\n"
+                f"[channel]\n{review_input.channel}\n\n"
+                f"[content_text]\n{review_input.content_text}"
+            ),
+            timeout_seconds=timeout_seconds,
+            model=model,
+        )
+        LOGGER.info(
+            "context_extractor.stage_sentences_returned review_run_id=%s seconds=%.2f sentence_count=%d",
+            review_run_id,
+            time.perf_counter() - frame_sentence_started,
+            len(frame_sentence_result.get("sentence_units", [])),
+        )
+
+        sentence_units_payload = frame_sentence_result.get("sentence_units", [])
+        chunk_size = int(os.environ.get("CCG_CONTEXT_CLAIM_CHUNK_SENTENCES", "8"))
+        claim_rows: list[dict[str, Any]] = []
+        claim_stage_started = time.perf_counter()
+        for chunk_index, chunk in enumerate(chunked(sentence_units_payload, chunk_size)):
+            chunk_result = self.llm.structured(
+                name="graphcompliance_context_claims",
+                schema=CLAIM_CHUNK_SCHEMA,
+                system=(
+                    "You are a Korean financial-advertising claim extractor. "
+                    "Stage 2: extract atomic Claim records only from the provided SentenceUnit chunk. "
+                    "Do not judge compliance. Extract distinct material benefits, rates, eligibility, "
+                    "fees, guarantees, safety claims, approvals, calls-to-action, and disclosure statements. "
+                    "Keep meaning, implicature, consumer_effect, and risk_hypernym concise. "
+                    "Do not collapse a risky claim into a later mitigating disclosure. For example, extract "
+                    "'최고 연 5.0% 금리를 확정 제공' as its own benefit/definitive-rate claim even if a later "
+                    "sentence says rates may vary by conditions. Also extract the later condition disclosure "
+                    "as a separate disclosure claim. "
+                    "Generic scope words like '누구나', '조건 없이', '확정', and '보장' must stay as "
+                    "ClaimQualifier items inside the parent claim, not standalone target-consumer claims. "
+                    "Use sentence_index values exactly as provided."
+                ),
+                user=(
+                    f"[title]\n{review_input.title}\n\n"
+                    f"[channel]\n{review_input.channel}\n\n"
+                    "[sentence_units]\n"
+                    f"{chunk}"
+                ),
+                timeout_seconds=timeout_seconds,
+                model=model,
+            )
+            rows = claim_chunk_rows(chunk_result.get("claims", []), valid_sentence_indexes={int(item["index"]) for item in chunk})
+            claim_rows.extend(rows)
+            LOGGER.info(
+                "context_extractor.claim_chunk_returned review_run_id=%s chunk_index=%d sentence_count=%d claim_count=%d",
+                review_run_id,
+                chunk_index,
+                len(chunk),
+                len(rows),
+            )
+        LOGGER.info(
+            "context_extractor.stage_claims_returned review_run_id=%s seconds=%.2f claim_count=%d",
+            review_run_id,
+            time.perf_counter() - claim_stage_started,
+            len(claim_rows),
+        )
+
+        relation_stage_started = time.perf_counter()
+        relation_result = self.llm.structured(
+            name="graphcompliance_context_relations",
+            schema=RELATION_INFLUENCE_SCHEMA,
+            system=(
+                "You are linking a Korean financial-advertising context graph. "
+                "Stage 3: choose only meaningful inter-sentence relations and context influences from "
+                "the provided sentence and claim summaries. Do not restate every pair. Prefer relations "
+                "where a disclosure QUALIFIES/MITIGATES a benefit claim or a later sentence "
+                "REINFORCES/AMPLIFIES_RISK an earlier claim. Use source_index and target_index from "
+                "the provided sentences."
+            ),
+            user=(
+                "[context_frame]\n"
+                f"{frame_sentence_result.get('context_frame', {})}\n\n"
+                "[sentence_units]\n"
+                f"{sentence_relation_view(sentence_units_payload)}\n\n"
+                "[claim_summaries]\n"
+                f"{claim_relation_view(claim_rows)}"
+            ),
+            timeout_seconds=timeout_seconds,
+            model=model,
+        )
+        LOGGER.info(
+            "context_extractor.stage_relations_returned review_run_id=%s seconds=%.2f relation_count=%d influence_count=%d",
+            review_run_id,
+            time.perf_counter() - relation_stage_started,
+            len(relation_result.get("inter_sentence_relations", [])),
+            len(relation_result.get("context_influences", [])),
+        )
+        result = {
+            "context_frame": frame_sentence_result["context_frame"],
+            "sentence_units": sentence_units_payload,
+            "inter_sentence_relations": relation_result.get("inter_sentence_relations", []),
+            "context_influences": relation_result.get("context_influences", []),
+            "claims": claim_rows,
+        }
+        return self._build_extraction_from_result(result, review_run_id=review_run_id, started=started)
+
+    def _build_extraction_from_result(
+        self,
+        result: dict[str, Any],
+        *,
+        review_run_id: str,
+        started: float,
+    ) -> HierarchicalContextExtraction:
+        structured_returned = time.perf_counter()
+        LOGGER.info(
+            "context_extractor.structured_returned review_run_id=%s seconds=%.2f counts=%s",
+            review_run_id,
+            structured_returned - started,
+            {
+                "sentence_units": len(result.get("sentence_units", [])),
+                "inter_sentence_relations": len(result.get("inter_sentence_relations", [])),
+                "context_influences": len(result.get("context_influences", [])),
+                "claims": len(result.get("claims", [])),
+            },
         )
         frame_row = result["context_frame"]
         context_frame = ContextFrame(
@@ -328,6 +535,13 @@ class LLMContextExtractor:
                     prominence_tier=item.get("prominence_tier") or "unknown",
                 )
             )
+        sentences_finished = time.perf_counter()
+        LOGGER.info(
+            "context_extractor.sentences_built review_run_id=%s count=%d seconds=%.2f",
+            review_run_id,
+            len(sentence_units),
+            sentences_finished - structured_returned,
+        )
         relations_by_index = {
             (int(row["source_index"]), int(row["target_index"]), row["relation_type"], row["evidence"]): row
             for row in result["inter_sentence_relations"]
@@ -343,6 +557,13 @@ class LLMContextExtractor:
             )
             for (source_index, target_index, _relation_type, _evidence), row in relations_by_index.items()
         ]
+        relations_finished = time.perf_counter()
+        LOGGER.info(
+            "context_extractor.relations_built review_run_id=%s count=%d seconds=%.2f",
+            review_run_id,
+            len(inter_sentence_relations),
+            relations_finished - sentences_finished,
+        )
         claims: list[Claim] = []
         claim_id_by_index: dict[int, str] = {}
         for index, item in enumerate(result["claims"]):
@@ -396,6 +617,16 @@ class LLMContextExtractor:
                     qualifiers=qualifiers,
                 )
             )
+        claims_finished = time.perf_counter()
+        LOGGER.info(
+            "context_extractor.claims_built review_run_id=%s count=%d qualifier_count=%d entity_count=%d relation_count=%d seconds=%.2f",
+            review_run_id,
+            len(claims),
+            sum(len(claim.qualifiers or []) for claim in claims),
+            sum(len(claim.entities or []) for claim in claims),
+            sum(len(claim.relations or []) for claim in claims),
+            claims_finished - relations_finished,
+        )
         context_influences = []
         for index, row in enumerate(result["context_influences"]):
             source_id = hierarchical_source_id(row, sentence_id_by_index, claim_id_by_index, context_frame.frame_id)
@@ -413,6 +644,14 @@ class LLMContextExtractor:
                     confidence=float(row["confidence"]),
                 )
             )
+        influences_finished = time.perf_counter()
+        LOGGER.info(
+            "context_extractor.finished review_run_id=%s influence_count=%d transform_seconds=%.2f total_seconds=%.2f",
+            review_run_id,
+            len(context_influences),
+            influences_finished - structured_returned,
+            influences_finished - started,
+        )
         return HierarchicalContextExtraction(
             context_frame=context_frame,
             sentence_units=sentence_units,
@@ -440,6 +679,56 @@ def hierarchical_target_id(row: dict[str, Any], sentence_id_by_index: dict[int, 
     if row["target_type"] in {"context_frame", "consumer_effect"}:
         return frame_id if row["target_type"] == "context_frame" else stable_id("consumer_effect_ref", row["target_index"])
     return ""
+
+
+def chunked(items: list[dict[str, Any]], size: int) -> list[list[dict[str, Any]]]:
+    chunk_size = max(1, size)
+    return [items[index : index + chunk_size] for index in range(0, len(items), chunk_size)]
+
+
+def claim_chunk_rows(rows: list[dict[str, Any]], *, valid_sentence_indexes: set[int]) -> list[dict[str, Any]]:
+    """Keep chunk extraction rows scoped to the sentence indexes the model saw."""
+    scoped: list[dict[str, Any]] = []
+    for row in rows:
+        try:
+            sentence_index = int(row["sentence_index"])
+        except (KeyError, TypeError, ValueError):
+            continue
+        if sentence_index in valid_sentence_indexes:
+            scoped.append(row)
+    return scoped
+
+
+def sentence_relation_view(sentence_rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    return [
+        {
+            "index": item.get("index"),
+            "text": item.get("text", ""),
+            "role": item.get("role", ""),
+            "risk_level": item.get("risk_level", ""),
+            "prominence_tier": item.get("prominence_tier", "unknown"),
+        }
+        for item in sentence_rows
+    ]
+
+
+def claim_relation_view(claim_rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    return [
+        {
+            "sentence_index": row.get("sentence_index"),
+            "text": row.get("text", ""),
+            "risk_hypernym": row.get("risk_hypernym", ""),
+            "risk_severity": row.get("risk_severity", ""),
+            "qualifiers": [
+                {
+                    "text": qualifier.get("text", ""),
+                    "role": qualifier.get("role", ""),
+                }
+                for qualifier in row.get("qualifiers", [])
+            ],
+        }
+        for row in claim_rows
+    ]
 
 
 def build_context_triples(

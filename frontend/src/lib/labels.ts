@@ -79,6 +79,23 @@ export const QUALIFIER_LABELS: Record<string, string> = {
 };
 
 export const DISCLOSURE_LABELS: Record<string, string> = {
+  disc_interest_condition: "금리/우대조건",
+  disc_depositor_protection_notice: "예금자보호",
+  disc_tax_and_after_tax_notice: "세전/세후",
+  disc_variable_rate_notice: "변동 가능성",
+  disc_product_terms_notice: "상품설명서·약관",
+  disc_review_approval_notice: "심의필",
+  disc_seller_name: "판매업자 명칭",
+  disc_economic_interest_notice: "경제적 이해관계",
+  disc_direct_seller_confirmation: "직접판매업자 확인",
+  disc_loan_conditions: "대출 조건",
+  disc_overdue_interest_rate: "연체이자율",
+  disc_early_repayment_fee: "중도상환수수료",
+  disc_credit_score_impact: "신용점수 영향",
+  disc_principal_loss_notice: "원금손실 가능성",
+  disc_past_performance_disclaimer: "과거성과 비보장",
+  disc_risk_grade: "투자위험등급",
+  disc_fee_notice: "수수료·보수",
   deposit_rate_condition: "최고금리 조건",
   deposit_term: "가입기간",
   deposit_tax_basis: "세전/세후",
@@ -88,6 +105,74 @@ export const DISCLOSURE_LABELS: Record<string, string> = {
 
 /** 고지 항목별 한 줄 설명 + 필수 여부 (예외·고지 검토 시뮬레이션용). */
 export const DISCLOSURE_META: Record<string, { desc: string; required: boolean }> = {
+  disc_interest_condition: {
+    desc: "금리·우대조건·적용기간을 함께 표시해야 합니다.",
+    required: true,
+  },
+  disc_depositor_protection_notice: {
+    desc: "예금자보호법에 따른 보호 한도와 합산 기준을 유지 고지해야 합니다.",
+    required: true,
+  },
+  disc_tax_and_after_tax_notice: {
+    desc: "금리·이자 표시에 세전/세후 기준을 구분해야 합니다.",
+    required: false,
+  },
+  disc_variable_rate_notice: {
+    desc: "금리나 혜택이 조건에 따라 달라질 수 있음을 함께 표시해야 합니다.",
+    required: true,
+  },
+  disc_product_terms_notice: {
+    desc: "계약 전 상품설명서와 약관 확인 안내를 표시해야 합니다.",
+    required: false,
+  },
+  disc_review_approval_notice: {
+    desc: "준법감시인 심의필과 유효기간 등 심의 정보를 표시합니다.",
+    required: false,
+  },
+  disc_seller_name: {
+    desc: "금융상품판매업자 또는 광고 주체를 명확히 표시합니다.",
+    required: false,
+  },
+  disc_economic_interest_notice: {
+    desc: "SNS·유튜브 등에서 추천·보증 대가나 경제적 이해관계를 표시합니다.",
+    required: true,
+  },
+  disc_direct_seller_confirmation: {
+    desc: "SNS·유튜브 등에서 직접판매업자 확인 정보를 표시합니다.",
+    required: true,
+  },
+  disc_loan_conditions: {
+    desc: "대출 대상, 자격, 담보, 심사 등 주요 대출조건을 표시해야 합니다.",
+    required: true,
+  },
+  disc_overdue_interest_rate: {
+    desc: "연체이자율 등 불이익 조건을 표시해야 합니다.",
+    required: true,
+  },
+  disc_early_repayment_fee: {
+    desc: "중도상환수수료 등 부대비용을 표시해야 합니다.",
+    required: false,
+  },
+  disc_credit_score_impact: {
+    desc: "대출 이용이 신용점수에 미칠 수 있는 영향을 안내합니다.",
+    required: false,
+  },
+  disc_principal_loss_notice: {
+    desc: "투자상품의 원금손실 가능성과 손실 책임을 명확히 표시해야 합니다.",
+    required: true,
+  },
+  disc_past_performance_disclaimer: {
+    desc: "과거 성과가 미래 수익을 보장하지 않음을 표시해야 합니다.",
+    required: true,
+  },
+  disc_risk_grade: {
+    desc: "투자위험등급 등 상품 위험 정보를 표시해야 합니다.",
+    required: true,
+  },
+  disc_fee_notice: {
+    desc: "수수료·보수 등 비용 정보를 표시해야 합니다.",
+    required: false,
+  },
   deposit_rate_condition: {
     desc: "최고금리/우대금리의 적용 조건과 기준을 함께 표시해야 합니다.",
     required: true,

@@ -9,10 +9,15 @@ from __future__ import annotations
 
 import argparse
 import json
+import logging
 import math
+import re
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Literal
+
+from env_loader import load_local_env
 
 
 RiskLevel = Literal["low", "medium", "high"]
@@ -24,6 +29,7 @@ FAILURE_CODES = {
     "CU_PLAN_EMPTY",
 }
 RISKY_VERDICTS = {"NON_COMPLIANT", "INSUFFICIENT"}
+LOGGER = logging.getLogger(__name__)
 
 
 @dataclass(frozen=True)
@@ -92,7 +98,8 @@ def record_from_json(obj: dict[str, Any]) -> EvaluationRecord:
 
 
 def review_payload_for_record(record: EvaluationRecord, *, workspace_id: str) -> dict[str, Any]:
-    """Build review input while deliberately excluding gold labels and facts."""
+    """Build review input while deliberately excluding gold labels and fact values."""
+    selected_product_name = str(record.facts.get("product_name") or "").strip()
     return {
         "dataset_item_id": record.record_id,
         "title": record.title,
@@ -100,6 +107,7 @@ def review_payload_for_record(record: EvaluationRecord, *, workspace_id: str) ->
         "channel": record.channel,
         "source_type": record.source_type,
         "product_group": record.product_group,
+        "selected_product_name": selected_product_name,
         "workspace_id": workspace_id,
     }
 
@@ -119,6 +127,13 @@ def summarize_prediction(record_id: str, output: dict[str, Any] | None) -> Predi
             str(item.get("source_article") or "").strip()
             for item in risky_plan_items
             if str(item.get("source_article") or "").strip()
+        }
+        | {
+            # 하위 규정 인용 시 router가 병기한 모법 조문 (legal_hierarchy 참조)
+            str(parent).strip()
+            for item in risky_plan_items
+            for parent in item.get("parent_articles") or []
+            if str(parent).strip()
         }
     )
     predicted_sales_principles = sorted(
@@ -146,7 +161,9 @@ def summarize_prediction(record_id: str, output: dict[str, Any] | None) -> Predi
     return PredictionSummary(
         record_id=record_id,
         predicted_articles=predicted_articles,
-        predicted_violation=final_verdict in {"reject", "revise"} or bool(predicted_articles),
+        # needs_review routes to a human and must not count as a violation call;
+        # cited articles alone are context, not a verdict.
+        predicted_violation=final_verdict in {"reject", "revise"},
         predicted_violation_types=predicted_violation_types,
         predicted_sales_principles=predicted_sales_principles,
         predicted_required_disclosures=predicted_required_disclosures,
@@ -161,8 +178,8 @@ def summarize_prediction(record_id: str, output: dict[str, Any] | None) -> Predi
 
 def evaluate_records(records: list[EvaluationRecord], predictions: dict[str, dict[str, Any]]) -> dict[str, Any]:
     summaries = [summarize_prediction(record.record_id, predictions.get(record.record_id)) for record in records]
-    gold_article_sets = [set(normalize_label(item) for item in record.labels.articles if item) for record in records]
-    pred_article_sets = [set(normalize_label(item) for item in summary.predicted_articles if item) for summary in summaries]
+    gold_article_sets = [set(canonical_article(item) for item in record.labels.articles if item) for record in records]
+    pred_article_sets = [set(canonical_article(item) for item in summary.predicted_articles if item) for summary in summaries]
     article_metrics = multilabel_metrics(gold_article_sets, pred_article_sets)
     return {
         "record_count": len(records),
@@ -249,8 +266,13 @@ def ccg_metrics(
         for record, summary in normal_records
         if "예금자보호" in record.text or "예금자보호" in " ".join(record.labels.required_disclosures)
     ]
+    violation_tp = sum(1 for r, s in zip(records, summaries, strict=True) if r.labels.violation and s.predicted_violation)
+    violation_fp = sum(1 for r, s in zip(records, summaries, strict=True) if not r.labels.violation and s.predicted_violation)
+    violation_fn = sum(1 for r, s in zip(records, summaries, strict=True) if r.labels.violation and not s.predicted_violation)
     return {
         "cuplan_recall": ratio(sum(cuplan_hits), len(cuplan_hits)),
+        "violation_precision": ratio(violation_tp, violation_tp + violation_fp),
+        "violation_recall": ratio(violation_tp, violation_tp + violation_fn),
         "evidence_grounding_rate": ratio(
             sum(1 for summary in risky_predictions if summary.has_policy_evidence),
             len(risky_predictions),
@@ -258,6 +280,11 @@ def ccg_metrics(
         "cu0_rate": ratio(sum(1 for summary in summaries if summary.has_cu0_failure), len(summaries)),
         "overblocking_rate": ratio(
             sum(1 for _, summary in normal_records if summary.predicted_routing == "reject"),
+            len(normal_records),
+        ),
+        # reject 외에도 클린 광고가 pass_candidate에 못 가면 soft 과차단이다.
+        "clean_non_pass_rate": ratio(
+            sum(1 for _, summary in normal_records if summary.predicted_routing != "pass_candidate"),
             len(normal_records),
         ),
         "exception_sanity_rate": ratio(
@@ -327,6 +354,30 @@ def normalize_label(value: str) -> str:
     return "".join(str(value).lower().split())
 
 
+# Gold labels and model citations name the same statute differently (금소법 vs
+# 금융소비자보호에 관한 법률) and at different granularity (조 vs 호·목). Match
+# at the statute+조 level so neither difference produces a spurious mismatch.
+LAW_ALIASES = [
+    ("금소법", "금융소비자보호에관한법률"),
+    ("금융소비자보호법", "금융소비자보호에관한법률"),
+    ("표시광고법", "표시ㆍ광고의공정화에관한법률"),
+    ("표시·광고의공정화에관한법률", "표시ㆍ광고의공정화에관한법률"),
+]
+ARTICLE_RE = re.compile(r"제\d+조(의\d+)?")
+
+
+def canonical_article(value: str) -> str:
+    text = normalize_label(value)
+    for alias, full in LAW_ALIASES:
+        if text.startswith(alias) and not text.startswith(full):
+            text = full + text[len(alias):]
+            break
+    match = ARTICLE_RE.search(text)
+    if match:
+        text = text[: match.end()]
+    return text
+
+
 def list_of_str(value: Any) -> list[str]:
     if value is None:
         return []
@@ -374,7 +425,45 @@ def load_json_records(path: Path) -> list[dict[str, Any]]:
     raise ValueError(f"Unsupported JSON structure in {path}")
 
 
-def run_live_predictions(records: list[EvaluationRecord], *, workspace_id: str) -> dict[str, dict[str, Any]]:
+def run_live_predictions(
+    records: list[EvaluationRecord],
+    *,
+    workspace_id: str,
+    workers: int = 1,
+    save_path: Path | None = None,
+) -> dict[str, dict[str, Any]]:
+    if save_path:
+        save_path.parent.mkdir(parents=True, exist_ok=True)
+        save_path.write_text("", encoding="utf-8")
+    if workers <= 1:
+        return run_live_predictions_sequential(records, workspace_id=workspace_id, save_path=save_path)
+    predictions: dict[str, dict[str, Any]] = {}
+    with ThreadPoolExecutor(max_workers=workers) as executor:
+        future_by_id = {
+            executor.submit(run_one_live_prediction, record, workspace_id): record.record_id
+            for record in records
+        }
+        completed = 0
+        for future in as_completed(future_by_id):
+            record_id = future_by_id[future]
+            completed += 1
+            try:
+                predictions[record_id] = future.result()
+                LOGGER.info("Reviewed %s/%s: %s", completed, len(records), record_id)
+            except Exception as exc:  # noqa: BLE001
+                LOGGER.exception("Live review failed for %s", record_id)
+                predictions[record_id] = error_prediction(record_id, exc)
+            if save_path:
+                append_prediction_jsonl(save_path, record_id, predictions[record_id])
+    return predictions
+
+
+def run_live_predictions_sequential(
+    records: list[EvaluationRecord],
+    *,
+    workspace_id: str,
+    save_path: Path | None = None,
+) -> dict[str, dict[str, Any]]:
     from utils import to_jsonable
     from workflow import GraphComplianceCCGWorkflow, review_input_from_payload
 
@@ -384,21 +473,92 @@ def run_live_predictions(records: list[EvaluationRecord], *, workspace_id: str) 
         payload = review_payload_for_record(record, workspace_id=workspace_id)
         output = workflow.review(review_input_from_payload(payload))
         predictions[record.record_id] = to_jsonable(output)
+        if save_path:
+            append_prediction_jsonl(save_path, record.record_id, predictions[record.record_id])
     return predictions
 
 
+def run_one_live_prediction(record: EvaluationRecord, workspace_id: str) -> dict[str, Any]:
+    from utils import to_jsonable
+    from workflow import GraphComplianceCCGWorkflow, review_input_from_payload
+
+    payload = review_payload_for_record(record, workspace_id=workspace_id)
+    output = GraphComplianceCCGWorkflow().review(review_input_from_payload(payload))
+    return to_jsonable(output)
+
+
+def error_prediction(record_id: str, exc: Exception) -> dict[str, Any]:
+    return {
+        "dataset_item_id": record_id,
+        "final_verdict": "needs_review",
+        "routing": {"error": True},
+        "detected_issues": [
+            {
+                "risk_code": "LIVE_REVIEW_ERROR",
+                "severity": "HIGH",
+                "problem_span": "",
+                "rationale": str(exc),
+                "required_action": "라이브 평가 실패 원인을 확인하고 재실행하세요.",
+            }
+        ],
+        "post_approval_required_actions": [],
+        "rationale": f"Live review failed: {exc}",
+        "review_run_id": "",
+        "cu_plan": [],
+        "effective_judgments": [],
+        "judgments": [],
+        "context_triples": [],
+        "system_review_items": [{"risk_code": "LIVE_REVIEW_ERROR", "message": str(exc)}],
+    }
+
+
+def write_predictions_jsonl(path: Path, predictions: dict[str, dict[str, Any]]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("w", encoding="utf-8") as handle:
+        for record_id in sorted(predictions):
+            row = predictions[record_id]
+            if not row.get("dataset_item_id"):
+                row = {"dataset_item_id": record_id, **row}
+            handle.write(json.dumps(row, ensure_ascii=False) + "\n")
+
+
+def append_prediction_jsonl(path: Path, record_id: str, prediction: dict[str, Any]) -> None:
+    row = prediction
+    if not row.get("dataset_item_id"):
+        row = {"dataset_item_id": record_id, **row}
+    with path.open("a", encoding="utf-8") as handle:
+        handle.write(json.dumps(row, ensure_ascii=False) + "\n")
+
+
 def main() -> int:
+    load_local_env(Path.cwd() / ".env")
+    logging.basicConfig(level=logging.INFO, format="%(levelname)s:%(name)s:%(message)s")
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--input", type=Path, required=True, help="Evaluation JSONL/JSON records.")
     parser.add_argument("--predictions", type=Path, default=None, help="Saved review outputs JSONL/JSON.")
     parser.add_argument("--run-live", action="store_true", help="Run the live CCG workflow before evaluation.")
     parser.add_argument("--workspace-id", default="graphcompliance_mvp_jb_20260530")
+    parser.add_argument("--workers", type=int, default=1, help="Parallel workers for --run-live. Keep small for OpenAI/Neo4j limits.")
+    parser.add_argument("--start", type=int, default=0, help="Start offset for batch live evaluation.")
+    parser.add_argument("--limit", type=int, default=None, help="Maximum records to evaluate in this run.")
+    parser.add_argument("--save-predictions", type=Path, default=None, help="Optional JSONL path to save live predictions before evaluation.")
     parser.add_argument("--output", type=Path, default=None)
     args = parser.parse_args()
 
     records = load_records(args.input)
+    if args.start or args.limit is not None:
+        records = records[args.start :]
+        if args.limit is not None:
+            records = records[: args.limit]
     if args.run_live:
-        predictions = run_live_predictions(records, workspace_id=args.workspace_id)
+        predictions = run_live_predictions(
+            records,
+            workspace_id=args.workspace_id,
+            workers=args.workers,
+            save_path=args.save_predictions,
+        )
+        if args.save_predictions:
+            write_predictions_jsonl(args.save_predictions, predictions)
     elif args.predictions:
         predictions = load_predictions(args.predictions)
     else:

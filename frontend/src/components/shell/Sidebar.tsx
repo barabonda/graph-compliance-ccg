@@ -1,14 +1,15 @@
 "use client";
 
 import type { ReviewOutput } from "@/lib/types";
-import { buildIssueCards } from "@/lib/selectors";
+import { buildIssueCards, disclosureIsSatisfied } from "@/lib/selectors";
 import { Icon } from "../Icon";
 
-export type ViewKey = "new" | "review" | "graph" | "exception" | "product" | "audit";
+export type ViewKey = "new" | "review" | "revision" | "graph" | "exception" | "product" | "audit";
 
 const NAV: { key: ViewKey; label: string; sub: string; icon: string }[] = [
   { key: "new", label: "새 심사", sub: "문안 접수 · 실행", icon: "plus" },
   { key: "review", label: "심사 콘솔", sub: "광고 원문 · 위험", icon: "review" },
+  { key: "revision", label: "수정안", sub: "Before/After", icon: "spark" },
   { key: "graph", label: "근거 경로", sub: "설명 그래프", icon: "graph" },
   { key: "exception", label: "예외·고지 검토", sub: "완화 시뮬레이션", icon: "shield" },
   { key: "product", label: "상품 사실", sub: "문서 대조", icon: "layers" },
@@ -26,7 +27,7 @@ export function Sidebar({ view, setView, result, resolvedCount }: Props) {
   const cards = result ? buildIssueCards(result).filter((card) => card.kind !== "trackB") : [];
   const openCount = Math.max(0, cards.length - resolvedCount);
   const checks = result?.product_fact_context?.disclosure_checks ?? [];
-  const met = checks.filter((check) => check.present).length;
+  const met = checks.filter(disclosureIsSatisfied).length;
 
   return (
     <aside className="flex w-[228px] shrink-0 flex-col border-r border-line bg-surface px-3.5 py-4">

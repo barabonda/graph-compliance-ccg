@@ -15,6 +15,14 @@ from the 준법 테스트용 Korean financial-ad violation DOCX. That fixture is
 intentionally violation-heavy and should be used as a recall/red-team suite,
 not as a balanced production-distribution benchmark.
 
+The directory also contains `approved_noise_jb_routine_deposit.json`, a small
+golden regression set derived from a 심의필 통과 deposit ad copy. It keeps one
+approved reference record and five targeted noisy mutations. This fixture is
+intended to verify that approved disclosures remain recognized as satisfied,
+while controlled edits such as depositor-protection removal, stale protection
+limit wording, unconditional top-rate claims, low-prominence condition
+disclosures, and missing review-approval text are detected.
+
 ## Schema
 
 Each JSONL record contains:
@@ -60,6 +68,15 @@ The DOCX-derived red-team fixture prioritizes deliberately unsafe drafts:
   qualifiers;
 - SNS/recommendation-disclosure and unauthorized-review style issues.
 
+The approved-noise fixture prioritizes regression safety around a known-good
+bank deposit ad:
+
+- the clean approved record should not be overblocked;
+- required disclosures in the clean record should be counted as present;
+- noisy mutations should preserve their targeted gold labels;
+- product name selection is documented through `facts.product_name` but gold
+  labels are still excluded from the review prompt.
+
 ## Representativeness And Bias
 
 This set intentionally covers a range of sales principles and channels, but it
@@ -76,6 +93,8 @@ Residual limitations:
 - the red-team fixture contains only violating cases, so precision and
   overblocking should be measured with the balanced smoke set or a separate
   normal/exception control set.
+- the approved-noise fixture is adapted from a user-provided 심의필 통과 ad and
+  is designed for local regression, not as public enforcement evidence.
 
 ## Ethics And Legal Safety
 

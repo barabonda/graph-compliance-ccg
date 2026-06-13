@@ -5,6 +5,9 @@ from __future__ import annotations
 import json
 import logging
 import os
+import queue
+import threading
+import time
 from pathlib import Path
 from typing import Any
 
@@ -77,41 +80,41 @@ def review(payload: dict[str, Any]) -> dict[str, Any]:
 @app.post("/api/review/stream")
 def review_stream(payload: dict[str, Any]) -> StreamingResponse:
     def event_lines():
-        try:
-            workflow = GraphComplianceCCGWorkflow()
-            review_input = review_input_from_payload(payload)
-            for event in workflow.review_events(review_input):
-                yield json.dumps(to_jsonable(event), ensure_ascii=False) + "\n"
-        except ServiceUnavailable as exc:
-            yield stream_error_event("neo4j_unavailable", {
-                "error": "neo4j_unavailable",
-                "message": "Neo4j is unavailable or DNS/network resolution failed.",
-                "cause": str(exc),
-            })
-        except AuthError as exc:
-            yield stream_error_event("neo4j_auth_failed", {
-                "error": "neo4j_auth_failed",
-                "message": "Neo4j authentication failed. Check NEO4J_USER and NEO4J_PASSWORD.",
-                "cause": str(exc),
-            })
-        except AuthenticationError as exc:
-            yield stream_error_event("openai_auth_failed", openai_error_detail("openai_auth_failed", exc))
-        except RateLimitError as exc:
-            yield stream_error_event("openai_rate_limited", openai_error_detail("openai_rate_limited", exc))
-        except BadRequestError as exc:
-            detail = openai_error_detail("openai_bad_request", exc)
-            if "model" in str(exc).lower():
-                detail["message"] = "OpenAI rejected the request. Check OPENAI_MODEL and structured-output support."
-            yield stream_error_event("openai_bad_request", detail)
-        except APIConnectionError as exc:
-            yield stream_error_event("openai_connection_failed", openai_error_detail("openai_connection_failed", exc))
-        except APIStatusError as exc:
-            detail = openai_error_detail("openai_api_error", exc)
-            detail["status_code"] = exc.status_code
-            yield stream_error_event("openai_api_error", detail)
-        except RuntimeError as exc:
-            detail = runtime_error_detail(exc)
-            yield stream_error_event(str(detail.get("error") or "review_runtime_error"), detail)
+        event_queue: queue.Queue[dict[str, Any] | None] = queue.Queue()
+        heartbeat_seconds = float(os.environ.get("CCG_REVIEW_STREAM_HEARTBEAT_SECONDS", "15"))
+
+        def worker() -> None:
+            try:
+                workflow = GraphComplianceCCGWorkflow()
+                review_input = review_input_from_payload(payload)
+                for event in workflow.review_events(review_input):
+                    event_queue.put(to_jsonable(event))
+            except Exception as exc:  # noqa: BLE001 - converted into a structured stream error below.
+                event_queue.put(stream_error_payload(exc))
+            finally:
+                event_queue.put(None)
+
+        thread = threading.Thread(target=worker, name="graphcompliance-review-stream", daemon=True)
+        thread.start()
+        last_payload_at = time.monotonic()
+        while True:
+            try:
+                event = event_queue.get(timeout=heartbeat_seconds)
+            except queue.Empty:
+                yield json.dumps(
+                    {
+                        "event": "heartbeat",
+                        "step": "Review still running",
+                        "summary": "긴 분석 단계가 계속 처리 중입니다. 연결 유지를 위해 heartbeat를 보냅니다.",
+                        "counts": {"seconds_since_last_event": round(time.monotonic() - last_payload_at, 1)},
+                    },
+                    ensure_ascii=False,
+                ) + "\n"
+                continue
+            if event is None:
+                break
+            last_payload_at = time.monotonic()
+            yield json.dumps(event, ensure_ascii=False) + "\n"
 
     return StreamingResponse(event_lines(), media_type="application/x-ndjson")
 
@@ -184,16 +187,55 @@ def friendly_openai_message(code: str, exc: Exception) -> str:
 
 
 def stream_error_event(code: str, detail: dict[str, Any]) -> str:
-    return json.dumps(
-        {
-            "event": "error",
-            "step": "Error",
-            "summary": detail.get("message") or code,
-            "error": code,
-            "detail": detail,
-        },
-        ensure_ascii=False,
-    ) + "\n"
+    return json.dumps(stream_error_dict(code, detail), ensure_ascii=False) + "\n"
+
+
+def stream_error_dict(code: str, detail: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "event": "error",
+        "step": "Error",
+        "summary": detail.get("message") or code,
+        "error": code,
+        "detail": detail,
+    }
+
+
+def stream_error_payload(exc: Exception) -> dict[str, Any]:
+    if isinstance(exc, ServiceUnavailable):
+        return stream_error_dict("neo4j_unavailable", {
+            "error": "neo4j_unavailable",
+            "message": "Neo4j is unavailable or DNS/network resolution failed.",
+            "cause": str(exc),
+        })
+    if isinstance(exc, AuthError):
+        return stream_error_dict("neo4j_auth_failed", {
+            "error": "neo4j_auth_failed",
+            "message": "Neo4j authentication failed. Check NEO4J_USER and NEO4J_PASSWORD.",
+            "cause": str(exc),
+        })
+    if isinstance(exc, AuthenticationError):
+        return stream_error_dict("openai_auth_failed", openai_error_detail("openai_auth_failed", exc))
+    if isinstance(exc, RateLimitError):
+        return stream_error_dict("openai_rate_limited", openai_error_detail("openai_rate_limited", exc))
+    if isinstance(exc, BadRequestError):
+        detail = openai_error_detail("openai_bad_request", exc)
+        if "model" in str(exc).lower():
+            detail["message"] = "OpenAI rejected the request. Check OPENAI_MODEL and structured-output support."
+        return stream_error_dict("openai_bad_request", detail)
+    if isinstance(exc, APIConnectionError):
+        return stream_error_dict("openai_connection_failed", openai_error_detail("openai_connection_failed", exc))
+    if isinstance(exc, APIStatusError):
+        detail = openai_error_detail("openai_api_error", exc)
+        detail["status_code"] = exc.status_code
+        return stream_error_dict("openai_api_error", detail)
+    if isinstance(exc, RuntimeError):
+        detail = runtime_error_detail(exc)
+        return stream_error_dict(str(detail.get("error") or "review_runtime_error"), detail)
+    return stream_error_dict("review_runtime_error", {
+        "error": "review_runtime_error",
+        "message": "Review workflow failed.",
+        "cause": str(exc),
+    })
 
 
 def runtime_error_detail(exc: RuntimeError) -> dict[str, Any]:

@@ -167,7 +167,7 @@ def test_evidence_window_uses_only_found_policy_chains_for_judge() -> None:
 
 
 class DuplicateJudgmentLLM(LLMGateway):
-    def structured(self, *, name, system, user, schema):
+    def structured(self, *, name, system, user, schema, timeout_seconds=None, model=None):
         if name != "graphcompliance_cu_judgment":
             raise AssertionError(f"unexpected LLM call: {name}")
         plan_item_id = re.search(r"'plan_item_id': '([^']+)'", user).group(1)
@@ -312,7 +312,7 @@ class FakeLLM(LLMGateway):
         self.verdict = verdict
         self.exception_calls = 0
 
-    def structured(self, *, name, system, user, schema):
+    def structured(self, *, name, system, user, schema, timeout_seconds=None, model=None):
         self.client.calls.append(name)
         if name == "graphcompliance_context_extraction":
             return {
@@ -387,6 +387,42 @@ class FakeLLM(LLMGateway):
                         ],
                     }
                 ]
+            }
+        if name == "graphcompliance_context_sentences":
+            payload = self.structured(
+                name="graphcompliance_context_extraction",
+                system=system,
+                user=user,
+                schema=schema,
+                timeout_seconds=timeout_seconds,
+                model=model,
+            )
+            return {
+                "context_frame": payload["context_frame"],
+                "sentence_units": payload["sentence_units"],
+            }
+        if name == "graphcompliance_context_claims":
+            payload = self.structured(
+                name="graphcompliance_context_extraction",
+                system=system,
+                user=user,
+                schema=schema,
+                timeout_seconds=timeout_seconds,
+                model=model,
+            )
+            return {"claims": payload["claims"]}
+        if name == "graphcompliance_context_relations":
+            payload = self.structured(
+                name="graphcompliance_context_extraction",
+                system=system,
+                user=user,
+                schema=schema,
+                timeout_seconds=timeout_seconds,
+                model=model,
+            )
+            return {
+                "inter_sentence_relations": payload["inter_sentence_relations"],
+                "context_influences": payload["context_influences"],
             }
         if name == "graphcompliance_policy_normalization":
             claim_id = re.search(r"'claim_id': '([^']+)'", user).group(1)
@@ -497,7 +533,7 @@ class CapturingExtractionLLM(FakeLLM):
         super().__init__()
         self.last_system = ""
 
-    def structured(self, *, name, system, user, schema):
+    def structured(self, *, name, system, user, schema, timeout_seconds=None, model=None):
         if name == "graphcompliance_context_extraction":
             self.last_system = system
             return {
@@ -563,11 +599,50 @@ class CapturingExtractionLLM(FakeLLM):
                     }
                 ]
             }
+        if name == "graphcompliance_context_sentences":
+            payload = self.structured(
+                name="graphcompliance_context_extraction",
+                system=system,
+                user=user,
+                schema=schema,
+                timeout_seconds=timeout_seconds,
+                model=model,
+            )
+            return {
+                "context_frame": payload["context_frame"],
+                "sentence_units": payload["sentence_units"],
+            }
+        if name == "graphcompliance_context_claims":
+            self.last_system = system
+            payload = self.structured(
+                name="graphcompliance_context_extraction",
+                system=system,
+                user=user,
+                schema=schema,
+                timeout_seconds=timeout_seconds,
+                model=model,
+            )
+            return {"claims": payload["claims"]}
+        if name == "graphcompliance_context_relations":
+            previous_system = self.last_system
+            payload = self.structured(
+                name="graphcompliance_context_extraction",
+                system=system,
+                user=user,
+                schema=schema,
+                timeout_seconds=timeout_seconds,
+                model=model,
+            )
+            self.last_system = previous_system
+            return {
+                "inter_sentence_relations": payload["inter_sentence_relations"],
+                "context_influences": payload["context_influences"],
+            }
         return super().structured(name=name, system=system, user=user, schema=schema)
 
 
 class OverrideLLM(FakeLLM):
-    def structured(self, *, name, system, user, schema):
+    def structured(self, *, name, system, user, schema, timeout_seconds=None, model=None):
         if name == "graphcompliance_exception_override":
             self.exception_calls += 1
             return {
@@ -580,14 +655,14 @@ class OverrideLLM(FakeLLM):
 
 
 class EmptyRerankLLM(FakeLLM):
-    def structured(self, *, name, system, user, schema):
+    def structured(self, *, name, system, user, schema, timeout_seconds=None, model=None):
         if name == "graphcompliance_cuplan_rerank":
             return {"selected": []}
         return super().structured(name=name, system=system, user=user, schema=schema)
 
 
 class MisleadingLLM(FakeLLM):
-    def structured(self, *, name, system, user, schema):
+    def structured(self, *, name, system, user, schema, timeout_seconds=None, model=None):
         if name == "graphcompliance_overall_impression":
             return {
                 "verdict": "HIGH",
@@ -601,7 +676,7 @@ class MisleadingLLM(FakeLLM):
 
 
 class ProductFactLLM(FakeLLM):
-    def structured(self, *, name, system, user, schema):
+    def structured(self, *, name, system, user, schema, timeout_seconds=None, model=None):
         if name == "graphcompliance_product_fact_extraction":
             return {
                 "product_facts": [
@@ -646,7 +721,7 @@ class ProductFactLLM(FakeLLM):
 
 
 class UnknownHypernymLLM(FakeLLM):
-    def structured(self, *, name, system, user, schema):
+    def structured(self, *, name, system, user, schema, timeout_seconds=None, model=None):
         if name == "graphcompliance_policy_normalization":
             return {
                 "anchors": [
@@ -674,7 +749,7 @@ class UnknownHypernymLLM(FakeLLM):
 
 
 class LeakyEvidenceLLM(FakeLLM):
-    def structured(self, *, name, system, user, schema):
+    def structured(self, *, name, system, user, schema, timeout_seconds=None, model=None):
         if name == "graphcompliance_cu_judgment":
             plan_item_id = re.search(r"'plan_item_id': '([^']+)'", user).group(1)
             return {
@@ -1163,7 +1238,50 @@ def test_product_fact_analyzer_requires_exact_product_selection() -> None:
     assert context["extraction_status"] == "NEEDS_PRODUCT_SELECTION"
     assert context["product_facts"] == []
     assert "graphcompliance_product_fact_extraction" not in llm.client.calls
-    assert any(item["label"] == "예금자보호 한도" for item in context["disclosure_checks"])
+    assert any(item["check_id"] == "disc_depositor_protection_notice" for item in context["disclosure_checks"])
+    assert "applicability_gate" in context
+
+
+def test_disclosure_check_handles_negated_protection_notice() -> None:
+    checks = product_facts_module.build_disclosure_checks(
+        ReviewInput(product_group="deposit", content_text="이 상품은 예금자보호 안 됨 상품입니다.")
+    )
+
+    protection = next(item for item in checks if item["check_id"] == "disc_depositor_protection_notice")
+    assert protection["status"] == "PRESENT_BUT_NEGATED"
+    assert protection["present"] is False
+
+
+def test_disclosure_check_reports_unsupported_graph_catalog(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(
+        product_facts_module,
+        "disclosure_catalog_for_group",
+        lambda workspace_id, product_group: (
+            {
+                "check_id": "disc_unknown_new_rule",
+                "label": "새로운 고지",
+                "source": "새 심의기준",
+                "detect_tokens": ["새로운 고지"],
+                "negative_tokens": [],
+                "fact_match_tokens": ["새로운 고지"],
+                "required_roles": [],
+                "prominence_required": False,
+                "check_type": "unsupported",
+                "on_missing": "needs_review",
+                "severity": 2,
+                "product_groups": ["deposit"],
+                "channels": [],
+                "profile_supported": False,
+            },
+        ),
+    )
+
+    checks = product_facts_module.build_disclosure_checks(
+        ReviewInput(product_group="deposit", content_text="JB 예금 안내입니다.")
+    )
+
+    unsupported = next(item for item in checks if item["check_id"] == "disc_unknown_new_rule")
+    assert unsupported["status"] == "UNSUPPORTED_DISCLOSURE_CHECK"
 
 
 def test_product_fact_analyzer_accepts_selected_product(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -2349,3 +2467,43 @@ def test_synthetic_quality_report_checks_spans_and_product_fact_sources() -> Non
     assert report["record_count"] == 2
     assert report["blocking_error_count"] == 4
     assert report["violation_type_counts"]["DEPOSIT_UNIVERSAL_SCOPE_MISLEADING"] == 1
+
+
+def test_selected_base_product_name_resolves_from_csv_metadata(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.delenv("NEO4J_URI", raising=False)
+    monkeypatch.delenv("NEO4J_USER", raising=False)
+    monkeypatch.delenv("NEO4J_USERNAME", raising=False)
+    monkeypatch.delenv("NEO4J_PASSWORD", raising=False)
+    jb_data_context_module.load_product_rows.cache_clear()
+
+    text = "JB시니어우대예금 특판 안내. 최고 연 5.0% 금리를 확정 제공하며 안정적으로 목돈을 관리할 수 있습니다."
+    review_input = ReviewInput(
+        dataset_item_id="product_match_regression",
+        title="JB시니어우대예금",
+        content_text=text,
+        channel="web_page",
+        product_group="deposit",
+        selected_product_name="JB시니어우대예금",
+        workspace_id="graphcompliance_mvp_jb_20260530",
+    )
+    claims = [
+        Claim(
+            claim_id="claim_rate",
+            text=text,
+            span=Span(text=text, start=0, end=len(text)),
+            entities=[],
+            qualifiers=[],
+            meaning="",
+            implicature="",
+            consumer_effect="",
+            risk_hypernym="",
+            risk_severity="LOW",
+        )
+    ]
+
+    product_context, _requirements = jb_data_context_module.build_product_context(review_input, claims)
+    first_product = product_context["matched_products"][0]
+
+    assert first_product["match_basis"] == "selected_product"
+    assert first_product["product"] == "JB시니어우대예금(만기일시지급식)"
+    assert first_product["document_count"] >= 1

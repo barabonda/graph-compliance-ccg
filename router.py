@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from legal_hierarchy import parent_articles_for
 from schemas import ExceptionReview, LLMJudgment, ReviewGraph, ReviewInput, ReviewOutput
 from utils import to_jsonable
 
@@ -74,23 +75,24 @@ def build_output(
                 "required_action": "전체 문안에서 조건, 제한, 위험, 고지를 더 균형 있게 표시하세요.",
             }
         )
-    for diagnostic in graph.prominence_diagnostics:
-        if diagnostic.get("diagnostic_code") not in {"PROMINENCE_INSUFFICIENT", "DISCLOSURE_MISSING"}:
-            continue
-        detected_issues.append(
-            {
-                "risk_code": str(diagnostic.get("diagnostic_code") or ""),
-                "principle": "광고규제",
-                "source_article": "금소법 제22조",
-                "risk_title": "필수고지 현저성 또는 누락",
-                "subject": "고지 표시",
-                "constraint": "혜택과 불이익을 균형 있게 명확히 전달해야 합니다.",
-                "severity": 3,
-                "problem_span": str(diagnostic.get("evidence") or ""),
-                "rationale": str(diagnostic.get("message") or ""),
-                "required_action": "조건, 기간, 한도, 세전/세후, 예금자보호 등 필요한 고지를 혜택 문구와 같은 맥락에서 충분히 보이게 표시하세요.",
-            }
-        )
+    if graph.cu_plan and final != "pass_candidate":
+        for diagnostic in graph.prominence_diagnostics:
+            if diagnostic.get("diagnostic_code") not in {"PROMINENCE_INSUFFICIENT", "DISCLOSURE_MISSING"}:
+                continue
+            detected_issues.append(
+                {
+                    "risk_code": str(diagnostic.get("diagnostic_code") or ""),
+                    "principle": "광고규제",
+                    "source_article": "금소법 제22조",
+                    "risk_title": "필수고지 현저성 또는 누락",
+                    "subject": "고지 표시",
+                    "constraint": "혜택과 불이익을 균형 있게 명확히 전달해야 합니다.",
+                    "severity": 3,
+                    "problem_span": str(diagnostic.get("evidence") or ""),
+                    "rationale": str(diagnostic.get("message") or ""),
+                    "required_action": "조건, 기간, 한도, 세전/세후, 예금자보호 등 필요한 고지를 혜택 문구와 같은 맥락에서 충분히 보이게 표시하세요.",
+                }
+            )
     system_review_items = system_review_items_for(graph)
     routing = {
         "ad_scope": "product_ad",
@@ -115,7 +117,7 @@ def build_output(
         context_triples=to_jsonable(graph.context_triples),
         context_anchors=to_jsonable(graph.anchors),
         anchor_feature_sets=to_jsonable(graph.anchor_feature_sets),
-        cu_plan=to_jsonable(graph.cu_plan),
+        cu_plan=cu_plan_with_parent_articles(graph, review_input.workspace_id),
         judgments=to_jsonable(graph.judgments),
         effective_judgments=to_jsonable(effective),
         exception_reviews=to_jsonable(graph.exception_reviews),
@@ -124,6 +126,7 @@ def build_output(
         revision_suggestions=revision_suggestions or [],
         product_context=graph.product_context,
         product_fact_context=graph.product_fact_context,
+        applicability_gate=graph.applicability_gate,
         prominence_analysis=graph.prominence_analysis,
         disclosure_links=graph.disclosure_links,
         prominence_diagnostics=graph.prominence_diagnostics,
@@ -137,6 +140,16 @@ def build_output(
         graph_paths=graph.graph_paths,
         highlight_spans=highlight_spans(graph, effective),
     )
+
+
+def cu_plan_with_parent_articles(graph: ReviewGraph, workspace_id: str) -> list[dict[str, object]]:
+    """하위 규정을 인용한 CUPlan 항목에 모법 조문(금소법 제21·22조 등)을 병기한다."""
+    rows = to_jsonable(graph.cu_plan)
+    for row in rows:
+        row["parent_articles"] = parent_articles_for(
+            str(row.get("source_article") or ""), workspace_id=workspace_id
+        )
+    return rows
 
 
 def effective_judgments(judgments: list[LLMJudgment], reviews: list[ExceptionReview]) -> list[LLMJudgment]:

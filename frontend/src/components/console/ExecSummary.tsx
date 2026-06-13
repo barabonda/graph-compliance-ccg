@@ -1,7 +1,7 @@
 "use client";
 
 import { riskGrade, VERDICT_LABELS, verdictBadgeTone } from "@/lib/labels";
-import { buildIssueCards } from "@/lib/selectors";
+import { buildIssueCards, disclosureIsSatisfied } from "@/lib/selectors";
 import type { ReviewOutput } from "@/lib/types";
 import { Icon } from "../Icon";
 import { Badge, Tag } from "../ui";
@@ -33,7 +33,7 @@ export function ExecSummary({ result, resolved }: { result: ReviewOutput; resolv
   const open = cards.filter((card) => !resolved.has(card.id)).length;
   const highOpen = cards.filter((card) => card.tone === "risk" && !resolved.has(card.id)).length;
   const checks = result.product_fact_context?.disclosure_checks ?? [];
-  const met = checks.filter((check) => check.present).length;
+  const met = checks.filter(disclosureIsSatisfied).length;
   const misleading = Number(result.overall_impression_judgment?.misleading_risk_score ?? 0);
   const grade = riskGrade(misleading);
   const gradeColor =

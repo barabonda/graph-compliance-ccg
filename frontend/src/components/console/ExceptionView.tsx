@@ -224,12 +224,18 @@ export function ExceptionView({ result, resolved }: Props) {
                     )}
                   </div>
                   <div className="mt-1 text-[12px] leading-relaxed text-ink-3">{item.desc}</div>
+                  {item.status !== "PRESENT" && item.status !== "MISSING" ? (
+                    <div className="mt-1 text-[11.5px] leading-relaxed text-ink-3">
+                      {item.statusLabel}
+                      {item.gateReason ? ` · ${item.gateReason}` : ""}
+                    </div>
+                  ) : null}
                 </div>
                 <span
-                  className="w-9 text-right text-[11.5px] font-bold"
+                  className="w-24 text-right text-[11.5px] font-bold"
                   style={{ color: item.present ? "var(--pass)" : "var(--ink-4)" }}
                 >
-                  {item.present ? "충족" : "누락"}
+                  {item.present ? "충족" : item.statusLabel}
                 </span>
                 <Toggle on={item.present} onClick={() => toggle(item.id)} />
               </div>

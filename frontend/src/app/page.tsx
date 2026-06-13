@@ -14,6 +14,7 @@ import { Toast } from "@/components/shell/Toast";
 import { AuditTab } from "@/components/tabs/AuditTab";
 import { OverallTab } from "@/components/tabs/OverallTab";
 import { ProductFactsTab } from "@/components/tabs/ProductFactsTab";
+import { RevisionTab } from "@/components/tabs/RevisionTab";
 import { SentenceMapTab } from "@/components/tabs/SentenceMapTab";
 import { EmptyState, Expandable } from "@/components/ui";
 import { useReview } from "@/hooks/useReview";
@@ -191,6 +192,15 @@ export default function Page() {
             <div className="rounded-[14px] border border-line bg-surface p-4 shadow-card">
               <ProductFactsTab result={result} />
             </div>
+          )}
+
+          {view === "revision" && (
+            <RevisionTab
+              result={result}
+              reviewedText={state.reviewedText}
+              resolved={resolved}
+              onToggleResolve={handleToggleResolve}
+            />
           )}
 
           {view === "audit" && (

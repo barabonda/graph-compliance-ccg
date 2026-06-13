@@ -193,6 +193,8 @@ class LLMRevisionSuggester:
             for suggestion in result["suggestions"]
             if suggestion_is_usable(suggestion, anchor_text_by_id)
         ]
+        if not usable:
+            usable = fallback_suggestions(risk_rows)
         # 전체 교정본을 센티넬 항목으로 첨부(원문과 달라야 의미 있음).
         integrated = str(result.get("integrated_revision") or "").strip()
         if integrated and integrated != review_input.content_text.strip():
@@ -242,3 +244,26 @@ def suggestion_is_usable(suggestion: dict[str, Any], anchor_text_by_id: dict[str
     if is_instruction_like(after):
         return False
     return True
+
+
+def fallback_suggestions(risk_rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    suggestions: list[dict[str, Any]] = []
+    for row in risk_rows:
+        anchor = row.get("anchor") or {}
+        anchor_id = str(anchor.get("anchor_id") or "")
+        span = (anchor.get("span") or {}).get("text") or ""
+        if not anchor_id or not span:
+            continue
+        suggestions.append(
+            {
+                "anchor_id": anchor_id,
+                "severity": "revise",
+                "risky_text": span,
+                "why_problematic": "근거와 조건을 함께 제시하지 않으면 소비자 오인 가능성이 있습니다.",
+                "required_disclosures": ["적용 조건, 위험, 수수료, 상품설명서 확인 문구"],
+                "before": span,
+                "after": "상품의 적용 조건과 유의사항을 확인한 뒤 가입 여부를 결정할 수 있습니다.",
+                "notes_for_reviewer": "LLM 수정안이 필터링되어 안전한 기본 교정안을 제시했습니다.",
+            }
+        )
+    return suggestions

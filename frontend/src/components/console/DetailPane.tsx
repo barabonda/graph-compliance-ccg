@@ -8,6 +8,8 @@ import {
   claimQualifiers,
   clauseEvidenceForAnchor,
   delegationByPrinciple,
+  disclosureIsSatisfied,
+  disclosureStatus,
   disclosureDocCrossRef,
   disclosureSignals,
   effectiveJudgmentsForAnchor,
@@ -257,7 +259,7 @@ export function DetailPane({ result, selectedAnchorId, resolved, onToggleResolve
   const suggestion = (result.revision_suggestions ?? []).find((item) => item.anchor_id === anchor.anchor_id);
   const qualifiers = claimQualifiers(result, anchor.claim_id);
   const checks = result.product_fact_context?.disclosure_checks ?? [];
-  const missingChecks = checks.filter((check) => !check.present);
+  const missingChecks = checks.filter((check) => !disclosureIsSatisfied(check) && disclosureStatus(check) !== "SKIPPED_BY_GATE");
   const comparisons = productClaimFactsForAnchor(result, anchor).flatMap((fact) =>
     productComparisonsForClaimFact(result, fact.claim_fact_id),
   );

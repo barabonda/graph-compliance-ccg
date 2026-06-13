@@ -352,6 +352,7 @@ class ReviewGraph:
     retrieval_diagnostics: dict[str, dict[str, Any]] = field(default_factory=dict)
     product_context: dict[str, Any] = field(default_factory=dict)
     product_fact_context: dict[str, Any] = field(default_factory=dict)
+    applicability_gate: dict[str, Any] = field(default_factory=dict)
     prominence_analysis: dict[str, Any] = field(default_factory=dict)
     disclosure_links: list[dict[str, Any]] = field(default_factory=list)
     prominence_diagnostics: list[dict[str, Any]] = field(default_factory=list)
@@ -387,6 +388,7 @@ class ReviewOutput:
     revision_suggestions: list[dict[str, Any]]
     product_context: dict[str, Any]
     product_fact_context: dict[str, Any]
+    applicability_gate: dict[str, Any]
     prominence_analysis: dict[str, Any]
     disclosure_links: list[dict[str, Any]]
     prominence_diagnostics: list[dict[str, Any]]

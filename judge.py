@@ -402,7 +402,8 @@ def grounded_judgment_row(row: dict[str, Any], anchor: ContextAnchor) -> dict[st
         "score": min(float(row.get("score") or 0.0), 0.5),
         "why": (
             f"{row.get('conclusion') or row.get('why', '')} / 근거 정합성 경고: evidence_span이 이 anchor의 "
-            "격리된 증거창 밖이라 위반을 이 anchor에 귀속할 수 없습니다."
+            "격리된 증거창 밖이라 위반을 이 anchor에 귀속할 수 없습니다. "
+            "(Evidence grounding warning: evidence_span was outside this anchor's isolated evidence window.)"
         ),
         "evidence_span": anchor.span.text,
     }

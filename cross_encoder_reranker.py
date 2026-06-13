@@ -8,6 +8,7 @@ anchor packet and the CU packet.
 from __future__ import annotations
 
 import os
+import threading
 from dataclasses import replace
 from typing import Protocol
 
@@ -15,6 +16,8 @@ from schemas import ContextAnchor, PolicyCandidate
 
 
 DEFAULT_MODEL = "BAAI/bge-reranker-v2-m3"
+_RERANKER_LOCK = threading.Lock()
+_RERANKER_CACHE: dict[tuple[str, bool], object] = {}
 
 
 class CUReranker(Protocol):
@@ -58,7 +61,13 @@ class FlagEmbeddingCrossEncoderCUReranker:
             ) from exc
 
         self.model_name = model_name
-        self._reranker = FlagReranker(model_name, use_fp16=use_fp16)
+        cache_key = (model_name, use_fp16)
+        with _RERANKER_LOCK:
+            reranker = _RERANKER_CACHE.get(cache_key)
+            if reranker is None:
+                reranker = FlagReranker(model_name, use_fp16=use_fp16)
+                _RERANKER_CACHE[cache_key] = reranker
+            self._reranker = reranker
 
     @property
     def enabled(self) -> bool:
@@ -79,7 +88,8 @@ class FlagEmbeddingCrossEncoderCUReranker:
                 reranked[anchor_id] = candidates
                 continue
             pairs = [[anchor_packet(anchor), candidate_packet(candidate)] for candidate in candidates]
-            raw_scores = self._reranker.compute_score(pairs, normalize=True)
+            with _RERANKER_LOCK:
+                raw_scores = self._reranker.compute_score(pairs, normalize=True)
             scores = raw_scores if isinstance(raw_scores, list) else [float(raw_scores)]
             scored = [
                 with_cross_encoder_score(candidate, float(score))

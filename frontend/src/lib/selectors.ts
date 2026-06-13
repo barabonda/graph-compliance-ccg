@@ -683,6 +683,35 @@ export interface CorrectedSegment {
   changed: boolean;
 }
 
+/**
+ * 누락된 필수 고지를 '보완 슬롯'으로. LLM이 지어내지 않고, 데이터(필수고지 카탈로그
+ * + 상품문서 대조)로만 "여기에 ~ 고지가 있어야 합니다 · 근거 조문"을 만든다.
+ * 상품설명서에 근거가 있으면 그 fact를 함께(할루시네이션 0).
+ */
+export interface DisclosureSlot {
+  checkId: string;
+  label: string;
+  source: string;
+  status: DisclosureDocStatus;
+  evidence: ProductFact[];
+}
+
+export function requiredDisclosureSlots(result: ReviewOutput): DisclosureSlot[] {
+  const checks = result.product_fact_context?.disclosure_checks ?? [];
+  return checks
+    .filter((check) => !disclosureIsSatisfied(check) && disclosureStatus(check) !== "SKIPPED_BY_GATE")
+    .map((check) => {
+      const cross = disclosureDocCrossRef(result, check.check_id, check.label);
+      return {
+        checkId: check.check_id,
+        label: check.label,
+        source: String(check.source ?? "금융광고 심의기준"),
+        status: cross.status,
+        evidence: cross.facts,
+      };
+    });
+}
+
 /** 백엔드가 보낸 '전체 일관 교정본'(문서 단위 재작성). 없으면 null. */
 export const DOCUMENT_REVISION_ANCHOR = "__document__";
 export function correctedDocument(result: ReviewOutput): string | null {
@@ -1004,7 +1033,8 @@ export function buildIssueCards(result: ReviewOutput): IssueCardModel[] {
 
   const requirements = result.disclosure_requirements ?? [];
   for (const check of result.product_fact_context?.disclosure_checks ?? []) {
-    if (check.present) continue;
+    const status = disclosureStatus(check);
+    if (disclosureIsSatisfied(check) || status === "SKIPPED_BY_GATE") continue;
     const requirement = requirements.find(
       (item) => item.label === check.label || String(item.check_id ?? "") === check.check_id,
     );
@@ -1169,6 +1199,44 @@ export interface DisclosureItem {
   desc: string;
   required: boolean;
   present: boolean;
+  status: string;
+  statusLabel: string;
+  checkType: string;
+  severity: number;
+  onMissing: string;
+  gateStatus: string;
+  gateReason: string;
+}
+
+const DISCLOSURE_SATISFIED_STATUSES = new Set(["PRESENT"]);
+const DISCLOSURE_REQUIRED_EXCLUDED_STATUSES = new Set(["SKIPPED_BY_GATE"]);
+
+export function disclosureStatus(check: { present?: boolean; status?: string; gate_status?: string }): string {
+  if (check.status) return String(check.status);
+  if (check.gate_status === "OFF") return "SKIPPED_BY_GATE";
+  return check.present ? "PRESENT" : "MISSING";
+}
+
+export function disclosureIsSatisfied(check: { present?: boolean; status?: string; gate_status?: string }): boolean {
+  return DISCLOSURE_SATISFIED_STATUSES.has(disclosureStatus(check));
+}
+
+export function disclosureCountsAsRequired(check: { status?: string; gate_status?: string }, required: boolean): boolean {
+  return required && !DISCLOSURE_REQUIRED_EXCLUDED_STATUSES.has(disclosureStatus(check));
+}
+
+export function disclosureStatusLabel(status: string): string {
+  const labels: Record<string, string> = {
+    PRESENT: "충족",
+    MISSING: "누락",
+    PRESENT_BUT_NEGATED: "부정 표현",
+    IN_PRODUCT_DOC_ONLY: "문서에는 있음 · 광고 누락",
+    PROMINENCE_INSUFFICIENT: "고지 있음 · 위계 낮음",
+    NOT_TESTED: "미검사",
+    SKIPPED_BY_GATE: "적용 제외",
+    UNSUPPORTED_DISCLOSURE_CHECK: "검사 미지원",
+  };
+  return labels[status] ?? (status || "미상");
 }
 
 export function buildComplianceGates(result: ReviewOutput): ComplianceGate[] {
@@ -1179,8 +1247,10 @@ export function buildComplianceGates(result: ReviewOutput): ComplianceGate[] {
   const riskCount = cards.filter((card) => card.kind === "anchor" && card.tone === "risk").length;
   const reviewCount = cards.filter((card) => card.kind === "anchor" && card.tone === "review").length;
   const checks = result.product_fact_context?.disclosure_checks ?? [];
-  const requiredChecks = checks.filter((check) => disclosureMetaResolved(check.check_id).required);
-  const metRequired = requiredChecks.filter((check) => check.present).length;
+  const requiredChecks = checks.filter((check) =>
+    disclosureCountsAsRequired(check, disclosureMetaResolved(check.check_id).required),
+  );
+  const metRequired = requiredChecks.filter(disclosureIsSatisfied).length;
   const trackBScore = Number(result.overall_impression_judgment?.misleading_risk_score ?? 0);
   const trackBGrade = trackBScore >= 0.7 ? "높음" : trackBScore >= 0.4 ? "중간" : "낮음";
 
@@ -1233,12 +1303,20 @@ export function buildComplianceGates(result: ReviewOutput): ComplianceGate[] {
 export function buildDisclosureItems(result: ReviewOutput): DisclosureItem[] {
   return (result.product_fact_context?.disclosure_checks ?? []).map((check) => {
     const meta = disclosureMetaResolved(check.check_id);
+    const status = disclosureStatus(check);
     return {
       id: check.check_id,
       label: check.label,
       desc: meta.desc,
-      required: meta.required,
-      present: Boolean(check.present),
+      required: disclosureCountsAsRequired(check, meta.required),
+      present: disclosureIsSatisfied(check),
+      status,
+      statusLabel: disclosureStatusLabel(status),
+      checkType: String(check.check_type ?? ""),
+      severity: Number(check.severity ?? 0),
+      onMissing: String(check.on_missing ?? ""),
+      gateStatus: String(check.gate_status ?? ""),
+      gateReason: String(check.gate_reason ?? ""),
     };
   });
 }

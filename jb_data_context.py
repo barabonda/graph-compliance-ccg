@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+import csv
 import os
 import re
 from functools import lru_cache
@@ -16,6 +17,9 @@ LOGGER = logging.getLogger(__name__)
 PRODUCT_GRAPH_SOURCE = "graphcompliance_ccg_product_graph_loader"
 DEFAULT_PRODUCT_META_PATH = Path(
     "/Users/barabonda/Downloads/JB금융그룹해커톤_데이터셋/금융상품 데이터셋/전북은행 상품문서 메타데이터.xlsx"
+)
+DEFAULT_PRODUCT_DISCLOSURE_META_PATH = Path(
+    "/Users/barabonda/Downloads/jbbank_product_disclosures_20260528/jbbank_product_disclosures_metadata_20260528.csv"
 )
 
 
@@ -409,17 +413,44 @@ def document_from_neo4j_node(node: Any) -> dict[str, Any]:
 def load_product_rows() -> dict[str, dict[str, Any]]:
     path = Path(os.environ.get("JB_PRODUCT_METADATA_PATH", str(DEFAULT_PRODUCT_META_PATH)))
     if not path.exists():
-        return {}
+        path = DEFAULT_PRODUCT_DISCLOSURE_META_PATH
+    records = load_product_metadata_records(path)
+    if not records and path != DEFAULT_PRODUCT_DISCLOSURE_META_PATH:
+        records = load_product_metadata_records(DEFAULT_PRODUCT_DISCLOSURE_META_PATH)
+    return product_rows_from_records(records)
+
+
+def load_product_metadata_records(path: Path) -> list[dict[str, Any]]:
+    if not path.exists():
+        return []
+    if path.suffix.lower() == ".csv":
+        with path.open("r", encoding="utf-8-sig", newline="") as handle:
+            return [{str(key): value for key, value in row.items()} for row in csv.DictReader(handle)]
     try:
         import pandas as pd
     except Exception:
-        return {}
-    df = pd.read_excel(path, sheet_name="jbbank_product_disclosures_meta")
+        LOGGER.warning("pandas is unavailable; falling back to disclosure CSV metadata for product rows.")
+        if path != DEFAULT_PRODUCT_DISCLOSURE_META_PATH:
+            return load_product_metadata_records(DEFAULT_PRODUCT_DISCLOSURE_META_PATH)
+        return []
+    sheet_name = "jbbank_product_disclosures_meta"
+    if path.name == DEFAULT_PRODUCT_DISCLOSURE_META_PATH.with_suffix(".xlsx").name:
+        sheet_name = "dataset_index"
+    df = pd.read_excel(path, sheet_name=sheet_name)
+    return [{str(key): value for key, value in row.items()} for row in df.fillna("").to_dict(orient="records")]
+
+
+def product_rows_from_records(records: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
     rows: dict[str, dict[str, Any]] = {}
-    for product, group in df.groupby("product", dropna=True):
-        product_name = str(product)
-        first = group.iloc[0]
-        labels = sorted({str(value) for value in group["label"].dropna().tolist()})
+    grouped: dict[str, list[dict[str, Any]]] = {}
+    for record in records:
+        product_name = str(record.get("product") or "").strip()
+        if not product_name:
+            continue
+        grouped.setdefault(product_name, []).append(record)
+    for product_name, group in grouped.items():
+        first = group[0]
+        labels = sorted({str(row.get("label") or "") for row in group if row.get("label")})
         documents = [
             {
                 "source_id": str(row.get("source_id", "")),
@@ -429,7 +460,7 @@ def load_product_rows() -> dict[str, dict[str, Any]]:
                 "relative_path": str(row.get("relative_path", "")),
                 "original_name": str(row.get("original_name", "")),
             }
-            for _, row in group.head(20).iterrows()
+            for row in group[:20]
         ]
         rows[product_name] = {
             "product": product_name,
@@ -439,7 +470,7 @@ def load_product_rows() -> dict[str, dict[str, Any]]:
             "category": str(first.get("category", "")),
             "document_count": int(len(group)),
             "document_labels": labels[:12],
-            "source_ids": [str(value) for value in group["source_id"].dropna().head(8).tolist()],
+            "source_ids": [str(row.get("source_id") or "") for row in group[:8] if row.get("source_id")],
             "documents": documents,
         }
     return rows

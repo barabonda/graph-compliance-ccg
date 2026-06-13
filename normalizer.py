@@ -3,11 +3,16 @@
 from __future__ import annotations
 
 from copy import deepcopy
+import logging
+import os
 from typing import Any
 
 from llm_gateway import LLMGateway
 from schemas import Claim, ContextAnchor, PolicyHypernymProposal, Span
 from utils import stable_id, to_jsonable
+
+
+LOGGER = logging.getLogger(__name__)
 
 
 NORMALIZATION_SCHEMA: dict[str, Any] = {
@@ -74,6 +79,8 @@ class PolicyGuidedNormalizer:
         if not allowed:
             raise RuntimeError("PolicyHypernym vocabulary is empty; run the policy compiler before review.")
         schema = normalization_schema_for_allowed_ids(allowed.keys())
+        model = os.environ.get("CCG_POLICY_NORMALIZATION_MODEL") or None
+        timeout_seconds = float(os.environ.get("CCG_POLICY_NORMALIZATION_TIMEOUT_SECONDS", "420"))
         allowed_rows = [
             {
                 "hypernym_id": item["hypernym_id"],
@@ -84,6 +91,22 @@ class PolicyGuidedNormalizer:
             for item in policy_context.get("hypernyms", [])
             if item.get("hypernym_id") in allowed
         ]
+        claim_view = normalization_claim_view(claims)
+        premises = policy_context.get("premises", [])[:80]
+        fragments = policy_context.get("fragments", [])[:40]
+        LOGGER.info(
+            "policy_normalization.prompt_components review_run_id=%s claims=%d claim_chars=%d "
+            "hypernyms=%d hypernym_chars=%d premises=%d premise_chars=%d fragments=%d fragment_chars=%d",
+            review_run_id,
+            len(claim_view),
+            len(str(claim_view)),
+            len(allowed_rows),
+            len(str(allowed_rows)),
+            len(premises),
+            len(str(premises)),
+            len(fragments),
+            len(str(fragments)),
+        )
         result = self.llm.structured(
             name="graphcompliance_policy_normalization",
             schema=schema,
@@ -101,15 +124,17 @@ class PolicyGuidedNormalizer:
             ),
             user=(
                 "[claims]\n"
-                f"{to_jsonable(claims)}\n\n"
+                f"{claim_view}\n\n"
                 "[allowed_policy_hypernyms]\n"
                 f"{allowed_rows}\n\n"
                 "[policy_premises]\n"
-                f"{policy_context.get('premises', [])[:80]}\n\n"
+                f"{premises}\n\n"
                 "[supporting_policy_fragments]\n"
-                f"{policy_context.get('fragments', [])[:40]}\n\n"
+                f"{fragments}\n\n"
                 f"Keep at most {top_n} hypernyms per anchor."
             ),
+            timeout_seconds=timeout_seconds,
+            model=model,
         )
         anchors: list[ContextAnchor] = []
         valid_claim_ids = {claim.claim_id for claim in claims}
@@ -164,3 +189,42 @@ def normalization_schema_for_allowed_ids(allowed_ids) -> dict[str, Any]:
     )
     hypernym_item["properties"]["hypernym_id"] = {"type": "string", "enum": ids}
     return schema
+
+
+def normalization_claim_view(claims: list[Claim]) -> list[dict[str, Any]]:
+    """Thin claim representation for policy normalization.
+
+    The full Context Graph keeps entities and relations for audit, but policy
+    hypernym normalization only needs the parent claim text, meaning/effect, and
+    expression-level qualifiers. Passing the whole graph here made real review
+    runs balloon into 100k+ character prompts after long disclosure extraction.
+    """
+    return [
+        {
+            "claim_id": claim.claim_id,
+            "text": claim.text,
+            "span": {
+                "start": claim.span.start,
+                "end": claim.span.end,
+                "text": claim.span.text,
+            },
+            "meaning": claim.meaning,
+            "implicature": claim.implicature,
+            "consumer_effect": claim.consumer_effect,
+            "risk_hypernym": claim.risk_hypernym,
+            "risk_severity": claim.risk_severity,
+            "sentence_id": claim.sentence_id,
+            "qualifiers": [
+                {
+                    "text": qualifier.text,
+                    "role": qualifier.role,
+                    "meaning": qualifier.meaning,
+                    "risk_reason": qualifier.risk_reason,
+                    "confidence": qualifier.confidence,
+                    "prominence_tier": qualifier.prominence_tier,
+                }
+                for qualifier in claim.qualifiers
+            ],
+        }
+        for claim in claims
+    ]

@@ -9,9 +9,15 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
-from disclosure_catalog import DISC_ENRICHMENT, disclosure_catalog_for_group
+from applicability_gate import gate_disclosure_catalog
+from disclosure_catalog import (
+    DISCLOSURE_PROFILES,
+    disclosure_catalog_for_group,
+    disclosure_profile,
+    profile_catalog_all,
+)
 from llm_gateway import LLMGateway
-from schemas import Claim, ReviewInput
+from schemas import Claim, ReviewInput, SentenceUnit
 from utils import stable_id, to_jsonable
 
 
@@ -134,6 +140,7 @@ class ProductFactAnalyzer:
         review_input: ReviewInput,
         claims: list[Claim],
         product_context: dict[str, Any],
+        sentence_units: list[SentenceUnit] | None = None,
     ) -> dict[str, Any]:
         matched_products = product_context.get("matched_products", []) or []
         exact_products = [
@@ -146,7 +153,7 @@ class ProductFactAnalyzer:
                 status="NEEDS_PRODUCT_SELECTION",
                 matched_products=matched_products,
                 reason="광고 문안에서 특정 상품명이 하나로 확정되지 않아 상품문서 본문 fact 대조를 수행하지 않았습니다.",
-                disclosure_checks=build_disclosure_checks(review_input),
+                disclosure_checks=build_disclosure_checks(review_input, sentence_units=sentence_units),
             )
 
         product = str(exact_products[0].get("product") or "")
@@ -157,7 +164,7 @@ class ProductFactAnalyzer:
                 matched_products=matched_products,
                 matched_product=product,
                 reason="선택된 상품의 상품주요내용/상품설명서/약관 PDF를 찾지 못했습니다.",
-                disclosure_checks=build_disclosure_checks(review_input),
+                disclosure_checks=build_disclosure_checks(review_input, sentence_units=sentence_units),
             )
         selected_documents = documents[:MAX_DOCUMENTS]
         for document in selected_documents:
@@ -214,6 +221,11 @@ class ProductFactAnalyzer:
             }
 
         status = "EXTRACTED" if product_facts else "NO_PRODUCT_FACT"
+        disclosure_checks = build_disclosure_checks(
+            review_input,
+            product_facts,
+            sentence_units=sentence_units,
+        )
         return {
             "matched_product": product,
             "selected_documents": selected_documents,
@@ -221,7 +233,8 @@ class ProductFactAnalyzer:
             "product_facts": product_facts,
             "claim_facts": claim_facts,
             "comparison_results": comparisons,
-            "disclosure_checks": build_disclosure_checks(review_input, product_facts),
+            "disclosure_checks": disclosure_checks,
+            "applicability_gate": disclosure_gate_summary_from_checks(disclosure_checks),
             "reason": "",
         }
 
@@ -358,6 +371,7 @@ def empty_product_fact_context(
     matched_product: str = "",
     disclosure_checks: list[dict[str, Any]] | None = None,
 ) -> dict[str, Any]:
+    checks = disclosure_checks or []
     return {
         "matched_product": matched_product,
         "candidate_products": matched_products[:8],
@@ -366,7 +380,8 @@ def empty_product_fact_context(
         "product_facts": [],
         "claim_facts": [],
         "comparison_results": [],
-        "disclosure_checks": disclosure_checks or [],
+        "disclosure_checks": checks,
+        "applicability_gate": disclosure_gate_summary_from_checks(checks),
         "reason": reason,
     }
 
@@ -386,6 +401,7 @@ def context_with_documents(
         "claim_facts": [],
         "comparison_results": [],
         "disclosure_checks": [],
+        "applicability_gate": {},
         "reason": reason,
     }
 
@@ -393,6 +409,7 @@ def context_with_documents(
 def build_disclosure_checks(
     review_input: ReviewInput,
     product_facts: list[dict[str, Any]] | None = None,
+    sentence_units: list[SentenceUnit] | None = None,
 ) -> list[dict[str, Any]]:
     """광고 텍스트의 필수 고지 존재/부재를 판정하고, 가능하면 상품설명서
     (product_facts)의 근거 fact를 각 고지에 직접 연결해 내려준다.
@@ -411,15 +428,32 @@ def build_disclosure_checks(
             product_group = "loan"
         elif any(token in lowered for token in ["els", "펀드", "투자", "수익률"]):
             product_group = "investment"
-    # 데이터 기반: 어떤 고지가 필요한가는 그래프 카탈로그(disc_*)에서. 존재 판정은
-    # 보강 토큰으로. 그래프 미가용 시 아래 하드코딩으로 폴백.
-    catalog = disclosure_catalog_for_group(review_input.workspace_id, product_group)
+    # 데이터 기반: 어떤 고지가 필요한가는 그래프 카탈로그(disc_*) 또는 코드
+    # profile catalog에서 가져오고, check_type별 검사 방식은 profile이 결정한다.
+    graph_catalog = disclosure_catalog_for_group(review_input.workspace_id, product_group)
+    catalog = merge_profile_and_graph_catalog(profile_catalog_all(), graph_catalog)
     if catalog:
-        graph_checks = [
-            disclosure_check(item["check_id"], item["label"], any_token(text, item["tokens"]), source=item["source"])
-            for item in catalog
+        enabled, skipped, gate_summary = gate_disclosure_catalog(review_input=review_input, catalog=catalog)
+        checks = [
+            build_profile_disclosure_check(
+                review_input=review_input,
+                item=item,
+                product_facts=product_facts,
+                sentence_units=sentence_units,
+                gate_status="ON",
+            )
+            for item in enabled
         ]
-        return attach_product_doc_evidence(graph_checks, product_facts)
+        checks.extend(
+            build_skipped_disclosure_check(item)
+            for item in skipped
+        )
+        for check in checks:
+            check["applicability_gate"] = {
+                "product_group": gate_summary.get("product_group"),
+                "channel": gate_summary.get("channel"),
+            }
+        return checks
     if product_group == "deposit":
         return attach_product_doc_evidence([
             # 조건 고지는 "우대조건" 같은 정형 문구 외에 계약기간별 약정이율·고시
@@ -458,6 +492,56 @@ def build_disclosure_checks(
     return []
 
 
+def merge_profile_and_graph_catalog(
+    profile_catalog: tuple[dict[str, Any], ...],
+    graph_catalog: tuple[dict[str, Any], ...] | None,
+) -> tuple[dict[str, Any], ...]:
+    rows = {str(row.get("check_id") or ""): dict(row) for row in profile_catalog}
+    for graph_row in graph_catalog or ():
+        check_id = str(graph_row.get("check_id") or "")
+        if not check_id:
+            continue
+        if check_id in rows:
+            rows[check_id] = {**rows[check_id], "label": graph_row.get("label") or rows[check_id].get("label")}
+        else:
+            rows[check_id] = dict(graph_row)
+    return tuple(sorted(rows.values(), key=lambda row: str(row.get("check_id") or "")))
+
+
+def disclosure_gate_summary_from_checks(checks: list[dict[str, Any]]) -> dict[str, Any]:
+    enabled = [row for row in checks if row.get("gate_status") != "OFF"]
+    skipped = [row for row in checks if row.get("gate_status") == "OFF"]
+    return {
+        "enabled_requirements": [
+            {
+                "check_id": row.get("check_id"),
+                "label": row.get("label"),
+                "status": row.get("status"),
+                "check_type": row.get("check_type"),
+                "severity": row.get("severity"),
+                "gate_reason": row.get("gate_reason"),
+            }
+            for row in enabled
+        ],
+        "skipped_requirements": [
+            {
+                "check_id": row.get("check_id"),
+                "label": row.get("label"),
+                "gate_reason": row.get("gate_reason"),
+            }
+            for row in skipped
+        ],
+        "gate_diagnostics": [
+            {
+                "diagnostic_code": "DISCLOSURE_REQUIREMENT_SKIPPED",
+                "check_id": row.get("check_id"),
+                "reason": row.get("gate_reason"),
+            }
+            for row in skipped
+        ],
+    }
+
+
 def disclosure_check(check_id: str, label: str, present: bool, source: str = "") -> dict[str, Any]:
     return {
         "check_id": check_id,
@@ -465,11 +549,123 @@ def disclosure_check(check_id: str, label: str, present: bool, source: str = "")
         "status": "PRESENT" if present else "MISSING",
         "present": present,
         "source": source,
+        "check_type": "presence",
+        "severity": 2,
+        "on_missing": "needs_review",
+        "gate_status": "ON",
+        "gate_reason": "legacy fallback",
     }
 
 
-def any_token(text: str, tokens: list[str]) -> bool:
+def any_token(text: str, tokens: list[str] | tuple[str, ...]) -> bool:
     return any(token in text for token in tokens)
+
+
+def build_profile_disclosure_check(
+    *,
+    review_input: ReviewInput,
+    item: dict[str, Any],
+    product_facts: list[dict[str, Any]] | None,
+    sentence_units: list[SentenceUnit] | None,
+    gate_status: str,
+) -> dict[str, Any]:
+    check_id = str(item.get("check_id") or "")
+    label = str(item.get("label") or check_id)
+    profile_row = disclosure_profile(check_id)
+    if not profile_row or item.get("profile_supported") is False:
+        return {
+            "check_id": check_id,
+            "label": label,
+            "status": "UNSUPPORTED_DISCLOSURE_CHECK",
+            "present": False,
+            "source": str(item.get("source") or ""),
+            "check_type": str(item.get("check_type") or "unsupported"),
+            "severity": int(item.get("severity") or 2),
+            "on_missing": str(item.get("on_missing") or "needs_review"),
+            "gate_status": gate_status,
+            "gate_reason": str(item.get("gate_reason") or "프로파일이 없어 검사하지 않았습니다."),
+            "product_doc_evidence": [],
+            "in_product_doc": False,
+            "required_roles": list(item.get("required_roles") or []),
+            "prominence_required": bool(item.get("prominence_required")),
+        }
+    text = review_input.content_text
+    positive = any_token(text, profile_row.detect_tokens)
+    negated = any_token(text, profile_row.negative_tokens)
+    role_present = sentence_role_present(sentence_units or [], profile_row.required_roles)
+    evidence = link_disclosure_to_facts(check_id, product_facts)
+    status = disclosure_status(
+        check_type=profile_row.check_type,
+        positive=positive,
+        negated=negated,
+        role_present=role_present,
+        has_product_facts=bool(product_facts),
+        has_product_doc_evidence=bool(evidence),
+    )
+    return {
+        "check_id": check_id,
+        "label": label,
+        "status": status,
+        "present": status == "PRESENT",
+        "source": profile_row.source,
+        "check_type": profile_row.check_type,
+        "severity": profile_row.severity,
+        "on_missing": profile_row.on_missing,
+        "gate_status": gate_status,
+        "gate_reason": str(item.get("gate_reason") or "상품군/채널 적용범위에 해당합니다."),
+        "product_doc_evidence": evidence,
+        "in_product_doc": bool(evidence),
+        "required_roles": list(profile_row.required_roles),
+        "prominence_required": profile_row.prominence_required,
+        "detected_tokens": [token for token in profile_row.detect_tokens if token in text],
+        "negative_detected_tokens": [token for token in profile_row.negative_tokens if token in text],
+    }
+
+
+def disclosure_status(
+    *,
+    check_type: str,
+    positive: bool,
+    negated: bool,
+    role_present: bool,
+    has_product_facts: bool,
+    has_product_doc_evidence: bool,
+) -> str:
+    if positive and negated:
+        return "PRESENT_BUT_NEGATED"
+    if positive or role_present:
+        return "PRESENT"
+    if check_type == "fact_match" and not has_product_facts:
+        return "NOT_TESTED"
+    if has_product_doc_evidence:
+        return "IN_PRODUCT_DOC_ONLY"
+    return "MISSING"
+
+
+def sentence_role_present(sentence_units: list[SentenceUnit], roles: tuple[str, ...]) -> bool:
+    if not roles:
+        return False
+    return any(sentence.role in roles for sentence in sentence_units)
+
+
+def build_skipped_disclosure_check(item: dict[str, Any]) -> dict[str, Any]:
+    profile_row = disclosure_profile(str(item.get("check_id") or ""))
+    return {
+        "check_id": str(item.get("check_id") or ""),
+        "label": str(item.get("label") or item.get("check_id") or ""),
+        "status": "SKIPPED_BY_GATE",
+        "present": False,
+        "source": str(item.get("source") or (profile_row.source if profile_row else "")),
+        "check_type": str(item.get("check_type") or (profile_row.check_type if profile_row else "presence")),
+        "severity": 0,
+        "on_missing": "pass_candidate",
+        "gate_status": "OFF",
+        "gate_reason": str(item.get("gate_reason") or "적용범위 밖 기준입니다."),
+        "product_doc_evidence": [],
+        "in_product_doc": False,
+        "required_roles": list(item.get("required_roles") or (profile_row.required_roles if profile_row else [])),
+        "prominence_required": bool(item.get("prominence_required") or (profile_row.prominence_required if profile_row else False)),
+    }
 
 
 # 각 필수 고지를 상품설명서 product_fact에 연결하기 위한 fact_type/조건 토큰.
@@ -496,10 +692,13 @@ def link_disclosure_to_facts(
     """누락/존재 고지의 주제가 상품설명서에 있는지 product_fact로 직접 연결한다."""
     if not product_facts:
         return []
-    # 그래프 카탈로그(disc_*) 체크는 보강 토큰을, 하드코딩 폴백 체크는 기존 토큰을 쓴다.
+    # 그래프 카탈로그(disc_*) 체크는 profile fact_match_tokens를, 하드코딩 폴백
+    # 체크는 기존 토큰을 쓴다. 없는 경우 빈 evidence를 반환해 NOT_TESTED/
+    # UNSUPPORTED 상태가 조용히 통과로 바뀌지 않게 한다.
     tokens = DISCLOSURE_FACT_TOKENS.get(check_id)
-    if not tokens and check_id in DISC_ENRICHMENT:
-        tokens = DISC_ENRICHMENT[check_id][0]
+    profile_row = DISCLOSURE_PROFILES.get(check_id)
+    if not tokens and profile_row:
+        tokens = list(profile_row.fact_match_tokens)
     if not tokens:
         return []
     evidence: list[dict[str, Any]] = []

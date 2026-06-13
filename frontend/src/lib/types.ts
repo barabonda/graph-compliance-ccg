@@ -328,6 +328,12 @@ export interface DisclosureCheck {
   check_id: string;
   label: string;
   present: boolean;
+  status?: string;
+  check_type?: string;
+  severity?: number;
+  on_missing?: string;
+  gate_status?: string;
+  gate_reason?: string;
   /** 근거 조문 (그래프 카탈로그 기반). */
   source?: string;
   [key: string]: unknown;

@@ -10,6 +10,10 @@ from utils import stable_id
 
 
 ACTIONABLE_ANCHOR_TYPES = {"claim_anchor", "risk_anchor"}
+RERANK_CANDIDATES_PER_ANCHOR = 8
+RERANK_ANCHOR_FACT_LIMIT = 5
+RERANK_ANCHOR_FACT_CHARS = 220
+RERANK_HYPERNYM_LIMIT = 5
 
 
 RERANK_SCHEMA: dict[str, Any] = {
@@ -50,13 +54,14 @@ class LLMCUPlanner:
     ) -> list[CUPlanItem]:
         candidate_rows: list[dict[str, Any]] = []
         for anchor in anchors:
-            for candidate in candidates_by_anchor.get(anchor.anchor_id, []):
+            anchor_candidates = candidates_by_anchor.get(anchor.anchor_id, [])[:RERANK_CANDIDATES_PER_ANCHOR]
+            for candidate in anchor_candidates:
                 candidate_rows.append(
                     {
                         "anchor_id": anchor.anchor_id,
                         "anchor_type": anchor.anchor_type,
-                        "anchor_text": anchor.span.text,
-                        "anchor_facts": anchor.facts,
+                        "anchor_text": shorten_evidence(anchor.span.text, RERANK_ANCHOR_FACT_CHARS),
+                        "anchor_facts": compact_anchor_facts(anchor.facts),
                         "anchor_hypernyms": [
                             {
                                 "hypernym_id": h.hypernym_id,
@@ -64,7 +69,7 @@ class LLMCUPlanner:
                                 "support": h.support,
                                 "normalized_score": h.normalized_score,
                             }
-                            for h in anchor.hypernyms
+                            for h in anchor.hypernyms[:RERANK_HYPERNYM_LIMIT]
                         ],
                         "anchor_feature_set": anchor.feature_set.__dict__ if anchor.feature_set else {},
                         "candidate": compact_candidate_for_rerank(candidate),
@@ -189,6 +194,10 @@ def compact_candidate_for_rerank(candidate: PolicyCandidate) -> dict[str, Any]:
         "legal_element_match": candidate.legal_element_match,
         "risk_title": candidate.risk_title,
     }
+
+
+def compact_anchor_facts(facts: list[str]) -> list[str]:
+    return [shorten_evidence(fact, RERANK_ANCHOR_FACT_CHARS) for fact in facts[:RERANK_ANCHOR_FACT_LIMIT]]
 
 
 def shorten_evidence(text: str, max_chars: int) -> str:
