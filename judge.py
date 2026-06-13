@@ -9,6 +9,27 @@ from schemas import CUPlanItem, Claim, ContextAnchor, ContextFrame, ContextInflu
 from utils import normalize_space, stable_id, to_jsonable
 
 
+# 규칙기반 행위요건(positive_feature) 코드 → 심사원이 읽는 한국어 요건명.
+FEATURE_KO: dict[str, str] = {
+    "universal_scope_expression": "대상 무제한 표현(누구나·전 고객)",
+    "unconditional_expression": "조건 없음 표현",
+    "certainty_expression": "단정·확정 표현",
+    "guarantee_expression": "보장 표현",
+    "benefit_claim_expression": "혜택 강조 표현",
+    "risk_downplay_expression": "위험 축소 표현",
+    "past_performance_claim": "과거실적·미래수익 암시",
+    "comparison_target": "비교 대상 제시",
+    "comparative_superiority_claim": "우위·최상급 표현",
+    "coercion_or_tie_in_context": "강요·끼워팔기 정황",
+    "product_fact_assertion": "상품사실 단정",
+    "sales_process_context": "판매과정 관여 정황",
+}
+
+
+def feature_ko(feature: str) -> str:
+    return FEATURE_KO.get(feature, feature)
+
+
 JUDGE_SCHEMA: dict[str, Any] = {
     "type": "object",
     "additionalProperties": False,
@@ -25,11 +46,41 @@ JUDGE_SCHEMA: dict[str, Any] = {
                         "enum": ["COMPLIANT", "NON_COMPLIANT", "INSUFFICIENT", "NOT_APPLICABLE"],
                     },
                     "score": {"type": "number"},
-                    "why": {"type": "string"},
+                    # 적용 법리: 이 CU/조문이 금지(또는 요구)하는 행위의 정의를 한 문장으로.
+                    "legal_basis": {"type": "string"},
+                    # 판단 기준별 적용: 규칙기반으로 제시된 각 요건(criterion)에 대해,
+                    # 이 광고의 어느 표현/사실이 왜 그 요건을 충족/불충족하는지.
+                    "criteria_findings": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "additionalProperties": False,
+                            "properties": {
+                                "criterion": {"type": "string"},
+                                "satisfied": {"type": "boolean"},
+                                "finding": {"type": "string"},
+                            },
+                            "required": ["criterion", "satisfied", "finding"],
+                        },
+                    },
+                    # 결론: 요건 적용을 종합한 판단 근거(왜 이 verdict인지).
+                    "conclusion": {"type": "string"},
+                    # 유보: 구체적 사실관계/추가 고지에 따라 달라질 수 있는 한계.
+                    "reservation": {"type": "string"},
                     "evidence_span": {"type": "string"},
                     "used_policy_evidence": {"type": "array", "items": {"type": "string"}},
                 },
-                "required": ["plan_item_id", "verdict", "score", "why", "evidence_span", "used_policy_evidence"],
+                "required": [
+                    "plan_item_id",
+                    "verdict",
+                    "score",
+                    "legal_basis",
+                    "criteria_findings",
+                    "conclusion",
+                    "reservation",
+                    "evidence_span",
+                    "used_policy_evidence",
+                ],
             },
         }
     },
@@ -126,6 +177,9 @@ class LLMComplianceJudge:
                 {
                     "context_anchor": to_jsonable(anchor),
                     "cu_plan_item": to_jsonable(item),
+                    # 규칙기반 판단 레이어를 명시적으로 제시 — LLM은 이 요건들에
+                    # 사실을 적용해 설명을 '종합'한다(처음부터 판단하지 않는다).
+                    "legal_test": build_legal_test(item, anchor),
                     "evidence_window": to_jsonable(window) if window else {},
                 }
             )
@@ -135,26 +189,29 @@ class LLMComplianceJudge:
             name="graphcompliance_cu_judgment",
             schema=JUDGE_SCHEMA,
             system=(
-                "You are a Korean financial-ad compliance judge. Each judgment_items entry is an isolated "
-                "ContextAnchor, hierarchical EvidenceWindow, and CUPlanItem. Judge every entry independently. Do not use "
-                "outside law, outside facts, or another judgment_items entry's advertising claim as evidence. "
-                "Use the EvidenceWindow's ContextFrame, SentenceUnit, and ContextInfluence fields to understand "
-                "how the current claim contributes to the whole ad impression. A neutral launch_notice sentence "
-                "should not be treated as a violation merely because later sentences are risky. Conversely, "
-                "qualifiers such as '누구나', '조건 없이', '확정', and '보장' inside the same Claim can raise risk "
-                "when they reinforce an unconditional or guaranteed consumer impression. "
-                "Prioritize explicit contradiction. Strong implication is allowed. Never infer a violation "
-                "from silence. If the CU is unrelated to the anchor, return NOT_APPLICABLE. If the CU is "
-                "related but a required fact or document is missing from the window, return INSUFFICIENT. "
-                "Use policy_evidence_chains only as concise legal-basis, disclosure, and exception summaries; "
-                "ignore chains whose status is INCOMPLETE unless explaining evidence insufficiency. "
-                "Do not return INSUFFICIENT merely because there is no evidence of wrongdoing; that should "
-                "usually be NOT_APPLICABLE or COMPLIANT depending on the CU. A mitigating disclosure anchor "
-                "can be COMPLIANT for that disclosure, but it must not erase a separate risky anchor such as "
-                "a definitive guarantee, unconditional best-rate, easy-approval, or past-performance claim. "
-                "When the CU principle/subject is about unfair sales, sanctions, review procedure, or "
-                "association workflow, return NOT_APPLICABLE unless the anchor itself describes that conduct. "
-                "Every evidence_span must be copied from that same entry's ContextAnchor span text or facts."
+                "당신은 한국 금융광고 준법 심사 판단자입니다. 금융감독원 법령해석 회답과 같은 방식으로, "
+                "규칙기반으로 제시된 법적 요건에 광고 사실을 적용해 '설명가능한 판단'을 종합합니다. "
+                "각 judgment_items 항목은 독립된 ContextAnchor·EvidenceWindow·CUPlanItem이며, 그 안의 "
+                "legal_test가 규칙기반 판단 레이어입니다. 항목마다 독립적으로 판단하고, 외부 법·외부 사실·"
+                "다른 항목의 광고 문구를 증거로 쓰지 마세요.\n"
+                "각 항목에 대해 다음을 산출하세요:\n"
+                "1) legal_basis: legal_test.cu_definition/principle을 근거로, 이 기준이 금지(또는 요구)하는 "
+                "행위가 무엇인지 한 문장 정의. (예: '광고에서 불확실한 사항을 단정적으로 제공하거나 확실하다고 "
+                "오인하게 하는 행위를 금지한다')\n"
+                "2) criteria_findings: legal_test.required_elements의 각 요건(criterion)에 대해, 이 광고의 어느 "
+                "표현/사실(legal_test.matched_facts, ContextAnchor.span, facts)이 왜 그 요건을 충족(satisfied=true) "
+                "또는 불충족(false)하는지 finding에 구체적으로. 규칙기반 매칭(satisfied 초기값)을 존중하되, 사실이 "
+                "실제로 그 요건을 뒷받침하지 않으면 false로 교정하세요. 요건명은 한국어 그대로 사용.\n"
+                "3) conclusion: 요건 적용을 종합해 왜 이 verdict인지. 핵심 요건이 충족되면 NON_COMPLIANT, 요건은 "
+                "관련되나 사실/문서가 부족하면 INSUFFICIENT, 무관하면 NOT_APPLICABLE, 충족 안 되면 COMPLIANT.\n"
+                "4) reservation: 금감원 회답처럼, 구체적 사실관계·추가 고지·실제 운영에 따라 해석이 달라질 수 있는 "
+                "한계를 한 문장. 단정 회피.\n"
+                "판단 원칙: 명시적 모순/단정/보장을 우선. 침묵으로부터 위반을 추론하지 말 것. anchor 자체가 조건·"
+                "유보 표현(세전, 조건에 따라, 달라질 수 있습니다 등)을 말하면 추가 세부 부재는 위반이 아니라 최대 "
+                "INSUFFICIENT. 완화 고지 anchor는 그 고지에 대해 COMPLIANT일 수 있으나 별개의 단정·보장·무조건 "
+                "최고금리·과거실적 anchor를 지우지 못합니다. CU가 불공정영업·제재·심의절차·협회워크플로우인데 anchor가 "
+                "그 행위를 기술하지 않으면 NOT_APPLICABLE. evidence_span은 반드시 해당 항목 ContextAnchor의 span "
+                "또는 facts에서 그대로 복사. 모든 산출 텍스트는 한국어."
             ),
             user=f"[judgment_payload]\n{{'judgment_items': {judgment_items}}}",
         )
@@ -168,6 +225,16 @@ class LLMComplianceJudge:
                 continue
             seen_plan_ids.add(item.plan_item_id)
             grounded = grounded_judgment_row(row, anchor)
+            criteria = [
+                {
+                    "criterion": str(cf.get("criterion") or ""),
+                    "satisfied": bool(cf.get("satisfied")),
+                    "finding": str(cf.get("finding") or ""),
+                }
+                for cf in (row.get("criteria_findings") or [])
+                if cf.get("criterion")
+            ]
+            conclusion = str(row.get("conclusion") or grounded.get("why") or row.get("legal_basis") or "")
             judgments.append(
                 LLMJudgment(
                     judgment_id=stable_id("judgment", review_run_id, item.plan_item_id),
@@ -176,9 +243,14 @@ class LLMComplianceJudge:
                     cu_id=item.cu_id,
                     verdict=grounded["verdict"],
                     score=float(grounded["score"]),
-                    why=grounded["why"],
+                    # why는 하위호환: 결론을 요약으로 유지.
+                    why=grounded.get("why", conclusion) if grounded.get("regrounded") else conclusion,
                     evidence_span=grounded["evidence_span"],
                     used_policy_evidence=grounded["used_policy_evidence"],
+                    legal_basis=str(row.get("legal_basis") or ""),
+                    criteria_findings=criteria,
+                    conclusion=conclusion,
+                    reservation=str(row.get("reservation") or ""),
                 )
             )
         for item in item_by_plan_id.values():
@@ -216,20 +288,58 @@ class LLMComplianceJudge:
         )
 
 
+def build_legal_test(item: CUPlanItem, anchor: ContextAnchor) -> dict[str, Any]:
+    """규칙기반 판단 레이어: 이 CU의 법적 요건 ↔ 광고에서 매칭된 사실.
+
+    legal_element_profile.required_positive_features를 요건(criterion)으로,
+    matched/missing_required_features로 충족 여부를, anchor.feature_set.evidence로
+    그 요건을 뒷받침하는 사실 텍스트를 제시한다. LLM은 이 위에 사실 적용을 종합한다.
+    """
+    profile = item.legal_element_profile
+    matched = set(item.matched_required_features or [])
+    feature_set = anchor.feature_set
+    evidence_by_feature: dict[str, list[str]] = {}
+    if feature_set:
+        for text in feature_set.evidence or []:
+            for feature in feature_set.positive_features or []:
+                if feature in str(text) or feature_ko(feature) in str(text):
+                    evidence_by_feature.setdefault(feature, []).append(str(text))
+    required = (profile.required_positive_features if profile else []) or item.matched_required_features or []
+    required_elements = [
+        {
+            "criterion": feature_ko(feature),
+            "rule_satisfied": feature in matched,
+            "matched_facts": evidence_by_feature.get(feature, []),
+        }
+        for feature in required
+    ]
+    return {
+        "action_type_ko": feature_ko(profile.action_type) if profile and profile.action_type in FEATURE_KO else (profile.action_type if profile else ""),
+        "risk_title": item.risk_title or (profile.risk_title if profile else ""),
+        "cu_definition": item.constraint or item.context,
+        "cu_principle": item.principle,
+        "cu_subject": item.subject,
+        "required_elements": required_elements,
+        "matched_facts": sorted({fact for facts in evidence_by_feature.values() for fact in facts}),
+        "anchor_positive_features": [feature_ko(f) for f in (feature_set.positive_features if feature_set else [])],
+    }
+
+
 def grounded_judgment_row(row: dict[str, Any], anchor: ContextAnchor) -> dict[str, Any]:
     """Reject cross-anchor evidence leakage before routing uses a judgment."""
     if row.get("verdict") == "NOT_APPLICABLE":
-        return row
+        return {**row, "regrounded": False}
     evidence_span = str(row.get("evidence_span") or "").strip()
     if not evidence_span or evidence_span_belongs_to_anchor(evidence_span, anchor):
-        return row
+        return {**row, "regrounded": False}
     return {
         **row,
+        "regrounded": True,
         "verdict": "INSUFFICIENT",
         "score": min(float(row.get("score") or 0.0), 0.5),
         "why": (
-            f"{row.get('why', '')} / Evidence grounding warning: evidence_span was outside this "
-            "anchor's isolated evidence window, so the violation cannot be attributed to this anchor."
+            f"{row.get('conclusion') or row.get('why', '')} / 근거 정합성 경고: evidence_span이 이 anchor의 "
+            "격리된 증거창 밖이라 위반을 이 anchor에 귀속할 수 없습니다."
         ),
         "evidence_span": anchor.span.text,
     }

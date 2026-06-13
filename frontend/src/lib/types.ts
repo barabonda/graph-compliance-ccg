@@ -188,6 +188,12 @@ export interface CUPlanItem {
   risk_title?: string;
 }
 
+export interface CriterionFinding {
+  criterion: string;
+  satisfied: boolean;
+  finding: string;
+}
+
 export interface LLMJudgment {
   judgment_id: string;
   plan_item_id: string;
@@ -198,6 +204,11 @@ export interface LLMJudgment {
   why: string;
   evidence_span: string;
   used_policy_evidence: string[];
+  /** 금감원 답변식 설명가능 추론. */
+  legal_basis?: string;
+  criteria_findings?: CriterionFinding[];
+  conclusion?: string;
+  reservation?: string;
 }
 
 export interface ExceptionReview {

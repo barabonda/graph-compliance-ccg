@@ -266,6 +266,11 @@ class LLMJudgment:
     why: str
     evidence_span: str
     used_policy_evidence: list[str]
+    # 금감원 답변식 설명가능 추론: 정의 → 요건별 사실 적용 → 결론 → 유보.
+    legal_basis: str = ""
+    criteria_findings: list[dict[str, Any]] = field(default_factory=list)
+    conclusion: str = ""
+    reservation: str = ""
 
 
 @dataclass(frozen=True)

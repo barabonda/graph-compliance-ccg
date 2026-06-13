@@ -263,11 +263,61 @@ export function DetailPane({ result, selectedAnchorId, resolved, onToggleResolve
           </div>
         </div>
 
-        {/* 판정 사유 */}
+        {/* 판정 사유 — 금감원 답변식: 정의 → 요건별 사실 적용 → 결론 → 유보 */}
         <DetailRow icon="alert" label="판정 사유">
-          <p className="m-0 text-[13.5px] leading-relaxed text-ink-2">
-            {card.rationale || topJudgment?.why || "이 표현은 정책 매칭 결과 확인이 필요합니다."}
-          </p>
+          {topJudgment?.legal_basis || (topJudgment?.criteria_findings?.length ?? 0) > 0 ? (
+            <div className="space-y-2.5">
+              {topJudgment?.legal_basis && (
+                <div className="rounded-md border border-line bg-surface-2 px-3 py-2">
+                  <span className="text-[10.5px] font-bold tracking-wider text-ink-4">적용 법리</span>
+                  <p className="mt-0.5 text-[13px] leading-relaxed text-ink-2">{topJudgment.legal_basis}</p>
+                </div>
+              )}
+              {(topJudgment?.criteria_findings?.length ?? 0) > 0 && (
+                <div>
+                  <span className="text-[10.5px] font-bold tracking-wider text-ink-4">판단 기준별 적용</span>
+                  <ol className="mt-1 space-y-1.5">
+                    {topJudgment!.criteria_findings!.map((cf, i) => (
+                      <li key={i} className="flex gap-2 rounded-md border border-line px-2.5 py-1.5">
+                        <span
+                          className="mt-0.5 grid h-4 w-4 shrink-0 place-items-center rounded text-[10px] font-bold"
+                          style={{
+                            background: cf.satisfied ? "var(--reject-bg)" : "var(--surface-3)",
+                            color: cf.satisfied ? "var(--reject)" : "var(--ink-4)",
+                          }}
+                        >
+                          {cf.satisfied ? "✓" : "—"}
+                        </span>
+                        <div className="min-w-0">
+                          <span className="text-[12.5px] font-bold text-ink">{cf.criterion}</span>
+                          <span className={`ml-1.5 text-[11px] ${cf.satisfied ? "text-reject" : "text-ink-4"}`}>
+                            {cf.satisfied ? "충족" : "불충족"}
+                          </span>
+                          <p className="mt-0.5 text-[12px] leading-relaxed text-ink-2">{cf.finding}</p>
+                        </div>
+                      </li>
+                    ))}
+                  </ol>
+                </div>
+              )}
+              {topJudgment?.conclusion && (
+                <div className="rounded-md border-l-2 border-reject bg-reject-bg/40 px-3 py-2">
+                  <span className="text-[10.5px] font-bold tracking-wider text-reject">결론</span>
+                  <p className="mt-0.5 text-[13px] leading-relaxed text-ink-2">{topJudgment.conclusion}</p>
+                </div>
+              )}
+              {topJudgment?.reservation && (
+                <div className="flex gap-1.5 px-1 text-[11.5px] leading-relaxed text-ink-3">
+                  <span className="font-bold text-ink-4">유보</span>
+                  <span>{topJudgment.reservation}</span>
+                </div>
+              )}
+            </div>
+          ) : (
+            <p className="m-0 text-[13.5px] leading-relaxed text-ink-2">
+              {card.rationale || topJudgment?.why || "이 표현은 정책 매칭 결과 확인이 필요합니다."}
+            </p>
+          )}
         </DetailRow>
 
         {/* 문제 표현 */}
