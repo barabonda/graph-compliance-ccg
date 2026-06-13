@@ -201,7 +201,7 @@ export function DashboardTab({ onOpenRun }: Props) {
                       </span>
                     </td>
                     <td className="px-3 py-2 whitespace-nowrap text-ink-3">{run.actor || "—"}</td>
-                    <td className="px-3 py-2 whitespace-nowrap font-mono text-[11px] text-ink-3">{run.model || ".env"}</td>
+                    <td className="px-3 py-2 whitespace-nowrap font-mono text-[11px] text-ink-3">{run.model || "GPT-5.4-nano"}</td>
                     <td className="px-3 py-2 whitespace-nowrap">
                       <span className="font-bold" style={{ color: VERDICT_TONE[run.final_verdict] ?? "var(--ink-2)" }}>
                         {verdictLabel(run.final_verdict)}
