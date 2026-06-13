@@ -328,6 +328,8 @@ export interface DisclosureCheck {
   check_id: string;
   label: string;
   present: boolean;
+  /** 근거 조문 (그래프 카탈로그 기반). */
+  source?: string;
   [key: string]: unknown;
 }
 

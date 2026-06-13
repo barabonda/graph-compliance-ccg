@@ -1018,7 +1018,8 @@ export function buildIssueCards(result: ReviewOutput): IssueCardModel[] {
       label: "필수 고지 누락",
       quote: check.label,
       title: `필수 고지 누락 — ${check.label}`,
-      basis: String(requirement?.source ?? "은행 광고심의 기준"),
+      // 근거 조문은 데이터 기반(그래프 카탈로그가 내려준 check.source) 우선.
+      basis: String(check.source ?? requirement?.source ?? "은행 광고심의 기준"),
       rationale: String(requirement?.why ?? "문안에서 해당 고지가 확인되지 않았습니다."),
     });
   }

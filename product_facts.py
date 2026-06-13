@@ -9,6 +9,7 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
+from disclosure_catalog import DISC_ENRICHMENT, disclosure_catalog_for_group
 from llm_gateway import LLMGateway
 from schemas import Claim, ReviewInput
 from utils import stable_id, to_jsonable
@@ -410,6 +411,15 @@ def build_disclosure_checks(
             product_group = "loan"
         elif any(token in lowered for token in ["els", "펀드", "투자", "수익률"]):
             product_group = "investment"
+    # 데이터 기반: 어떤 고지가 필요한가는 그래프 카탈로그(disc_*)에서. 존재 판정은
+    # 보강 토큰으로. 그래프 미가용 시 아래 하드코딩으로 폴백.
+    catalog = disclosure_catalog_for_group(review_input.workspace_id, product_group)
+    if catalog:
+        graph_checks = [
+            disclosure_check(item["check_id"], item["label"], any_token(text, item["tokens"]), source=item["source"])
+            for item in catalog
+        ]
+        return attach_product_doc_evidence(graph_checks, product_facts)
     if product_group == "deposit":
         return attach_product_doc_evidence([
             # 조건 고지는 "우대조건" 같은 정형 문구 외에 계약기간별 약정이율·고시
@@ -448,12 +458,13 @@ def build_disclosure_checks(
     return []
 
 
-def disclosure_check(check_id: str, label: str, present: bool) -> dict[str, Any]:
+def disclosure_check(check_id: str, label: str, present: bool, source: str = "") -> dict[str, Any]:
     return {
         "check_id": check_id,
         "label": label,
         "status": "PRESENT" if present else "MISSING",
         "present": present,
+        "source": source,
     }
 
 
@@ -485,7 +496,10 @@ def link_disclosure_to_facts(
     """누락/존재 고지의 주제가 상품설명서에 있는지 product_fact로 직접 연결한다."""
     if not product_facts:
         return []
+    # 그래프 카탈로그(disc_*) 체크는 보강 토큰을, 하드코딩 폴백 체크는 기존 토큰을 쓴다.
     tokens = DISCLOSURE_FACT_TOKENS.get(check_id)
+    if not tokens and check_id in DISC_ENRICHMENT:
+        tokens = DISC_ENRICHMENT[check_id][0]
     if not tokens:
         return []
     evidence: list[dict[str, Any]] = []
