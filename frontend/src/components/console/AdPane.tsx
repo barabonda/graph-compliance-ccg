@@ -7,7 +7,9 @@ import {
   type AnnotatedText,
   buildAdLines,
   buildCorrectedCopy,
+  buildDocumentDiff,
   conditionalDisclosures,
+  correctedDocument,
   revisionFor,
 } from "@/lib/selectors";
 import type { ReviewOutput } from "@/lib/types";
@@ -171,9 +173,15 @@ export function AdPane({
 }: Props) {
   const [mode, setMode] = useState<"original" | "corrected">("original");
   const lines = useMemo(() => buildAdLines(result, reviewedText), [result, reviewedText]);
+  // 교정본 = 백엔드의 일관 재작성 전체 문서(원문↔교정본 diff). 없으면(구버전 데이터)
+  // 기존 per-span 짜깁기로 폴백.
+  const correctedDoc = useMemo(() => correctedDocument(result), [result]);
   const corrected = useMemo(
-    () => buildCorrectedCopy(result, reviewedText, resolved),
-    [result, reviewedText, resolved],
+    () =>
+      correctedDoc
+        ? buildDocumentDiff(reviewedText, correctedDoc)
+        : buildCorrectedCopy(result, reviewedText, resolved),
+    [result, reviewedText, resolved, correctedDoc],
   );
   const selectedSentenceId = useMemo(() => {
     if (!selectedAnchorId) return "";
@@ -284,12 +292,17 @@ export function AdPane({
 
           <div className="border-t border-line bg-surface-2 px-5.5 py-2.5 text-[11.5px] leading-relaxed text-ink-3">
             {mode === "corrected" ? (
-              corrected.changedCount ? (
+              correctedDoc ? (
+                <span>
+                  광고 전체를 일관되게 재작성한 교정본입니다. 초록 구간이 변경된 부분이며{" "}
+                  {corrected.changedCount}곳이 수정되었습니다.
+                </span>
+              ) : corrected.changedCount ? (
                 <span>
                   적용된 수정안 {corrected.changedCount}건이 반영된 교정본입니다. 초록 구간이 변경된 문안입니다.
                 </span>
               ) : (
-                <span>아직 적용된 수정안이 없습니다. 원문에서 ‘수정안 적용’을 누르면 여기에 반영됩니다.</span>
+                <span>전체 교정본이 아직 생성되지 않았습니다. 원문에서 개별 수정안을 확인하세요.</span>
               )
             ) : (
               <span>

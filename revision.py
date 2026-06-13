@@ -110,10 +110,16 @@ REVISION_SCHEMA: dict[str, Any] = {
                     "notes_for_reviewer",
                 ],
             },
-        }
+        },
+        "integrated_revision": {"type": "string"},
     },
-    "required": ["suggestions"],
+    "required": ["suggestions", "integrated_revision"],
 }
+
+# 전체 교정본을 별도 항목으로 revision_suggestions 리스트에 실어 보내는 센티넬.
+# (router/schema 변경 없이 기존 흐름을 통과시키기 위함. 프론트는 이 항목을
+#  꺼내 원문↔교정본 문서 diff로 렌더하고, 인라인 카드에서는 제외한다.)
+DOCUMENT_REVISION_ANCHOR = "__document__"
 
 
 class LLMRevisionSuggester:
@@ -167,7 +173,12 @@ class LLMRevisionSuggester:
                 "guidance, rationale, and instructions in `notes_for_reviewer` ONLY. If a risky span has no clean "
                 "replacement copy and only advice applies, omit that span (do not put advice in `after`).\n"
                 "Create suggestions only for the risky span itself. If an anchor is merely a product launch, title, "
-                "brand mention, or neutral scope sentence, omit it."
+                "brand mention, or neutral scope sentence, omit it.\n"
+                "ALSO produce `integrated_revision`: the COMPLETE ad text rewritten as ONE coherent final draft "
+                "with every fix applied together. Keep ALL non-risky text VERBATIM (line breaks, sections, "
+                "disclosures, hashtags) and change ONLY what the suggestions require. When a fix merges a "
+                "condition into the benefit sentence, do not leave the now-duplicated original line — fold it in "
+                "so the corrected document reads cleanly with no repetition. Return the full text, not a fragment."
             ),
             user=(
                 "[original_ad]\n"
@@ -177,11 +188,27 @@ class LLMRevisionSuggester:
             ),
         )
         anchor_text_by_id = {row["anchor"]["anchor_id"]: row["anchor"]["span"]["text"] for row in risk_rows}
-        return [
+        usable = [
             suggestion
             for suggestion in result["suggestions"]
             if suggestion_is_usable(suggestion, anchor_text_by_id)
         ]
+        # 전체 교정본을 센티넬 항목으로 첨부(원문과 달라야 의미 있음).
+        integrated = str(result.get("integrated_revision") or "").strip()
+        if integrated and integrated != review_input.content_text.strip():
+            usable.append(
+                {
+                    "anchor_id": DOCUMENT_REVISION_ANCHOR,
+                    "severity": "revise",
+                    "risky_text": "",
+                    "why_problematic": "",
+                    "required_disclosures": [],
+                    "before": review_input.content_text,
+                    "after": integrated,
+                    "notes_for_reviewer": "광고 전체를 일관되게 재작성한 교정본입니다.",
+                }
+            )
+        return usable
 
 
 def should_generate_revision(*, anchor: Any, judgment: Any) -> bool:

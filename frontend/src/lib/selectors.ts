@@ -683,6 +683,46 @@ export interface CorrectedSegment {
   changed: boolean;
 }
 
+/** 백엔드가 보낸 '전체 일관 교정본'(문서 단위 재작성). 없으면 null. */
+export const DOCUMENT_REVISION_ANCHOR = "__document__";
+export function correctedDocument(result: ReviewOutput): string | null {
+  const doc = (result.revision_suggestions ?? []).find(
+    (item) => item.anchor_id === DOCUMENT_REVISION_ANCHOR,
+  );
+  const after = String(doc?.after ?? "").trim();
+  return after ? after : null;
+}
+
+/**
+ * 원문 ↔ 교정본 문장 단위 diff. 비위험 텍스트는 verbatim 유지되므로, 원문에 없는
+ * 교정본 문장을 '변경'으로 표시한다(짜깁기 대신 일관 재작성을 그대로 보여줌).
+ * 문장 경계(마침표/물음표/느낌표 + 공백, 줄바꿈)로 나누되 구분자는 보존한다.
+ */
+export function buildDocumentDiff(
+  original: string,
+  corrected: string,
+): { segments: CorrectedSegment[]; changedCount: number } {
+  const normalize = (value: string) => value.replace(/[\s.!?]+$/g, "").trim();
+  const originalSet = new Set(
+    original.split(/[\n.!?]+/).map(normalize).filter(Boolean),
+  );
+  const parts = corrected.split(/(\n+|(?<=[다요.!?])\s+)/);
+  const segments: CorrectedSegment[] = [];
+  let changedCount = 0;
+  for (const part of parts) {
+    if (!part) continue;
+    if (/^\s+$/.test(part)) {
+      segments.push({ text: part, changed: false });
+      continue;
+    }
+    const key = normalize(part);
+    const changed = key.length > 0 && !originalSet.has(key);
+    if (changed) changedCount += 1;
+    segments.push({ text: part, changed });
+  }
+  return { segments, changedCount };
+}
+
 /** 적용된(resolved) anchor들의 span을 after 문안으로 치환한 교정본. */
 export function buildCorrectedCopy(
   result: ReviewOutput,
