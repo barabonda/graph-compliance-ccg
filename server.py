@@ -19,6 +19,7 @@ from openai import APIConnectionError, APIStatusError, AuthenticationError, BadR
 
 from env_loader import load_local_env
 from llm_gateway import LLMGateway
+from run_store import list_runs, load_run, record_run
 from workflow import GraphComplianceCCGWorkflow, review_input_from_payload
 from utils import to_jsonable
 
@@ -54,7 +55,16 @@ def review(payload: dict[str, Any]) -> dict[str, Any]:
     try:
         workflow = workflow_for(payload)
         output = workflow.review(review_input_from_payload(payload))
-        return to_jsonable(output)
+        jsonable = to_jsonable(output)
+        record_run(
+            jsonable,
+            title=str(payload.get("title") or ""),
+            channel=str(payload.get("channel") or ""),
+            product_group=str(payload.get("product_group") or ""),
+            model=str(payload.get("llm_model") or ""),
+            content_text=str(payload.get("content_text") or ""),
+        )
+        return jsonable
     except ServiceUnavailable as exc:
         raise HTTPException(
             status_code=503,
@@ -101,7 +111,17 @@ def review_stream(payload: dict[str, Any]) -> StreamingResponse:
                 workflow = workflow_for(payload)
                 review_input = review_input_from_payload(payload)
                 for event in workflow.review_events(review_input):
-                    event_queue.put(to_jsonable(event))
+                    jsonable = to_jsonable(event)
+                    if jsonable.get("event") == "result" and isinstance(jsonable.get("result"), dict):
+                        record_run(
+                            jsonable["result"],
+                            title=str(payload.get("title") or ""),
+                            channel=str(payload.get("channel") or ""),
+                            product_group=str(payload.get("product_group") or ""),
+                            model=str(payload.get("llm_model") or ""),
+                            content_text=str(payload.get("content_text") or ""),
+                        )
+                    event_queue.put(jsonable)
             except Exception as exc:  # noqa: BLE001 - converted into a structured stream error below.
                 event_queue.put(stream_error_payload(exc))
             finally:
@@ -168,6 +188,21 @@ def product_doc(document_id: str) -> FileResponse:
 
     disposition = f"inline; filename*=UTF-8''{quote(str(row.get('file_name') or path.name))}"
     return FileResponse(path, media_type="application/pdf", headers={"Content-Disposition": disposition})
+
+
+@app.get("/api/runs")
+def runs(limit: int = 100) -> dict[str, Any]:
+    """운영 대시보드용 최근 실행 요약 목록(최신순)."""
+    return {"runs": list_runs(limit=limit)}
+
+
+@app.get("/api/runs/{run_id}")
+def run_detail(run_id: str) -> dict[str, Any]:
+    """저장된 실행의 시점 데이터(전체 ReviewOutput) — 디버깅용."""
+    output = load_run(run_id)
+    if output is None:
+        raise HTTPException(status_code=404, detail={"error": "run_not_found", "message": "Unknown review run id."})
+    return output
 
 
 @app.get("/")

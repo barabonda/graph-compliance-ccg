@@ -12,14 +12,16 @@ import { ContextBar } from "@/components/shell/ContextBar";
 import { Sidebar, type ViewKey } from "@/components/shell/Sidebar";
 import { Toast } from "@/components/shell/Toast";
 import { AuditTab } from "@/components/tabs/AuditTab";
+import { DashboardTab } from "@/components/tabs/DashboardTab";
 import { OverallTab } from "@/components/tabs/OverallTab";
 import { ProductFactsTab } from "@/components/tabs/ProductFactsTab";
 import { RevisionTab } from "@/components/tabs/RevisionTab";
 import { SentenceMapTab } from "@/components/tabs/SentenceMapTab";
 import { EmptyState, Expandable } from "@/components/ui";
 import { useReview } from "@/hooks/useReview";
+import { fetchRun } from "@/lib/api";
 import { CHANNELS, DECISIONS, type DecisionKey } from "@/lib/labels";
-import type { ReviewOutput, ReviewRequest } from "@/lib/types";
+import type { ReviewOutput, ReviewRequest, RunSummary } from "@/lib/types";
 
 interface ReviewMeta {
   title: string;
@@ -71,6 +73,22 @@ export default function Page() {
     setDecision(null);
     setView("product");
   }, [loadSample]);
+
+  /** 운영 대시보드에서 과거 실행을 열어 시점 데이터를 콘솔에서 디버깅. */
+  const handleOpenRun = useCallback(
+    async (run: RunSummary) => {
+      const output = await fetchRun(run.id);
+      loadSample(output, run.content_text);
+      setMeta({
+        title: run.title,
+        channelLabel: CHANNELS.find((item) => item.value === run.channel)?.label ?? run.channel,
+      });
+      setResolved(new Set());
+      setDecision(null);
+      setView("review");
+    },
+    [loadSample],
+  );
 
   const handleToggleResolve = useCallback((id: string) => {
     setResolved((prev) => {
@@ -228,6 +246,12 @@ export default function Page() {
                   </div>
                 </Expandable>
               )}
+            </div>
+          )}
+
+          {view === "dashboard" && (
+            <div className="rounded-[14px] border border-line bg-surface p-4 shadow-card">
+              <DashboardTab onOpenRun={handleOpenRun} />
             </div>
           )}
         </div>

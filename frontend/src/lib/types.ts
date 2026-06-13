@@ -273,6 +273,23 @@ export interface RevisionSuggestion {
   notes_for_reviewer?: string;
 }
 
+/** 운영 대시보드용 실행(ReviewRun) 요약. `GET /api/runs`. */
+export interface RunSummary {
+  id: string;
+  ts: number;
+  title: string;
+  channel: string;
+  product_group: string;
+  model: string;
+  content_text: string;
+  final_verdict: string;
+  misleading_verdict: string;
+  issue_count: number;
+  missing_disclosures: string[];
+  principles: string[];
+  cu_ids: string[];
+}
+
 export interface SystemReviewItem {
   anchor_id: string;
   risk_code?: string;

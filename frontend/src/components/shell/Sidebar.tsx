@@ -4,7 +4,7 @@ import type { ReviewOutput } from "@/lib/types";
 import { buildIssueCards, disclosureIsSatisfied } from "@/lib/selectors";
 import { Icon } from "../Icon";
 
-export type ViewKey = "new" | "review" | "revision" | "graph" | "exception" | "product" | "audit";
+export type ViewKey = "new" | "review" | "revision" | "graph" | "exception" | "product" | "audit" | "dashboard";
 
 const NAV: { key: ViewKey; label: string; sub: string; icon: string }[] = [
   { key: "new", label: "새 심사", sub: "문안 접수 · 실행", icon: "plus" },
@@ -14,6 +14,7 @@ const NAV: { key: ViewKey; label: string; sub: string; icon: string }[] = [
   { key: "exception", label: "예외·고지 검토", sub: "완화 시뮬레이션", icon: "shield" },
   { key: "product", label: "상품 사실", sub: "문서 대조", icon: "layers" },
   { key: "audit", label: "감사 로그", sub: "추적 · 단계", icon: "audit" },
+  { key: "dashboard", label: "운영 대시보드", sub: "실행 기록 · 집계", icon: "dashboard" },
 ];
 
 interface Props {

@@ -1,4 +1,4 @@
-import type { ReviewRequest, StreamEvent } from "./types";
+import type { ReviewOutput, ReviewRequest, RunSummary, StreamEvent } from "./types";
 
 export class ReviewApiError extends Error {
   readonly code: string;
@@ -83,6 +83,21 @@ export async function streamReview(
   }
   buffer += decoder.decode();
   dispatch(buffer);
+}
+
+/** 운영 대시보드: 최근 실행 요약 목록. */
+export async function fetchRuns(): Promise<RunSummary[]> {
+  const response = await fetch("/api/runs", { cache: "no-store" });
+  if (!response.ok) throw await parseErrorResponse(response);
+  const data = (await response.json()) as { runs?: RunSummary[] };
+  return data.runs ?? [];
+}
+
+/** 저장된 실행의 시점 데이터(전체 ReviewOutput) — 디버깅용. */
+export async function fetchRun(id: string): Promise<ReviewOutput> {
+  const response = await fetch(`/api/runs/${encodeURIComponent(id)}`, { cache: "no-store" });
+  if (!response.ok) throw await parseErrorResponse(response);
+  return (await response.json()) as ReviewOutput;
 }
 
 export async function checkHealth(): Promise<boolean> {
