@@ -797,6 +797,13 @@ export function disclosureDocCrossRef(
   if (ctx?.extraction_status !== "EXTRACTED" || checkId.includes("document_notice")) {
     return { status: "no_doc", facts: [] };
   }
+  // 백엔드(build_disclosure_checks)가 직접 연결한 근거를 단일 출처로 우선 사용.
+  const check = (ctx.disclosure_checks ?? []).find((item) => item.check_id === checkId);
+  const linked = check?.product_doc_evidence as ProductFact[] | undefined;
+  if (linked !== undefined) {
+    return { status: linked.length ? "in_doc" : "not_in_doc", facts: linked.slice(0, 4) };
+  }
+  // 폴백: 백엔드 연결이 없는 데이터는 프론트 토큰 휴리스틱으로 추정.
   const facts = ctx.product_facts ?? [];
   const tokens = DISCLOSURE_DOC_TOKENS[checkId] ?? [label];
   const matched = facts.filter((fact) => {

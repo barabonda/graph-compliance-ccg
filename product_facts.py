@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+import csv
 import unicodedata
 from functools import lru_cache
 from pathlib import Path
@@ -219,7 +220,7 @@ class ProductFactAnalyzer:
             "product_facts": product_facts,
             "claim_facts": claim_facts,
             "comparison_results": comparisons,
-            "disclosure_checks": build_disclosure_checks(review_input),
+            "disclosure_checks": build_disclosure_checks(review_input, product_facts),
             "reason": "",
         }
 
@@ -388,7 +389,17 @@ def context_with_documents(
     }
 
 
-def build_disclosure_checks(review_input: ReviewInput) -> list[dict[str, Any]]:
+def build_disclosure_checks(
+    review_input: ReviewInput,
+    product_facts: list[dict[str, Any]] | None = None,
+) -> list[dict[str, Any]]:
+    """광고 텍스트의 필수 고지 존재/부재를 판정하고, 가능하면 상품설명서
+    (product_facts)의 근거 fact를 각 고지에 직접 연결해 내려준다.
+
+    'present'는 광고 문안 기준(토큰 매칭)이고, 'product_doc_evidence'/
+    'in_product_doc'는 상품문서 기준이다. 둘을 분리해, '광고엔 없지만
+    상품설명서엔 있음'을 프론트 휴리스틱이 아니라 단일 출처로 표현한다.
+    """
     text = review_input.content_text
     product_group = review_input.product_group
     if product_group == "auto":
@@ -400,26 +411,40 @@ def build_disclosure_checks(review_input: ReviewInput) -> list[dict[str, Any]]:
         elif any(token in lowered for token in ["els", "펀드", "투자", "수익률"]):
             product_group = "investment"
     if product_group == "deposit":
-        return [
-            disclosure_check("deposit_rate_condition", "최고금리 적용 조건", any_token(text, ["우대조건", "조건 충족", "조건에 따라", "가입기간"])),
+        return attach_product_doc_evidence([
+            # 조건 고지는 "우대조건" 같은 정형 문구 외에 계약기간별 약정이율·고시
+            # 이자율 안내 형태로도 충족된다. 존재 여부만 보고, 현저성(혜택 문구
+            # 대비 표시 위계)은 prominence 모듈이 별도로 판단한다.
+            disclosure_check(
+                "deposit_rate_condition",
+                "최고금리 적용 조건",
+                any_token(
+                    text,
+                    [
+                        "우대조건", "조건 충족", "조건에 따라", "가입기간",
+                        "계약기간별", "유형별 약정이율", "약정이율 적용",
+                        "고시 이자율", "고시이자율", "달라질 수 있",
+                    ],
+                ),
+            ),
             disclosure_check("deposit_term", "가입기간", any_token(text, ["개월", "년", "가입기간", "만기"])),
             disclosure_check("deposit_tax_basis", "세전/세후 기준", any_token(text, ["세전", "세후"])),
             disclosure_check("depositor_protection_limit", "예금자보호 한도", any_token(text, ["1억원", "예금자보호", "보호법"])),
             disclosure_check("product_document_notice", "상품설명서·약관 확인", any_token(text, ["상품설명서", "약관", "설명서"])),
-        ]
+        ], product_facts)
     if product_group == "loan":
-        return [
+        return attach_product_doc_evidence([
             disclosure_check("loan_rate_range", "대출금리 범위", any_token(text, ["연 ", "%", "금리"])),
             disclosure_check("loan_screening", "심사 조건", any_token(text, ["심사", "신용도", "상환능력"])),
             disclosure_check("loan_fee", "수수료/부대비용", any_token(text, ["수수료", "부대비용", "중도상환"])),
             disclosure_check("product_document_notice", "상품설명서·약관 확인", any_token(text, ["상품설명서", "약관", "설명서"])),
-        ]
+        ], product_facts)
     if product_group == "investment":
-        return [
+        return attach_product_doc_evidence([
             disclosure_check("investment_loss_risk", "원금손실 가능성", any_token(text, ["원금손실", "손실", "투자위험"])),
             disclosure_check("past_performance_warning", "과거성과 미래수익 보장 아님", any_token(text, ["미래 수익을 보장", "보장하지 않습니다", "과거"])),
             disclosure_check("product_document_notice", "투자설명서·약관 확인", any_token(text, ["투자설명서", "상품설명서", "약관"])),
-        ]
+        ], product_facts)
     return []
 
 
@@ -434,6 +459,62 @@ def disclosure_check(check_id: str, label: str, present: bool) -> dict[str, Any]
 
 def any_token(text: str, tokens: list[str]) -> bool:
     return any(token in text for token in tokens)
+
+
+# 각 필수 고지를 상품설명서 product_fact에 연결하기 위한 fact_type/조건 토큰.
+# 광고 텍스트가 아니라 추출된 product_fact(fact_type·condition·value·evidence)를 본다.
+# '상품설명서·약관 확인'은 문서 내용이 아니라 메타 고지이므로 제외한다.
+DISCLOSURE_FACT_TOKENS: dict[str, list[str]] = {
+    "deposit_rate_condition": [
+        "우대", "고시이율", "고시 이자율", "고시이자율", "약정이율", "기본이자율", "우대이자율",
+    ],
+    "deposit_term": ["계약기간", "가입기간", "만기", "기간"],
+    "deposit_tax_basis": ["세전", "세후", "세금"],
+    "depositor_protection_limit": ["예금자보호", "예금보험", "보호한도", "5천만원", "5,000만원", "1억원"],
+    "loan_rate_range": ["대출금리", "금리", "연이율"],
+    "loan_screening": ["심사", "승인", "신용"],
+    "loan_fee": ["수수료", "중도상환", "부대비용"],
+    "investment_loss_risk": ["원금", "손실", "투자위험"],
+    "past_performance_warning": ["과거", "수익률", "실적"],
+}
+
+
+def link_disclosure_to_facts(
+    check_id: str, product_facts: list[dict[str, Any]] | None
+) -> list[dict[str, Any]]:
+    """누락/존재 고지의 주제가 상품설명서에 있는지 product_fact로 직접 연결한다."""
+    if not product_facts:
+        return []
+    tokens = DISCLOSURE_FACT_TOKENS.get(check_id)
+    if not tokens:
+        return []
+    evidence: list[dict[str, Any]] = []
+    for fact in product_facts:
+        haystack = " ".join(
+            str(fact.get(key) or "")
+            for key in ("fact_type", "condition", "value", "evidence_text")
+        )
+        if any(token in haystack for token in tokens):
+            evidence.append(
+                {
+                    "fact_id": str(fact.get("fact_id") or ""),
+                    "fact_type": str(fact.get("fact_type") or ""),
+                    "value": str(fact.get("value") or ""),
+                    "page_or_chunk": str(fact.get("page_or_chunk") or ""),
+                }
+            )
+    return evidence[:4]
+
+
+def attach_product_doc_evidence(
+    checks: list[dict[str, Any]], product_facts: list[dict[str, Any]] | None
+) -> list[dict[str, Any]]:
+    """각 고지에 상품설명서 근거 fact를 직접 연결(in_product_doc/product_doc_evidence)."""
+    for check in checks:
+        evidence = link_disclosure_to_facts(str(check.get("check_id") or ""), product_facts)
+        check["product_doc_evidence"] = evidence
+        check["in_product_doc"] = bool(evidence)
+    return checks
 
 
 def select_product_documents(product: str) -> list[dict[str, Any]]:
@@ -513,9 +594,15 @@ def load_disclosure_metadata() -> list[dict[str, Any]]:
     path = Path(os.environ.get("JB_PRODUCT_DISCLOSURE_METADATA_PATH", str(DEFAULT_DISCLOSURE_META)))
     if not path.exists():
         return []
+    if path.suffix.lower() == ".csv":
+        with path.open("r", encoding="utf-8-sig", newline="") as handle:
+            return [{str(key): value for key, value in row.items()} for row in csv.DictReader(handle)]
     try:
         import pandas as pd
     except Exception:
         return []
-    df = pd.read_csv(path)
+    if path.suffix.lower() in {".xlsx", ".xls"}:
+        df = pd.read_excel(path, sheet_name="dataset_index")
+    else:
+        df = pd.read_csv(path)
     return [{str(key): value for key, value in row.items()} for row in df.fillna("").to_dict(orient="records")]
