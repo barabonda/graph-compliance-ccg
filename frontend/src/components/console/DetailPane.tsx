@@ -5,7 +5,8 @@ import {
   aggregationForAnchor,
   buildIssueCards,
   claimQualifiers,
-  delegationChainsForAnchor,
+  clauseEvidenceForAnchor,
+  delegationByPrinciple,
   disclosureSignals,
   effectiveJudgmentsForAnchor,
   planItemsForAnchor,
@@ -16,7 +17,7 @@ import {
 import type { ReviewOutput } from "@/lib/types";
 import { Icon } from "../Icon";
 import { Badge, Expandable, KeyValueText, Meter, Tag } from "../ui";
-import { DelegationChain, sortDelegationSteps } from "./DelegationChain";
+import { DelegationChain } from "./DelegationChain";
 import { DetailRow, PaneHeader } from "./common";
 import { TONE_BG, TONE_COLOR, TONE_WORD_SHORT } from "./RiskList";
 
@@ -183,9 +184,8 @@ export function DetailPane({ result, selectedAnchorId, resolved, onToggleResolve
     effective.some((judgment) => judgment.judgment_id === review.judgment_id),
   );
   // 법령 위임 사슬 (법률→시행령→감독규정→심의기준) — 여러 chain의 단계를 병합.
-  const delegationChains = delegationChainsForAnchor(result, anchor.anchor_id);
-  const delegationSteps = sortDelegationSteps(delegationChains.flatMap((c) => c.steps));
-  const delegationPrinciples = [...new Set(delegationChains.flatMap((c) => c.principles))];
+  const delegationGroups = delegationByPrinciple(result, anchor.anchor_id).filter((g) => g.steps.length > 0);
+  const clauseEvidence = clauseEvidenceForAnchor(result, anchor.anchor_id);
   const aggregationRows = aggregationForAnchor(result, anchor);
   const suggestion = (result.revision_suggestions ?? []).find((item) => item.anchor_id === anchor.anchor_id);
   const qualifiers = claimQualifiers(result, anchor.claim_id);
@@ -195,7 +195,6 @@ export function DetailPane({ result, selectedAnchorId, resolved, onToggleResolve
     productComparisonsForClaimFact(result, fact.claim_fact_id),
   );
   const principles = [...new Set(plans.map((item) => item.principle).filter(Boolean))];
-  const articles = [...new Set(plans.map((item) => item.source_article).filter(Boolean))];
 
   return (
     <div className="flex h-full flex-col">
@@ -363,84 +362,42 @@ export function DetailPane({ result, selectedAnchorId, resolved, onToggleResolve
           </DetailRow>
         )}
 
-        {/* 근거 조문 — 법령 위임 사슬(법률→시행령→감독규정→심의기준) + 조문별 원문 */}
-        <DetailRow icon="clause" label="근거 조문 · 법령 위임 사슬">
-          <div className="space-y-2">
-            {delegationSteps.length > 0 && (
-              <div className="mb-1 rounded-[10px] border border-line bg-surface-2 p-3">
-                <DelegationChain steps={delegationSteps} />
-                {delegationPrinciples.length > 0 && (
-                  <div className="mt-2 flex flex-wrap items-center gap-1.5 border-t border-line pt-2">
-                    <span className="text-[10.5px] font-bold tracking-wider text-ink-4">판매원칙</span>
-                    {delegationPrinciples.map((p) => (
-                      <Tag key={p} tone="danger">
-                        {p}
-                      </Tag>
-                    ))}
+        {/* 근거 조문 — 판매원칙별 법령 위임 사슬(법률→시행령→감독규정→심의기준) */}
+        {delegationGroups.length > 0 && (
+          <DetailRow icon="clause" label="근거 조문 · 법령 위임 사슬">
+            <div className="space-y-2.5">
+              {delegationGroups.map((group) => (
+                <div key={group.principle} className="rounded-[10px] border border-line bg-surface-2 p-3">
+                  <div className="mb-2 flex items-center gap-1.5">
+                    <Tag tone="danger">{group.principle}</Tag>
+                    <span className="text-[10.5px] text-ink-4">원칙 기준 위임 사슬</span>
                   </div>
-                )}
-              </div>
-            )}
-            {articles.slice(0, 4).map((article) => {
-              const articlePlans = plans.filter((item) => item.source_article === article);
-              const evidenceTexts = [
-                ...new Set(articlePlans.flatMap((item) => item.evidence_texts ?? []).filter(Boolean)),
-              ];
-              const evidenceIds = [
-                ...new Set(articlePlans.flatMap((item) => item.legal_evidence_ids ?? []).filter(Boolean)),
-              ];
-              const principle = articlePlans.find((item) => item.principle)?.principle;
-              const constraint = articlePlans.find((item) => item.constraint)?.constraint;
-              const hasDetail = evidenceTexts.length > 0 || Boolean(constraint) || evidenceIds.length > 0;
-              return (
+                  <DelegationChain steps={group.steps} />
+                </div>
+              ))}
+              {/* 조문 원문은 별도 드릴다운(평면 중복 제거, 난수 id 비노출) */}
+              {clauseEvidence.some((c) => c.texts.length || c.constraint) && (
                 <Expandable
-                  key={article}
-                  disabled={!hasDetail}
-                  header={
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span className="font-mono text-[11.5px] font-bold text-brand-2">{article}</span>
-                      {principle && <Tag>{principle}</Tag>}
-                      {!hasDetail && <span className="text-[11px] text-ink-4">원문 미수록</span>}
-                    </div>
-                  }
+                  header={<span className="text-[12px] font-bold text-ink-2">조문·근거 원문 보기</span>}
                 >
                   <div className="space-y-2.5">
-                    {constraint && (
-                      <div>
-                        <div className="mb-1 text-[10.5px] font-bold tracking-wider text-ink-4">요건</div>
-                        <p className="m-0 text-[12.5px] leading-relaxed text-ink-2">{constraint}</p>
-                      </div>
-                    )}
-                    {evidenceTexts.length > 0 && (
-                      <div>
-                        <div className="mb-1 text-[10.5px] font-bold tracking-wider text-ink-4">조문/근거 원문</div>
-                        <div className="space-y-2">
-                          {evidenceTexts.slice(0, 4).map((text, index) => (
-                            <div
-                              key={index}
-                              className="border-l-2 border-line-2 pl-2.5 text-[12.5px] leading-relaxed text-ink-2"
-                            >
-                              “{text}”
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                    {evidenceIds.length > 0 && (
-                      <div className="flex flex-wrap gap-1.5">
-                        {evidenceIds.slice(0, 8).map((id) => (
-                          <span key={id} className="font-mono text-[10px] text-ink-4">
-                            {id}
-                          </span>
+                    {clauseEvidence.map((c) => (
+                      <div key={c.article}>
+                        <div className="font-mono text-[11.5px] font-bold text-brand-2">{c.article}</div>
+                        {c.constraint && <p className="mt-0.5 text-[12px] leading-relaxed text-ink-2">{c.constraint}</p>}
+                        {c.texts.slice(0, 3).map((t, i) => (
+                          <div key={i} className="mt-1 border-l-2 border-line-2 pl-2.5 text-[12px] leading-relaxed text-ink-3">
+                            “{t}”
+                          </div>
                         ))}
                       </div>
-                    )}
+                    ))}
                   </div>
                 </Expandable>
-              );
-            })}
-          </div>
-        </DetailRow>
+              )}
+            </div>
+          </DetailRow>
+        )}
 
         {/* 조항별 / 원칙별 영향 집계 — 심사 보고서 단위 */}
         {aggregationRows.length > 0 && (

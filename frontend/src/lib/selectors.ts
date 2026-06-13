@@ -1175,6 +1175,74 @@ export function delegationChainsForAnchor(result: ReviewOutput, anchorId: string
     .map((chain) => ({ ...delegationChain(chain), summary: String(chain.summary ?? "") }));
 }
 
+export interface PrincipleDelegation {
+  principle: string;
+  steps: DelegationStep[];
+}
+
+/**
+ * 위임 사슬을 '판매원칙'별로 그룹핑 — 부당권유(§20)와 설명의무(§18·§14)가 한
+ * 사슬에 섞이는 오염을 막는다. 각 원칙 아래 법률→시행령→감독규정→심의기준 단계.
+ */
+export function delegationByPrinciple(result: ReviewOutput, anchorId: string): PrincipleDelegation[] {
+  const chains = delegationChainsForAnchor(result, anchorId);
+  const byPrinciple = new Map<string, DelegationStep[]>();
+  for (const chain of chains) {
+    const principle = chain.principles[0] ?? "근거";
+    const bucket = byPrinciple.get(principle) ?? [];
+    byPrinciple.set(principle, [...bucket, ...chain.steps]);
+  }
+  return [...byPrinciple.entries()].map(([principle, steps]) => ({
+    principle,
+    steps: sortDelegationStepsLocal(steps),
+  }));
+}
+
+function sortDelegationStepsLocal(steps: DelegationStep[]): DelegationStep[] {
+  const order = ["법률", "시행령", "위임기준", "감독규정", "심의기준"];
+  const seen = new Set<string>();
+  return steps
+    .filter((s) => {
+      const key = `${s.layer}:${s.label}`;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    })
+    .sort((a, b) => {
+      const ai = order.indexOf(a.layer);
+      const bi = order.indexOf(b.layer);
+      return (ai < 0 ? 9 : ai) - (bi < 0 ? 9 : bi);
+    });
+}
+
+/** anchor의 모든 조문 원문(중복 제거, 난수 id 제외) — 조문 드릴다운용. */
+export function clauseEvidenceForAnchor(result: ReviewOutput, anchorId: string): {
+  article: string;
+  principle: string;
+  constraint: string;
+  texts: string[];
+}[] {
+  const plans = planItemsForAnchor(result, anchorId);
+  const byArticle = new Map<string, { article: string; principle: string; constraint: string; texts: Set<string> }>();
+  for (const item of plans) {
+    const article = item.source_article || "근거 조항";
+    const entry = byArticle.get(article) ?? {
+      article,
+      principle: item.principle ?? "",
+      constraint: item.constraint ?? item.context ?? "",
+      texts: new Set<string>(),
+    };
+    for (const text of item.evidence_texts ?? []) if (text) entry.texts.add(text);
+    byArticle.set(article, entry);
+  }
+  return [...byArticle.values()].map((e) => ({
+    article: e.article,
+    principle: e.principle,
+    constraint: e.constraint,
+    texts: [...e.texts],
+  }));
+}
+
 /** 조항/원칙 집계 행을 anchor의 문구로 필터. */
 export function aggregationForAnchor(result: ReviewOutput, anchor: ContextAnchor): AggregationRow[] {
   const inAnchor = (rows: AggregationRow[]) =>

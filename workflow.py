@@ -406,6 +406,7 @@ class GraphComplianceCCGWorkflow:
             anchors=anchors,
             plan=cu_plan,
             windows=evidence_windows,
+            product_fact_signals=product_fact_signals_by_anchor(product_fact_context, claims, anchors),
         )
         yield workflow_event(
             "step_completed",
@@ -550,6 +551,40 @@ def build_retrieval_diagnostics(
             ],
         }
     return diagnostics
+
+
+def product_fact_signals_by_anchor(
+    product_fact_context: dict[str, Any],
+    claims: list[Any],
+    anchors: list[Any],
+) -> dict[str, list[dict[str, Any]]]:
+    """anchor_id -> 그 anchor의 claim에 대한 상품문서 대조 신호(상태/사유).
+
+    광고 주장 ↔ 약관·상품설명서 사실의 모순(CONTRADICTED 등)을 judge가 결론에
+    엮을 수 있도록, claim_fact -> claim -> anchor 경로로 비교 결과를 모은다.
+    """
+    claim_facts = {cf.get("claim_fact_id"): cf for cf in (product_fact_context.get("claim_facts") or [])}
+    comparisons = product_fact_context.get("comparison_results") or []
+    anchor_by_claim: dict[str, str] = {}
+    for anchor in anchors:
+        anchor_by_claim.setdefault(getattr(anchor, "claim_id", ""), getattr(anchor, "anchor_id", ""))
+    signals: dict[str, list[dict[str, Any]]] = {}
+    for comparison in comparisons:
+        status = str(comparison.get("status") or "")
+        if status == "SUPPORTED":
+            continue  # 일치 신호는 위반 추론에 불필요
+        claim_fact = claim_facts.get(comparison.get("claim_fact_id"))
+        claim_id = str(claim_fact.get("claim_id")) if claim_fact else ""
+        anchor_id = anchor_by_claim.get(claim_id)
+        if not anchor_id:
+            continue
+        signals.setdefault(anchor_id, []).append(
+            {
+                "status": status,
+                "rationale": str(comparison.get("rationale") or "")[:400],
+            }
+        )
+    return signals
 
 
 def workflow_event(event: str, step: str, *, review_run_id: str, summary: str = "", **extra: Any) -> dict[str, Any]:

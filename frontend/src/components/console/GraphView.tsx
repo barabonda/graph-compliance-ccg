@@ -3,13 +3,13 @@
 import {
   buildEvidencePath,
   buildIssueCards,
-  delegationChainsForAnchor,
+  delegationByPrinciple,
   type EvidenceNodeKind,
 } from "@/lib/selectors";
 import type { ReviewOutput } from "@/lib/types";
 import { Icon } from "../Icon";
 import { EmptyState } from "../ui";
-import { DelegationChain, PrincipleTags, sortDelegationSteps } from "./DelegationChain";
+import { DelegationChain, PrincipleTags } from "./DelegationChain";
 import { PaneHeader } from "./common";
 import { TONE_BG, TONE_COLOR, TONE_WORD_SHORT } from "./RiskList";
 
@@ -142,9 +142,7 @@ export function GraphView({ result, selectedAnchorId, onSelectAnchor }: Props) {
   const svgH = PAD_Y * 2 + NODE_H;
   const yMid = PAD_Y + NODE_H / 2;
   const activeCard = anchorCards.find((card) => card.anchorId === activeId);
-  const delegationChains = delegationChainsForAnchor(result, activeId);
-  const delegationSteps = sortDelegationSteps(delegationChains.flatMap((c) => c.steps));
-  const delegationPrinciples = [...new Set(delegationChains.flatMap((c) => c.principles))];
+  const delegationGroups = delegationByPrinciple(result, activeId).filter((g) => g.steps.length > 0);
 
   // 각 노드의 x 시작 좌표.
   const xs: number[] = [];
@@ -241,19 +239,21 @@ export function GraphView({ result, selectedAnchorId, onSelectAnchor }: Props) {
             </div>
           </div>
 
-          {/* 법령 위임 사슬 — 마지막 '근거 조문' 노드의 위임 위계 전개 */}
-          {delegationSteps.length > 0 && (
+          {/* 법령 위임 사슬 — 판매원칙별 위임 위계 전개 */}
+          {delegationGroups.length > 0 && (
             <div className="mt-6">
               <div className="mb-2.5 flex items-center gap-1.5 text-[11px] font-bold tracking-wider text-ink-4 uppercase">
                 법령 위임 사슬 <span className="font-normal normal-case text-ink-4">· 법률 → 시행령 → 감독규정 → 심의기준</span>
               </div>
-              <div className="rounded-[12px] border border-line bg-surface-2 px-4.5 py-4">
-                <DelegationChain steps={delegationSteps} />
-                {delegationPrinciples.length > 0 && (
-                  <div className="mt-2 border-t border-line pt-2">
-                    <PrincipleTags principles={delegationPrinciples} />
+              <div className="space-y-2.5">
+                {delegationGroups.map((group) => (
+                  <div key={group.principle} className="rounded-[12px] border border-line bg-surface-2 px-4.5 py-4">
+                    <div className="mb-2">
+                      <PrincipleTags principles={[group.principle]} />
+                    </div>
+                    <DelegationChain steps={group.steps} />
                   </div>
-                )}
+                ))}
               </div>
             </div>
           )}

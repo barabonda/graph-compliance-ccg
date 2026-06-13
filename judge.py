@@ -155,6 +155,7 @@ class LLMComplianceJudge:
         anchors: list[ContextAnchor],
         plan: list[CUPlanItem],
         windows: list[EvidenceWindow],
+        product_fact_signals: dict[str, list[dict[str, Any]]] | None = None,
     ) -> list[LLMJudgment]:
         if not plan:
             return []
@@ -180,6 +181,8 @@ class LLMComplianceJudge:
                     # 규칙기반 판단 레이어를 명시적으로 제시 — LLM은 이 요건들에
                     # 사실을 적용해 설명을 '종합'한다(처음부터 판단하지 않는다).
                     "legal_test": build_legal_test(item, anchor),
+                    # 상품문서 대조 신호: 광고 주장 ↔ 약관/상품설명서 사실의 모순.
+                    "product_fact_signals": (product_fact_signals or {}).get(item.anchor_id, []),
                     "evidence_window": to_jsonable(window) if window else {},
                 }
             )
@@ -195,17 +198,22 @@ class LLMComplianceJudge:
                 "legal_test가 규칙기반 판단 레이어입니다. 항목마다 독립적으로 판단하고, 외부 법·외부 사실·"
                 "다른 항목의 광고 문구를 증거로 쓰지 마세요.\n"
                 "각 항목에 대해 다음을 산출하세요:\n"
-                "1) legal_basis: legal_test.cu_definition/principle을 근거로, 이 기준이 금지(또는 요구)하는 "
-                "행위가 무엇인지 한 문장 정의. (예: '광고에서 불확실한 사항을 단정적으로 제공하거나 확실하다고 "
-                "오인하게 하는 행위를 금지한다')\n"
-                "2) criteria_findings: legal_test.required_elements의 각 요건(criterion)에 대해, 이 광고의 어느 "
-                "표현/사실(legal_test.matched_facts, ContextAnchor.span, facts)이 왜 그 요건을 충족(satisfied=true) "
-                "또는 불충족(false)하는지 finding에 구체적으로. 규칙기반 매칭(satisfied 초기값)을 존중하되, 사실이 "
-                "실제로 그 요건을 뒷받침하지 않으면 false로 교정하세요. 요건명은 한국어 그대로 사용.\n"
-                "3) conclusion: 요건 적용을 종합해 왜 이 verdict인지. 핵심 요건이 충족되면 NON_COMPLIANT, 요건은 "
-                "관련되나 사실/문서가 부족하면 INSUFFICIENT, 무관하면 NOT_APPLICABLE, 충족 안 되면 COMPLIANT.\n"
-                "4) reservation: 금감원 회답처럼, 구체적 사실관계·추가 고지·실제 운영에 따라 해석이 달라질 수 있는 "
-                "한계를 한 문장. 단정 회피.\n"
+                "1) legal_basis: 금감원 법령해석 회답의 '이유'처럼, 근거 조문을 명시하여 이 기준이 금지(또는 "
+                "요구)하는 행위가 무엇인지 한 문장으로. cu_plan_item.source_article와 evidence_window의 위임 "
+                "사슬(법률→시행령→감독규정→심의기준)을 인용하세요. (예: '금융소비자보호법 시행령 제20조 제1항 "
+                "제4호는 광고 시 불확실한 사항에 대해 단정적 판단을 제공하거나 확실하다고 오인하게 할 소지가 있는 "
+                "내용을 알리는 행위를 금지한다')\n"
+                "2) criteria_findings: legal_test.required_elements의 '모든' 요건(criterion)을 빠짐없이 다루세요. "
+                "충족 요건은 satisfied=true와 함께 이 광고의 어느 표현/사실(legal_test.matched_facts, "
+                "ContextAnchor.span, facts)이 왜 그 요건을 충족하는지, 불충족 요건은 satisfied=false와 함께 무엇이 "
+                "없어서 불충족인지 finding에 구체적으로. 규칙기반 매칭(rule_satisfied)을 존중하되 사실이 뒷받침하지 "
+                "않으면 false로 교정. 요건명은 한국어 그대로.\n"
+                "3) conclusion: 요건 적용을 종합해 왜 이 verdict인지를 조문과 함께. product_fact_signals가 있으면 "
+                "(예: CONTRADICTED) '광고는 ~라고 하나 상품설명서·약관 사실은 ~로 서로 모순된다'처럼 사실 대조를 "
+                "결론에 반드시 엮으세요. 핵심 요건 충족+모순 시 NON_COMPLIANT, 요건은 관련되나 사실/문서가 부족하면 "
+                "INSUFFICIENT, 무관하면 NOT_APPLICABLE, 충족 안 되면 COMPLIANT.\n"
+                "4) reservation: 금감원 회답의 마무리처럼 '이는 개별적 사실인정에 관한 사항으로 구체적 사실관계(추가 "
+                "고지·실제 운영 등)에 따라 해석·적용이 달라질 수 있다'는 취지의 유보를 한 문장. 단정 회피.\n"
                 "판단 원칙: 명시적 모순/단정/보장을 우선. 침묵으로부터 위반을 추론하지 말 것. anchor 자체가 조건·"
                 "유보 표현(세전, 조건에 따라, 달라질 수 있습니다 등)을 말하면 추가 세부 부재는 위반이 아니라 최대 "
                 "INSUFFICIENT. 완화 고지 anchor는 그 고지에 대해 COMPLIANT일 수 있으나 별개의 단정·보장·무조건 "
