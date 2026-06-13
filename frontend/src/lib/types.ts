@@ -450,6 +450,12 @@ export interface OverallImpressionJudgment {
   explicit_mitigation_signals?: { id?: string; label?: string; matched_terms?: string }[];
   grounded_claim_ids?: string[];
   evidence_paths?: TrackBEvidencePath[];
+  /** 복잡 위반 종합에 연결한 흩어진 증거(위계·위계차·사실모순). */
+  synthesized_evidence?: {
+    sentence_layers?: { role?: string; tier?: string; text?: string }[];
+    prominence_gaps?: { code?: string; message?: string; evidence?: string }[];
+    fact_contradictions?: { status?: string; rationale?: string }[];
+  };
 }
 
 export interface AggregationRow {

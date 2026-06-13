@@ -5,7 +5,7 @@ from __future__ import annotations
 from typing import Any
 
 from llm_gateway import LLMGateway
-from schemas import Claim, ReviewInput
+from schemas import Claim, ReviewInput, SentenceUnit
 from utils import to_jsonable
 
 
@@ -44,22 +44,47 @@ class LLMOverallImpressionJudge:
         review_input: ReviewInput,
         claims: list[Claim],
         disclosure_requirements: list[dict[str, Any]],
+        sentence_units: list[SentenceUnit] | None = None,
+        prominence_diagnostics: list[dict[str, Any]] | None = None,
+        product_fact_context: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
         mitigation_signals = extract_mitigation_signals(review_input.content_text)
+        # 복잡 위반을 위한 흩어진 구조화 증거: 문장 위계/역할, 혜택↔고지 위계차,
+        # 광고 주장↔상품문서 사실 모순. 개별 조각은 합법이어도 종합 인상은 다를 수 있다.
+        sentence_layers = [
+            {"role": s.role, "tier": s.prominence_tier, "text": s.text}
+            for s in (sentence_units or [])
+            if s.role in {"benefit_claim", "condition_disclosure", "risk_disclosure", "protection_disclosure"}
+        ]
+        prominence_gaps = [
+            {"code": d.get("diagnostic_code"), "message": d.get("message"), "evidence": d.get("evidence")}
+            for d in (prominence_diagnostics or [])
+            if d.get("diagnostic_code") in {"PROMINENCE_INSUFFICIENT", "DISCLOSURE_MISSING"}
+        ]
+        fact_contradictions = [
+            {"status": c.get("status"), "rationale": c.get("rationale")}
+            for c in ((product_fact_context or {}).get("comparison_results") or [])
+            if c.get("status") in {"CONTRADICTED", "CONDITION_MISSING", "NO_PRODUCT_FACT"}
+        ]
         result = self.llm.structured(
             name="graphcompliance_overall_impression",
             schema=OVERALL_IMPRESSION_SCHEMA,
             system=(
-                "You judge Track B consumer misleading risk for Korean financial advertisements. "
-                "Apply the overall and ultimate impression standard: ordinary consumers form impressions "
-                "from direct wording, implied meaning, context, customary interpretation, and omissions. "
-                "Use only the provided ad, extracted Claim->Meaning->Implicature->ConsumerEffect path, "
-                "and disclosure requirement hints. Do not decide legal violation; decide misleading-risk "
-                "for compliance review routing. Treat explicit conditions, limits, variable-rate wording, "
-                "depositor-protection limits, risk warnings, fee notices, and review-process notices as "
-                "mitigating evidence. Do not say a condition is missing when the ad explicitly states that "
-                "the benefit depends on conditions; in that case judge whether the stated condition is still "
-                "too vague, not whether it is absent."
+                "당신은 한국 금융광고의 Track B '전체적·궁극적 인상' 기준 소비자 오인위험을 판단합니다. "
+                "핵심은 '복잡 위반' 탐지입니다: 개별 문구는 모두 합법(예: '최고 10%'는 조건 충족 시 사실, "
+                "'예금자보호 안 됨'도 정직한 고지)이어도, 흩어진 조각을 종합하면 '안전한 고금리'라는 전체 "
+                "인상과 '조건 까다롭고 원금손실 가능'이라는 실체 사이에 간극이 생길 수 있습니다. 그 간극이 "
+                "오인위험입니다. 다음 구조화 증거를 반드시 종합하세요:\n"
+                "- sentence_layers: 혜택(benefit) 문구는 headline에, 위험·조건 고지는 footnote에 놓였는지 "
+                "(위계 비대칭은 오인을 키움).\n"
+                "- prominence_gaps: 혜택 대비 고지가 낮은 위계이거나 누락된 신호.\n"
+                "- fact_contradictions: 광고 주장과 상품설명서·약관 사실의 모순(CONTRADICTED) 또는 근거 부재. "
+                "수치 불일치(예: 본문 10% vs 예상수취 11%)나 '확정' 주장 vs 변동금리 실체는 강한 오인 신호.\n"
+                "misleading_factors에는 '어떤 조각들을 어떻게 연결했는지'를 구체적으로 적으세요(예: '친근한 "
+                "상품명+headline 최고금리 강조' vs 'footnote 예금자보호 미해당+원금손실' vs '문서상 변동금리'를 "
+                "종합하면 안전·확정 인상과 실체가 괴리). 법적 위반을 단정하지 말고 라우팅용 오인위험만 판단. "
+                "명시된 조건·한도·변동·예금자보호·위험·수수료·심의 고지는 완화 증거로 보되, footnote로 약하게 "
+                "표시되면 완화력이 제한됨을 반영하세요. 모든 산출은 한국어."
             ),
             user=(
                 "[ad]\n"
@@ -67,6 +92,12 @@ class LLMOverallImpressionJudge:
                 f"{review_input.content_text}\n\n"
                 "[claims]\n"
                 f"{to_jsonable(claims)}\n\n"
+                "[sentence_layers] (역할·위계)\n"
+                f"{sentence_layers}\n\n"
+                "[prominence_gaps] (혜택↔고지 위계차/누락)\n"
+                f"{prominence_gaps}\n\n"
+                "[fact_contradictions] (광고 주장↔상품문서 사실 모순)\n"
+                f"{fact_contradictions}\n\n"
                 "[disclosure_requirements]\n"
                 f"{disclosure_requirements}\n\n"
                 "[explicit_mitigation_signals]\n"
@@ -82,6 +113,12 @@ class LLMOverallImpressionJudge:
             "representative_consumer_impression": result["representative_consumer_impression"],
             "misleading_factors": result["misleading_factors"],
             "explicit_mitigation_signals": mitigation_signals,
+            # 종합에 사용된 흩어진 증거(감사 추적): 어떤 조각을 연결해 인상을 판단했는지.
+            "synthesized_evidence": {
+                "sentence_layers": sentence_layers,
+                "prominence_gaps": prominence_gaps,
+                "fact_contradictions": fact_contradictions,
+            },
             "grounded_claim_ids": result["grounded_claim_ids"],
             "evidence_paths": [
                 {

@@ -247,6 +247,11 @@ class GraphComplianceCCGWorkflow:
             review_input=review_input,
             claims=claims,
             disclosure_requirements=disclosure_requirements,
+            # 복잡 위반(전체 인상 vs 실체 간극)을 종합하도록 흩어진 구조화 증거 주입:
+            # 문장 위계/역할, 혜택↔고지 위계차(prominence), 광고 주장↔상품문서 사실 모순.
+            sentence_units=extraction.sentence_units,
+            prominence_diagnostics=prominence_diagnostics,
+            product_fact_context=product_fact_context,
         )
         yield workflow_event(
             "step_completed",

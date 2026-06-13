@@ -97,6 +97,70 @@ function TrackBDetail({ result }: { result: ReviewOutput }) {
             ))}
           </ul>
         </DetailRow>
+        {(() => {
+          const syn = trackB.synthesized_evidence;
+          const layers = syn?.sentence_layers ?? [];
+          const gaps = syn?.prominence_gaps ?? [];
+          const contradictions = syn?.fact_contradictions ?? [];
+          if (!layers.length && !gaps.length && !contradictions.length) return null;
+          const ROLE_KO: Record<string, string> = {
+            benefit_claim: "혜택",
+            condition_disclosure: "조건 고지",
+            risk_disclosure: "위험 고지",
+            protection_disclosure: "보호 고지",
+          };
+          return (
+            <DetailRow icon="layers" label="종합한 증거 (흩어진 조각 → 전체 인상)">
+              <div className="space-y-2.5">
+                {layers.length > 0 && (
+                  <div>
+                    <div className="mb-1 text-[10.5px] font-bold tracking-wider text-ink-4">문장 위계</div>
+                    <div className="space-y-1">
+                      {layers.map((l, i) => (
+                        <div key={i} className="flex items-start gap-2 text-[12px]">
+                          <span
+                            className={`shrink-0 rounded px-1.5 py-0.5 text-[10px] font-bold ${
+                              l.role === "benefit_claim" ? "bg-reject-bg text-reject" : "bg-pass-bg text-pass"
+                            }`}
+                          >
+                            {ROLE_KO[l.role ?? ""] ?? l.role}
+                          </span>
+                          <span className="shrink-0 rounded bg-surface-3 px-1 text-[10px] text-ink-3">{l.tier}</span>
+                          <span className="min-w-0 text-ink-2">{l.text}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {gaps.length > 0 && (
+                  <div>
+                    <div className="mb-1 text-[10.5px] font-bold tracking-wider text-ink-4">혜택↔고지 위계차</div>
+                    {gaps.map((g, i) => (
+                      <p key={i} className="text-[12px] leading-relaxed text-ink-2">
+                        <span className="font-mono text-[10.5px] text-revise">{g.code}</span> · {g.message}
+                      </p>
+                    ))}
+                  </div>
+                )}
+                {contradictions.length > 0 && (
+                  <div>
+                    <div className="mb-1 text-[10.5px] font-bold tracking-wider text-ink-4">광고↔상품문서 사실 모순</div>
+                    {contradictions.map((c, i) => (
+                      <p key={i} className="text-[12px] leading-relaxed text-ink-2">
+                        <span
+                          className={`font-bold ${c.status === "CONTRADICTED" ? "text-reject" : "text-revise"}`}
+                        >
+                          {c.status}
+                        </span>{" "}
+                        · {c.rationale}
+                      </p>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </DetailRow>
+          );
+        })()}
         <DetailRow icon="graph" label="근거 경로 (Claim → 인상 → 효과)">
           <div className="space-y-2">
             {(trackB.evidence_paths ?? []).map((path, index) => (
