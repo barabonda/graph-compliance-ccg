@@ -6,7 +6,6 @@ import {
   buildIssueCards,
   claimQualifiers,
   delegationChainsForAnchor,
-  type DelegationStep,
   disclosureSignals,
   effectiveJudgmentsForAnchor,
   planItemsForAnchor,
@@ -17,45 +16,9 @@ import {
 import type { ReviewOutput } from "@/lib/types";
 import { Icon } from "../Icon";
 import { Badge, Expandable, KeyValueText, Meter, Tag } from "../ui";
+import { DelegationChain, sortDelegationSteps } from "./DelegationChain";
 import { DetailRow, PaneHeader } from "./common";
 import { TONE_BG, TONE_COLOR, TONE_WORD_SHORT } from "./RiskList";
-
-/** 법령 단계 배지 색. 법률→시행령→감독규정→심의기준 위임 위계. */
-const LAYER_STYLE: Record<string, string> = {
-  법률: "bg-brand text-white",
-  시행령: "bg-brand-tint2 text-brand-2",
-  감독규정: "bg-revise-bg text-revise",
-  위임기준: "bg-revise-bg text-revise",
-  심의기준: "bg-surface-3 text-ink-2",
-  판매원칙: "bg-reject-bg text-reject",
-};
-
-function DelegationChain({ steps }: { steps: DelegationStep[] }) {
-  return (
-    <ol className="relative space-y-0">
-      {steps.map((step, i) => (
-        <li key={`${step.layer}_${i}`} className="relative flex gap-2.5 pb-3 last:pb-0">
-          {/* 위임 세로선 */}
-          {i < steps.length - 1 && <span className="absolute top-5 left-[7px] h-full w-px bg-line-2" />}
-          <span className="mt-1.5 h-3.5 w-3.5 shrink-0 rounded-full border-2 border-brand bg-surface" />
-          <div className="min-w-0 flex-1">
-            <span
-              className={`inline-block rounded px-1.5 py-0.5 text-[10px] font-bold ${LAYER_STYLE[step.layer] ?? "bg-surface-3 text-ink-2"}`}
-            >
-              {step.layer}
-            </span>
-            <span className="ml-1.5 font-mono text-[12px] font-bold text-ink">{step.label}</span>
-            {step.why && (
-              <p className="mt-0.5 flex items-center gap-1 text-[11px] leading-relaxed text-ink-3">
-                <span className="text-ink-4">↳ 위임</span> {step.why}
-              </p>
-            )}
-          </div>
-        </li>
-      ))}
-    </ol>
-  );
-}
 
 interface Props {
   result: ReviewOutput;
@@ -221,23 +184,7 @@ export function DetailPane({ result, selectedAnchorId, resolved, onToggleResolve
   );
   // 법령 위임 사슬 (법률→시행령→감독규정→심의기준) — 여러 chain의 단계를 병합.
   const delegationChains = delegationChainsForAnchor(result, anchor.anchor_id);
-  const delegationSteps: DelegationStep[] = [];
-  const stepSeen = new Set<string>();
-  for (const chain of delegationChains) {
-    for (const step of chain.steps) {
-      const key = `${step.layer}:${step.label}`;
-      if (stepSeen.has(key)) continue;
-      stepSeen.add(key);
-      delegationSteps.push(step);
-    }
-  }
-  // 병합된 단계를 법률→시행령→감독규정→심의기준 위임 순서로 전역 정렬.
-  const LAYER_ORDER = ["법률", "시행령", "위임기준", "감독규정", "심의기준"];
-  delegationSteps.sort((a, b) => {
-    const ai = LAYER_ORDER.indexOf(a.layer);
-    const bi = LAYER_ORDER.indexOf(b.layer);
-    return (ai < 0 ? 9 : ai) - (bi < 0 ? 9 : bi);
-  });
+  const delegationSteps = sortDelegationSteps(delegationChains.flatMap((c) => c.steps));
   const delegationPrinciples = [...new Set(delegationChains.flatMap((c) => c.principles))];
   const aggregationRows = aggregationForAnchor(result, anchor);
   const suggestion = (result.revision_suggestions ?? []).find((item) => item.anchor_id === anchor.anchor_id);
