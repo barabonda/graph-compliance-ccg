@@ -111,48 +111,55 @@ body {
   position: relative;
   display: inline;
   border: 0;
-  padding: 1.5px 1px;
+  padding: 1px 3px;
+  margin: 0 -1px;
   background: transparent;
   font: inherit;
   cursor: pointer;
-  border-radius: 2px;
+  border-radius: 5px;
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 3px;
   transition:
-    background-color 140ms ease,
-    box-shadow 140ms ease;
+    background-color 140ms ease;
 }
 
-/* One highlight per claim/disclosure span (token layer dropped). Default =
-   tone-colored underline only, NO background. Background appears ONLY on the
-   selected span, in the SAME tone color (never brand blue). This kills the
-   per-word patchwork and the stray blue boxes. */
+/* One highlight per claim/disclosure span (token layer dropped). The risky
+   phrase itself is COLORED by severity + wavy-underlined in the same colour —
+   reads as intentional editorial markup, not a black-text spellcheck squiggle.
+   고지는 위험이 아니므로 초록 + solid 밑줄. Background only on the selected span. */
 .hl-area-risk {
-  border-bottom: 2px solid var(--reject);
+  color: var(--reject);
+  text-decoration-line: underline;
+  text-decoration-style: wavy;
+  text-decoration-color: rgba(214, 69, 58, 0.7);
 }
 .hl-area-review {
-  border-bottom: 2px solid var(--revise);
+  color: var(--revise);
+  text-decoration-line: underline;
+  text-decoration-style: wavy;
+  text-decoration-color: rgba(217, 138, 11, 0.75);
 }
 .hl-area-keep,
 .hl-area-keep-warning {
-  border-bottom: 1.5px solid rgba(15, 157, 107, 0.55);
+  color: var(--pass);
+  text-decoration-line: underline;
+  text-decoration-style: solid;
+  text-decoration-color: rgba(15, 157, 107, 0.6);
 }
 .hl-area-scope {
-  background: transparent;
+  color: inherit;
 }
 
-.hl:hover {
-  background: rgba(0, 0, 0, 0.035);
-}
-
-/* Selection — tone-colored wash on the selected span (continuous, not blue). */
+/* Selection — soft tone-colored wash on the selected span (never brand blue). */
 .hl-area-risk.is-selected {
-  background: rgba(214, 69, 58, 0.13);
+  background: var(--reject-bg);
 }
 .hl-area-review.is-selected {
-  background: rgba(217, 138, 11, 0.14);
+  background: var(--revise-bg);
 }
 .hl-area-keep.is-selected,
 .hl-area-keep-warning.is-selected {
-  background: rgba(15, 157, 107, 0.13);
+  background: var(--pass-bg);
 }
 .hl-area-scope.is-selected {
   background: var(--surface-3);

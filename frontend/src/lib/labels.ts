@@ -2,6 +2,23 @@ import type { FinalVerdict } from "./types";
 
 export const WORKSPACE_ID = "graphcompliance_mvp_jb_20260530";
 
+// 원칙(심의 카테고리)별 색 — 의미별로 구분되게(레퍼런스: 설명의무=보라/부당권유=
+// 빨강/광고규제=파랑). 변형 표기('부당권유행위 금지' 등)도 포함 매칭으로 잡는다.
+const PRINCIPLE_COLORS: { key: string; color: string }[] = [
+  { key: "설명의무", color: "#7c5cde" },
+  { key: "부당권유", color: "#d6453a" },
+  { key: "허위", color: "#d6453a" },
+  { key: "과장", color: "#d6453a" },
+  { key: "불공정영업", color: "#0f9d6b" },
+  { key: "적합성", color: "#0f9d6b" },
+  { key: "광고규제", color: "#2f6df0" },
+];
+
+export function principleColor(principle: string): string | undefined {
+  const value = principle ?? "";
+  return PRINCIPLE_COLORS.find((item) => value.includes(item.key))?.color;
+}
+
 export const PRINCIPLES = [
   { key: "suitability", label: "적합성", match: ["적합성"] },
   { key: "appropriateness", label: "적정성", match: ["적정성"] },

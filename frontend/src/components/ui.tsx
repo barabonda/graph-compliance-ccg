@@ -22,30 +22,39 @@ export function Badge({ tone = "neutral", children }: { tone?: BadgeTone; childr
 
 export function Tag({
   tone,
+  color,
   children,
   onClick,
 }: {
   tone?: "ok" | "review" | "danger";
+  /** 카테고리 색(hex) 오버라이드 — 원칙 태그처럼 의미별 색이 필요할 때. */
+  color?: string;
   children: ReactNode;
   onClick?: () => void;
 }) {
-  const toneClass =
-    tone === "ok"
+  const toneClass = color
+    ? ""
+    : tone === "ok"
       ? "border-pass/40 text-pass"
       : tone === "review"
         ? "border-revise/40 text-revise"
         : tone === "danger"
           ? "border-reject/40 text-reject"
           : "border-line text-ink-3";
-  const base = `inline-flex max-w-full items-center truncate rounded border bg-surface-2 px-1.5 py-0.5 text-[11px] font-medium ${toneClass}`;
+  const style = color ? { color, borderColor: `${color}59`, background: `${color}14` } : undefined;
+  const base = `inline-flex max-w-full items-center truncate rounded border ${color ? "" : "bg-surface-2"} px-1.5 py-0.5 text-[11px] font-medium ${toneClass}`;
   if (onClick) {
     return (
-      <button type="button" onClick={onClick} className={`${base} cursor-pointer hover:border-brand hover:text-brand`}>
+      <button type="button" onClick={onClick} style={style} className={`${base} cursor-pointer hover:opacity-80`}>
         {children}
       </button>
     );
   }
-  return <span className={base}>{children}</span>;
+  return (
+    <span className={base} style={style}>
+      {children}
+    </span>
+  );
 }
 
 export function Card({

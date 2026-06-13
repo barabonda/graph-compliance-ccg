@@ -1,3 +1,4 @@
+import { principleColor } from "@/lib/labels";
 import type { DelegationStep } from "@/lib/selectors";
 import { Tag } from "../ui";
 
@@ -61,7 +62,7 @@ export function PrincipleTags({ principles }: { principles: string[] }) {
     <div className="flex flex-wrap items-center gap-1.5">
       <span className="text-[10.5px] font-bold tracking-wider text-ink-4">판매원칙</span>
       {principles.map((p) => (
-        <Tag key={p} tone="danger">
+        <Tag key={p} color={principleColor(p)} tone="danger">
           {p}
         </Tag>
       ))}

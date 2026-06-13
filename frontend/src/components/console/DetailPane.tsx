@@ -1,6 +1,6 @@
 "use client";
 
-import { JUDGMENT_STATUS, judgmentBadgeTone, riskGrade } from "@/lib/labels";
+import { JUDGMENT_STATUS, judgmentBadgeTone, principleColor, riskGrade } from "@/lib/labels";
 import {
   aggregationForAnchor,
   buildIssueCards,
@@ -305,7 +305,9 @@ export function DetailPane({ result, selectedAnchorId, resolved, onToggleResolve
         </div>
         <div className="mt-2.5 flex flex-wrap gap-1.5">
           {principles.map((principle) => (
-            <Tag key={principle}>{principle}</Tag>
+            <Tag key={principle} color={principleColor(principle)}>
+              {principle}
+            </Tag>
           ))}
         </div>
 

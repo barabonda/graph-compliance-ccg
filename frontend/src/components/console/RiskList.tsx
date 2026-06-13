@@ -1,6 +1,6 @@
 "use client";
 
-import { REVIEW_LAYER } from "@/lib/labels";
+import { principleColor, REVIEW_LAYER } from "@/lib/labels";
 import { buildIssueCards, planItemsForAnchor, type HighlightTone, type IssueCardModel } from "@/lib/selectors";
 import type { ReviewOutput } from "@/lib/types";
 import { Icon } from "../Icon";
@@ -124,7 +124,9 @@ function IssueCard({
       {/* 원칙 태그 + 근거 */}
       <div className="mt-2 flex flex-wrap items-center gap-1.5">
         {principles.slice(0, 3).map((principle) => (
-          <Tag key={principle}>{principle}</Tag>
+          <Tag key={principle} color={principleColor(principle)}>
+            {principle}
+          </Tag>
         ))}
         <span className="ml-auto max-w-[55%] truncate font-mono text-[10.5px] text-ink-4">
           {card.basis.split(" · ")[0]}
