@@ -18,6 +18,7 @@ from neo4j.exceptions import AuthError, ServiceUnavailable
 from openai import APIConnectionError, APIStatusError, AuthenticationError, BadRequestError, RateLimitError
 
 from env_loader import load_local_env
+from jb_data_context import search_products
 from llm_gateway import LLMGateway
 from run_store import list_runs, load_run, record_run
 from workflow import GraphComplianceCCGWorkflow, review_input_from_payload
@@ -48,6 +49,13 @@ def workflow_for(payload: dict[str, Any]) -> GraphComplianceCCGWorkflow:
 @app.get("/health")
 def health() -> dict[str, str]:
     return {"status": "ok"}
+
+
+@app.get("/api/products/search")
+def products_search(q: str = "", product_group: str = "auto", limit: int = 12) -> dict[str, Any]:
+    """Search product metadata so reviewers select a real Product row."""
+
+    return {"products": search_products(q, product_group=product_group, limit=limit)}
 
 
 @app.post("/api/review")

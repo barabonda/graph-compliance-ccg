@@ -1,4 +1,4 @@
-import type { ReviewOutput, ReviewRequest, RunSummary, StreamEvent } from "./types";
+import type { ProductSearchResult, ReviewOutput, ReviewRequest, RunSummary, StreamEvent } from "./types";
 
 export class ReviewApiError extends Error {
   readonly code: string;
@@ -98,6 +98,24 @@ export async function fetchRun(id: string): Promise<ReviewOutput> {
   const response = await fetch(`/api/runs/${encodeURIComponent(id)}`, { cache: "no-store" });
   if (!response.ok) throw await parseErrorResponse(response);
   return (await response.json()) as ReviewOutput;
+}
+
+export async function searchProducts(
+  query: string,
+  productGroup: string,
+  signal?: AbortSignal,
+): Promise<ProductSearchResult[]> {
+  const params = new URLSearchParams();
+  if (query.trim()) params.set("q", query.trim());
+  if (productGroup) params.set("product_group", productGroup);
+  params.set("limit", "12");
+  const response = await fetch(`/api/products/search?${params.toString()}`, {
+    cache: "no-store",
+    signal,
+  });
+  if (!response.ok) throw await parseErrorResponse(response);
+  const data = (await response.json()) as { products?: ProductSearchResult[] };
+  return data.products ?? [];
 }
 
 export async function checkHealth(): Promise<boolean> {

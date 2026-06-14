@@ -385,6 +385,21 @@ export interface MatchedProduct {
   [key: string]: unknown;
 }
 
+export interface ProductSearchResult {
+  product: string;
+  product_group?: string;
+  major?: string;
+  subcategory?: string;
+  category?: string;
+  document_count?: number;
+  document_labels?: string[];
+  source_ids?: string[];
+  source?: string;
+  score?: number;
+  match_basis?: string;
+  [key: string]: unknown;
+}
+
 export interface ProductContext {
   product_group?: string;
   matched_products?: MatchedProduct[];

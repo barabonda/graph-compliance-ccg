@@ -199,6 +199,11 @@ def selected_product_match(
     if not selected_name and not selected_id:
         return None
 
+    if selected_name:
+        search_matches = search_products(selected_name, product_group=product_group, limit=1)
+        if search_matches and float(search_matches[0].get("score") or 0) >= 55:
+            return selected_product_payload(search_matches[0], product_group)
+
     candidates = [*current_matches]
     rows = load_product_rows()
     candidates.extend({**meta, "match_basis": "selected_product"} for meta in rows.values())
@@ -257,6 +262,124 @@ def product_family_name(product_name: str) -> str:
 
 def normalized_product_name(product_name: str) -> str:
     return re.sub(r"[\s()（）·._-]+", "", product_name).lower()
+
+
+def product_query_variants(query: str) -> list[str]:
+    """Return normalized product-name variants for user-facing search.
+
+    Marketing users often type a shorter alias such as ``JB도전루틴적금`` even
+    when the product graph stores ``도전 루틴 적금``.  Search should absorb that
+    prefix noise, while the final selected value still comes from the DB row.
+    """
+
+    normalized = normalized_product_name(query)
+    if not normalized:
+        return []
+    variants = {normalized}
+    for prefix in ("jb", "jbbank", "전북은행", "전북"):
+        if normalized.startswith(prefix) and len(normalized) > len(prefix):
+            variants.add(normalized[len(prefix) :])
+    return [variant for variant in variants if variant]
+
+
+def product_search_score(query_variants: list[str], product: str, meta: dict[str, Any]) -> tuple[float, str]:
+    product_norm = normalized_product_name(product)
+    family_norm = normalized_product_name(product_family_name(product))
+    metadata_norm = normalized_product_name(
+        " ".join(
+            [
+                product,
+                str(meta.get("major") or ""),
+                str(meta.get("subcategory") or ""),
+                str(meta.get("category") or ""),
+                " ".join(str(label) for label in (meta.get("document_labels") or [])),
+            ]
+        )
+    )
+    best_score = 0.0
+    best_basis = ""
+    for query in query_variants:
+        if not query:
+            continue
+        candidates: list[tuple[float, str]] = []
+        if query == product_norm:
+            candidates.append((100.0, "exact_product_name"))
+        if family_norm and query == family_norm:
+            candidates.append((96.0, "exact_product_family"))
+        if query in product_norm:
+            candidates.append((86.0 + min(len(query), 20) / 10, "product_name_contains"))
+        if product_norm and product_norm in query:
+            candidates.append((82.0, "query_contains_product_name"))
+        if family_norm and query in family_norm:
+            candidates.append((78.0 + min(len(query), 20) / 20, "product_family_contains"))
+        if family_norm and family_norm in query:
+            candidates.append((74.0, "query_contains_product_family"))
+        if query in metadata_norm:
+            candidates.append((58.0, "metadata_contains"))
+        if candidates:
+            score, basis = max(candidates, key=lambda item: item[0])
+            if score > best_score:
+                best_score = score
+                best_basis = basis
+    return best_score, best_basis
+
+
+def all_product_rows() -> dict[str, dict[str, Any]]:
+    rows: dict[str, dict[str, Any]] = {}
+    try:
+        rows.update(load_product_rows_from_neo4j())
+    except Exception as exc:  # noqa: BLE001 - search should degrade to local metadata.
+        LOGGER.warning("Neo4j Product Graph search failed; falling back to local metadata: %s", exc)
+    for product, meta in load_product_rows().items():
+        rows.setdefault(product, meta)
+    return rows
+
+
+def search_products(query: str = "", product_group: str = "auto", limit: int = 12) -> list[dict[str, Any]]:
+    """Search product metadata for UI selection and selected-product resolution."""
+
+    capped_limit = max(1, min(int(limit or 12), 50))
+    group = normalize_product_group(product_group, "")
+    rows = all_product_rows()
+    if not rows:
+        return []
+
+    scoped_rows = [
+        meta
+        for meta in rows.values()
+        if group == "auto" or meta.get("product_group") in {group, "", None}
+    ]
+    variants = product_query_variants(query)
+    results: list[dict[str, Any]] = []
+    for meta in scoped_rows:
+        product = str(meta.get("product") or "")
+        if not product:
+            continue
+        if variants:
+            score, basis = product_search_score(variants, product, meta)
+            if score <= 0:
+                continue
+        else:
+            score = min(50.0, 20.0 + float(meta.get("document_count") or 0))
+            basis = "product_group_top"
+        results.append(
+            {
+                **meta,
+                "product": product,
+                "score": round(score, 2),
+                "match_basis": basis,
+                "source": meta.get("source") or "local_product_metadata",
+            }
+        )
+
+    return sorted(
+        results,
+        key=lambda item: (
+            -float(item.get("score") or 0),
+            -int(item.get("document_count") or 0),
+            str(item.get("product") or ""),
+        ),
+    )[:capped_limit]
 
 
 def selected_product_matches_family(selected_name: str, candidate_name: str) -> bool:

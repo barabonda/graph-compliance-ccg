@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { getActor } from "@/lib/actor";
+import { searchProducts } from "@/lib/api";
 import { CHANNELS, EXAMPLES, LLM_MODELS, PRODUCT_GROUPS, WORKSPACE_ID, type ExamplePreset } from "@/lib/labels";
-import type { ReviewRequest } from "@/lib/types";
+import type { ProductSearchResult, ReviewRequest } from "@/lib/types";
 import { Icon } from "./Icon";
 
 interface Props {
@@ -35,6 +36,11 @@ export function ReviewForm({ running, onSubmit, onLoadSample, onLoadProductSampl
   const [productGroup, setProductGroup] = useState(DEFAULT_EXAMPLE.product);
   const [channel, setChannel] = useState(DEFAULT_EXAMPLE.channel);
   const [selectedProduct, setSelectedProduct] = useState(DEFAULT_EXAMPLE.selectedProduct);
+  const [productQuery, setProductQuery] = useState(DEFAULT_EXAMPLE.selectedProduct);
+  const [productResults, setProductResults] = useState<ProductSearchResult[]>([]);
+  const [productLoading, setProductLoading] = useState(false);
+  const [productOpen, setProductOpen] = useState(false);
+  const [productSearchError, setProductSearchError] = useState("");
   const [text, setText] = useState(DEFAULT_EXAMPLE.text);
   const [llmModel, setLlmModel] = useState("");
 
@@ -43,7 +49,42 @@ export function ReviewForm({ running, onSubmit, onLoadSample, onLoadProductSampl
     setProductGroup(example.product);
     setChannel(example.channel);
     setSelectedProduct(example.selectedProduct);
+    setProductQuery(example.selectedProduct);
+    setProductOpen(false);
     setText(example.text);
+  };
+
+  useEffect(() => {
+    const controller = new AbortController();
+    const timer = window.setTimeout(() => {
+      setProductLoading(true);
+      setProductSearchError("");
+      searchProducts(productQuery, productGroup, controller.signal)
+        .then((products) => setProductResults(products))
+        .catch((error: unknown) => {
+          if (error instanceof DOMException && error.name === "AbortError") return;
+          setProductSearchError(error instanceof Error ? error.message : "상품 검색에 실패했습니다.");
+          setProductResults([]);
+        })
+        .finally(() => setProductLoading(false));
+    }, 220);
+
+    return () => {
+      window.clearTimeout(timer);
+      controller.abort();
+    };
+  }, [productGroup, productQuery]);
+
+  const chooseProduct = (product: ProductSearchResult) => {
+    setSelectedProduct(product.product);
+    setProductQuery(product.product);
+    setProductOpen(false);
+  };
+
+  const clearSelectedProduct = () => {
+    setSelectedProduct("");
+    setProductQuery("");
+    setProductOpen(true);
   };
 
   const handleSubmit = (event: FormEvent) => {
@@ -114,7 +155,16 @@ export function ReviewForm({ running, onSubmit, onLoadSample, onLoadProductSampl
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
         <label className="block">
           <span className="mb-1 block text-xs font-bold text-ink-3">상품군</span>
-          <select className={fieldClass} value={productGroup} onChange={(event) => setProductGroup(event.target.value)}>
+          <select
+            className={fieldClass}
+            value={productGroup}
+            onChange={(event) => {
+              setProductGroup(event.target.value);
+              setSelectedProduct("");
+              setProductQuery("");
+              setProductOpen(false);
+            }}
+          >
             {PRODUCT_GROUPS.map((item) => (
               <option key={item.value} value={item.value}>
                 {item.label}
@@ -134,15 +184,70 @@ export function ReviewForm({ running, onSubmit, onLoadSample, onLoadProductSampl
         </label>
         <label className="block">
           <span className="mb-1 flex items-center gap-1.5 text-xs font-bold text-ink-3">
-            상품명 <span className="font-normal text-ink-4">선택</span>
+            상품명 <span className="font-normal text-ink-4">DB에서 검색/선택</span>
           </span>
-          <input
-            className={fieldClass}
-            type="text"
-            value={selectedProduct}
-            onChange={(event) => setSelectedProduct(event.target.value)}
-            placeholder="예: 스텝다운 ELS 제25-118호"
-          />
+          <div className="relative">
+            <input
+              className={`${fieldClass} pr-9`}
+              type="search"
+              value={productQuery}
+              onFocus={() => setProductOpen(true)}
+              onBlur={() => window.setTimeout(() => setProductOpen(false), 140)}
+              onChange={(event) => {
+                setProductQuery(event.target.value);
+                setSelectedProduct("");
+                setProductOpen(true);
+              }}
+              placeholder="예: JB도전루틴적금"
+              autoComplete="off"
+            />
+            {selectedProduct ? (
+              <button
+                type="button"
+                onMouseDown={(event) => event.preventDefault()}
+                onClick={clearSelectedProduct}
+                className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full px-1.5 text-xs font-bold text-ink-4 hover:bg-surface-2 hover:text-ink"
+                aria-label="선택 상품 지우기"
+              >
+                ×
+              </button>
+            ) : null}
+            {productOpen && (
+              <div className="absolute z-30 mt-1 max-h-80 w-full overflow-auto rounded-lg border border-line bg-surface p-1.5 shadow-xl">
+                {productLoading && <div className="px-3 py-2 text-xs text-ink-4">상품 DB 검색 중…</div>}
+                {!productLoading && productSearchError && <div className="px-3 py-2 text-xs text-reject">{productSearchError}</div>}
+                {!productLoading && !productSearchError && productResults.length === 0 && (
+                  <div className="px-3 py-2 text-xs leading-relaxed text-ink-4">
+                    검색 결과가 없습니다. 상품군을 바꾸거나 상품명 일부를 다시 입력해 주세요.
+                  </div>
+                )}
+                {!productLoading &&
+                  !productSearchError &&
+                  productResults.map((product) => (
+                    <button
+                      key={`${product.product}-${product.source ?? ""}-${product.match_basis ?? ""}`}
+                      type="button"
+                      onMouseDown={(event) => event.preventDefault()}
+                      onClick={() => chooseProduct(product)}
+                      className="w-full rounded-md px-3 py-2 text-left hover:bg-brand/10"
+                    >
+                      <span className="block text-sm font-bold text-ink">{product.product}</span>
+                      <span className="mt-0.5 block truncate text-[11px] text-ink-4">
+                        {product.major || product.product_group || "상품"} · 문서 {product.document_count ?? 0}개
+                        {product.document_labels?.length ? ` · ${product.document_labels.slice(0, 2).join(", ")}` : ""}
+                      </span>
+                    </button>
+                  ))}
+              </div>
+            )}
+          </div>
+          {selectedProduct ? (
+            <span className="mt-1 block text-[11px] font-semibold text-pass">선택됨: {selectedProduct}</span>
+          ) : productQuery.trim() ? (
+            <span className="mt-1 block text-[11px] text-revise">검색 결과에서 상품을 선택해야 상품 사실 대조가 진행됩니다.</span>
+          ) : (
+            <span className="mt-1 block text-[11px] text-ink-4">상품 미선택 시 Product Fact 대조는 건너뜁니다.</span>
+          )}
         </label>
       </div>
 
