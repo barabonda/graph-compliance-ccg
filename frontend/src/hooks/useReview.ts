@@ -64,7 +64,9 @@ function reducer(state: ReviewState, action: Action): ReviewState {
         ...state,
         status: "done",
         result: action.result,
-        reviewedText: action.reviewedText,
+        // 원문을 NFC로 정규화 — 입력이 NFD(분해형 자모)면 NFC인 앵커·제안 텍스트와
+        // 바이트가 달라 하이라이트 정렬이 전부 실패한다. 표시상으로는 동일하다.
+        reviewedText: action.reviewedText.normalize("NFC"),
         error: null,
         selectedAnchorId: defaultAnchorId(action.result),
         selectedPrinciple: "",
@@ -83,7 +85,7 @@ function reducer(state: ReviewState, action: Action): ReviewState {
         ...initialState,
         status: "done",
         result: action.result,
-        reviewedText: action.reviewedText,
+        reviewedText: action.reviewedText.normalize("NFC"),
         selectedAnchorId: defaultAnchorId(action.result),
       };
     default:

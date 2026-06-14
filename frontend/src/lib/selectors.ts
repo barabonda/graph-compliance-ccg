@@ -38,22 +38,42 @@ export function shorten(text: unknown, max: number): string {
   return value.length > max ? `${value.slice(0, max)}...` : value;
 }
 
+const INVALID_SPAN = { start: -1, end: -1 };
+
+/**
+ * 앵커 span을 reviewedText의 실제 위치로 정렬한다. 매칭에 실패하면 검증 안 된
+ * 오프셋으로 폴백하지 않고 무효(-1)를 돌려준다 — 엉뚱한 자리에 하이라이트가 칠해지는
+ * 것을 막기 위함(호출부는 start<0이면 건너뛴다).
+ *
+ * 우선순위: ① 오프셋이 span.text와 정확히 일치 → 그대로. ② 정확한 부분문자열.
+ * ③ 공백 유연 매칭(원문은 줄바꿈, span은 공백 등 공백만 다른 경우 — \s+로 매칭하되
+ *    원문 기준 위치를 그대로 반환). 모두 실패하면 무효.
+ */
 export function alignSpan(sourceText: string, span: Partial<Span> | undefined): { start: number; end: number } {
-  const fallback = { start: span?.start ?? -1, end: span?.end ?? -1 };
-  if (!span?.text) return fallback;
+  if (!span?.text) return { start: span?.start ?? -1, end: span?.end ?? -1 };
+  // 정규화 불일치(NFC/NFD) 방지: needle을 NFC로. sourceText는 경계(useReview)에서 이미
+  // NFC로 정규화된다. 둘 다 NFC면 indexOf/정규식 매칭이 정상 동작한다.
+  const needle = span.text.normalize("NFC");
   if (
     Number.isInteger(span.start) &&
     Number.isInteger(span.end) &&
-    sourceText.slice(span.start, span.end) === span.text
+    sourceText.slice(span.start, span.end) === needle
   ) {
     return { start: span.start as number, end: span.end as number };
   }
-  const exactIndex = sourceText.indexOf(span.text);
-  if (exactIndex >= 0) return { start: exactIndex, end: exactIndex + span.text.length };
-  const compactNeedle = span.text.replace(/\s+/g, " ").trim();
-  const compactIndex = sourceText.indexOf(compactNeedle);
-  if (compactIndex >= 0) return { start: compactIndex, end: compactIndex + compactNeedle.length };
-  return fallback;
+  const exactIndex = sourceText.indexOf(needle);
+  if (exactIndex >= 0) return { start: exactIndex, end: exactIndex + needle.length };
+  const trimmed = needle.trim();
+  if (trimmed) {
+    const pattern = trimmed.replace(/[.*+?^${}()|[\]\\]/g, "\\$&").replace(/\s+/g, "\\s+");
+    try {
+      const match = new RegExp(pattern).exec(sourceText);
+      if (match) return { start: match.index, end: match.index + match[0].length };
+    } catch {
+      // 잘못된 정규식은 무시하고 무효 처리.
+    }
+  }
+  return INVALID_SPAN;
 }
 
 export function anchorDisplay(result: ReviewOutput, anchorId: string): AnchorDisplay | undefined {
