@@ -69,9 +69,13 @@ def review(payload: dict[str, Any]) -> dict[str, Any]:
             title=str(payload.get("title") or ""),
             channel=str(payload.get("channel") or ""),
             product_group=str(payload.get("product_group") or ""),
+            selected_product_name=str(payload.get("selected_product_name") or ""),
+            selected_product_id=str(payload.get("selected_product_id") or ""),
+            source_type=str(payload.get("source_type") or ""),
             model=str(payload.get("llm_model") or ""),
             content_text=str(payload.get("content_text") or ""),
             actor=str(payload.get("actor") or ""),
+            workspace_id=str(payload.get("workspace_id") or ""),
         )
         return jsonable
     except ServiceUnavailable as exc:
@@ -121,17 +125,24 @@ def review_stream(payload: dict[str, Any]) -> StreamingResponse:
                 review_input = review_input_from_payload(payload)
                 for event in workflow.review_events(review_input):
                     jsonable = to_jsonable(event)
+                    # 결과를 먼저 클라이언트로 보낸다 — 스냅샷 저장(파일+Neo4j)의 지연이나
+                    # 실패가 result 전달을 막거나 유실시키지 않도록. record_run은 예외를
+                    # 던지지 않지만, 순서 자체로도 결과 전달을 보장한다.
+                    event_queue.put(jsonable)
                     if jsonable.get("event") == "result" and isinstance(jsonable.get("result"), dict):
                         record_run(
                             jsonable["result"],
                             title=str(payload.get("title") or ""),
                             channel=str(payload.get("channel") or ""),
                             product_group=str(payload.get("product_group") or ""),
+                            selected_product_name=str(payload.get("selected_product_name") or ""),
+                            selected_product_id=str(payload.get("selected_product_id") or ""),
+                            source_type=str(payload.get("source_type") or ""),
                             model=str(payload.get("llm_model") or ""),
                             content_text=str(payload.get("content_text") or ""),
                             actor=str(payload.get("actor") or ""),
+                            workspace_id=str(payload.get("workspace_id") or ""),
                         )
-                    event_queue.put(jsonable)
             except Exception as exc:  # noqa: BLE001 - converted into a structured stream error below.
                 event_queue.put(stream_error_payload(exc))
             finally:
