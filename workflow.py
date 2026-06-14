@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import unicodedata
 from collections.abc import Iterator
 from typing import Any
 from uuid import uuid4
@@ -507,10 +508,13 @@ class GraphComplianceCCGWorkflow:
 
 
 def review_input_from_payload(payload: dict[str, Any]) -> ReviewInput:
+    # 입력이 NFD(분해형 자모)면 NFC로 정규화 — macOS 등에서 들어온 NFD 텍스트는 폰트에
+    # 따라 자모가 벌어져 '깨진' 것처럼 보이고, NFC인 추출 결과와 정렬도 어긋난다. 여기서
+    # 한 번 정규화하면 원문·문장·앵커·인용·판정 등 다운스트림 텍스트가 모두 NFC가 된다.
     return ReviewInput(
         dataset_item_id=str(payload.get("dataset_item_id", "")),
-        title=str(payload.get("title", "")),
-        content_text=str(payload.get("content_text", "")),
+        title=unicodedata.normalize("NFC", str(payload.get("title", ""))),
+        content_text=unicodedata.normalize("NFC", str(payload.get("content_text", ""))),
         channel=str(payload.get("channel", "bank_event_page_text")),
         source_type=str(payload.get("source_type", "")),
         product_group=str(payload.get("product_group", "auto")),
