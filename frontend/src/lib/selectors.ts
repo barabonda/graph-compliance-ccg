@@ -23,6 +23,7 @@ import type {
   ComparisonResult,
   ContextAnchor,
   CUPlanItem,
+  DisclosureBlockItem,
   LLMJudgment,
   PolicyEvidenceChain,
   ProductFact,
@@ -654,11 +655,15 @@ export function buildAdLines(result: ReviewOutput, text: string): AdLine[] {
   return lines;
 }
 
-/** anchor의 수정안(before/after). 제안이 없으면 safeAlternative로 대체. */
+/**
+ * anchor의 실제 수정안(before/after). 백엔드가 확정 위반(NON_COMPLIANT)에 대해 생성한
+ * 제안이 있을 때만 반환한다. 제안이 없으면 null — 일반 조언을 'after'로 지어내지 않는다
+ * (조언이 교체 문안처럼 보이거나, 적법·중립 문구에 억지 수정 카드가 붙는 과판정 방지).
+ */
 export function revisionFor(
   result: ReviewOutput,
   anchorId: string,
-): { before: string; after: string; notes_for_reviewer?: string } | null {
+): { before: string; after: string; notes_for_reviewer?: string; why_problematic?: string } | null {
   const anchor = result.context_anchors?.find((item) => item.anchor_id === anchorId);
   if (!anchor) return null;
   const display = anchorDisplay(result, anchorId);
@@ -666,10 +671,13 @@ export function revisionFor(
   const tone = verdictTone(display?.display_verdict ?? "ANCHOR");
   if (tone !== "risk" && tone !== "review") return null;
   const suggestion = (result.revision_suggestions ?? []).find((item) => item.anchor_id === anchorId);
+  const after = String(suggestion?.after ?? "").trim();
+  if (!after) return null;
   return {
     before: suggestion?.before ?? anchor.span.text,
-    after: suggestion?.after ?? safeAlternative(anchor.span.text),
+    after,
     notes_for_reviewer: suggestion?.notes_for_reviewer,
+    why_problematic: suggestion?.why_problematic,
   };
 }
 
@@ -722,6 +730,25 @@ export function correctedDocument(result: ReviewOutput): string | null {
   );
   const after = String(doc?.after ?? "").trim();
   return after ? after : null;
+}
+
+export const DISCLOSURE_BLOCK_ANCHOR = "__disclosure_block__";
+/**
+ * 광고 하단 '꼭 확인해 주세요' 고지 블록(추가/심사자 보완). 실제 광고는 약관·유의사항을
+ * 본문 중간이 아니라 하단 불릿 블록으로 모으므로, 교정본도 본문(개별 수정) + 하단 블록으로
+ * 구성한다. 적용범위(gate ON) 내 누락 고지만 들어 있다(백엔드에서 게이트 필터링).
+ */
+export function correctedDisclosureBlock(
+  result: ReviewOutput,
+): { text: string; items: DisclosureBlockItem[] } | null {
+  const item = (result.revision_suggestions ?? []).find(
+    (entry) => entry.anchor_id === DISCLOSURE_BLOCK_ANCHOR,
+  );
+  if (!item) return null;
+  const items = item.disclosure_block ?? [];
+  const text = String(item.after ?? "").trim();
+  if (!text && items.length === 0) return null;
+  return { text, items };
 }
 
 /**

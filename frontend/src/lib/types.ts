@@ -262,6 +262,13 @@ export interface DetectedIssue {
   required_action?: string;
 }
 
+export interface DisclosureBlockItem {
+  check_id: string;
+  label: string;
+  status: "add" | "reviewer";
+  text: string;
+}
+
 export interface RevisionSuggestion {
   anchor_id: string;
   severity: string;
@@ -271,6 +278,8 @@ export interface RevisionSuggestion {
   before: string;
   after: string;
   notes_for_reviewer?: string;
+  /** `__disclosure_block__` 센티넬에만: 하단 '꼭 확인해 주세요' 고지 블록 항목. */
+  disclosure_block?: DisclosureBlockItem[];
 }
 
 /** 운영 대시보드용 실행(ReviewRun) 요약. `GET /api/runs`. */
@@ -280,6 +289,10 @@ export interface RunSummary {
   title: string;
   channel: string;
   product_group: string;
+  selected_product_name?: string;
+  selected_product_id?: string;
+  source_type?: string;
+  workspace_id?: string;
   model: string;
   content_text: string;
   final_verdict: string;
