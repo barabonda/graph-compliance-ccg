@@ -16,7 +16,6 @@ import {
   planItemsForAnchor,
   productClaimFactsForAnchor,
   productComparisonsForClaimFact,
-  safeAlternative,
 } from "@/lib/selectors";
 import type { ReviewOutput } from "@/lib/types";
 import { Icon } from "../Icon";
@@ -621,30 +620,30 @@ export function DetailPane({ result, selectedAnchorId, resolved, onToggleResolve
           </DetailRow>
         )}
 
-        {/* 안전한 대체 문안 */}
-        <DetailRow icon="spark" label="안전한 대체 문안">
-          <div className="overflow-hidden rounded-[10px] border border-line">
-            <div className="border-b border-[#f3d3cf] bg-reject-bg px-3 py-2.5">
-              <div className="mb-1 flex items-center gap-1.5">
-                <span className="h-1.5 w-1.5 rounded-full bg-reject" />
-                <span className="text-[10.5px] font-bold tracking-wider text-reject">BEFORE · 현재 문안</span>
+        {/* 수정 제안 — 실제 LLM 교체 문안이 있을 때만. 없으면 조언을 지어내지 않는다. */}
+        {String(suggestion?.after ?? "").trim() && (
+          <DetailRow icon="spark" label="수정 제안">
+            <div className="overflow-hidden rounded-[10px] border border-line">
+              <div className="border-b border-[#f3d3cf] bg-reject-bg px-3 py-2.5">
+                <div className="mb-1 flex items-center gap-1.5">
+                  <span className="h-1.5 w-1.5 rounded-full bg-reject" />
+                  <span className="text-[10.5px] font-bold tracking-wider text-reject">BEFORE · 현재 문안</span>
+                </div>
+                <div className="text-[13px] leading-relaxed text-[#8a2e26] line-through decoration-[#d6453a66]">
+                  {suggestion?.before ?? anchor.span.text}
+                </div>
               </div>
-              <div className="text-[13px] leading-relaxed text-[#8a2e26] line-through decoration-[#d6453a66]">
-                {suggestion?.before ?? anchor.span.text}
+              <div className="bg-pass-bg px-3 py-2.5">
+                <div className="mb-1 flex items-center gap-1.5">
+                  <span className="h-1.5 w-1.5 rounded-full bg-pass" />
+                  <span className="text-[10.5px] font-bold tracking-wider text-pass">AFTER · 제안 문안</span>
+                  <span className="ml-auto font-mono text-[9.5px] font-bold text-ink-4">Revision LLM · 권고</span>
+                </div>
+                <div className="text-[13px] leading-relaxed font-medium text-[#0c6b4a]">{suggestion?.after}</div>
               </div>
             </div>
-            <div className="bg-pass-bg px-3 py-2.5">
-              <div className="mb-1 flex items-center gap-1.5">
-                <span className="h-1.5 w-1.5 rounded-full bg-pass" />
-                <span className="text-[10.5px] font-bold tracking-wider text-pass">AFTER · 제안 문안</span>
-                <span className="ml-auto font-mono text-[9.5px] font-bold text-ink-4">Revision LLM · 권고</span>
-              </div>
-              <div className="text-[13px] leading-relaxed font-medium text-[#0c6b4a]">
-                {suggestion?.after ?? safeAlternative(anchor.span.text)}
-              </div>
-            </div>
-          </div>
-        </DetailRow>
+          </DetailRow>
+        )}
 
         {/* 액션 */}
         <div className="mt-4 flex gap-2">
