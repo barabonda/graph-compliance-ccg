@@ -9,7 +9,8 @@ import { Icon } from "./Icon";
 
 interface Props {
   running: boolean;
-  onSubmit: (payload: ReviewRequest) => void;
+  onSubmit: (payload: ReviewRequest, options?: { stayOnNew?: boolean }) => Promise<boolean>;
+  draftPreset?: Partial<ReviewRequest> | null;
   onLoadSample?: () => void;
   onLoadProductSample?: () => void;
 }
@@ -31,18 +32,20 @@ function exampleDot(example: ExamplePreset): string {
   return "var(--reject)";
 }
 
-export function ReviewForm({ running, onSubmit, onLoadSample, onLoadProductSample }: Props) {
-  const [title, setTitle] = useState(DEFAULT_EXAMPLE.title);
-  const [productGroup, setProductGroup] = useState(DEFAULT_EXAMPLE.product);
-  const [channel, setChannel] = useState(DEFAULT_EXAMPLE.channel);
-  const [selectedProduct, setSelectedProduct] = useState(DEFAULT_EXAMPLE.selectedProduct);
-  const [productQuery, setProductQuery] = useState(DEFAULT_EXAMPLE.selectedProduct);
+export function ReviewForm({ running, onSubmit, draftPreset, onLoadSample, onLoadProductSample }: Props) {
+  const [title, setTitle] = useState(draftPreset?.title ?? DEFAULT_EXAMPLE.title);
+  const [productGroup, setProductGroup] = useState(draftPreset?.product_group ?? DEFAULT_EXAMPLE.product);
+  const [channel, setChannel] = useState(draftPreset?.channel ?? DEFAULT_EXAMPLE.channel);
+  const [selectedProduct, setSelectedProduct] = useState(draftPreset?.selected_product_name ?? DEFAULT_EXAMPLE.selectedProduct);
+  const [productQuery, setProductQuery] = useState(draftPreset?.selected_product_name ?? DEFAULT_EXAMPLE.selectedProduct);
   const [productResults, setProductResults] = useState<ProductSearchResult[]>([]);
   const [productLoading, setProductLoading] = useState(false);
   const [productOpen, setProductOpen] = useState(false);
   const [productSearchError, setProductSearchError] = useState("");
-  const [text, setText] = useState(DEFAULT_EXAMPLE.text);
-  const [llmModel, setLlmModel] = useState("");
+  const [text, setText] = useState(draftPreset?.content_text ?? DEFAULT_EXAMPLE.text);
+  const [llmModel, setLlmModel] = useState(draftPreset?.llm_model ?? "");
+  const [draftQueue, setDraftQueue] = useState<ReviewRequest[]>([]);
+  const [queueRunning, setQueueRunning] = useState(false);
 
   const fillExample = (example: ExamplePreset) => {
     setTitle(example.title);
@@ -87,10 +90,7 @@ export function ReviewForm({ running, onSubmit, onLoadSample, onLoadProductSampl
     setProductOpen(true);
   };
 
-  const handleSubmit = (event: FormEvent) => {
-    event.preventDefault();
-    if (!text.trim() || running) return;
-    onSubmit({
+  const buildPayload = (): ReviewRequest => ({
       dataset_item_id: `console_${Date.now()}`,
       title,
       content_text: text,
@@ -101,6 +101,41 @@ export function ReviewForm({ running, onSubmit, onLoadSample, onLoadProductSampl
       llm_model: llmModel || undefined,
       actor: getActor(),
     });
+
+  const handleSubmit = (event: FormEvent) => {
+    event.preventDefault();
+    if (!text.trim() || running || queueRunning) return;
+    void onSubmit(buildPayload());
+  };
+
+  const addToQueue = () => {
+    if (!text.trim()) return;
+    setDraftQueue((items) => [...items, { ...buildPayload(), dataset_item_id: `queue_${Date.now()}_${items.length + 1}` }]);
+  };
+
+  const removeQueuedDraft = (datasetItemId: string) => {
+    setDraftQueue((items) => items.filter((item) => item.dataset_item_id !== datasetItemId));
+  };
+
+  const runQueue = async () => {
+    if (!draftQueue.length || running || queueRunning) return;
+    setQueueRunning(true);
+    const items = [...draftQueue];
+    setDraftQueue([]);
+    try {
+      for (const [index, item] of items.entries()) {
+        await onSubmit(
+          {
+            ...item,
+            dataset_item_id: `${item.dataset_item_id}_${Date.now()}_${index + 1}`,
+            actor: item.actor || getActor(),
+          },
+          { stayOnNew: true },
+        );
+      }
+    } finally {
+      setQueueRunning(false);
+    }
   };
 
   const fieldClass =
@@ -282,6 +317,41 @@ export function ReviewForm({ running, onSubmit, onLoadSample, onLoadProductSampl
         </div>
       )}
 
+      {draftQueue.length > 0 && (
+        <div className="rounded-lg border border-line bg-surface-2 p-3">
+          <div className="mb-2 flex items-center justify-between gap-2">
+            <span className="text-xs font-extrabold text-ink">대기 중인 초안 {draftQueue.length}건</span>
+            <button
+              type="button"
+              onClick={() => void runQueue()}
+              disabled={running || queueRunning}
+              className="rounded-md bg-ink px-3 py-1.5 text-[12px] font-bold text-white disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {queueRunning ? "대기열 실행 중…" : "대기열 실행"}
+            </button>
+          </div>
+          <div className="flex max-h-36 flex-col gap-1.5 overflow-auto">
+            {draftQueue.map((item, index) => (
+              <div key={item.dataset_item_id} className="flex items-center gap-2 rounded-md border border-line bg-surface px-2 py-1.5">
+                <span className="rounded bg-surface-3 px-1.5 py-0.5 font-mono text-[10px] font-bold text-ink-3">
+                  {index + 1}
+                </span>
+                <span className="min-w-0 flex-1 truncate text-[12px] font-semibold text-ink-2">
+                  {item.title || "(제목 없음)"} · {item.product_group} · {item.selected_product_name || "상품 미선택"}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => removeQueuedDraft(item.dataset_item_id)}
+                  className="rounded px-1.5 py-0.5 text-[11px] font-bold text-ink-4 hover:bg-surface-2 hover:text-reject"
+                >
+                  제거
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       <div className="flex flex-wrap items-end justify-between gap-3">
         <label className="block">
           <span className="mb-1 block text-[11px] font-bold text-ink-4">판정 모델</span>
@@ -297,14 +367,24 @@ export function ReviewForm({ running, onSubmit, onLoadSample, onLoadProductSampl
             ))}
           </select>
         </label>
-        <button
-          type="submit"
-          disabled={running || !text.trim()}
-          className="flex items-center gap-2 rounded-md bg-brand px-6 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-brand/90 disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          {running ? "심의 분석 중…" : "심의 분석 시작"}
-          {!running && <Icon name="arrowR" size={15} />}
-        </button>
+        <div className="flex flex-wrap justify-end gap-2">
+          <button
+            type="button"
+            onClick={addToQueue}
+            disabled={!text.trim()}
+            className="rounded-md border border-line bg-surface px-4 py-2.5 text-sm font-bold text-ink-2 hover:border-brand hover:text-brand disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            대기열 추가
+          </button>
+          <button
+            type="submit"
+            disabled={running || queueRunning || !text.trim()}
+            className="flex items-center gap-2 rounded-md bg-brand px-6 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-brand/90 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {running || queueRunning ? "심의 분석 중…" : "심의 분석 시작"}
+            {!running && !queueRunning && <Icon name="arrowR" size={15} />}
+          </button>
+        </div>
       </div>
     </form>
   );

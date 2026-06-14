@@ -14,6 +14,7 @@ import { Sidebar, type ViewKey } from "@/components/shell/Sidebar";
 import { Toast } from "@/components/shell/Toast";
 import { AuditTab } from "@/components/tabs/AuditTab";
 import { DashboardTab } from "@/components/tabs/DashboardTab";
+import { HomeTab } from "@/components/tabs/HomeTab";
 import { OverallTab } from "@/components/tabs/OverallTab";
 import { ProductFactsTab } from "@/components/tabs/ProductFactsTab";
 import { RevisionTab } from "@/components/tabs/RevisionTab";
@@ -21,7 +22,7 @@ import { SentenceMapTab } from "@/components/tabs/SentenceMapTab";
 import { EmptyState, Expandable } from "@/components/ui";
 import { useReview } from "@/hooks/useReview";
 import { fetchRun } from "@/lib/api";
-import { CHANNELS, DECISIONS, type DecisionKey } from "@/lib/labels";
+import { CHANNELS, DECISIONS, WORKSPACE_ID, type DecisionKey } from "@/lib/labels";
 import type { ReviewOutput, ReviewRequest, RunSummary } from "@/lib/types";
 
 interface ReviewMeta {
@@ -31,22 +32,27 @@ interface ReviewMeta {
 
 export default function Page() {
   const { state, runReview, selectAnchor, loadSample } = useReview();
-  const [view, setView] = useState<ViewKey>("new");
+  const [view, setView] = useState<ViewKey>("home");
   const [meta, setMeta] = useState<ReviewMeta>({ title: "", channelLabel: "" });
   const [resolved, setResolved] = useState<Set<string>>(new Set());
+  // 사전심사 체크리스트의 '심사자 확인함' — '수정안 적용(resolved)'과 의미가 다르므로 분리.
+  const [acknowledged, setAcknowledged] = useState<Set<string>>(new Set());
   const [decision, setDecision] = useState<DecisionKey | null>(null);
   const [toast, setToast] = useState<string | null>(null);
+  const [draftPreset, setDraftPreset] = useState<Partial<ReviewRequest> | null>(null);
 
   const handleSubmit = useCallback(
-    async (payload: ReviewRequest) => {
+    async (payload: ReviewRequest, options?: { stayOnNew?: boolean }): Promise<boolean> => {
       setMeta({
         title: payload.title,
         channelLabel: CHANNELS.find((item) => item.value === payload.channel)?.label ?? payload.channel,
       });
       setResolved(new Set());
+      setAcknowledged(new Set());
       setDecision(null);
       const ok = await runReview(payload);
-      if (ok) setView("review");
+      if (ok && !options?.stayOnNew) setView("review");
+      return ok;
     },
     [runReview],
   );
@@ -59,6 +65,7 @@ export default function Page() {
     loadSample(sample as unknown as ReviewOutput, SAMPLE_REVIEW_TEXT);
     setMeta({ title: "JB 특판예금 출시 안내", channelLabel: "은행 이벤트 페이지" });
     setResolved(new Set());
+    setAcknowledged(new Set());
     setDecision(null);
     setView("review");
   }, [loadSample]);
@@ -71,6 +78,7 @@ export default function Page() {
     loadSample(sample as unknown as ReviewOutput, text);
     setMeta({ title: "JB시니어우대예금 특판 안내", channelLabel: "웹페이지" });
     setResolved(new Set());
+    setAcknowledged(new Set());
     setDecision(null);
     setView("product");
   }, [loadSample]);
@@ -85,11 +93,38 @@ export default function Page() {
         channelLabel: CHANNELS.find((item) => item.value === run.channel)?.label ?? run.channel,
       });
       setResolved(new Set());
+      setAcknowledged(new Set());
       setDecision(null);
       setView("review");
     },
     [loadSample],
   );
+
+  const handleUsePreset = useCallback((preset: Partial<ReviewRequest>) => {
+    setDraftPreset({
+      dataset_item_id: `preset_${Date.now()}`,
+      workspace_id: WORKSPACE_ID,
+      ...preset,
+    });
+    setView("new");
+  }, []);
+
+  const handleEditRun = useCallback((run: RunSummary) => {
+    setDraftPreset({
+      dataset_item_id: `rerun_${run.id}_${Date.now()}`,
+      title: run.title,
+      content_text: run.content_text,
+      channel: run.channel,
+      product_group: run.product_group,
+      selected_product_name: run.selected_product_name,
+      source_type: run.source_type,
+      workspace_id: run.workspace_id || WORKSPACE_ID,
+      llm_model: run.model,
+      actor: run.actor,
+    });
+    setToast("이전 실행 조건을 새 심사에 불러왔습니다.");
+    setView("new");
+  }, []);
 
   const handleToggleResolve = useCallback((id: string) => {
     setResolved((prev) => {
@@ -99,6 +134,20 @@ export default function Page() {
       } else {
         next.add(id);
         setToast("수정안을 적용했습니다 · 이슈 해소");
+      }
+      return next;
+    });
+  }, []);
+
+  // 사전심사 체크리스트: 항목을 '심사자 확인함'으로 표시(통과를 단정하지 않음).
+  const handleToggleAck = useCallback((id: string) => {
+    setAcknowledged((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+        setToast("심사자 확인으로 표시했습니다");
       }
       return next;
     });
@@ -124,46 +173,91 @@ export default function Page() {
           onDecide={handleDecide}
         />
         <div className="min-h-0 flex-1 overflow-y-auto p-4">
+          {view === "home" && (
+            <HomeTab
+              status={state.status}
+              result={result}
+              events={state.events}
+              onNewReview={() => setView("new")}
+              onDashboard={() => setView("dashboard")}
+              onOpenRun={handleOpenRun}
+              onEditRun={handleEditRun}
+              onUsePreset={handleUsePreset}
+            />
+          )}
+
           {view === "new" && (
-            <div className="mx-auto flex max-w-3xl flex-col gap-4">
-              <div>
-                <h2 className="flex items-center gap-2 text-[20px] font-extrabold tracking-tight text-ink">
-                  새 심사
-                  <span className="rounded-full bg-brand-tint px-2 py-0.5 text-[12px] font-bold text-brand-2">
-                    AI 사전심의
-                  </span>
-                </h2>
-                <p className="mt-1 text-[13px] leading-relaxed text-ink-3">
-                  금융광고 문안을 법령·심의기준·상품설명서 사실과 대조하고, 규칙 기반 판정과 LLM 해석을 결합해
-                  설명가능한 사전 검토를 지원합니다.
-                </p>
-              </div>
-              <section className="rounded-[14px] border border-line bg-surface p-5 shadow-card">
-                <ReviewForm
-                  running={state.status === "running"}
-                  onSubmit={handleSubmit}
-                  onLoadSample={handleLoadSample}
-                  onLoadProductSample={handleLoadProductSample}
-                />
-                {state.error && (
-                  <div className="mt-3 rounded-md border border-reject/40 bg-reject/5 px-3 py-2 text-sm text-reject">
-                    <strong>{state.error.code}</strong>: {state.error.message}
-                    {state.error.cause && <div className="mt-1 text-xs opacity-80">원인: {state.error.cause}</div>}
-                  </div>
-                )}
-              </section>
-              {/* 약간의 친절한 설명 — 분석 흐름 + 보조 도구 안내 */}
-              <div className="rounded-[12px] border border-line bg-surface-2 px-4 py-3 text-[12px] leading-relaxed text-ink-3">
-                접수하면 <b className="font-semibold text-ink-2">문안 구조 분석 → 표현 추출 → 심의기준 매칭 → 판정 → 예외·완화 검토 → 수정안 생성</b>{" "}
-                순으로 분석합니다. AI 사전심의 결과는 보조 자료이며 최종 심의 책임은 심사자에게 있고, 모든 판정은 근거 조항 원문까지 추적할 수 있습니다.
-              </div>
-              {(state.status === "running" || (state.events.length > 0 && !result)) && (
+            <div className="mx-auto grid max-w-7xl grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1fr)_380px]">
+              <div className="flex min-w-0 flex-col gap-4">
+                <div>
+                  <h2 className="flex items-center gap-2 text-[20px] font-extrabold tracking-tight text-ink">
+                    새 심사
+                    <span className="rounded-full bg-brand-tint px-2 py-0.5 text-[12px] font-bold text-brand-2">
+                      AI 사전심의
+                    </span>
+                  </h2>
+                  <p className="mt-1 text-[13px] leading-relaxed text-ink-3">
+                    금융광고 문안을 법령·심의기준·상품설명서 사실과 대조하고, 규칙 기반 판정과 LLM 해석을 결합해
+                    설명가능한 사전 검토를 지원합니다.
+                  </p>
+                </div>
                 <section className="rounded-[14px] border border-line bg-surface p-5 shadow-card">
-                  <h3 className="mb-3 text-sm font-bold">실시간 진행</h3>
-                  <PipelineProgress events={state.events} />
-                  <AuditTab result={null} events={state.events} />
+                  <ReviewForm
+                    key={draftPreset?.dataset_item_id ?? "new-review-form"}
+                    running={state.status === "running"}
+                    onSubmit={handleSubmit}
+                    draftPreset={draftPreset}
+                    onLoadSample={handleLoadSample}
+                    onLoadProductSample={handleLoadProductSample}
+                  />
+                  {state.error && (
+                    <div className="mt-3 rounded-md border border-reject/40 bg-reject/5 px-3 py-2 text-sm text-reject">
+                      <strong>{state.error.code}</strong>: {state.error.message}
+                      {state.error.cause && <div className="mt-1 text-xs opacity-80">원인: {state.error.cause}</div>}
+                    </div>
+                  )}
                 </section>
-              )}
+                {/* 약간의 친절한 설명 — 분석 흐름 + 보조 도구 안내 */}
+                <div className="rounded-[12px] border border-line bg-surface-2 px-4 py-3 text-[12px] leading-relaxed text-ink-3">
+                  접수하면 <b className="font-semibold text-ink-2">문안 구조 분석 → 표현 추출 → 심의기준 매칭 → 판정 → 예외·완화 검토 → 수정안 생성</b>{" "}
+                  순으로 분석합니다. AI 사전심의 결과는 보조 자료이며 최종 심의 책임은 심사자에게 있고, 모든 판정은 근거 조항 원문까지 추적할 수 있습니다.
+                </div>
+              </div>
+
+              <aside className="xl:sticky xl:top-4 xl:self-start">
+                <section className="rounded-[14px] border border-line bg-surface p-4 shadow-card">
+                  <div className="mb-3 flex items-center justify-between gap-2">
+                    <div>
+                      <h3 className="text-sm font-extrabold text-ink">실시간 진행</h3>
+                      <p className="mt-0.5 text-[11px] text-ink-4">심사 중에도 현재 단계를 계속 확인합니다.</p>
+                    </div>
+                    <span
+                      className={`rounded-full px-2 py-1 text-[11px] font-bold ${
+                        state.status === "running"
+                          ? "bg-review/15 text-review"
+                          : result
+                            ? "bg-pass/15 text-pass"
+                            : "bg-surface-2 text-ink-4"
+                      }`}
+                    >
+                      {state.status === "running" ? "실행 중" : result ? "완료" : "대기"}
+                    </span>
+                  </div>
+                  {state.events.length > 0 ? (
+                    <>
+                      <PipelineProgress events={state.events} />
+                      <div className="max-h-[calc(100vh-280px)] overflow-y-auto pr-1">
+                        <AuditTab result={null} events={state.events} />
+                      </div>
+                    </>
+                  ) : (
+                    <div className="rounded-[10px] border border-dashed border-line bg-surface-2 px-3 py-4 text-[12px] leading-relaxed text-ink-3">
+                      아직 실행된 단계가 없습니다. <b className="font-semibold text-ink-2">심의 분석 시작</b> 또는
+                      <b className="font-semibold text-ink-2"> 대기열 실행</b>을 누르면 이곳에 단계별 진행이 표시됩니다.
+                    </div>
+                  )}
+                </section>
+              </aside>
             </div>
           )}
 
@@ -217,7 +311,7 @@ export default function Page() {
 
           {view === "exception" && (
             <div className="h-full">
-              <ExceptionView result={result} resolved={resolved} />
+              <ExceptionView result={result} acknowledged={acknowledged} onToggleAck={handleToggleAck} />
             </div>
           )}
 
@@ -239,7 +333,7 @@ export default function Page() {
           {view === "dashboard" && (
             <div className="flex flex-col gap-4">
               <div className="rounded-[14px] border border-line bg-surface p-4 shadow-card">
-                <DashboardTab onOpenRun={handleOpenRun} />
+                <DashboardTab onOpenRun={handleOpenRun} onEditRun={handleEditRun} />
               </div>
               {/* 감사 로그(별도 탭 폐지) — 현재 로드된 실행의 단계 추적과 컨텍스트 raw를
                   운영/디버깅 화면 안에서 펼쳐 본다. */}

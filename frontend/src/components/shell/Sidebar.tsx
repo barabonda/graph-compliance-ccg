@@ -4,14 +4,15 @@ import type { ReviewOutput } from "@/lib/types";
 import { buildIssueCards, disclosureIsSatisfied } from "@/lib/selectors";
 import { Icon } from "../Icon";
 
-export type ViewKey = "new" | "review" | "revision" | "graph" | "exception" | "product" | "audit" | "dashboard";
+export type ViewKey = "home" | "new" | "review" | "revision" | "graph" | "exception" | "product" | "audit" | "dashboard";
 
 const NAV: { key: ViewKey; label: string; sub: string; icon: string }[] = [
+  { key: "home", label: "홈", sub: "상태 · 최근 심사", icon: "dashboard" },
   { key: "new", label: "새 심사", sub: "문안 접수 · 실행", icon: "plus" },
   { key: "review", label: "심사 콘솔", sub: "광고 원문 · 위험", icon: "review" },
   { key: "revision", label: "수정안", sub: "Before/After", icon: "spark" },
   { key: "graph", label: "근거 경로", sub: "설명 그래프", icon: "graph" },
-  { key: "exception", label: "예외·고지 검토", sub: "완화 시뮬레이션", icon: "shield" },
+  { key: "exception", label: "사전심사 체크리스트", sub: "충족·확인 필요 점검", icon: "shield" },
   { key: "product", label: "상품 사실", sub: "문서 대조", icon: "layers" },
   { key: "dashboard", label: "운영 대시보드", sub: "실행 기록 · 감사 추적", icon: "dashboard" },
 ];
@@ -31,7 +32,11 @@ export function Sidebar({ view, setView, result, resolvedCount }: Props) {
 
   return (
     <aside className="flex w-[228px] shrink-0 flex-col border-r border-line bg-surface px-3.5 py-4">
-      <div className="flex items-center gap-2.5 px-2 pb-4">
+      <button
+        type="button"
+        onClick={() => setView("home")}
+        className="flex items-center gap-2.5 rounded-[12px] px-2 pb-4 text-left hover:bg-surface-2"
+      >
         <div
           className="grid h-9 w-9 shrink-0 place-items-center rounded-[10px] text-white shadow-[0_4px_12px_rgba(47,109,240,.3)]"
           style={{ background: "linear-gradient(140deg,#2f6df0,#1d3a6e)" }}
@@ -45,7 +50,7 @@ export function Sidebar({ view, setView, result, resolvedCount }: Props) {
           <div className="text-sm font-extrabold tracking-tight">JB Compliance</div>
           <div className="font-mono text-[10px] text-ink-4">JunBub · CONTENT SAFEGUARD</div>
         </div>
-      </div>
+      </button>
 
       <nav className="flex flex-col gap-1">
         {NAV.map((item) => {

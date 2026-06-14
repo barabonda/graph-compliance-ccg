@@ -9,6 +9,7 @@ import { EmptyState } from "../ui";
 
 interface Props {
   onOpenRun: (run: RunSummary) => void;
+  onEditRun?: (run: RunSummary) => void;
 }
 
 const VERDICT_ORDER: FinalVerdict[] = ["reject", "revise", "needs_review", "pass_candidate"];
@@ -89,7 +90,7 @@ function formatTime(ts: number): string {
   return `${d.getMonth() + 1}/${d.getDate()} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
 
-export function DashboardTab({ onOpenRun }: Props) {
+export function DashboardTab({ onOpenRun, onEditRun }: Props) {
   const [runs, setRuns] = useState<RunSummary[] | null>(null);
   const [error, setError] = useState<string>("");
 
@@ -104,8 +105,21 @@ export function DashboardTab({ onOpenRun }: Props) {
   }, []);
 
   useEffect(() => {
-    void load();
-  }, [load]);
+    let cancelled = false;
+    fetchRuns()
+      .then((items) => {
+        if (!cancelled) setRuns(items);
+      })
+      .catch((err: unknown) => {
+        if (!cancelled) {
+          setError(err instanceof Error ? err.message : "실행 기록을 불러오지 못했습니다.");
+          setRuns([]);
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   if (runs === null) return <EmptyState>실행 기록을 불러오는 중…</EmptyState>;
 
@@ -131,7 +145,7 @@ export function DashboardTab({ onOpenRun }: Props) {
         <div>
           <h2 className="text-[18px] font-extrabold tracking-tight text-ink">운영 대시보드</h2>
           <p className="mt-0.5 text-[12px] text-ink-3">
-            실행 기록과 집계 · 행을 클릭하면 그 실행의 시점 데이터를 콘솔에서 디버깅합니다.
+            실행 기록과 집계 · 행을 클릭하면 시점 데이터를 열고, 조건 불러오기로 수정 후 재실행합니다.
             {demoCount ? ` (집계는 실제 실행 ${total}건만 · 데모 ${demoCount}건 제외)` : ""}
           </p>
         </div>
@@ -163,7 +177,7 @@ export function DashboardTab({ onOpenRun }: Props) {
       <div className="overflow-hidden rounded-[12px] border border-line bg-surface shadow-card">
         <div className="flex items-center gap-2 border-b border-line px-4 py-2.5 text-[12.5px] font-bold text-ink">
           <Icon name="audit" size={14} color="var(--ink-3)" /> 실행 기록
-          <span className="ml-auto text-[11px] font-normal text-ink-4">행 클릭 → 시점 데이터 디버깅</span>
+          <span className="ml-auto text-[11px] font-normal text-ink-4">행 클릭 → 시점 데이터 · 조건 불러오기 → 새 심사</span>
         </div>
         {runs.length ? (
           <div className="overflow-x-auto">
@@ -172,11 +186,13 @@ export function DashboardTab({ onOpenRun }: Props) {
                 <tr className="text-[11px] text-ink-4">
                   <th className="px-4 py-2 text-left font-bold">시각</th>
                   <th className="px-4 py-2 text-left font-bold">제목</th>
+                  <th className="px-3 py-2 text-left font-bold">실행 조건</th>
                   <th className="px-3 py-2 text-left font-bold">심사자</th>
                   <th className="px-3 py-2 text-left font-bold">모델</th>
                   <th className="px-3 py-2 text-left font-bold">AI 권고</th>
                   <th className="px-3 py-2 text-right font-bold">위험</th>
                   <th className="px-3 py-2 text-right font-bold">오인</th>
+                  <th className="px-3 py-2 text-left font-bold">재실행</th>
                   <th className="px-4 py-2 text-left font-bold">ReviewRun</th>
                 </tr>
               </thead>
@@ -200,6 +216,14 @@ export function DashboardTab({ onOpenRun }: Props) {
                         </span>
                       </span>
                     </td>
+                    <td className="max-w-[230px] px-3 py-2 text-[11.5px] text-ink-3">
+                      <div className="truncate" title={`${run.product_group} · ${run.channel}`}>
+                        {run.product_group || "auto"} · {run.channel || "channel"}
+                      </div>
+                      <div className="truncate text-ink-4" title={run.selected_product_name || ""}>
+                        {run.selected_product_name ? `상품: ${run.selected_product_name}` : "상품 미선택"}
+                      </div>
+                    </td>
                     <td className="px-3 py-2 whitespace-nowrap text-ink-3">{run.actor || "—"}</td>
                     <td className="px-3 py-2 whitespace-nowrap font-mono text-[11px] text-ink-3">{run.model || "GPT-5.4-nano"}</td>
                     <td className="px-3 py-2 whitespace-nowrap">
@@ -209,6 +233,18 @@ export function DashboardTab({ onOpenRun }: Props) {
                     </td>
                     <td className="px-3 py-2 text-right font-mono font-bold text-ink-2">{run.issue_count}</td>
                     <td className="px-3 py-2 text-right font-mono text-[11px] text-ink-3">{run.misleading_verdict || "—"}</td>
+                    <td className="px-3 py-2 whitespace-nowrap">
+                      <button
+                        type="button"
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          onEditRun?.(run);
+                        }}
+                        className="rounded-md border border-line bg-surface px-2 py-1 text-[11px] font-bold text-ink-3 hover:border-brand hover:text-brand"
+                      >
+                        조건 불러오기
+                      </button>
+                    </td>
                     <td className="px-4 py-2 font-mono text-[10.5px] text-ink-4">{run.id.slice(0, 22)}</td>
                   </tr>
                 ))}
