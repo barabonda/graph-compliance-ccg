@@ -21,6 +21,8 @@ from schemas import Claim, ReviewInput, SentenceUnit
 from utils import stable_id, to_jsonable
 
 
+MODULE_DIR = Path(__file__).resolve().parent
+BUNDLED_DISCLOSURE_ROOT = MODULE_DIR / "data" / "demo_product_documents"
 DEFAULT_DISCLOSURE_ROOT = Path("/Users/barabonda/Downloads/jbbank_product_disclosures_20260528")
 DEFAULT_DISCLOSURE_META = DEFAULT_DISCLOSURE_ROOT / "jbbank_product_disclosures_metadata_20260528.csv"
 MAX_DOCUMENTS = 3
@@ -130,6 +132,23 @@ CLAIM_FACT_COMPARISON_SCHEMA: dict[str, Any] = {
 }
 
 
+# 단일 상품 확정 우선순위. 사용자가 명시적으로 선택한 상품(selected_product)은 퍼지
+# 패밀리 매칭이 함께 잡혀도 우선한다 — 선택 상품이 퍼지 매칭에 묻혀 모호 처리되던 버그 방지.
+PRODUCT_MATCH_PRIORITY = ("selected_product", "exact_product_name", "exact_product_family")
+
+
+def resolve_single_product(matched_products: list[dict[str, Any]]) -> dict[str, Any] | None:
+    """우선순위 등급을 차례로 보며 해당 등급에 정확히 1개면 그 상품으로 확정한다.
+    같은 등급에서 다수가 잡히면(진짜 모호) None → NEEDS_PRODUCT_SELECTION."""
+    for tier in PRODUCT_MATCH_PRIORITY:
+        same = [item for item in matched_products if item.get("match_basis") == tier]
+        if len(same) == 1:
+            return same[0]
+        if len(same) > 1:
+            return None
+    return None
+
+
 class ProductFactAnalyzer:
     def __init__(self, llm: LLMGateway) -> None:
         self.llm = llm
@@ -143,12 +162,8 @@ class ProductFactAnalyzer:
         sentence_units: list[SentenceUnit] | None = None,
     ) -> dict[str, Any]:
         matched_products = product_context.get("matched_products", []) or []
-        exact_products = [
-            item
-            for item in matched_products
-            if item.get("match_basis") in {"exact_product_name", "exact_product_family", "selected_product"}
-        ]
-        if len(exact_products) != 1:
+        resolved = resolve_single_product(matched_products)
+        if resolved is None:
             return empty_product_fact_context(
                 status="NEEDS_PRODUCT_SELECTION",
                 matched_products=matched_products,
@@ -156,7 +171,7 @@ class ProductFactAnalyzer:
                 disclosure_checks=build_disclosure_checks(review_input, sentence_units=sentence_units),
             )
 
-        product = str(exact_products[0].get("product") or "")
+        product = str(resolved.get("product") or "")
         documents = select_product_documents(product)
         if not documents:
             return empty_product_fact_context(
@@ -557,8 +572,26 @@ def disclosure_check(check_id: str, label: str, present: bool, source: str = "")
     }
 
 
+def normalize_match_text(value: str) -> str:
+    """Normalize user/PDF text before lightweight evidence token checks.
+
+    Korean ad copy often arrives from PDF/OCR/clipboard in mixed Unicode forms
+    (NFD/NFC compatibility jamo, full-width punctuation, non-breaking spaces).
+    Disclosure presence checks should not miss an explicit notice such as
+    "준법감시인 심의필" solely because of that representation drift.
+    """
+    normalized = unicodedata.normalize("NFKC", unicodedata.normalize("NFC", value or ""))
+    return " ".join(normalized.split())
+
+
 def any_token(text: str, tokens: list[str] | tuple[str, ...]) -> bool:
-    return any(token in text for token in tokens)
+    haystack = normalize_match_text(text)
+    return any(normalize_match_text(token) in haystack for token in tokens)
+
+
+def matched_tokens(text: str, tokens: list[str] | tuple[str, ...]) -> list[str]:
+    haystack = normalize_match_text(text)
+    return [token for token in tokens if normalize_match_text(token) in haystack]
 
 
 def build_profile_disclosure_check(
@@ -617,8 +650,8 @@ def build_profile_disclosure_check(
         "in_product_doc": bool(evidence),
         "required_roles": list(profile_row.required_roles),
         "prominence_required": profile_row.prominence_required,
-        "detected_tokens": [token for token in profile_row.detect_tokens if token in text],
-        "negative_detected_tokens": [token for token in profile_row.negative_tokens if token in text],
+        "detected_tokens": matched_tokens(text, profile_row.detect_tokens),
+        "negative_detected_tokens": matched_tokens(text, profile_row.negative_tokens),
     }
 
 
@@ -757,13 +790,18 @@ def document_from_row(row: dict[str, Any]) -> dict[str, Any]:
 
 
 def resolve_document_path(relative_path: str) -> Path:
-    root = Path(os.environ.get("JB_PRODUCT_DISCLOSURE_ROOT", str(DEFAULT_DISCLOSURE_ROOT)))
+    configured_root = Path(os.environ.get("JB_PRODUCT_DISCLOSURE_ROOT", str(DEFAULT_DISCLOSURE_ROOT)))
+    roots = [configured_root]
+    if BUNDLED_DISCLOSURE_ROOT not in roots:
+        roots.append(BUNDLED_DISCLOSURE_ROOT)
     rel = relative_path.replace("\\", "/")
-    for candidate in (rel, unicodedata.normalize("NFD", rel), unicodedata.normalize("NFC", rel)):
-        path = root / candidate
-        if path.exists():
-            return path
-    return root / rel
+    candidates = (rel, unicodedata.normalize("NFD", rel), unicodedata.normalize("NFC", rel))
+    for root in roots:
+        for candidate in candidates:
+            path = root / candidate
+            if path.exists():
+                return path
+    return configured_root / rel
 
 
 def extract_document_snippet(document: dict[str, Any]) -> dict[str, str]:

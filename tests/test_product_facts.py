@@ -1,0 +1,49 @@
+"""상품 단일 확정(resolve_single_product) 회귀 테스트.
+
+배경 결함: 사용자가 명시적으로 선택한 상품(selected_product)이 퍼지 패밀리 매칭과
+함께 2개로 세어져 NEEDS_PRODUCT_SELECTION으로 빠지면서, 문서가 실제로 있는데도
+ProductFact가 0개로 추출되지 않았다.
+"""
+
+from __future__ import annotations
+
+from product_facts import resolve_single_product
+
+
+def _m(basis, product):
+    return {"match_basis": basis, "product": product}
+
+
+def test_selected_product_wins_over_fuzzy_family():
+    # 실측 케이스: 선택 상품 + 퍼지 패밀리 → 선택 상품으로 확정.
+    matched = [
+        _m("selected_product", "(26년 JUMP UP) 특판 예금"),
+        _m("exact_product_family", "(봄맞이) 특판 예금"),
+    ]
+    resolved = resolve_single_product(matched)
+    assert resolved is not None and resolved["product"] == "(26년 JUMP UP) 특판 예금"
+
+
+def test_exact_name_used_when_no_selection():
+    matched = [_m("exact_product_name", "JB 주거래 플러스 예금"), _m("fuzzy", "기타")]
+    assert resolve_single_product(matched)["product"] == "JB 주거래 플러스 예금"
+
+
+def test_family_used_as_last_resort():
+    assert resolve_single_product([_m("exact_product_family", "(봄맞이) 특판 예금")])["product"] == "(봄맞이) 특판 예금"
+
+
+def test_priority_order_selected_over_exact_name():
+    matched = [_m("exact_product_name", "다른상품"), _m("selected_product", "선택상품")]
+    assert resolve_single_product(matched)["product"] == "선택상품"
+
+
+def test_genuine_ambiguity_returns_none():
+    # 같은 등급에서 다수 → 진짜 모호 → None(NEEDS_PRODUCT_SELECTION).
+    matched = [_m("exact_product_name", "A"), _m("exact_product_name", "B")]
+    assert resolve_single_product(matched) is None
+
+
+def test_no_match_returns_none():
+    assert resolve_single_product([]) is None
+    assert resolve_single_product([_m("fuzzy", "x"), _m("token_overlap", "y")]) is None
