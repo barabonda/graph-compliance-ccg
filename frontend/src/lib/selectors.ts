@@ -822,6 +822,50 @@ export function buildCorrectedCopy(
   return { segments, changedCount: merged.length };
 }
 
+/**
+ * 원문(Before)에서 '교체될 위험 span'을 표시한 세그먼트. buildCorrectedCopy가 초록으로
+ * 바꾸는 바로 그 위치를, 여기선 원문 그대로 두되 changed=true로 표시한다. 두 결과를 나란히
+ * 그리면 '빨강(전) → 초록(후)'이 같은 자리에서 확 드러난다.
+ */
+export function buildBeforeDiff(
+  result: ReviewOutput,
+  text: string,
+  resolvedIds: Set<string>,
+): { segments: CorrectedSegment[]; changedCount: number } {
+  const spans = [...resolvedIds]
+    .map((id) => {
+      const anchor = result.context_anchors?.find((item) => item.anchor_id === id);
+      if (!anchor) return null;
+      const aligned = alignSpan(text, anchor.span);
+      const revision = revisionFor(result, id);
+      if (!revision || !Number.isInteger(aligned.start) || aligned.start < 0 || aligned.end > text.length || aligned.end <= aligned.start) {
+        return null;
+      }
+      return { start: aligned.start, end: aligned.end };
+    })
+    .filter((s): s is { start: number; end: number } => Boolean(s))
+    .sort((a, b) => a.start - b.start);
+
+  const merged: typeof spans = [];
+  let lastEnd = -1;
+  for (const span of spans) {
+    if (span.start >= lastEnd) {
+      merged.push(span);
+      lastEnd = span.end;
+    }
+  }
+
+  const segments: CorrectedSegment[] = [];
+  let cursor = 0;
+  for (const span of merged) {
+    if (span.start > cursor) segments.push({ text: text.slice(cursor, span.start), changed: false });
+    segments.push({ text: text.slice(span.start, span.end), changed: true });
+    cursor = span.end;
+  }
+  if (cursor < text.length) segments.push({ text: text.slice(cursor), changed: false });
+  return { segments, changedCount: merged.length };
+}
+
 // ---------------------------------------------------------------------------
 // Issue cards — the right-hand evidence panel read model.
 // One compact card per actionable finding; deep evidence stays in tabs.

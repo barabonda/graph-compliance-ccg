@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import {
+  buildBeforeDiff,
   buildCorrectedCopy,
   buildDocumentDiff,
   buildIssueCards,
@@ -192,8 +193,12 @@ export function RevisionTab({
   const proposedCorrection = docRevision
     ? buildDocumentDiff(reviewedText, docRevision)
     : buildCorrectedCopy(result, reviewedText, proposedAnchorIds);
+  // 원문에서 '교체될 위험 문구'를 같은 자리에 빨강으로 표시 → After 초록과 나란히 대비.
+  const beforeDiff = docRevision ? null : buildBeforeDiff(result, reviewedText, proposedAnchorIds);
   const hasBodyChange = Boolean(docRevision) || proposedCorrection.changedCount > 0;
   const hasFullRevision = hasBodyChange || Boolean(disclosureBlock);
+  // 원문에 이미 '꼭 확인해 주세요' 고지 블록이 있으면, 추가 고지는 같은 헤더로 중복하지 않는다.
+  const adHasNoticeBlock = /꼭\s*확인해\s*주세요|유의\s*사항|확인해\s*주세요/.test(reviewedText);
 
   return (
     <div className="flex flex-col gap-4">
@@ -210,41 +215,63 @@ export function RevisionTab({
           </Badge>
         </div>
 
-        <div className="mt-4 rounded-[14px] border border-line bg-surface-2 p-3">
+        <div className="mt-4 rounded-[16px] border border-line bg-surface-2 p-4">
           <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
             <div>
-              <h3 className="text-sm font-extrabold text-ink">전체 Before → After</h3>
+              <h3 className="text-base font-extrabold text-ink">수정 전 → 수정 후</h3>
               <p className="mt-1 text-xs leading-relaxed text-ink-3">
                 {hasFullRevision
-                  ? `변경 후보 ${proposedCorrection.changedCount}곳을 전체 문안 흐름 안에서 표시합니다.`
-                  : "아직 문서 단위 수정안이 생성되지 않았습니다."}
+                  ? `위험 문구 ${proposedCorrection.changedCount}곳을 완화하고, 빠진 고지는 하단에 추가했습니다.`
+                  : "수정이 필요한 표현이 없습니다."}
               </p>
             </div>
-            {docRevision ? <Badge tone="pass">문서 단위 수정안</Badge> : <Badge tone="revise">이슈별 수정안 합성</Badge>}
+            <span className="rounded-full bg-brand/10 px-3 py-1 text-[12px] font-extrabold text-brand">
+              {proposedCorrection.changedCount}곳 수정
+            </span>
           </div>
-          <div className="grid gap-3 xl:grid-cols-2">
-            <section className="min-h-[220px] rounded-[12px] border border-reject/20 bg-reject/5">
-              <div className="flex items-center justify-between border-b border-reject/15 px-3 py-2">
-                <span className="text-[11px] font-extrabold tracking-wider text-reject uppercase">Before · 원문</span>
-                <span className="text-[11px] font-semibold text-ink-4">{reviewedText.length}자</span>
+          <div className="grid items-stretch gap-3 xl:grid-cols-[1fr_auto_1fr]">
+            <section className="flex min-h-[240px] flex-col overflow-hidden rounded-[14px] border-2 border-reject/25 bg-reject/5">
+              <div className="flex items-center justify-between border-b border-reject/15 bg-reject/10 px-3.5 py-2">
+                <span className="text-[12px] font-extrabold tracking-wide text-reject">수정 전 · 원문</span>
+                <span className="text-[11px] font-bold text-reject/70">위험 {beforeDiff?.changedCount ?? 0}곳</span>
               </div>
-              <div className="max-h-[420px] overflow-auto whitespace-pre-wrap p-3 text-[13.5px] leading-7 text-ink">
-                {reviewedText || "원문이 없습니다."}
+              <div className="max-h-[440px] flex-1 overflow-auto whitespace-pre-wrap p-3.5 text-[13.5px] leading-7 text-ink">
+                {beforeDiff && beforeDiff.changedCount > 0
+                  ? beforeDiff.segments.map((segment, index) => (
+                      <span
+                        key={`b${index}_${segment.text.slice(0, 8)}`}
+                        className={
+                          segment.changed
+                            ? "rounded bg-reject/15 px-1 font-bold text-reject line-through decoration-reject/50 decoration-2"
+                            : ""
+                        }
+                      >
+                        {segment.text}
+                      </span>
+                    ))
+                  : reviewedText || "원문이 없습니다."}
               </div>
             </section>
-            <section className="min-h-[220px] rounded-[12px] border border-pass/25 bg-pass/5">
-              <div className="flex items-center justify-between border-b border-pass/20 px-3 py-2">
-                <span className="text-[11px] font-extrabold tracking-wider text-pass uppercase">After · 수정안</span>
-                <span className="text-[11px] font-semibold text-ink-4">초록 표시 = 변경/추가 후보</span>
+
+            <div className="flex items-center justify-center xl:flex-col">
+              <span className="grid h-10 w-10 place-items-center rounded-full bg-brand text-white shadow-[0_4px_12px_rgba(47,109,240,.3)]">
+                <Icon name="arrowR" size={20} color="#fff" />
+              </span>
+            </div>
+
+            <section className="flex min-h-[240px] flex-col overflow-hidden rounded-[14px] border-2 border-pass/30 bg-pass/5">
+              <div className="flex items-center justify-between border-b border-pass/20 bg-pass/10 px-3.5 py-2">
+                <span className="text-[12px] font-extrabold tracking-wide text-pass">수정 후 · 교정안</span>
+                <span className="text-[11px] font-bold text-pass/80">초록 = 바뀐/추가된 부분</span>
               </div>
-              <div className="max-h-[420px] overflow-auto whitespace-pre-wrap p-3 text-[13.5px] leading-7 text-ink">
+              <div className="max-h-[440px] flex-1 overflow-auto whitespace-pre-wrap p-3.5 text-[13.5px] leading-7 text-ink">
                 {hasFullRevision ? (
                   <>
                     {hasBodyChange ? (
                       proposedCorrection.segments.map((segment, index) => (
                         <span
-                          key={`${index}_${segment.text.slice(0, 10)}`}
-                          className={segment.changed ? "rounded bg-pass/15 px-1 font-semibold text-pass" : ""}
+                          key={`a${index}_${segment.text.slice(0, 8)}`}
+                          className={segment.changed ? "rounded bg-pass/20 px-1 font-bold text-pass" : ""}
                         >
                           {segment.text}
                         </span>
@@ -254,14 +281,17 @@ export function RevisionTab({
                     )}
                     {disclosureBlock && (
                       <div className="mt-4 border-t border-pass/20 pt-3">
-                        <div className="mb-1.5 text-[12px] font-extrabold text-ink-2">꼭 확인해 주세요!</div>
+                        <div className="mb-1.5 flex items-center gap-1.5 text-[12px] font-extrabold text-pass">
+                          <Icon name="plus" size={13} color="var(--pass)" />
+                          {adHasNoticeBlock ? "하단 고지에 추가할 항목" : "추가할 고지 · 꼭 확인해 주세요"}
+                        </div>
                         <ul className="m-0 list-none space-y-1 p-0">
                           {disclosureBlock.items.map((item) => (
                             <li key={item.check_id} className="flex gap-1.5 text-[13px] leading-6">
                               <span className={item.status === "add" ? "text-pass" : "text-revise"}>ㆍ</span>
                               <span>
                                 {item.status === "add" ? (
-                                  <span className="rounded bg-pass/15 px-1 font-semibold text-pass">{item.text}</span>
+                                  <span className="rounded bg-pass/20 px-1 font-bold text-pass">{item.text}</span>
                                 ) : (
                                   <span className="text-ink-3">
                                     {item.label} — <span className="font-semibold text-revise">심사자 보완</span>
