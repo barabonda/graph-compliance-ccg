@@ -204,6 +204,9 @@ class Neo4jPolicyRetriever:
                     OPTIONAL MATCH (cu)<-[:SUPPORTS_CU]-(premise:Premise)
                     OPTIONAL MATCH (premise)<-[:DERIVES_PREMISE]-(source)
                     OPTIONAL MATCH (cu)-[:GROUNDED_IN|HAS_SOURCE_CHUNK|EVIDENCES_CU]-(direct_evidence)
+                    // 자율규제(은행 광고심의 기준) grounding — 법령 증거와 캡 경쟁 없이
+                    // 전용 수집: 가이드라인 '원문'이 judge 증거창에 반드시 도달해야 한다.
+                    OPTIONAL MATCH (cu)<-[:GROUNDS_CU]-(guideline_article:LawArticle {workspace_id: $workspace_id})
                     OPTIONAL MATCH (cu)-[:HAS_LEGAL_ELEMENT_PROFILE]->(legal_profile:CULegalElementProfile {workspace_id: $workspace_id})
                     WITH seed_ids,
                          seed_names,
@@ -229,7 +232,12 @@ class Neo4jPolicyRetriever:
                             id: direct_evidence.id,
                             text: coalesce(direct_evidence.text, direct_evidence.summary, direct_evidence.article_title, direct_evidence.title, ''),
                             type: head(labels(direct_evidence))
-                         })[0..4] AS direct_evidence
+                         })[0..4] AS direct_evidence,
+                         collect(DISTINCT {
+                            id: guideline_article.id,
+                            text: coalesce(guideline_article.document_title, '') + ' ' + coalesce(guideline_article.article_no, '') + ': ' + coalesce(guideline_article.text, ''),
+                            type: 'GuidelineArticle'
+                         })[0..2] AS guideline_evidence
                     RETURN cu.id AS cu_id,
                            coalesce(cu.principle, '') AS principle,
                            coalesce(cu.subject, '') AS subject,
@@ -252,7 +260,7 @@ class Neo4jPolicyRetriever:
                            legal_profile.risk_title AS risk_title,
                            coalesce(legal_profile.exception_eligible, false) AS exception_eligible,
                            legal_profile.rationale AS legal_profile_rationale,
-                           premise_evidence + premise_sources + direct_evidence AS evidence
+                           premise_evidence + premise_sources + direct_evidence + guideline_evidence AS evidence
                     ORDER BY (0.55 * profile_vector_score)
                            + (0.35 * CASE
                                WHEN size(seed_ids) = 0 THEN 0

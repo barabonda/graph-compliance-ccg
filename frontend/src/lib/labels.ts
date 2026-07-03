@@ -34,6 +34,47 @@ const DEV_TERM_REPLACEMENTS: [RegExp, string][] = [
   [/\bComplianceUnit\b/g, "심의 기준"],
 ];
 
+/**
+ * 금소법 6대 판매원칙 — 심의 의견서의 1차 분류 좌표. 화면 표기는 이 순서를 따른다.
+ * 0건인 원칙도 표시한다("점검했고 문제없음"이 정보다).
+ */
+export const SIX_SALES_PRINCIPLES: { key: string; label: string }[] = [
+  { key: "적합성", label: "적합성" },
+  { key: "적정성", label: "적정성" },
+  { key: "설명의무", label: "설명의무" },
+  { key: "불공정영업", label: "불공정영업 금지" },
+  { key: "부당권유", label: "부당권유 금지" },
+  { key: "광고규제", label: "광고규제" },
+];
+
+/** 원칙 문자열 → 6대 원칙 버킷. 허위·과장광고는 금소법 §22 계열이므로 광고규제로 귀속. */
+export function principleBucket(principle: string): string | null {
+  const value = principle ?? "";
+  if (value.includes("적합성")) return "적합성";
+  if (value.includes("적정성")) return "적정성";
+  if (value.includes("설명")) return "설명의무";
+  if (value.includes("불공정")) return "불공정영업 금지";
+  if (value.includes("부당권유")) return "부당권유 금지";
+  if (value.includes("광고") || value.includes("허위") || value.includes("과장")) return "광고규제";
+  return null;
+}
+
+// 준법 실무 표준 약칭 — 위험 카드처럼 좁은 공간용. 판정 상세·보고서 문면은
+// 정식 명칭을 유지한다(법령 인용의 정확성). 시행령은 기본명 치환으로 자연 처리
+// ("금융소비자 보호에 관한 법률 시행령" → "금소법 시행령").
+const LAW_ABBREVIATIONS: [string, string][] = [
+  ["금융소비자 보호에 관한 감독규정", "금소법 감독규정"],
+  ["금융소비자 보호에 관한 법률", "금소법"],
+  ["표시ㆍ광고의 공정화에 관한 법률", "표시광고법"],
+  ["표시·광고의 공정화에 관한 법률", "표시광고법"],
+];
+
+export function abbreviateLawNames(text: string): string {
+  let out = text;
+  for (const [full, abbr] of LAW_ABBREVIATIONS) out = out.replaceAll(full, abbr);
+  return out;
+}
+
 export function humanizeJudgment(text: string | undefined | null): string {
   let out = String(text ?? "");
   for (const [pattern, replacement] of DEV_TERM_REPLACEMENTS) out = out.replace(pattern, replacement);
@@ -341,9 +382,22 @@ export const REVIEW_LAYER = {
   holistic: { name: "종합 심사", sub: "광고 전체 인상 기준" },
 } as const;
 
+/**
+ * 개별 심사 안에서 권위 계층별 하위 그룹 명칭.
+ * "법령 위반"과 "가이드라인/심의기준 미흡"은 소비자·규제 관점에서 다른 말이므로
+ * 목록에서부터 구분해 보여준다(법 위반 아닌 자율규제 미흡을 과장하지 않기 위함).
+ */
+export const AUTHORITY_GROUP = {
+  law: { name: "법령 위반 근거", sub: "" },
+  guideline: { name: "심의기준 미흡", sub: "법령 위반 아님 · 자율규제" },
+  uncertain: { name: "확인 필요", sub: "근거 불충분 — 심사자 판단 필요" },
+} as const;
+
 export function trackBBadgeTone(verdict?: string, score?: number): "pass" | "review" | "reject" {
   const value = Number(score ?? 0);
   if (verdict === "HIGH" || value >= 0.75) return "reject";
   if (verdict === "MEDIUM" || value >= 0.45) return "review";
   return "pass";
 }
+
+

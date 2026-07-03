@@ -1,7 +1,9 @@
 "use client";
 
+import { CopilotKit } from "@copilotkit/react-core/v2";
 import { useCallback, useState } from "react";
 import { AdPane } from "@/components/console/AdPane";
+import { ReviewCopilot } from "@/components/copilot/ReviewCopilot";
 import { DetailPane } from "@/components/console/DetailPane";
 import { ExceptionView } from "@/components/console/ExceptionView";
 import { ExecSummary } from "@/components/console/ExecSummary";
@@ -161,6 +163,7 @@ export default function Page() {
   const result = state.result;
 
   return (
+    <CopilotKit runtimeUrl="/api/copilotkit" useSingleEndpoint={false}>
     <div className="flex h-screen overflow-hidden">
       <Sidebar view={view} setView={setView} result={result} resolvedCount={resolved.size} />
       <main className="flex min-w-0 flex-1 flex-col">
@@ -367,6 +370,11 @@ export default function Page() {
         </div>
       </main>
       {toast && <Toast message={toast} onDone={() => setToast(null)} />}
+      {/* 심사 코파일럿 — 결과가 로드된 뒤에만 (컨텍스트 없는 자유 법률 상담 방지) */}
+      {result && (
+        <ReviewCopilot result={result} resolved={resolved} title={meta.title} reviewedText={state.reviewedText} />
+      )}
     </div>
+    </CopilotKit>
   );
 }

@@ -40,6 +40,41 @@ class DisclosureRequirementProfile:
     source: str
     product_groups: tuple[str, ...]
     channels: tuple[str, ...] = ()
+    # tier별 근거. 같은 룰이 법령·심의기준 두 근거를 가질 수 있으며,
+    # 대표 근거는 resolve_representative_basis()가 상황(존재 부재 vs 위계 미달)에
+    # 따라 고른다 — "법 위반" vs "법 OK/심의기준 미흡" 문구를 정확히 가르기 위함.
+    law_basis: str = ""
+    guideline_basis: str = ""
+
+
+def resolve_representative_basis(
+    profile_row: "DisclosureRequirementProfile | None",
+    *,
+    situation: str,
+) -> dict[str, Any]:
+    """대표 근거 선택 규칙.
+
+    - situation="missing"(항목 자체 부재): 법령 근거가 있으면 법령이 대표(법정 표시
+      의무 위반). 법령 근거가 없으면 심의기준 대표 + 라우팅 상한 needs_review.
+    - situation="prominence"(존재하나 위계 미달): 법령은 '표시하라'까지 충족된
+      상태이므로 구체 위계 기준을 정한 심의기준이 대표. 법령(포괄규정)은 병기.
+    """
+    law = (profile_row.law_basis if profile_row else "") or ""
+    guide = (profile_row.guideline_basis if profile_row else "") or ""
+    if not law and not guide:
+        # tier 근거 미기입 프로파일 — 오분류 방지 위해 tier 미상으로 둔다.
+        return {"representative_basis": "", "authority_tier": "", "co_basis": "", "routing_cap": "", "tier_note": ""}
+    if situation == "prominence":
+        rep, tier = (guide or law), ("guideline" if guide else "law")
+    else:
+        rep, tier = (law or guide), ("law" if law else "guideline")
+    return {
+        "representative_basis": rep,
+        "authority_tier": tier,
+        "co_basis": (law if rep == guide and law else (guide if rep == law and guide else "")),
+        "routing_cap": "needs_review" if tier == "guideline" else "",
+        "tier_note": "법령 위반이 아닌 심의기준 미흡입니다." if tier == "guideline" else "",
+    }
 
 
 def profile(
@@ -56,6 +91,8 @@ def profile(
     on_missing: str = "needs_review",
     severity: int = 2,
     channels: list[str] | None = None,
+    law_basis: str = "",
+    guideline_basis: str = "",
 ) -> DisclosureRequirementProfile:
     return DisclosureRequirementProfile(
         check_id=check_id,
@@ -70,7 +107,17 @@ def profile(
         source=source,
         product_groups=tuple(product_groups),
         channels=tuple(channels or []),
+        law_basis=law_basis,
+        guideline_basis=guideline_basis,
     )
+
+
+# 균형표시(prominence)의 tier 근거 — 법령은 포괄('균형 전달' 방법 규정), 구체
+# 위계 기준(혜택과 동등 표시)은 심의기준. 위계 미달은 guideline 대표가 원칙.
+PROMINENCE_BALANCE_BASIS = {
+    "law": "금융소비자 보호에 관한 법률 시행령 제18조제4항(광고의 방법: 혜택·불이익 균형 전달)",
+    "guideline": "은행 광고심의 기준 제18조제4호(혜택을 알리는 경우 불이익도 균형 있게 전달)",
+}
 
 
 DISCLOSURE_PROFILES: dict[str, DisclosureRequirementProfile] = {
@@ -86,6 +133,8 @@ DISCLOSURE_PROFILES: dict[str, DisclosureRequirementProfile] = {
         severity=3,
         source="은행 광고심의 기준 제16조·제18조 (금리·우대조건)",
         product_groups=["deposit"],
+        law_basis="금융소비자 보호에 관한 법률 시행령 제18조(광고의 내용)",
+        guideline_basis="은행 광고심의 기준 제16조제1항제5호(가입조건·이자율 범위·산출기준)",
     ),
     "disc_depositor_protection_notice": profile(
         "disc_depositor_protection_notice",
@@ -98,6 +147,8 @@ DISCLOSURE_PROFILES: dict[str, DisclosureRequirementProfile] = {
         severity=2,
         source="은행 광고심의 기준 제16조 (예금자보호 부보내용)",
         product_groups=["deposit"],
+        law_basis="금융소비자보호 감독규정 제17조(예금성 상품 거래조건: 부보내용)",
+        guideline_basis="은행 광고심의 기준 제16조제1항제5호 라목(예금자보호 부보내용)",
     ),
     "disc_tax_and_after_tax_notice": profile(
         "disc_tax_and_after_tax_notice",
@@ -108,6 +159,7 @@ DISCLOSURE_PROFILES: dict[str, DisclosureRequirementProfile] = {
         severity=2,
         source="은행 광고심의 기준 (세전/세후 기준 표시)",
         product_groups=["deposit"],
+        guideline_basis="은행 광고심의 기준 제16조(세전/세후 기준 표시)",
     ),
     "disc_variable_rate_notice": profile(
         "disc_variable_rate_notice",
@@ -130,6 +182,8 @@ DISCLOSURE_PROFILES: dict[str, DisclosureRequirementProfile] = {
         severity=2,
         source="금융소비자보호법 제19조 (설명서·약관 확인)",
         product_groups=["deposit", "loan", "investment"],
+        law_basis="금융소비자보호법 제19조(설명서·약관 확인)",
+        guideline_basis="은행 광고심의 기준 제16조제1항제3호(상품설명서·약관 확인 권유 문구)",
     ),
     "disc_review_approval_notice": profile(
         "disc_review_approval_notice",
@@ -140,6 +194,7 @@ DISCLOSURE_PROFILES: dict[str, DisclosureRequirementProfile] = {
         severity=1,
         source="은행 광고심의 기준 제4조·제9조 (사전승인·심의필)",
         product_groups=["deposit", "loan", "investment"],
+        guideline_basis="은행 광고심의 기준 제4조·제9조·제16조제1항제2호(사전승인·심의필 번호·유효기간)",
     ),
     "disc_seller_name": profile(
         "disc_seller_name",
@@ -170,6 +225,26 @@ DISCLOSURE_PROFILES: dict[str, DisclosureRequirementProfile] = {
         product_groups=["deposit", "loan", "investment"],
         channels=["sns", "youtube"],
     ),
+    "disc_loan_rate_basis": profile(
+        "disc_loan_rate_basis",
+        # 은행 광고심의 기준 제16조①6나 "이자율의 범위 및 산출기준" 표시 의무.
+        # 단일 teaser 금리("최저 연 1.64%")만 있고 범위·산출기준 신호가 없으면
+        # MISSING (detect_tokens가 '범위·산출기준' 쪽 신호로 구성됨).
+        check_type="presence_and_prominence",
+        detect_tokens=[
+            "범위", "산출기준", "산출 기준", "기준금리", "가산금리", "신용등급", "신용점수",
+            "우대금리", "우대조건", "차등", "개인별", "고시금리", "고시이율", "약정이율", "부터",
+        ],
+        fact_match_tokens=["기준금리", "가산금리", "금리", "이자율"],
+        required_roles=["condition_disclosure"],
+        prominence_required=True,
+        on_missing="revise",
+        severity=3,
+        source="은행 광고심의 기준 제16조제1항제6호 나목·제17조제1호 (이자율의 범위 및 산출기준)",
+        product_groups=["loan"],
+        law_basis="금융소비자보호 감독규정 제17조제1항제4호다목1)(이자율의 범위 및 산출기준)",
+        guideline_basis="은행 광고심의 기준 제16조제1항제6호 나목·제17조제1호",
+    ),
     "disc_loan_conditions": profile(
         "disc_loan_conditions",
         check_type="presence_and_prominence",
@@ -181,6 +256,8 @@ DISCLOSURE_PROFILES: dict[str, DisclosureRequirementProfile] = {
         severity=3,
         source="은행 광고심의 기준 (대출 대상·자격·담보 조건)",
         product_groups=["loan"],
+        law_basis="금융소비자보호법 제22조제3항(대출성 상품 거래조건)",
+        guideline_basis="은행 광고심의 기준 제16조제1항제6호 가목(자격요건·신용수준)",
     ),
     "disc_overdue_interest_rate": profile(
         "disc_overdue_interest_rate",
@@ -191,6 +268,8 @@ DISCLOSURE_PROFILES: dict[str, DisclosureRequirementProfile] = {
         severity=3,
         source="은행 광고심의 기준 (연체이자율 표시)",
         product_groups=["loan"],
+        law_basis="금융소비자보호 감독규정 제17조(연체이자율 표시)",
+        guideline_basis="은행 광고심의 기준 제16조제1항제6호 나목(연체이자율 포함)",
     ),
     "disc_early_repayment_fee": profile(
         "disc_early_repayment_fee",
@@ -201,6 +280,8 @@ DISCLOSURE_PROFILES: dict[str, DisclosureRequirementProfile] = {
         severity=2,
         source="은행 광고심의 기준 (중도상환수수료)",
         product_groups=["loan"],
+        law_basis="금융소비자 보호에 관한 법률 시행령 제18조(부대비용)",
+        guideline_basis="은행 광고심의 기준 제16조제1항제6호 마목(중도상환 조건)",
     ),
     "disc_credit_score_impact": profile(
         "disc_credit_score_impact",
@@ -255,6 +336,8 @@ DISCLOSURE_PROFILES: dict[str, DisclosureRequirementProfile] = {
         severity=2,
         source="자본시장법 (수수료·보수 표시)",
         product_groups=["loan", "investment"],
+        law_basis="금융소비자 보호에 관한 법률 시행령 제18조(수수료 등 부대비용)",
+        guideline_basis="은행 광고심의 기준 제16조제1항제6호 바목(수수료 등 부대비용)",
     ),
 }
 

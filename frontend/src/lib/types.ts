@@ -253,6 +253,10 @@ export interface DetectedIssue {
   risk_code: string;
   principle?: string;
   source_article?: string;
+  /** 권위 계층: "law" | "guideline" | 미상. 판정 어휘("위반" vs "미흡")를 가른다. */
+  authority_tier?: string;
+  /** 병기 근거 (대표 근거와 다른 tier의 조문). */
+  co_basis?: string;
   risk_title?: string;
   subject?: string;
   constraint?: string;
@@ -372,6 +376,14 @@ export interface DisclosureCheck {
   gate_reason?: string;
   /** 근거 조문 (그래프 카탈로그 기반). */
   source?: string;
+  /** 권위 계층: "law"(법령 위반 근거) | "guideline"(심의기준 미흡) | ""(미상). */
+  authority_tier?: string;
+  /** tier 규칙으로 고른 대표 근거 조문. */
+  representative_basis?: string;
+  /** 병기 근거 (다른 tier 쪽 조문). */
+  co_basis?: string;
+  /** guideline tier 안내 문구 ("법령 위반이 아닌 심의기준 미흡입니다."). */
+  tier_note?: string;
   [key: string]: unknown;
 }
 
@@ -506,7 +518,7 @@ export interface OverallImpressionJudgment {
   representative_consumer_impression?: string;
   why?: string;
   misleading_factors?: string[];
-  explicit_mitigation_signals?: { id?: string; label?: string; matched_terms?: string }[];
+  mitigation_relations?: { id?: string; label?: string; matched_terms?: string }[];
   grounded_claim_ids?: string[];
   evidence_paths?: TrackBEvidencePath[];
   /** 복잡 위반 종합에 연결한 흩어진 증거(위계·위계차·사실모순). */

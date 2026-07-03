@@ -25,13 +25,54 @@ from workflow import GraphComplianceCCGWorkflow, review_input_from_payload
 from utils import to_jsonable
 
 
-load_local_env(Path.cwd() / ".env")
+load_local_env(Path(__file__).resolve().parent / ".env")
 logging.basicConfig(
     level=getattr(logging, os.environ.get("CCG_LOG_LEVEL", "INFO").upper(), logging.INFO),
     format="%(asctime)s %(levelname)s %(name)s %(message)s",
 )
 app = FastAPI(title="GraphCompliance CCG", version="0.1.0")
 CONSOLE_DIR = Path(__file__).resolve().parent / "console"
+
+# 심사 코파일럿(AG-UI/LangGraph) — 의존성 문제로 실패해도 심의 API 는 살아있어야 한다.
+# ag_ui_langgraph.add_langgraph_fastapi_endpoint 대신 직접 라우트를 정의하는 이유:
+# 스트림 응답에 Connection: close 를 붙여야 한다. keep-alive 소켓을 CopilotKit 런타임
+# (undici)이 재사용하려다 'terminated' 에러를 RUN_ERROR 로 흘리는 노이즈가 있다
+# (CopilotKit/CopilotKit#2402 계열). 런마다 새 연결이면 발생하지 않는다.
+try:
+    from ag_ui.core.types import RunAgentInput
+    from ag_ui.encoder import EventEncoder
+    from copilotkit import LangGraphAGUIAgent
+    from fastapi import Request
+    from fastapi.responses import StreamingResponse
+
+    from copilot_agent import graph as copilot_graph
+
+    _copilot_agent = LangGraphAGUIAgent(
+        name="compliance_copilot",
+        description="심의 결과를 근거 조문과 함께 설명하는 심사 코파일럿",
+        graph=copilot_graph,
+    )
+
+    @app.post("/copilot-agent")
+    async def copilot_agent_endpoint(input_data: RunAgentInput, request: Request):
+        encoder = EventEncoder(accept=request.headers.get("accept"))
+        request_agent = _copilot_agent.clone()  # 요청별 상태 격리 (endpoint.py 와 동일)
+
+        async def event_generator():
+            async for event in request_agent.run(input_data):
+                yield encoder.encode(event)
+
+        return StreamingResponse(
+            event_generator(),
+            media_type=encoder.get_content_type(),
+            headers={"Connection": "close"},
+        )
+
+    @app.get("/copilot-agent/health")
+    def copilot_agent_health() -> dict[str, str]:
+        return {"status": "ok", "agent": "compliance_copilot"}
+except Exception:  # noqa: BLE001
+    logging.getLogger(__name__).exception("copilot agent mount failed — 심의 API는 계속 동작")
 
 
 def workflow_for(payload: dict[str, Any]) -> GraphComplianceCCGWorkflow:

@@ -263,15 +263,21 @@ def _list_neo4j(limit: int) -> list[dict[str, Any]]:
 
 
 def list_runs(limit: int = 100) -> list[dict[str, Any]]:
-    """최근 실행 요약 목록(최신순). 파일 + Neo4j를 병합해 어느 한쪽이 비어도 복원."""
+    """최근 실행 요약 목록(최신순). 파일이 있으면 파일만(빠름), 비었을 때만 Neo4j 복원.
+
+    Neo4j(원격 Aura) 조회는 네트워크에 따라 수초~십수초 걸릴 수 있어, 평상시 대시보드
+    로딩을 느리게 만든다. 파일이 진실원천(local)이고 Neo4j는 '파일이 사라졌을 때(재배포)'의
+    복구 경로이므로, 파일이 비었을 때만 Neo4j를 조회한다.
+    """
     by_id: dict[str, dict[str, Any]] = {}
-    # 파일 우선(같은 id가 여러 줄이면 최근 줄), 그다음 Neo4j에서 빠진 것만 보충.
-    for row in _list_filesystem():
+    filesystem_rows = _list_filesystem()
+    for row in filesystem_rows:
         by_id[str(row.get("id") or "")] = row
-    for row in _list_neo4j(limit * 3):
-        rid = str(row.get("id") or "")
-        if rid and rid not in by_id:
-            by_id[rid] = row
+    if not filesystem_rows:
+        for row in _list_neo4j(limit * 3):
+            rid = str(row.get("id") or "")
+            if rid and rid not in by_id:
+                by_id[rid] = row
     by_id.pop("", None)
     ordered = sorted(by_id.values(), key=lambda item: float(item.get("ts") or 0), reverse=True)
     return ordered[:limit]

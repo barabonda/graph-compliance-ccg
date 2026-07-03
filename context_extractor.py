@@ -5,6 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 import logging
 import os
+import re
 import time
 from typing import Any
 
@@ -291,7 +292,23 @@ class LLMContextExtractor:
         started = time.perf_counter()
         timeout_seconds = float(os.environ.get("CCG_CONTEXT_EXTRACTION_TIMEOUT_SECONDS", "360"))
         model = os.environ.get("CCG_CONTEXT_EXTRACTION_MODEL") or None
-        if os.environ.get("CCG_CONTEXT_EXTRACTION_STAGED", "").lower() in {"1", "true", "yes"}:
+        # 적응형 추출: 짧은 광고는 단일콜(legacy)로 충분하고 빠르다. 긴 문서는
+        # 단일콜의 timeout·누락 위험이 커서 staged(프레임/클레임청크/관계 분리)로
+        # 자동 승격한다. env 로 강제 지정도 가능(1=항상 staged, 0=항상 legacy).
+        staged_env = os.environ.get("CCG_CONTEXT_EXTRACTION_STAGED", "").lower()
+        if staged_env in {"1", "true", "yes"}:
+            use_staged = True
+        elif staged_env in {"0", "false", "no"}:
+            use_staged = False
+        else:
+            min_sentences = int(os.environ.get("CCG_CONTEXT_STAGED_AUTO_MIN_SENTENCES", "9"))
+            estimated = estimate_sentence_count(review_input.content_text)
+            use_staged = estimated >= min_sentences
+            LOGGER.info(
+                "context extraction mode=%s (estimated_sentences=%d, threshold=%d)",
+                "staged" if use_staged else "legacy", estimated, min_sentences,
+            )
+        if use_staged:
             return self._extract_hierarchical_staged(
                 review_input,
                 review_run_id=review_run_id,
@@ -679,6 +696,13 @@ def hierarchical_target_id(row: dict[str, Any], sentence_id_by_index: dict[int, 
     if row["target_type"] in {"context_frame", "consumer_effect"}:
         return frame_id if row["target_type"] == "context_frame" else stable_id("consumer_effect_ref", row["target_index"])
     return ""
+
+
+
+def estimate_sentence_count(text: str) -> int:
+    """LLM 호출 전 결정론적 문장 수 추정 (적응형 추출 분기용)."""
+    segments = [seg for seg in re.split(r"(?<=[.!?])\s+|\n+", str(text or "")) if seg.strip()]
+    return len(segments)
 
 
 def chunked(items: list[dict[str, Any]], size: int) -> list[list[dict[str, Any]]]:

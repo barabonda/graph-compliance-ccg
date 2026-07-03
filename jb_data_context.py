@@ -15,6 +15,11 @@ from schemas import Claim, ReviewInput
 
 LOGGER = logging.getLogger(__name__)
 PRODUCT_GRAPH_SOURCE = "graphcompliance_ccg_product_graph_loader"
+MODULE_DIR = Path(__file__).resolve().parent
+BUNDLED_PRODUCT_DISCLOSURE_ROOT = MODULE_DIR / "data" / "demo_product_documents"
+BUNDLED_PRODUCT_DISCLOSURE_META_PATH = (
+    BUNDLED_PRODUCT_DISCLOSURE_ROOT / "jbbank_product_disclosures_metadata_20260528.csv"
+)
 DEFAULT_PRODUCT_META_PATH = Path(
     "/Users/barabonda/Downloads/JB금융그룹해커톤_데이터셋/금융상품 데이터셋/전북은행 상품문서 메타데이터.xlsx"
 )
@@ -330,9 +335,59 @@ def all_product_rows() -> dict[str, dict[str, Any]]:
         rows.update(load_product_rows_from_neo4j())
     except Exception as exc:  # noqa: BLE001 - search should degrade to local metadata.
         LOGGER.warning("Neo4j Product Graph search failed; falling back to local metadata: %s", exc)
-    for product, meta in load_product_rows().items():
-        rows.setdefault(product, meta)
-    return rows
+    return merge_product_rows_with_local_documents(rows, load_product_rows())
+
+
+def merge_product_rows_with_local_documents(
+    primary_rows: dict[str, dict[str, Any]],
+    local_rows: dict[str, dict[str, Any]],
+) -> dict[str, dict[str, Any]]:
+    """Merge local ProductDocument metadata into Product Graph rows.
+
+    The Product Graph may contain the selected Product node before its PDF
+    document edges are populated.  In that case the UI search succeeds, but
+    ProductFact extraction later sees ``document_count=0`` and is skipped.
+    Local disclosure metadata is the authoritative PDF locator for the MVP, so
+    enrich graph rows with local documents for the same product/family.
+    """
+
+    merged = {product: dict(meta) for product, meta in primary_rows.items()}
+    local_by_product = {normalized_product_name(product): meta for product, meta in local_rows.items()}
+    local_by_family: dict[str, list[dict[str, Any]]] = {}
+    for product, meta in local_rows.items():
+        family_key = normalized_product_name(product_family_name(product))
+        if family_key:
+            local_by_family.setdefault(family_key, []).append(meta)
+
+    def matching_local_meta(product: str) -> dict[str, Any] | None:
+        product_key = normalized_product_name(product)
+        if product_key in local_by_product:
+            return local_by_product[product_key]
+        family_key = normalized_product_name(product_family_name(product))
+        family_matches = local_by_family.get(family_key, [])
+        if family_matches:
+            return preferred_product_variant(family_matches, product)
+        return None
+
+    for product, local_meta in local_rows.items():
+        merged.setdefault(product, local_meta)
+
+    for product, meta in list(merged.items()):
+        if int(meta.get("document_count") or 0) > 0 and meta.get("documents"):
+            continue
+        local_meta = matching_local_meta(product)
+        if not local_meta:
+            continue
+        enriched = {**meta}
+        for key in ("document_count", "document_labels", "source_ids", "documents"):
+            enriched[key] = local_meta.get(key, enriched.get(key))
+        for key in ("major", "subcategory", "category", "product_group"):
+            if not enriched.get(key) or enriched.get(key) == "auto":
+                enriched[key] = local_meta.get(key, enriched.get(key))
+        if meta.get("source") and local_meta.get("documents"):
+            enriched["source"] = f"{meta.get('source')}+local_product_metadata"
+        merged[product] = enriched
+    return merged
 
 
 def search_products(query: str = "", product_group: str = "auto", limit: int = 12) -> list[dict[str, Any]]:
@@ -417,7 +472,7 @@ def match_products_from_neo4j(text: str, claims: list[Claim], product_group: str
         return []
 
     try:
-        rows = load_product_rows_from_neo4j()
+        rows = merge_product_rows_with_local_documents(load_product_rows_from_neo4j(), load_product_rows())
     except Exception as exc:  # noqa: BLE001
         LOGGER.warning("Neo4j Product Graph lookup failed; falling back to local metadata: %s", exc)
         return []
@@ -534,12 +589,19 @@ def document_from_neo4j_node(node: Any) -> dict[str, Any]:
 
 @lru_cache(maxsize=1)
 def load_product_rows() -> dict[str, dict[str, Any]]:
-    path = Path(os.environ.get("JB_PRODUCT_METADATA_PATH", str(DEFAULT_PRODUCT_META_PATH)))
-    if not path.exists():
-        path = DEFAULT_PRODUCT_DISCLOSURE_META_PATH
-    records = load_product_metadata_records(path)
-    if not records and path != DEFAULT_PRODUCT_DISCLOSURE_META_PATH:
-        records = load_product_metadata_records(DEFAULT_PRODUCT_DISCLOSURE_META_PATH)
+    configured_path = Path(os.environ.get("JB_PRODUCT_METADATA_PATH", str(DEFAULT_PRODUCT_META_PATH)))
+    metadata_paths = [
+        configured_path,
+        DEFAULT_PRODUCT_DISCLOSURE_META_PATH,
+        BUNDLED_PRODUCT_DISCLOSURE_META_PATH,
+    ]
+    records: list[dict[str, Any]] = []
+    for path in metadata_paths:
+        if not path.exists():
+            continue
+        records = load_product_metadata_records(path)
+        if records:
+            break
     return product_rows_from_records(records)
 
 

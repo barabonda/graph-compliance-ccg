@@ -10,7 +10,9 @@ import {
   HUMAN_ACTION_LABELS,
   HUMAN_FEATURE_LABELS,
   PRINCIPLES,
+  principleBucket,
   QUALIFIER_LABELS,
+  SIX_SALES_PRINCIPLES,
   type PrincipleKey,
 } from "./labels";
 import type {
@@ -916,6 +918,15 @@ export interface IssueCardModel {
   basis: string;
   /** One-line rationale shown when the card is selected/expanded. */
   rationale: string;
+  /** 권위 계층: "law"=법령 위반 근거 / "guideline"=심의기준 미흡(법 위반 아님) / undefined=미상. */
+  authorityTier?: "law" | "guideline";
+  /** 병기 근거 (대표 근거와 다른 tier의 조문). */
+  coBasis?: string;
+}
+
+/** DetectedIssue/DisclosureCheck의 authority_tier 문자열 → 카드 tier. */
+function cardTier(raw: unknown): "law" | "guideline" | undefined {
+  return raw === "law" || raw === "guideline" ? raw : undefined;
 }
 
 /** 0–1 점수를 위반 가능성 등급으로. 수치는 hover에서만 노출. */
@@ -1108,6 +1119,8 @@ export function buildIssueCards(result: ReviewOutput): IssueCardModel[] {
       title: `${label} — “${shorten(quote, 24)}”`,
       basis,
       rationale: issues[0]?.rationale || risky[0]?.why || "",
+      authorityTier: cardTier(issues[0]?.authority_tier) ?? (issues.length || risky.length ? "law" : undefined),
+      coBasis: String(issues[0]?.co_basis ?? "") || undefined,
     };
     const score = TONE_RANK[tone] * 10 + Number(display?.score ?? 0);
     const existing = byClaim.get(anchor.claim_id);
@@ -1141,9 +1154,13 @@ export function buildIssueCards(result: ReviewOutput): IssueCardModel[] {
       label: "필수 고지 누락",
       quote: check.label,
       title: `필수 고지 누락 — ${check.label}`,
-      // 근거 조문은 데이터 기반(그래프 카탈로그가 내려준 check.source) 우선.
-      basis: String(check.source ?? requirement?.source ?? "은행 광고심의 기준"),
-      rationale: String(requirement?.why ?? "문안에서 해당 고지가 확인되지 않았습니다."),
+      // 근거 조문: tier 규칙이 고른 대표 근거 우선, 없으면 카탈로그 source.
+      basis: String(check.representative_basis ?? check.source ?? requirement?.source ?? "은행 광고심의 기준"),
+      rationale: [String(check.tier_note ?? ""), String(requirement?.why ?? "문안에서 해당 고지가 확인되지 않았습니다.")]
+        .filter(Boolean)
+        .join(" "),
+      authorityTier: cardTier(check.authority_tier),
+      coBasis: String(check.co_basis ?? "") || undefined,
     });
   }
 
@@ -1186,6 +1203,36 @@ function mergeBasis(primary: string, secondary: string): string {
   if (!secondary || secondary === primary) return primary;
   const extra = secondary.split(" · ")[0];
   return primary.includes(extra) ? primary : `${primary} / ${extra}`;
+}
+
+export interface PrincipleCount {
+  label: string;
+  count: number;
+}
+
+/**
+ * 금소법 6대 판매원칙별 미해소 이슈 현황 — 심의 의견서의 원칙별 목차와 1:1 대응.
+ * 개별 심사(Track A) 카드만 집계한다(종합 심사는 원칙 축이 아니라 전체 인상 축).
+ * 필수 고지 누락은 금소법 §22 광고 준수사항이므로 광고규제로 귀속.
+ * 한 카드가 두 원칙에 걸리면 양쪽 모두에 센다(의견서에서도 각 원칙 절에 기재).
+ */
+export function principleBreakdown(result: ReviewOutput, resolved: Set<string>): PrincipleCount[] {
+  const counts = new Map<string, number>(SIX_SALES_PRINCIPLES.map((item) => [item.label, 0]));
+  for (const card of buildIssueCards(result)) {
+    if (card.track !== "A" || resolved.has(card.id)) continue;
+    const buckets =
+      card.kind === "disclosure"
+        ? ["광고규제"]
+        : [
+            ...new Set(
+              planItemsForAnchor(result, card.anchorId ?? "")
+                .map((item) => principleBucket(String(item.principle ?? "")))
+                .filter((bucket): bucket is string => Boolean(bucket)),
+            ),
+          ];
+    for (const bucket of buckets) counts.set(bucket, (counts.get(bucket) ?? 0) + 1);
+  }
+  return SIX_SALES_PRINCIPLES.map((item) => ({ label: item.label, count: counts.get(item.label) ?? 0 }));
 }
 
 // ---------------------------------------------------------------------------

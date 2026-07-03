@@ -165,22 +165,26 @@ export function AdPane({
           </div>
 
           {mode === "original" ? (
-            <div className="px-5.5 py-5 text-[16px] leading-[1.95] break-keep text-ink">
-              {lines.map((line) => (
-                <div key={line.key}>
-                  <span className="whitespace-pre-wrap">
+            // 원문의 장식성 들여쓰기·중앙정렬 공백은 접고(whitespace 기본 접기),
+            // 문단 경계(공백 전용 줄)는 고정 간격으로 치환해 읽는 흐름만 남긴다.
+            <div className="space-y-1.5 px-5.5 py-5 text-[15px] leading-[1.55] break-keep text-ink">
+              {lines.map((line) =>
+                line.text.trim() ? (
+                  <div key={line.key}>
                     <LineText
                       annotated={line.annotated}
                       selectedAnchorId={selectedAnchorId}
                       resolved={resolved}
                       onSelectAnchor={onSelectAnchor}
                     />
-                  </span>
-                </div>
-              ))}
+                  </div>
+                ) : (
+                  <div key={line.key} className="h-1.5" aria-hidden />
+                ),
+              )}
             </div>
           ) : (
-            <div className="px-5.5 py-5 text-[16px] leading-[1.95] break-keep whitespace-pre-wrap text-ink">
+            <div className="px-5.5 py-5 text-[15px] leading-[1.45] break-keep whitespace-pre-wrap text-ink">
               {corrected.segments.map((seg, index) =>
                 seg.changed ? (
                   <mark

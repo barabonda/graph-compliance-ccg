@@ -165,7 +165,26 @@ export function DetailPane({ result, selectedAnchorId, resolved, onToggleResolve
             {card.quote}
           </div>
           <DetailRow icon="clause" label="근거">
+            {/* 출처 계층: 이 근거가 국가 법령인지, 금소법 §22 위임 자율규제(심의기준)인지. */}
+            {card.authorityTier === "guideline" && (
+              <div className="mb-1 flex items-center gap-1.5">
+                <span className="rounded bg-surface-3 px-1.5 py-0.5 text-[10px] font-bold text-ink-2">
+                  자율규제 · 은행연합회 심의기준
+                </span>
+                <span className="text-[10.5px] text-ink-4">금소법 제22조 위임</span>
+              </div>
+            )}
+            {card.authorityTier === "law" && (
+              <div className="mb-1">
+                <span className="rounded bg-reject-bg px-1.5 py-0.5 text-[10px] font-bold text-reject">
+                  법령 · 국가 법규범
+                </span>
+              </div>
+            )}
             <div className="font-mono text-[12px] font-bold text-brand-2">{card.basis}</div>
+            {card.coBasis && (
+              <div className="mt-1 font-mono text-[11px] text-ink-4">병기 · {card.coBasis}</div>
+            )}
           </DetailRow>
           <DetailRow icon="alert" label="누락 사유">
             <p className="m-0 text-[13px] leading-relaxed text-ink-2">{card.rationale}</p>
@@ -302,35 +321,53 @@ export function DetailPane({ result, selectedAnchorId, resolved, onToggleResolve
         >
           “{anchor.span.text}”
         </div>
-        <div className="mt-2.5 flex flex-wrap gap-1.5">
-          {principles.map((principle) => (
-            <Tag key={principle} color={principleColor(principle)}>
-              {principle}
-            </Tag>
-          ))}
-        </div>
-
-        {/* 판정 · 신뢰도 */}
-        <div className="mt-3 flex items-center gap-3">
-          <span
-            className="shrink-0 rounded-md px-2 py-1 font-mono text-[11px] font-extrabold tracking-wide"
-            style={{
-              color: headColor,
-              background: isResolved ? "var(--pass-bg)" : TONE_BG[tone],
-            }}
-          >
-            {isResolved ? "RESOLVED" : TONE_WORD_SHORT[tone]}
-          </span>
-          <div className="flex-1">
-            <div className="mb-1 flex justify-between text-[11px]">
-              <span className="font-semibold text-ink-3">위반 가능성</span>
+        {/* 핵심 사실 그리드 — 판정·위반 가능성·대표 근거를 스크롤 없이 한눈에.
+            색은 상태 텍스트와 게이지에만, 셀은 테두리 없이 배경 톤으로만 구분. */}
+        <div className="mt-2.5 grid grid-cols-2 gap-2">
+          <div className="rounded-[10px] bg-surface-2 px-3 py-2">
+            <div className="text-[10px] font-bold tracking-wider text-ink-4">판정</div>
+            <div className="mt-1 text-[12px] leading-relaxed">
               <span className="font-bold" style={{ color: headColor }}>
-                {grade.label}
+                {isResolved ? "수정안 적용 · 해소" : TONE_WORD_SHORT[tone]}
               </span>
+              {!isResolved && card.authorityTier === "law" && (
+                <span className="text-ink-3"> · 법령 근거</span>
+              )}
+              {!isResolved && card.authorityTier === "guideline" && (
+                <span className="text-ink-3"> · 심의기준 미흡(법령 위반 아님)</span>
+              )}
             </div>
-            <Meter value={score * 100} color={headColor} title={`score ${score.toFixed(2)}`} />
           </div>
+          <div className="rounded-[10px] bg-surface-2 px-3 py-2">
+            <div className="flex justify-between text-[10px] font-bold tracking-wider text-ink-4">
+              <span>위반 가능성</span>
+              <span style={{ color: headColor }}>{grade.label}</span>
+            </div>
+            <div className="mt-2.5">
+              <Meter value={score * 100} color={headColor} title={`score ${score.toFixed(2)}`} />
+            </div>
+          </div>
+          {card.basis ? (
+            <div className="col-span-2 rounded-[10px] bg-surface-2 px-3 py-2">
+              <div className="text-[10px] font-bold tracking-wider text-ink-4">대표 근거</div>
+              <div className="mt-1 text-[12.5px] leading-relaxed font-medium break-keep text-ink">{card.basis}</div>
+              {card.coBasis && (
+                <div className="mt-0.5 text-[11px] text-ink-4">병기 · {card.coBasis}</div>
+              )}
+            </div>
+          ) : null}
         </div>
+        {/* 금소법 6대 판매원칙 — 이 사안이 어느 원칙 위반 후보인지가 준법 보고서의 1차 분류다 */}
+        {principles.length > 0 && (
+          <div className="mt-2 flex flex-wrap items-center gap-1.5 px-0.5">
+            <span className="text-[10px] font-bold tracking-wider text-ink-4">판매원칙</span>
+            {principles.map((principle) => (
+              <Tag key={principle} color={principleColor(principle)}>
+                {principle}
+              </Tag>
+            ))}
+          </div>
+        )}
 
         {/* 판정 사유 — 금감원 답변식: 정의 → 요건별 사실 적용 → 결론 → 유보 */}
         <DetailRow icon="alert" label="판정 사유">

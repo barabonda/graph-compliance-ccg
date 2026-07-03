@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+import json
+from functools import lru_cache
+from pathlib import Path
 from typing import Any
 
 from llm_gateway import LLMGateway
@@ -30,6 +33,42 @@ def feature_ko(feature: str) -> str:
     return FEATURE_KO.get(feature, feature)
 
 
+_REGULATOR_GROUNDING_PATH = Path(__file__).resolve().parent / "eval" / "regulator_grounding.jsonl"
+
+
+@lru_cache(maxsize=1)
+def regulator_precedents_block() -> str:
+    """금융위·금감원 가이드라인의 지적사례/해석을 판정 few-shot 근거로 제공.
+
+    특히 명시 표현(누구나/무조건)이 없어도 함의로 오인을 유발하면 위반이라는
+    규제당국 해석을 판단자가 참고하도록 한다. 파일이 없으면 빈 문자열(무해).
+    """
+    try:
+        rows = [json.loads(line) for line in _REGULATOR_GROUNDING_PATH.read_text(encoding="utf-8").splitlines() if line.strip()]
+    except Exception:  # noqa: BLE001
+        return ""
+    lines: list[str] = []
+    for row in rows:
+        arts = row.get("articles") or []
+        head = arts[0] if arts else row.get("rule", "")
+        interp = row.get("regulator_interpretation", "")
+        viol = (row.get("violation_example") or {}).get("ad", "")
+        lines.append(f"- [{head}] {row.get('requirement','')} / 규제당국 해석: {interp}" + (f" / 위반 예시: \"{viol}\"" if viol else ""))
+    if not lines:
+        return ""
+    return (
+        "\n[규제당국 지적사례·해석 (금융위·금감원 금융광고규제 가이드라인)]\n"
+        "아래는 규제당국이 실제로 위법/미흡으로 본 사례와 그 해석이다. 판단 시 참고하되, 특히 "
+        "'누구나/무조건' 같은 명시 표현이 없어도 문안의 함의가 조건 없이 누구에게나 적용되는 것으로 "
+        "오인하게 하면 위반으로 본다는 해석을 적용하라. 중요: 이렇게 광고가 스스로 조건을 밝히지 않은 채 "
+        "'심사·자격 없이 누구나/얼마까지 받는다'는 인상을 적극적으로 유발하는 경우는 정보가 부족한 것이 "
+        "아니라 '적극적 오인 유발'이므로, 판정을 '근거 부족'으로 회피하지 말고 '위반'으로 분류하라. "
+        "('근거 부족'은 광고가 스스로 조건·유보를 밝혀 침묵에 해당할 때로 한정한다.) "
+        "다만 각 항목은 여전히 해당 광고 사실에 근거해 판단한다.\n"
+        + "\n".join(lines)
+    )
+
+
 JUDGE_SCHEMA: dict[str, Any] = {
     "type": "object",
     "additionalProperties": False,
@@ -45,7 +84,7 @@ JUDGE_SCHEMA: dict[str, Any] = {
                         "type": "string",
                         "enum": ["COMPLIANT", "NON_COMPLIANT", "INSUFFICIENT", "NOT_APPLICABLE"],
                     },
-                    "score": {"type": "number"},
+                    "score": {"type": "number", "minimum": 0, "maximum": 1},
                     # 적용 법리: 이 CU/조문이 금지(또는 요구)하는 행위의 정의를 한 문장으로.
                     "legal_basis": {"type": "string"},
                     # 판단 기준별 적용: 규칙기반으로 제시된 각 요건(criterion)에 대해,
@@ -207,7 +246,7 @@ class LLMComplianceJudge:
                 "각 항목에 대해 다음을 산출하세요:\n"
                 "1) legal_basis: 금감원 법령해석 회답의 '이유'처럼, 근거 조문을 명시하여 이 기준이 금지(또는 "
                 "요구)하는 행위가 무엇인지 한 문장으로. cu_plan_item.source_article와 evidence_window의 위임 "
-                "사슬(법률→시행령→감독규정→심의기준)을 인용하세요. (예: '금융소비자보호법 시행령 제20조 제1항 "
+                "사슬(법률→시행령→감독규정→심의기준)을 인용하세요. 증거에 '은행 광고심의 기준' 원문이 포함되어 있으면 legal_basis 에 병기하세요(법령이 대표 근거, 심의기준은 '및 은행 광고심의 기준 제N조' 형태의 병기 — 법령 요건 불성립인데 심의기준만 걸리면 심의기준을 대표로 하되 '법령 위반이 아닌 심의기준 미흡'임을 명시). (예: '금융소비자보호법 시행령 제20조 제1항 "
                 "제4호는 광고 시 불확실한 사항에 대해 단정적 판단을 제공하거나 확실하다고 오인하게 할 소지가 있는 "
                 "내용을 알리는 행위를 금지한다')\n"
                 "2) criteria_findings: legal_test.required_elements의 '모든' 요건(criterion)을 빠짐없이 다루세요. "
@@ -237,6 +276,7 @@ class LLMComplianceJudge:
                 "대신 '근거 자료', '해당 문구', '심의 항목', '상품설명서 사실', '근거 조문'과 '위반/근거 부족/적합' "
                 "같은 한국어로 쓴다. 또한 광고 채널과 무관한 표현요소(웹 텍스트 광고에 '음성 속도' 등)를 예시로 "
                 "끌어오지 말고, 실제 매체에 맞는 근거만 든다."
+                + regulator_precedents_block()
             ),
             user=f"[judgment_payload]\n{{'judgment_items': {judgment_items}}}",
         )
@@ -267,7 +307,7 @@ class LLMComplianceJudge:
                     anchor_id=item.anchor_id,
                     cu_id=item.cu_id,
                     verdict=grounded["verdict"],
-                    score=float(grounded["score"]),
+                    score=normalize_judgment_score(grounded["score"]),
                     # why는 하위호환: 결론을 요약으로 유지.
                     why=grounded.get("why", conclusion) if grounded.get("regrounded") else conclusion,
                     evidence_span=grounded["evidence_span"],
@@ -394,6 +434,18 @@ def build_legal_test(item: CUPlanItem, anchor: ContextAnchor) -> dict[str, Any]:
     }
 
 
+def normalize_judgment_score(raw: Any) -> float:
+    """LLM score 스케일 드리프트 방지. 0~1 기대이나 간혹 10점/100점 척도로 반환됨 —
+    라우팅 문턱(0.82=reject)이 8.6 같은 값을 그대로 받으면 클린 광고도 반려된다."""
+    try:
+        value = float(raw or 0.0)
+    except (TypeError, ValueError):
+        return 0.0
+    if value > 1.0:
+        value = value / 10.0 if value <= 10.0 else value / 100.0
+    return max(0.0, min(1.0, value))
+
+
 def grounded_judgment_row(row: dict[str, Any], anchor: ContextAnchor) -> dict[str, Any]:
     """Reject cross-anchor evidence leakage before routing uses a judgment."""
     if row.get("verdict") == "NOT_APPLICABLE":
@@ -405,7 +457,7 @@ def grounded_judgment_row(row: dict[str, Any], anchor: ContextAnchor) -> dict[st
         **row,
         "regrounded": True,
         "verdict": "INSUFFICIENT",
-        "score": min(float(row.get("score") or 0.0), 0.5),
+        "score": min(normalize_judgment_score(row.get("score")), 0.5),
         "why": (
             f"{row.get('conclusion') or row.get('why', '')} / 근거 정합성 경고: evidence_span이 이 anchor의 "
             "격리된 증거창 밖이라 위반을 이 anchor에 귀속할 수 없습니다. "
@@ -429,9 +481,10 @@ def evidence_span_belongs_to_anchor(evidence_span: str, anchor: ContextAnchor) -
 def missing_judgment(review_run_id: str, item: CUPlanItem, *, reason: str) -> LLMJudgment:
     """Backfill an INSUFFICIENT judgment so every CUPlan item is accounted for."""
     note = {
-        "no_row": "LLM judge가 이 CUPlan 항목에 대한 판단을 반환하지 않아 커버리지 보강으로 INSUFFICIENT 처리했습니다.",
-        "anchor": "이 CUPlan 항목의 ContextAnchor를 찾을 수 없어 커버리지 보강으로 INSUFFICIENT 처리했습니다.",
-    }.get(reason, "커버리지 보강으로 INSUFFICIENT 처리했습니다.")
+        # 사용자 노출 문구 — 심사 실무 언어로.
+        "no_row": "이 심의 항목은 자동 판단이 완료되지 않아 '근거 부족(추가 확인 필요)'으로 분류했습니다. 심사자가 직접 확인해 주세요.",
+        "anchor": "이 심의 항목과 연결된 광고 문구를 특정하지 못해 '근거 부족(추가 확인 필요)'으로 분류했습니다. 심사자가 직접 확인해 주세요.",
+    }.get(reason, "자동 판단이 완료되지 않아 '근거 부족(추가 확인 필요)'으로 분류했습니다.")
     return LLMJudgment(
         judgment_id=stable_id("judgment", review_run_id, item.plan_item_id),
         plan_item_id=item.plan_item_id,

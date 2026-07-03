@@ -89,7 +89,10 @@ class Neo4jReviewWriter:
             )
             self._save_claims(session, review_input, graph, common)
             self._save_hierarchical_context(session, review_input, graph, common)
-            self._save_context_triples(session, review_input, graph, common)
+            # context_triples 는 저장하지 않는다: 클레임 체인(DENOTES→IMPLIES→
+            # CAN_MISLEAD→RAISES)·한정어·문장 노드로 같은 정보가 이미 저장되는
+            # 결정론 파생물이라 이중 기록이었다. 필요 시 build_context_triples 로
+            # 언제든 동일하게 재생성 가능(stable_id).
             self._save_anchors(session, review_input, graph, common)
             self._save_plan(session, review_input, graph, common)
             self._save_judgments(session, review_input, graph, common)
@@ -272,25 +275,6 @@ class Neo4jReviewWriter:
                 source=SOURCE,
                 influence_id=influence.influence_id,
                 influence_props=neo4j_props({**common, **to_jsonable(influence)}),
-            )
-
-    def _save_context_triples(self, session, review_input: ReviewInput, graph: ReviewGraph, common: dict[str, object]) -> None:
-        for triple in graph.context_triples:
-            if not triple.claim_id:
-                continue
-            session.run(
-                """
-                MATCH (claim:Claim {id: $claim_id, workspace_id: $workspace_id})
-                MERGE (triple:ContextTriple {id: $triple_id, workspace_id: $workspace_id})
-                SET triple += $triple_props
-                MERGE (claim)-[:HAS_CONTEXT_TRIPLE {workspace_id: $workspace_id, review_run_id: $review_run_id, source: $source}]->(triple)
-                """,
-                workspace_id=review_input.workspace_id,
-                review_run_id=graph.review_run_id,
-                source=SOURCE,
-                claim_id=triple.claim_id,
-                triple_id=triple.triple_id,
-                triple_props=neo4j_props({**common, **to_jsonable(triple)}),
             )
 
     def _save_anchors(self, session, review_input: ReviewInput, graph: ReviewGraph, common: dict[str, object]) -> None:

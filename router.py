@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from disclosure_catalog import PROMINENCE_BALANCE_BASIS, disclosure_profile, resolve_representative_basis
 from legal_hierarchy import parent_articles_for
 from schemas import ExceptionReview, LLMJudgment, ReviewGraph, ReviewInput, ReviewOutput
 from utils import to_jsonable
@@ -77,19 +78,41 @@ def build_output(
         )
     if graph.cu_plan and final != "pass_candidate":
         for diagnostic in graph.prominence_diagnostics:
-            if diagnostic.get("diagnostic_code") not in {"PROMINENCE_INSUFFICIENT", "DISCLOSURE_MISSING"}:
+            code = str(diagnostic.get("diagnostic_code") or "")
+            if code not in {"PROMINENCE_INSUFFICIENT", "DISCLOSURE_MISSING"}:
                 continue
+            # 대표 근거 선택: 항목 부재(missing)는 법령 근거가 있으면 법령 대표,
+            # 위계 미달(prominence)은 구체 기준을 정한 심의기준 대표 + '법 위반 아님' 문구.
+            if code == "PROMINENCE_INSUFFICIENT":
+                basis = {
+                    "representative_basis": PROMINENCE_BALANCE_BASIS["guideline"],
+                    "authority_tier": "guideline",
+                    "co_basis": PROMINENCE_BALANCE_BASIS["law"],
+                    "tier_note": "법령 위반이 아닌 심의기준 미흡입니다.",
+                }
+            else:
+                basis = resolve_representative_basis(
+                    disclosure_profile(str(diagnostic.get("check_id") or "")),
+                    situation="missing",
+                )
+                if not basis["representative_basis"]:
+                    basis = {"representative_basis": "금소법 제22조", "authority_tier": "law", "co_basis": "", "tier_note": ""}
+            rationale = str(diagnostic.get("message") or "")
+            if basis.get("tier_note"):
+                rationale = f"{basis['tier_note']} {rationale}".strip()
             detected_issues.append(
                 {
-                    "risk_code": str(diagnostic.get("diagnostic_code") or ""),
+                    "risk_code": code,
                     "principle": "광고규제",
-                    "source_article": "금소법 제22조",
+                    "source_article": basis["representative_basis"],
+                    "authority_tier": basis["authority_tier"],
+                    "co_basis": basis.get("co_basis", ""),
                     "risk_title": "필수고지 현저성 또는 누락",
                     "subject": "고지 표시",
                     "constraint": "혜택과 불이익을 균형 있게 명확히 전달해야 합니다.",
-                    "severity": 3,
+                    "severity": 2 if basis["authority_tier"] == "guideline" else 3,
                     "problem_span": str(diagnostic.get("evidence") or ""),
-                    "rationale": str(diagnostic.get("message") or ""),
+                    "rationale": rationale,
                     "required_action": "조건, 기간, 한도, 세전/세후, 예금자보호 등 필요한 고지를 혜택 문구와 같은 맥락에서 충분히 보이게 표시하세요.",
                 }
             )
@@ -107,7 +130,7 @@ def build_output(
         routing=routing,
         detected_issues=detected_issues,
         post_approval_required_actions=["assign_review_number", "insert_review_phrase_before_publication"],
-        rationale=summary_rationale(final, actionable_effective),
+        rationale=summary_rationale(final, actionable_effective, detected_issues),
         review_run_id=graph.review_run_id,
         context_frame=graph.context_frame,
         sentence_units=to_jsonable(graph.sentence_units),
@@ -239,13 +262,40 @@ def action_for_verdict(verdict: str) -> str:
     return "추가 조치 없음"
 
 
-def summary_rationale(final: str, judgments: list[LLMJudgment]) -> str:
+# 사용자(준법감시자)에게 보이는 판정 어휘. 내부 enum(needs_review 등)을 그대로
+# 노출하지 않는다 — 화면·의견서의 언어는 심사 실무 용어여야 한다.
+FINAL_VERDICT_KO = {
+    "pass_candidate": "통과 후보",
+    "needs_review": "검토 필요",
+    "revise": "수정 권고",
+    "reject": "반려 권고",
+}
+
+
+def summary_rationale(
+    final: str,
+    judgments: list[LLMJudgment],
+    detected_issues: list[dict[str, object]] | None = None,
+) -> str:
+    final_ko = FINAL_VERDICT_KO.get(final, final)
     if not judgments:
-        return "CUPlan 기준 판단 대상이 없어 자동 통과하지 않고 추가 검토로 라우팅했습니다."
+        return "연결된 심의 기준이 없어 자동 통과하지 않고 심사자 추가 검토로 회부합니다."
     risky = [judgment for judgment in judgments if judgment.verdict in {"NON_COMPLIANT", "INSUFFICIENT"}]
-    if not risky:
-        return "선택된 CUPlan과 evidence window 기준으로 중대한 위반 신호가 확인되지 않았습니다."
-    return f"{len(risky)}개 CU에서 위반 또는 추가 검토 필요 판단이 확인되어 {final}로 라우팅했습니다."
+    guideline_issues = [
+        issue for issue in (detected_issues or []) if str(issue.get("authority_tier") or "") == "guideline"
+    ]
+    if not risky and not guideline_issues:
+        return "연결된 심의 기준과 근거 자료를 기준으로 중대한 위반 신호가 확인되지 않았습니다."
+    # 판정 어휘 원칙: 법령 근거 검토와 심의기준 미흡(자율규제 보완 권고)은 다른 말이다.
+    parts: list[str] = []
+    if risky:
+        parts.append(f"법령 조문 근거 검토 대상 {len(risky)}건")
+    if guideline_issues:
+        parts.append(f"심의기준 미흡 {len(guideline_issues)}건")
+    summary = f"{' · '.join(parts)}이 확인되어 '{final_ko}' 의견으로 회부합니다."
+    if guideline_issues and not any(j.verdict == "NON_COMPLIANT" for j in risky):
+        summary += " 심의기준 미흡은 법령 위반이 아닌 자율규제 보완 권고입니다."
+    return summary
 
 
 def article_aggregation(graph: ReviewGraph, effective: list[LLMJudgment]) -> list[dict[str, object]]:
@@ -449,25 +499,27 @@ def system_review_items_for(graph: ReviewGraph) -> list[dict[str, object]]:
 
 
 def retrieval_failure_rationale(code: str) -> str:
+    # 사용자 노출 문구 — 심사 실무 언어로. (내부 스키마·컴포넌트명 노출 금지)
     return {
-        "NO_HYPERNYM_MATCH": "ContextAnchor는 생성됐지만 승인된 PolicyHypernym으로 정규화되지 않았습니다.",
-        "NO_ACTIVE_CU_AFTER_GATE": "후보 CU는 있었지만 상품군/채널/광고유형 gate 이후 활성 CU가 남지 않았습니다.",
-        "RERANK_DROPPED_ALL": "후보 CU는 있었지만 LLM rerank가 판단 계획에 포함하지 않았습니다.",
-        "MISSING_POLICY_COVERAGE": "정책어는 잡혔지만 연결 가능한 CU 후보가 부족합니다.",
-        "NO_LEGAL_ELEMENT_MATCH": "정책어는 잡혔지만 해당 CU의 금소법 행위요건을 충족하는 후보가 없습니다.",
-        "CU_PLAN_EMPTY": "ContextAnchor는 생성됐지만 연결 가능한 CUPlan이 없어 자동 통과할 수 없습니다.",
-    }.get(code, "정책 매칭 상태를 확인해야 합니다.")
+        "NO_HYPERNYM_MATCH": "이 표현을 심의 정책 용어로 분류하지 못해 자동 판단이 완료되지 않았습니다.",
+        "NO_ACTIVE_CU_AFTER_GATE": "관련 심의 기준 후보는 있었으나 이 상품군·채널에 적용되는 기준이 남지 않았습니다.",
+        "RERANK_DROPPED_ALL": "관련 심의 기준 후보가 판단 대상으로 선정되지 않았습니다.",
+        "MISSING_POLICY_COVERAGE": "이 표현과 연결할 수 있는 심의 기준이 부족합니다.",
+        "NO_LEGAL_ELEMENT_MATCH": "이 표현이 관련 심의 기준의 행위요건(금소법상 구성요건)에 해당하는지 자동으로 확인되지 않았습니다.",
+        "CU_PLAN_EMPTY": "이 표현에 연결된 심의 기준이 없어 자동 통과할 수 없습니다.",
+    }.get(code, "정책 매칭 상태를 심사자가 확인해야 합니다.")
 
 
 def retrieval_failure_action(code: str) -> str:
+    # 심사자가 취할 행동 중심으로. 시스템 보강이 필요한 경우는 그렇게 말한다.
     return {
-        "NO_HYPERNYM_MATCH": "PolicyHypernym vocabulary와 normalization prompt를 보강하세요.",
-        "NO_ACTIVE_CU_AFTER_GATE": "MetaCU gate 적용범위와 상품군/채널 scope를 확인하세요.",
-        "RERANK_DROPPED_ALL": "CUEmbeddingProfile, rerank prompt, 후보 evidence를 확인하세요.",
-        "MISSING_POLICY_COVERAGE": "해당 PolicyHypernym과 ComplianceUnit/DisclosureRequirement 연결을 보강하세요.",
-        "NO_LEGAL_ELEMENT_MATCH": "AnchorFeatureSet과 CULegalElementProfile의 action_type/required_positive_features를 확인하세요.",
-        "CU_PLAN_EMPTY": "Policy compiler와 CUEmbeddingProfile/PolicyHypernym 연결 상태를 확인하세요.",
-    }.get(code, "Policy Graph와 후보검색 상태를 확인하세요.")
+        "NO_HYPERNYM_MATCH": "해당 표현은 심사자가 직접 판단해 주세요. (시스템: 정책 용어 사전 보강 필요)",
+        "NO_ACTIVE_CU_AFTER_GATE": "이 상품군·채널에 실제로 적용될 기준인지 심사자가 확인해 주세요.",
+        "RERANK_DROPPED_ALL": "해당 표현의 위반 여부를 심사자가 직접 확인해 주세요.",
+        "MISSING_POLICY_COVERAGE": "해당 표현은 심사자가 직접 판단해 주세요. (시스템: 심의 기준 연결 보강 필요)",
+        "NO_LEGAL_ELEMENT_MATCH": "행위요건 해당 여부를 심사자가 직접 확인해 주세요.",
+        "CU_PLAN_EMPTY": "해당 표현은 심사자가 직접 판단해 주세요. (시스템: 심의 기준 연결 보강 필요)",
+    }.get(code, "정책 매칭 상태를 심사자가 확인해 주세요.")
 
 
 def judgments_by_anchor(judgments: list[LLMJudgment]) -> dict[str, list[LLMJudgment]]:

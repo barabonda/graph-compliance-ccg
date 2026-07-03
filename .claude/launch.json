@@ -6,6 +6,12 @@
       "runtimeExecutable": "npm",
       "runtimeArgs": ["run", "dev", "--prefix", "frontend", "--", "--port", "3100"],
       "port": 3100
+    },
+    {
+      "name": "ccg-backend",
+      "runtimeExecutable": "uvicorn",
+      "runtimeArgs": ["server:app", "--app-dir", "/Users/barabonda/Documents/GraphRAG/examples/graph-compliance-ccg", "--port", "8770"],
+      "port": 8770
     }
   ]
 }

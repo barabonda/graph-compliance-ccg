@@ -1,0 +1,284 @@
+{
+  "records": [
+    {
+      "id": "gold_jb_routine_approved_clean_001",
+      "title": "JB도전루틴적금 심의필 통과 문안",
+      "text": "❤도전 루틴 적금 출시\n\n나의 루틴이 이자가 된다면?\n어제보다 더 나은 나를 위해 JB와 함께 나만의 루틴을 만들어 보세요.\n\n하루 한 번, 1만원씩 기록할 때마다 0.1% 우대금리가 차곡차곡 쌓여요.\n\n100일 도전, 100회 납입 시 최고 10.0% 우대금리를 받으실 수 있습니다.\n\n[도전 루틴 적금 상품정보]\n■ 예금과목: 정기적금(자유적립식)\n■ 가입대상: 당행 적금 첫거래 고객(실명의 개인 및 개인사업자, 1인 1계좌)\n■ 계약기간: 31일 이상 100일 이내(일 단위)\n■ 가입금액: 초회 불입금 1만원\n■ 납입방법: 1일 1회에 한하여 연결된 본인 명의의 전북은행 입출금계좌를 통한 납입만 가능\n■ 1회 납입한도: 1일 1만원\n■ 판매기간: 2026.05.13. ~ 2026.11.30.\n■ 판매한도: 10,000좌 ※ 판매한도 소진 시 조기 종료\n■ 기본금리: 연 1.0%(2026.05.13 기준, 세전)\n■ 우대이율: 아래 우대조건 충족 시 최고 연 10.0% 제공. 단, 우대이율은 만기해지 시 적용\n납입 성공 우대: 본 적금 납입 시 1회당 연 0.10% 제공, 최대 연 10.0%\n■ 예상수취이자액: 100일 동안 매일 1만원씩 100회 납입 시 세전 15,219원(최고금리 11.0% 적용, 세부사항 변동 가능)\n■ 예금자보호여부: 이 예금은 예금자보호법에 따라 원금과 소정의 이자를 합하여 1인당 1억원까지(본 은행의 여타 보호상품과 합산) 보호됩니다.\n※ 유의사항: 만기 전 해지할 경우 약정한 이율보다 낮은 중도해지 이율이 적용됩니다. 우대금리는 만기해지 시에 적용되며, 중도해지 시에는 적용되지 않습니다. 계약을 체결하기 전에 상품설명서 및 약관을 읽어보시기 바랍니다. 금융소비자보호법 제19조 제1항에 따라 상품에 대하여 설명을 받으실 권리가 있습니다. 법령 및 내부통제기준에 따라 작성된 자료입니다. 준법감시인 심의필 제2026-가-1681호(유효기간: 2026.11.30까지). 이 광고는 2026.05.14~2026.11.30 이후에는 게시물 기록관리 목적으로 유지됩니다.",
+      "facts": {
+        "product_name": "JB도전루틴적금",
+        "product_group": "deposit",
+        "approved_reference": true,
+        "mutation_code": "CLEAN_APPROVED",
+        "expected_present_disclosures": [
+          "우대조건",
+          "가입대상",
+          "가입기간",
+          "납입한도",
+          "판매기간",
+          "판매한도",
+          "세전 금리",
+          "만기해지 조건",
+          "중도해지 이율",
+          "예금자보호 1억원",
+          "상품설명서 및 약관 확인",
+          "설명 받을 권리",
+          "준법감시인 심의필"
+        ]
+      },
+      "product_group": "deposit",
+      "channel": "web_page",
+      "language": "ko",
+      "source_type": "approved_noise_gold",
+      "labels": {
+        "violation": false,
+        "violation_types": [],
+        "articles": [],
+        "sales_principles": [
+          "설명의무",
+          "광고규제"
+        ],
+        "required_disclosures": [
+          "우대조건",
+          "가입대상",
+          "가입기간",
+          "세전/세후 금리",
+          "예금자보호",
+          "상품설명서 및 약관",
+          "심의필"
+        ],
+        "risk_level": "low",
+        "expected_routing": "pass_candidate",
+        "review_basis": [
+          "실제 심의필 통과 문안",
+          "은행 광고심의 기준",
+          "금소법 제19조",
+          "금소법 제22조"
+        ]
+      }
+    },
+    {
+      "id": "gold_jb_routine_noise_missing_protection_001",
+      "title": "도전루틴적금 노이즈: 예금자보호 고지 삭제",
+      "text": "❤도전 루틴 적금 출시\n\n하루 한 번, 1만원씩 기록할 때마다 0.1% 우대금리가 차곡차곡 쌓여요.\n100일 도전, 100회 납입 시 최고 10.0% 우대금리를 받으실 수 있습니다.\n\n[도전 루틴 적금 상품정보]\n■ 가입대상: 당행 적금 첫거래 고객(실명의 개인 및 개인사업자, 1인 1계좌)\n■ 계약기간: 31일 이상 100일 이내(일 단위)\n■ 1회 납입한도: 1일 1만원\n■ 기본금리: 연 1.0%(2026.05.13 기준, 세전)\n■ 우대이율: 아래 우대조건 충족 시 최고 연 10.0% 제공. 단, 우대이율은 만기해지 시 적용\n납입 성공 우대: 본 적금 납입 시 1회당 연 0.10% 제공, 최대 연 10.0%\n※ 유의사항: 만기 전 해지할 경우 약정한 이율보다 낮은 중도해지 이율이 적용됩니다. 계약을 체결하기 전에 상품설명서 및 약관을 읽어보시기 바랍니다. 준법감시인 심의필 제2026-가-1681호(유효기간: 2026.11.30까지).",
+      "facts": {
+        "product_name": "JB도전루틴적금",
+        "product_group": "deposit",
+        "approved_reference_id": "gold_jb_routine_approved_clean_001",
+        "mutation_code": "REMOVE_DEPOSITOR_PROTECTION",
+        "removed_spans": [
+          "이 예금은 예금자보호법에 따라 원금과 소정의 이자를 합하여 1인당 1억원까지 보호됩니다."
+        ]
+      },
+      "product_group": "deposit",
+      "channel": "web_page",
+      "language": "ko",
+      "source_type": "approved_noise_mutation",
+      "labels": {
+        "violation": true,
+        "violation_types": [
+          "missing_depositor_protection_disclosure"
+        ],
+        "articles": [
+          "금소법 제22조",
+          "금소법 시행령 제18조"
+        ],
+        "sales_principles": [
+          "광고규제",
+          "설명의무"
+        ],
+        "required_disclosures": [
+          "예금자보호"
+        ],
+        "risk_level": "medium",
+        "expected_routing": "revise",
+        "review_basis": [
+          "실제 심의필 통과 문안 mutation",
+          "은행 광고심의 기준"
+        ]
+      }
+    },
+    {
+      "id": "gold_jb_routine_noise_stale_protection_limit_001",
+      "title": "도전루틴적금 노이즈: 예금자보호 한도 5천만원 오기",
+      "text": "❤도전 루틴 적금 출시\n\n100일 도전, 100회 납입 시 최고 10.0% 우대금리를 받으실 수 있습니다.\n\n■ 가입대상: 당행 적금 첫거래 고객(실명의 개인 및 개인사업자, 1인 1계좌)\n■ 계약기간: 31일 이상 100일 이내(일 단위)\n■ 기본금리: 연 1.0%(2026.05.13 기준, 세전)\n■ 우대이율: 아래 우대조건 충족 시 최고 연 10.0% 제공. 단, 우대이율은 만기해지 시 적용\n■ 예금자보호여부: 이 예금은 예금자보호법에 따라 원금과 소정의 이자를 합하여 1인당 5천만원까지 보호됩니다.\n※ 유의사항: 계약을 체결하기 전에 상품설명서 및 약관을 읽어보시기 바랍니다. 준법감시인 심의필 제2026-가-1681호(유효기간: 2026.11.30까지).",
+      "facts": {
+        "product_name": "JB도전루틴적금",
+        "product_group": "deposit",
+        "approved_reference_id": "gold_jb_routine_approved_clean_001",
+        "mutation_code": "STALE_DEPOSITOR_PROTECTION_LIMIT",
+        "expected_problem_spans": [
+          "1인당 5천만원까지"
+        ],
+        "expected_current_limit": "1인당 1억원"
+      },
+      "product_group": "deposit",
+      "channel": "web_page",
+      "language": "ko",
+      "source_type": "approved_noise_mutation",
+      "labels": {
+        "violation": true,
+        "violation_types": [
+          "stale_depositor_protection_limit",
+          "product_fact_contradiction"
+        ],
+        "articles": [
+          "금소법 제22조",
+          "금소법 시행령 제18조"
+        ],
+        "sales_principles": [
+          "광고규제",
+          "설명의무"
+        ],
+        "required_disclosures": [
+          "예금자보호"
+        ],
+        "risk_level": "high",
+        "expected_routing": "revise",
+        "review_basis": [
+          "실제 심의필 통과 문안 mutation",
+          "ProductFact/RegulationFact stale disclosure"
+        ]
+      }
+    },
+    {
+      "id": "gold_jb_routine_noise_unconditional_top_rate_001",
+      "title": "도전루틴적금 노이즈: 조건 없는 최고금리 확정 표현",
+      "text": "❤도전 루틴 적금 출시\n\n누구나 조건 없이 최고 연 10.0% 우대금리를 확정으로 받을 수 있습니다. 지금 가입하면 하루 1만원 납입만으로 고금리 혜택이 보장됩니다.\n\n■ 가입대상: 당행 적금 첫거래 고객(실명의 개인 및 개인사업자, 1인 1계좌)\n■ 계약기간: 31일 이상 100일 이내(일 단위)\n■ 기본금리: 연 1.0%(2026.05.13 기준, 세전)\n※ 유의사항: 우대금리는 만기해지 시에 적용되며, 중도해지 시에는 적용되지 않습니다. 이 예금은 예금자보호법에 따라 원금과 소정의 이자를 합하여 1인당 1억원까지 보호됩니다. 계약을 체결하기 전에 상품설명서 및 약관을 읽어보시기 바랍니다. 준법감시인 심의필 제2026-가-1681호(유효기간: 2026.11.30까지).",
+      "facts": {
+        "product_name": "JB도전루틴적금",
+        "product_group": "deposit",
+        "approved_reference_id": "gold_jb_routine_approved_clean_001",
+        "mutation_code": "UNCONDITIONAL_TOP_RATE_GUARANTEE",
+        "expected_problem_spans": [
+          "누구나 조건 없이",
+          "최고 연 10.0% 우대금리를 확정",
+          "고금리 혜택이 보장"
+        ]
+      },
+      "product_group": "deposit",
+      "channel": "web_page",
+      "language": "ko",
+      "source_type": "approved_noise_mutation",
+      "labels": {
+        "violation": true,
+        "violation_types": [
+          "condition_or_scope_missing",
+          "guarantee_or_return_misleading",
+          "universal_scope_expression"
+        ],
+        "articles": [
+          "금소법 제21조",
+          "금소법 제22조",
+          "금융소비자 보호에 관한 감독규정 제19조"
+        ],
+        "sales_principles": [
+          "부당권유",
+          "광고규제",
+          "설명의무"
+        ],
+        "required_disclosures": [
+          "우대조건",
+          "가입대상",
+          "가입기간",
+          "만기해지 조건",
+          "세전/세후 금리"
+        ],
+        "risk_level": "high",
+        "expected_routing": "reject",
+        "review_basis": [
+          "실제 심의필 통과 문안 mutation",
+          "금소법 제21조",
+          "금소법 제22조"
+        ]
+      }
+    },
+    {
+      "id": "gold_jb_routine_noise_low_prominence_conditions_001",
+      "title": "도전루틴적금 노이즈: 조건 고지 현저성 부족",
+      "text": "❤도전 루틴 적금 출시\n\n100일 도전, 최고 10.0% 우대금리를 받으실 수 있습니다.\n나의 루틴이 이자가 되는 특별한 기회입니다.\n\n가입하기\n\n#전북은행 #도전루틴적금 #최고10퍼센트\n\n※ 세부 조건: 당행 적금 첫거래 고객 대상이며 31일 이상 100일 이내 가입, 1일 1회 1만원 납입, 납입 성공 1회당 연 0.10% 우대, 우대이율은 만기해지 시 적용됩니다. 이 예금은 예금자보호법에 따라 원금과 소정의 이자를 합하여 1인당 1억원까지 보호됩니다. 계약 전 상품설명서 및 약관을 확인해 주세요. 준법감시인 심의필 제2026-가-1681호.",
+      "facts": {
+        "product_name": "JB도전루틴적금",
+        "product_group": "deposit",
+        "approved_reference_id": "gold_jb_routine_approved_clean_001",
+        "mutation_code": "LOW_PROMINENCE_CONDITIONS",
+        "expected_problem_spans": [
+          "최고 10.0% 우대금리",
+          "※ 세부 조건"
+        ],
+        "prominence_expectation": "condition disclosure exists but is demoted to footnote-style text"
+      },
+      "product_group": "deposit",
+      "channel": "sns",
+      "language": "ko",
+      "source_type": "approved_noise_mutation",
+      "labels": {
+        "violation": true,
+        "violation_types": [
+          "prominence_insufficient",
+          "condition_or_scope_missing"
+        ],
+        "articles": [
+          "금소법 제22조",
+          "금융소비자 보호에 관한 감독규정 제19조"
+        ],
+        "sales_principles": [
+          "광고규제",
+          "설명의무"
+        ],
+        "required_disclosures": [
+          "우대조건",
+          "가입대상",
+          "가입기간",
+          "만기해지 조건"
+        ],
+        "risk_level": "medium",
+        "expected_routing": "needs_review",
+        "review_basis": [
+          "실제 심의필 통과 문안 mutation",
+          "prominence fixture"
+        ]
+      }
+    },
+    {
+      "id": "gold_jb_routine_noise_missing_review_approval_001",
+      "title": "도전루틴적금 노이즈: 심의필/유효기간 삭제",
+      "text": "❤도전 루틴 적금 출시\n\n하루 한 번, 1만원씩 기록할 때마다 0.1% 우대금리가 차곡차곡 쌓여요.\n100일 도전, 100회 납입 시 최고 10.0% 우대금리를 받으실 수 있습니다.\n\n■ 가입대상: 당행 적금 첫거래 고객(실명의 개인 및 개인사업자, 1인 1계좌)\n■ 계약기간: 31일 이상 100일 이내(일 단위)\n■ 기본금리: 연 1.0%(2026.05.13 기준, 세전)\n■ 우대이율: 아래 우대조건 충족 시 최고 연 10.0% 제공. 단, 우대이율은 만기해지 시 적용\n■ 예금자보호여부: 이 예금은 예금자보호법에 따라 원금과 소정의 이자를 합하여 1인당 1억원까지 보호됩니다.\n※ 유의사항: 계약을 체결하기 전에 상품설명서 및 약관을 읽어보시기 바랍니다. 금융소비자보호법 제19조 제1항에 따라 상품에 대하여 설명을 받으실 권리가 있습니다. 법령 및 내부통제기준에 따라 작성된 자료입니다.",
+      "facts": {
+        "product_name": "JB도전루틴적금",
+        "product_group": "deposit",
+        "approved_reference_id": "gold_jb_routine_approved_clean_001",
+        "mutation_code": "REMOVE_REVIEW_APPROVAL_NOTICE",
+        "removed_spans": [
+          "준법감시인 심의필 제2026-가-1681호",
+          "유효기간: 2026.11.30까지"
+        ]
+      },
+      "product_group": "deposit",
+      "channel": "web_page",
+      "language": "ko",
+      "source_type": "approved_noise_mutation",
+      "labels": {
+        "violation": true,
+        "violation_types": [
+          "missing_review_approval_notice"
+        ],
+        "articles": [
+          "금소법 제22조"
+        ],
+        "sales_principles": [
+          "광고규제"
+        ],
+        "required_disclosures": [
+          "심의필",
+          "유효기간"
+        ],
+        "risk_level": "medium",
+        "expected_routing": "needs_review",
+        "review_basis": [
+          "실제 심의필 통과 문안 mutation",
+          "은행 광고심의 기준"
+        ]
+      }
+    }
+  ]
+}

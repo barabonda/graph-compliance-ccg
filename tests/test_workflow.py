@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import re
+import unicodedata
 from pathlib import Path
 
 import pytest
@@ -11,7 +12,7 @@ from claim_modeling import fold_qualifier_anchors_into_parent_claims
 from cross_encoder_reranker import with_cross_encoder_score
 from context_extractor import LLMContextExtractor
 from judge import LLMComplianceJudge
-from legal_elements import canonicalize_required_features
+from legal_elements import build_anchor_feature_set, canonicalize_required_features
 from llm_gateway import LLMGateway
 from evaluate import (
     EvaluationLabels,
@@ -1284,6 +1285,20 @@ def test_disclosure_check_reports_unsupported_graph_catalog(monkeypatch: pytest.
     assert unsupported["status"] == "UNSUPPORTED_DISCLOSURE_CHECK"
 
 
+def test_disclosure_check_detects_review_approval_notice_with_unicode_drift() -> None:
+    text = "• 준법감시인 심의필 제2026-가-326호"
+    decomposed = unicodedata.normalize("NFD", text)
+
+    checks = product_facts_module.build_disclosure_checks(
+        ReviewInput(product_group="deposit", content_text=decomposed)
+    )
+
+    review_approval = next(item for item in checks if item["check_id"] == "disc_review_approval_notice")
+    assert review_approval["status"] == "PRESENT"
+    assert review_approval["present"] is True
+    assert {"준법감시인", "심의필"} & set(review_approval["detected_tokens"])
+
+
 def test_product_fact_analyzer_accepts_selected_product(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(
         product_facts_module,
@@ -1804,6 +1819,50 @@ def test_canonicalizes_existing_free_text_required_features_for_runtime_gate() -
     assert gated.matched_required_features == ["certainty_expression", "guarantee_expression"]
     assert gated.legal_element_profile
     assert gated.legal_element_profile.required_positive_features == ["guarantee_expression", "certainty_expression"]
+
+
+def test_bare_must_check_phrase_does_not_canonicalize_as_certainty_expression() -> None:
+    assert canonicalize_required_features(["계약 체결 전 상품설명서 및 약관을 반드시 확인"]) == []
+    assert canonicalize_required_features(["수익을 반드시 지급받을 수 있다고 오인하게 하는 표현"]) == [
+        "certainty_expression"
+    ]
+
+
+def test_bare_must_check_qualifier_does_not_emit_certainty_expression() -> None:
+    claim = Claim(
+        claim_id="claim_must_check",
+        text="계약 체결 전 상품설명서 및 약관을 반드시 확인하시기 바랍니다",
+        span=Span(start=0, end=33, text="계약 체결 전 상품설명서 및 약관을 반드시 확인하시기 바랍니다"),
+        meaning="계약 전 상품설명서와 약관 확인을 권유하는 보호 고지",
+        implicature="중요 사항을 확인해야 한다는 안내",
+        consumer_effect="소비자가 약관과 상품설명서를 확인하도록 유도",
+        risk_hypernym="",
+        risk_severity="LOW",
+        qualifiers=[
+            ClaimQualifier(
+                qualifier_id="qualifier_must_check",
+                role="certainty",
+                text="반드시 확인",
+                span=Span(start=21, end=27, text="반드시 확인"),
+                meaning="약관 확인을 강조하는 보호 문구",
+                risk_reason="",
+                confidence=0.9,
+            )
+        ],
+    )
+    anchor = ContextAnchor(
+        anchor_id="anchor_must_check",
+        anchor_type="claim_anchor",
+        claim_id="claim_must_check",
+        span=claim.span,
+        facts=[],
+        hypernyms=[],
+    )
+
+    feature_set = build_anchor_feature_set(review_run_id="run_must_check", anchor=anchor, claim=claim)
+
+    assert "certainty_expression" not in feature_set.positive_features
+    assert any("완화 한정어" in item for item in feature_set.evidence)
 
 
 def test_legal_element_gate_allows_comparison_cu_with_comparison_feature() -> None:

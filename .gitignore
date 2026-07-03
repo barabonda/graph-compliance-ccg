@@ -13,3 +13,12 @@ output/
 
 .DS_Store
 runs/
+
+# evaluate.py 실행 산출물(예측/리포트) — 재실행으로 언제든 재생성되는 결과물이라
+# 버전관리 대상이 아니다. eval/ 안의 손으로 쓴 골든 케이스(*_cases.jsonl,
+# *_grounding.jsonl, approved_noise_*.json 등)는 이 패턴에 걸리지 않아 계속 추적된다.
+eval/*_pred.jsonl
+eval/*predictions*.jsonl
+eval/*_report*.json
+eval/report_*.json
+eval/retrieval_sweep_*.json

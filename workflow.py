@@ -155,6 +155,7 @@ class GraphComplianceCCGWorkflow:
             review_run_id=review_run_id,
             anchors=anchors,
             claims=claims,
+            relations=extraction.inter_sentence_relations,
         )
         yield workflow_event(
             "step_completed",
@@ -255,6 +256,8 @@ class GraphComplianceCCGWorkflow:
             sentence_units=extraction.sentence_units,
             prominence_diagnostics=prominence_diagnostics,
             product_fact_context=product_fact_context,
+            inter_sentence_relations=extraction.inter_sentence_relations,
+            context_frame=extraction.context_frame,
         )
         yield workflow_event(
             "step_completed",

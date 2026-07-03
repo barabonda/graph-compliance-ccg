@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import os
 import csv
+import logging
 import unicodedata
 from functools import lru_cache
 from pathlib import Path
@@ -15,12 +16,14 @@ from disclosure_catalog import (
     disclosure_catalog_for_group,
     disclosure_profile,
     profile_catalog_all,
+    resolve_representative_basis,
 )
 from llm_gateway import LLMGateway
 from schemas import Claim, ReviewInput, SentenceUnit
 from utils import stable_id, to_jsonable
 
 
+LOGGER = logging.getLogger(__name__)
 MODULE_DIR = Path(__file__).resolve().parent
 BUNDLED_DISCLOSURE_ROOT = MODULE_DIR / "data" / "demo_product_documents"
 DEFAULT_DISCLOSURE_ROOT = Path("/Users/barabonda/Downloads/jbbank_product_disclosures_20260528")
@@ -172,6 +175,46 @@ class ProductFactAnalyzer:
             )
 
         product = str(resolved.get("product") or "")
+        preloaded = load_preloaded_product_facts_from_neo4j(
+            product=product,
+            workspace_id=review_input.workspace_id,
+        )
+        if preloaded and preloaded.get("product_facts"):
+            product_facts = list(preloaded.get("product_facts") or [])
+            try:
+                claim_facts, comparisons = self.compare_claims(
+                    review_input=review_input,
+                    claims=claims,
+                    product=product,
+                    product_facts=product_facts,
+                )
+            except Exception as exc:
+                return {
+                    **context_with_documents(
+                        status="COMPARISON_FAILED",
+                        matched_product=product,
+                        selected_documents=list(preloaded.get("selected_documents") or []),
+                        reason=str(exc),
+                    ),
+                    "product_facts": product_facts,
+                }
+            disclosure_checks = build_disclosure_checks(
+                review_input,
+                product_facts,
+                sentence_units=sentence_units,
+            )
+            return {
+                "matched_product": product,
+                "selected_documents": list(preloaded.get("selected_documents") or []),
+                "extraction_status": "PRELOADED_PRODUCT_FACTS",
+                "product_facts": product_facts,
+                "claim_facts": claim_facts,
+                "comparison_results": comparisons,
+                "disclosure_checks": disclosure_checks,
+                "applicability_gate": disclosure_gate_summary_from_checks(disclosure_checks),
+                "reason": "Neo4j에 선제 적재된 ProductFact를 사용했습니다.",
+            }
+
         documents = select_product_documents(product)
         if not documents:
             return empty_product_fact_context(
@@ -421,6 +464,90 @@ def context_with_documents(
     }
 
 
+def load_preloaded_product_facts_from_neo4j(*, product: str, workspace_id: str) -> dict[str, Any] | None:
+    """Read product-level ProductFact grounding preloaded into Neo4j.
+
+    This is intentionally optional: if Neo4j is unavailable or no ProductFact
+    exists for the product, review runtime falls back to on-demand PDF
+    extraction. It should never fabricate ProductFact evidence.
+    """
+    if not product:
+        return None
+    uri = os.environ.get("NEO4J_URI", "")
+    user = os.environ.get("NEO4J_USER") or os.environ.get("NEO4J_USERNAME", "")
+    password = os.environ.get("NEO4J_PASSWORD", "")
+    if not uri or not user or not password:
+        return None
+    try:
+        from neo4j import GraphDatabase
+    except Exception:
+        return None
+
+    database = os.environ.get("NEO4J_DATABASE")
+    driver = GraphDatabase.driver(uri, auth=(user, password))
+    try:
+        with driver.session(database=database) if database else driver.session() as session:
+            record = session.run(
+                """
+                MATCH (product:Product {workspace_id: $workspace_id})
+                WHERE product.name = $product
+                OPTIONAL MATCH (product)-[:HAS_PRODUCT_DOCUMENT]->(doc:ProductDocument {workspace_id: $workspace_id})
+                OPTIONAL MATCH (product)-[:HAS_PRODUCT_FACT]->(fact:ProductFact {workspace_id: $workspace_id})
+                WITH collect(DISTINCT doc) AS docs, collect(DISTINCT fact) AS facts
+                RETURN
+                    [doc IN docs WHERE doc IS NOT NULL | doc][0..10] AS documents,
+                    [fact IN facts WHERE fact IS NOT NULL | fact] AS product_facts
+                """,
+                workspace_id=workspace_id,
+                product=product,
+            ).single()
+    except Exception as exc:  # noqa: BLE001
+        LOGGER.warning("preloaded ProductFact lookup failed product=%s err=%s", product, exc)
+        return None
+    finally:
+        driver.close()
+
+    if not record:
+        return None
+    facts = [product_fact_from_neo4j_node(node) for node in (record.get("product_facts") or [])]
+    if not facts:
+        return None
+    return {
+        "selected_documents": [product_document_from_neo4j_node(node) for node in (record.get("documents") or [])],
+        "product_facts": facts,
+    }
+
+
+def product_document_from_neo4j_node(node: Any) -> dict[str, Any]:
+    data = dict(node)
+    return {
+        "document_id": str(data.get("id") or ""),
+        "product": str(data.get("product_name") or ""),
+        "label": str(data.get("label") or ""),
+        "original_name": str(data.get("original_name") or ""),
+        "file_name": str(data.get("file_name") or ""),
+        "relative_path": str(data.get("relative_path") or ""),
+        "exists": bool(data.get("exists", False)),
+        "source": str(data.get("source") or ""),
+    }
+
+
+def product_fact_from_neo4j_node(node: Any) -> dict[str, Any]:
+    data = dict(node)
+    return {
+        "fact_id": str(data.get("fact_id") or data.get("id") or ""),
+        "fact_type": str(data.get("fact_type") or ""),
+        "value": str(data.get("value") or ""),
+        "unit": str(data.get("unit") or ""),
+        "condition": str(data.get("condition") or ""),
+        "source_document_id": str(data.get("source_document_id") or ""),
+        "page_or_chunk": str(data.get("page_or_chunk") or ""),
+        "evidence_text": str(data.get("evidence_text") or ""),
+        "confidence": float(data.get("confidence") or 0.0),
+        "source": str(data.get("source") or ""),
+    }
+
+
 def build_disclosure_checks(
     review_input: ReviewInput,
     product_facts: list[dict[str, Any]] | None = None,
@@ -635,12 +762,18 @@ def build_profile_disclosure_check(
         has_product_facts=bool(product_facts),
         has_product_doc_evidence=bool(evidence),
     )
+    # 권위 계층: 부재 시 어느 규범이 대표 근거인가 (법령 위반 vs 심의기준 미흡).
+    basis = resolve_representative_basis(profile_row, situation="missing")
     return {
         "check_id": check_id,
         "label": label,
         "status": status,
         "present": status == "PRESENT",
         "source": profile_row.source,
+        "authority_tier": basis["authority_tier"],
+        "representative_basis": basis["representative_basis"] or profile_row.source,
+        "co_basis": basis.get("co_basis", ""),
+        "tier_note": basis.get("tier_note", ""),
         "check_type": profile_row.check_type,
         "severity": profile_row.severity,
         "on_missing": profile_row.on_missing,

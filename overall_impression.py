@@ -47,8 +47,34 @@ class LLMOverallImpressionJudge:
         sentence_units: list[SentenceUnit] | None = None,
         prominence_diagnostics: list[dict[str, Any]] | None = None,
         product_fact_context: dict[str, Any] | None = None,
+        inter_sentence_relations: list[Any] | None = None,
+        context_frame: Any | None = None,
     ) -> dict[str, Any]:
-        mitigation_signals = extract_mitigation_signals(review_input.content_text)
+        # 완화 신호는 표면 토큰 매칭이 아니라 이미 추출된 그래프 관계
+        # (QUALIFIES/MITIGATES)를 신뢰한다 — 어휘가 바뀌어도 관계 타입은 안정적이고,
+        # 단독 문장 고지(예금자보호 등)는 sentence_layers 의 role 이 이미 커버한다.
+        sentence_text_by_id = {s.sentence_id: s.text for s in (sentence_units or [])}
+        mitigation_relations = [
+            {
+                "type": getattr(rel, "relation_type", ""),
+                "qualifying_sentence": sentence_text_by_id.get(getattr(rel, "source_sentence_id", ""), getattr(rel, "source_sentence_id", "")),
+                "qualified_sentence": sentence_text_by_id.get(getattr(rel, "target_sentence_id", ""), getattr(rel, "target_sentence_id", "")),
+                "explanation": getattr(rel, "explanation", ""),
+            }
+            for rel in (inter_sentence_relations or [])
+            if getattr(rel, "relation_type", "") in ("QUALIFIES", "MITIGATES")
+        ]
+        # Stage 1 프레임은 참조 입력으로 격상 — 같은 "대표 소비자 인상"을 두 번
+        # 독립 판단하던 중복을 "1차 요약 → Track B 재검증·정련"으로 바꾼다.
+        stage1_frame = (
+            {
+                "primary_message": getattr(context_frame, "primary_message", ""),
+                "representative_consumer_impression": getattr(context_frame, "representative_consumer_impression", ""),
+                "summary": getattr(context_frame, "summary", ""),
+            }
+            if context_frame
+            else None
+        )
         # 복잡 위반을 위한 흩어진 구조화 증거: 문장 위계/역할, 혜택↔고지 위계차,
         # 광고 주장↔상품문서 사실 모순. 개별 조각은 합법이어도 종합 인상은 다를 수 있다.
         sentence_layers = [
@@ -80,6 +106,11 @@ class LLMOverallImpressionJudge:
                 "- prominence_gaps: 혜택 대비 고지가 낮은 위계이거나 누락된 신호.\n"
                 "- fact_contradictions: 광고 주장과 상품설명서·약관 사실의 모순(CONTRADICTED) 또는 근거 부재. "
                 "수치 불일치(예: 본문 10% vs 예상수취 11%)나 '확정' 주장 vs 변동금리 실체는 강한 오인 신호.\n"
+                "- stage1_frame: 1차 추출기가 요약한 전체 인상. 출발점으로 참고하되 그대로 믿지 말고 "
+                "아래 구조화 증거로 재검증·정련하세요(1차 요약이 놓친 간극이 있으면 갱신).\n"
+                "- mitigation_relations: 문장 간 한정·완화 관계(QUALIFIES/MITIGATES). 혜택 주장이 이 관계로 "
+                "실질적 조건·유보와 연결되어 있으면 완화 증거로 반영하되, 관계가 없거나 한정 문장이 "
+                "혜택과 동떨어진(낮은 위계) 경우 완화력이 제한됨을 반영하세요.\n"
                 "misleading_factors에는 '어떤 조각들을 어떻게 연결했는지'를 구체적으로 적으세요(예: '친근한 "
                 "상품명+headline 최고금리 강조' vs 'footnote 예금자보호 미해당+원금손실' vs '문서상 변동금리'를 "
                 "종합하면 안전·확정 인상과 실체가 괴리). 법적 위반을 단정하지 말고 라우팅용 오인위험만 판단. "
@@ -100,8 +131,10 @@ class LLMOverallImpressionJudge:
                 f"{fact_contradictions}\n\n"
                 "[disclosure_requirements]\n"
                 f"{disclosure_requirements}\n\n"
-                "[explicit_mitigation_signals]\n"
-                f"{mitigation_signals}"
+                "[stage1_frame] (1차 전체 인상 요약 — 재검증 대상)\n"
+                f"{stage1_frame}\n\n"
+                "[mitigation_relations] (그래프 관계: 어떤 문장이 어떤 주장을 한정·완화하는가)\n"
+                f"{mitigation_relations}"
             ),
         )
         score = calibrate_score(result["verdict"], float(result["misleading_risk_score"]))
@@ -112,12 +145,13 @@ class LLMOverallImpressionJudge:
             "misleading_risk_score": score,
             "representative_consumer_impression": result["representative_consumer_impression"],
             "misleading_factors": result["misleading_factors"],
-            "explicit_mitigation_signals": mitigation_signals,
+            "mitigation_relations": mitigation_relations,
             # 종합에 사용된 흩어진 증거(감사 추적): 어떤 조각을 연결해 인상을 판단했는지.
             "synthesized_evidence": {
                 "sentence_layers": sentence_layers,
                 "prominence_gaps": prominence_gaps,
                 "fact_contradictions": fact_contradictions,
+                "mitigation_relations": mitigation_relations,
             },
             "grounded_claim_ids": result["grounded_claim_ids"],
             "evidence_paths": [
@@ -136,21 +170,6 @@ class LLMOverallImpressionJudge:
         }
 
 
-def extract_mitigation_signals(text: str) -> list[dict[str, str]]:
-    signals: list[dict[str, str]] = []
-    patterns = [
-        ("condition_disclosure", ["우대조건", "조건 충족", "가입기간", "대상", "자격요건"], "혜택/금리 적용 조건 고지"),
-        ("variable_rate_disclosure", ["달라질 수", "변동", "상이"], "금리나 조건 변동 가능성 고지"),
-        ("depositor_protection", ["예금자보호", "1억원", "보호됩니다"], "예금자보호 한도 고지"),
-        ("risk_warning", ["원금손실", "손실 가능성", "투자위험"], "원금손실/투자위험 고지"),
-        ("fee_disclosure", ["수수료", "부대비용", "중도상환"], "수수료/부대비용 고지"),
-        ("review_notice", ["심의필", "준법감시인", "유효기간"], "심의필/심의주체 고지"),
-    ]
-    for signal_id, tokens, label in patterns:
-        matched = [token for token in tokens if token in text]
-        if matched:
-            signals.append({"id": signal_id, "label": label, "matched_terms": ", ".join(matched)})
-    return signals
 
 
 def calibrate_score(verdict: str, score: float) -> float:

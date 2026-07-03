@@ -1,7 +1,7 @@
 "use client";
 
-import { riskGrade, VERDICT_LABELS, verdictBadgeTone } from "@/lib/labels";
-import { buildIssueCards, disclosureIsSatisfied } from "@/lib/selectors";
+import { principleColor, riskGrade, VERDICT_LABELS, verdictBadgeTone } from "@/lib/labels";
+import { buildIssueCards, disclosureIsSatisfied, principleBreakdown } from "@/lib/selectors";
 import type { ReviewOutput } from "@/lib/types";
 import { Icon } from "../Icon";
 import { Badge, Tag } from "../ui";
@@ -11,17 +11,30 @@ function StatMini({
   value,
   sub,
   danger,
+  minor,
+  toneColor,
 }: {
   label: string;
   value: string | number;
   sub?: string;
   danger: boolean;
+  /** 보조 지표 — 주요 3지표보다 한 단계 작게. */
+  minor?: boolean;
+  /** danger 2색(적/녹) 대신 특정 색을 직접 지정 (예: 심의기준 미흡 앰버). */
+  toneColor?: string;
 }) {
   return (
     <div className="text-center">
       <div className="text-[10.5px] font-semibold whitespace-nowrap text-ink-4">{label}</div>
       <div className="mt-1">
-        <span className={`text-[22px] font-extrabold ${danger ? "text-reject" : "text-pass"}`}>{value}</span>
+        <span
+          className={`font-extrabold ${minor ? "text-[16px]" : "text-[22px]"} ${
+            toneColor ? "" : danger ? "text-reject" : "text-pass"
+          }`}
+          style={toneColor ? { color: toneColor } : undefined}
+        >
+          {value}
+        </span>
         {sub && <span className="text-[11px] font-semibold text-ink-4">{sub}</span>}
       </div>
     </div>
@@ -31,7 +44,11 @@ function StatMini({
 export function ExecSummary({ result, resolved }: { result: ReviewOutput; resolved: Set<string> }) {
   const cards = buildIssueCards(result).filter((card) => card.kind !== "trackB");
   const open = cards.filter((card) => !resolved.has(card.id)).length;
-  const highOpen = cards.filter((card) => card.tone === "risk" && !resolved.has(card.id)).length;
+  // 권위 계층 분리 — "법령 위반 근거"와 "심의기준 미흡(법 위반 아님)"은 다른 말이다.
+  // 이 둘을 주 지표로 승격하고(둘을 합치면 사실상 "위반 의심"이 되므로 별도 지표는
+  // 뺐다 — 같은 숫자를 두 번 세는 인상을 준다), 미해소·필수고지는 보조 지표로.
+  const lawOpen = cards.filter((card) => card.authorityTier === "law" && !resolved.has(card.id)).length;
+  const guidelineOpen = cards.filter((card) => card.authorityTier === "guideline" && !resolved.has(card.id)).length;
   const checks = result.product_fact_context?.disclosure_checks ?? [];
   const met = checks.filter(disclosureIsSatisfied).length;
   const misleading = Number(result.overall_impression_judgment?.misleading_risk_score ?? 0);
@@ -69,6 +86,20 @@ export function ExecSummary({ result, resolved }: { result: ReviewOutput; resolv
         <p className="m-0 line-clamp-3 text-[13.5px] leading-relaxed text-ink-2" style={{ textWrap: "pretty" }}>
           {result.rationale}
         </p>
+        {/* 6대 판매원칙별 현황 — 심의 의견서의 원칙별 목차와 1:1. 0건도 "점검됨"의 정보. */}
+        <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px]">
+          <span className="text-[10px] font-bold tracking-wider text-ink-4">판매원칙</span>
+          {principleBreakdown(result, resolved).map(({ label, count }) => (
+            <span key={label} className="flex items-center gap-1 whitespace-nowrap">
+              <span
+                className="h-[6px] w-[6px] rounded-full"
+                style={{ background: count ? (principleColor(label) ?? "var(--ink-3)") : "var(--line-2)" }}
+              />
+              <span className={count ? "font-semibold text-ink-2" : "text-ink-4"}>{label}</span>
+              <span className={count ? "font-bold text-ink" : "text-ink-4"}>{count}</span>
+            </span>
+          ))}
+        </div>
         {result.routing?.review_phrase_required_before_publication && (
           <div className="mt-1.5">
             <Tag tone="review">게시 전 심의필 표시 필요</Tag>
@@ -76,14 +107,16 @@ export function ExecSummary({ result, resolved }: { result: ReviewOutput; resolv
         )}
       </div>
 
-      {/* 우: 지표 */}
+      {/* 우: 지표 — 법령/심의기준 2개를 주 지표로, 미해소·필수고지는 보조로 */}
       <div className="flex items-center gap-4.5 border-l border-line pl-4.5">
-        <StatMini label="미해소 이슈" value={open} sub={` / ${cards.length}`} danger={open > 0} />
-        <StatMini label="위반 의심" value={highOpen} danger={highOpen > 0} />
+        <StatMini label="법령 근거" value={lawOpen} danger={lawOpen > 0} />
+        <StatMini label="심의기준 미흡" value={guidelineOpen} danger={false} toneColor="var(--revise)" />
+        <StatMini label="미해소 이슈" value={open} sub={` / ${cards.length}`} danger={open > 0} minor />
         <StatMini
           label="필수 고지"
           value={`${met}/${checks.length}`}
           danger={checks.length > 0 && met < checks.length}
+          minor
         />
       </div>
     </div>

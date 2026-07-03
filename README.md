@@ -243,8 +243,13 @@ Configure local disclosure data when it is outside the default Downloads path:
 
 ```bash
 export JB_PRODUCT_DISCLOSURE_ROOT="/path/to/jbbank_product_disclosures_20260528"
-export JB_PRODUCT_DISCLOSURE_METADATA_PATH="/path/to/jbbank_product_disclosures_metadata_20260528.csv"
+export JB_PRODUCT_METADATA_PATH="/path/to/jbbank_product_disclosures_metadata_20260528.csv"
 ```
+
+For deployable demos, the app also carries a tiny bundled ProductDocument set
+under `data/demo_product_documents/`. It currently includes `도전 루틴 적금`
+metadata and PDFs so ProductFact extraction still works when the original local
+Downloads dataset is unavailable.
 
 ## Evaluation
 

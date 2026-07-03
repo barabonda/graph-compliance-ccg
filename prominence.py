@@ -149,6 +149,7 @@ def build_diagnostics(
                 {
                     "diagnostic_id": stable_id("prominence_diagnostic", review_input.content_text, check.get("check_id", "")),
                     "diagnostic_code": "DISCLOSURE_MISSING",
+                    "check_id": str(check.get("check_id") or ""),
                     "severity": "MEDIUM",
                     "benefit_sentence_id": benefit_sentences[0].sentence_id,
                     "disclosure_sentence_id": "",

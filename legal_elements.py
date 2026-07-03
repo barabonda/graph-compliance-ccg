@@ -51,6 +51,18 @@ FEATURE_BY_QUALIFIER_ROLE = {
     "risk_downplay": "risk_downplay_expression",
 }
 
+# 한정어(qualifier)의 극성. 한정어가 '존재'한다고 위험 표현이 되는 게 아니다 —
+# "우대조건 충족 시"는 조건을 '고지'한 것이지 '무조건 표현'이 아니다(의미 반전 방지).
+# 아래 단정 토큰을 qualifier 가 직접 말할 때만 해당 role 의 위험 feature 가 즉시 성립.
+ASSERTIVE_QUALIFIER_TOKENS: dict[str, tuple[str, ...]] = {
+    "condition_scope": ("조건 없이", "무조건", "조건 불문", "제한 없이", "심사 없이", "묻지도"),
+    "target_scope": ("누구나", "누구에게나", "모든", "전원", "어떤 분이라도"),
+    # "반드시"는 제외 — "반드시 확인/유의"(보호 문구) vs "반드시 수익"(오인)로 문맥
+    # 의존적이라 단독 토큰으로는 오탐. 확정·확실·보장·단정만 확정적 오인 신호로 본다.
+    "certainty": ("확정", "확실", "보장", "단정"),
+    "guarantee": ("보장", "보전", "확정"),
+}
+
 ACTION_TYPES_BY_FEATURE = {
     "guarantee_expression": ["guarantee_or_return_misleading"],
     "certainty_expression": ["guarantee_or_return_misleading", "condition_or_scope_missing"],
@@ -147,12 +159,16 @@ FEATURE_ALIAS_RULES = [
     ("sales_process_context", ["판매 과정", "영업 과정", "계약 체결 과정", "우월적 지위"]),
     ("past_performance_claim", ["과거", "운용실적", "수익률", "조기상환", "성과"]),
     ("guarantee_expression", ["보장", "이익보장", "손실보전", "손실 보전", "수익 보장", "확정 보장"]),
-    ("certainty_expression", ["확정", "단정", "확실", "반드시", "무조건 지급", "오인"]),
+    # "반드시" alone is often a protective disclosure ("반드시 확인/유의").
+    # Treat it as certainty only when it asserts payout, benefit, or return.
+    ("certainty_expression", ["확정", "단정", "확실", "반드시 지급", "반드시 받", "반드시 수익", "무조건 지급", "오인"]),
     ("unconditional_expression", ["조건 없이", "무조건", "제한 없이", "제한조건", "우대조건", "조건", "제한"]),
     ("universal_scope_expression", ["누구나", "모든", "전체", "가입대상", "대상 범위", "소비자군"]),
     ("risk_downplay_expression", ["안정", "안전", "위험 없음", "손실 없음", "리스크 낮"]),
     ("benefit_claim_expression", ["혜택", "금리", "수익", "수수료", "한도", "우대", "이자율"]),
-    ("product_fact_assertion", ["상품유형", "상품 유형", "상품 설명", "상품설명", "약관", "금리", "수수료", "한도", "가입기간", "예금자보호"]),
+    # 절차·보호 문서어("약관","상품설명서 확인")는 사실 '단정'이 아니라 확인 권유라
+    # 제외 — 실제 상품 사실(금리·수수료·한도·수익률 등)만 product_fact_assertion 신호.
+    ("product_fact_assertion", ["상품유형", "상품 유형", "금리", "이자율", "수익률", "수수료", "한도", "가입기간", "예금자보호"]),
 ]
 
 
@@ -161,21 +177,61 @@ def attach_anchor_feature_sets(
     review_run_id: str,
     anchors: list[ContextAnchor],
     claims: list[Claim],
+    relations: list | None = None,
 ) -> tuple[list[ContextAnchor], list[AnchorFeatureSet]]:
     claim_by_id = {claim.claim_id: claim for claim in claims}
     enriched: list[ContextAnchor] = []
     feature_sets: list[AnchorFeatureSet] = []
     for anchor in anchors:
-        feature_set = build_anchor_feature_set(review_run_id=review_run_id, anchor=anchor, claim=claim_by_id.get(anchor.claim_id))
+        feature_set = build_anchor_feature_set(
+            review_run_id=review_run_id,
+            anchor=anchor,
+            claim=claim_by_id.get(anchor.claim_id),
+            relations=relations,
+        )
         feature_sets.append(feature_set)
         enriched.append(replace(anchor, feature_set=feature_set))
     return enriched, feature_sets
 
 
-def build_anchor_feature_set(*, review_run_id: str, anchor: ContextAnchor, claim: Claim | None) -> AnchorFeatureSet:
+def claim_has_relation_hedge(claim: Claim | None, relations: list | None) -> bool:
+    """이 claim 의 문장에 QUALIFIES/MITIGATES 관계로 연결된 문장이 있는가.
+
+    헤지 인식은 표면 토큰이 아니라 이미 추출된 그래프 관계를 우선 신뢰한다 —
+    어휘가 바뀌어도 관계 타입은 안정적이고, 이중 유지보수(토큰 사전)를 피한다.
+    """
+    if not claim or not getattr(claim, "sentence_id", "") or not relations:
+        return False
+    sid = claim.sentence_id
+    for rel in relations:
+        rel_type = str(getattr(rel, "relation_type", "") or (rel.get("relation_type") if isinstance(rel, dict) else ""))
+        if rel_type not in ("QUALIFIES", "MITIGATES"):
+            continue
+        src = getattr(rel, "source_sentence_id", None) or (rel.get("source_sentence_id") if isinstance(rel, dict) else None)
+        tgt = getattr(rel, "target_sentence_id", None) or (rel.get("target_sentence_id") if isinstance(rel, dict) else None)
+        if sid in (src, tgt):
+            return True
+    return False
+
+
+def build_anchor_feature_set(
+    *, review_run_id: str, anchor: ContextAnchor, claim: Claim | None, relations: list | None = None
+) -> AnchorFeatureSet:
+    """토큰 매칭은 '위험 확신 성립'의 1차 스크리닝일 뿐이다.
+
+    - 명시 단정어(ASSERTIVE) 매칭 → 위험 확정(feature 발화).
+    - 비매칭 → '안전 확정'이 아니라 '판단 불충분': feature 미발화로 rule_satisfied 가
+      낮아지고 judge 가 INSUFFICIENT→needs_review 로 처리한다(과탐/미탐 균형 원칙).
+    - 헤지 인식은 그래프 관계(QUALIFIES/MITIGATES)를 우선 신뢰 — 관계가 있으면
+      토큰 없이도 헤지 존재로 evidence 에 기록하고, 단정어와 공존하면 충돌로
+      표시해 judge 가 최종 판단하게 한다.
+    """
     positive_features: list[str] = []
     evidence: list[str] = []
     haystack = normalized_text(" ".join([anchor.span.text, *anchor.facts, *(h.hypernym for h in anchor.hypernyms)]))
+    relation_hedge = claim_has_relation_hedge(claim, relations)
+    if relation_hedge:
+        evidence.append("관계 기반 헤지: 이 claim 문장에 QUALIFIES/MITIGATES 연결 문장 존재")
     if claim:
         for qualifier in claim.qualifiers:
             if normalized_text(qualifier.text) not in haystack and not (
@@ -183,9 +239,24 @@ def build_anchor_feature_set(*, review_run_id: str, anchor: ContextAnchor, claim
             ):
                 continue
             feature = FEATURE_BY_QUALIFIER_ROLE.get(qualifier.role)
-            if feature:
+            if not feature:
+                continue
+            assertive = ASSERTIVE_QUALIFIER_TOKENS.get(qualifier.role)
+            qualifier_text = normalized_text(qualifier.text)
+            if assertive is None:
+                # benefit_scope·risk_downplay 등 극성 무해 role — 기존 동작 유지.
                 positive_features.append(feature)
                 evidence.append(f"ClaimQualifier role={qualifier.role} text='{qualifier.text}'")
+            elif any(token in qualifier_text for token in assertive):
+                positive_features.append(feature)
+                if relation_hedge:
+                    evidence.append(
+                        f"ClaimQualifier role={qualifier.role} 명시 단정 표현 text='{qualifier.text}' — 단, 관계 기반 헤지와 충돌: judge 최종 판단"
+                    )
+                else:
+                    evidence.append(f"ClaimQualifier role={qualifier.role} 명시 단정 표현 text='{qualifier.text}'")
+            else:
+                evidence.append(f"완화 한정어(문맥 의존, 결정론 미발화 → judge 판단): role={qualifier.role} text='{qualifier.text}'")
         risk_text = normalized_text(" ".join([claim.risk_hypernym, claim.meaning, claim.implicature, claim.consumer_effect]))
         if any(token in risk_text for token in ["과거", "수익률", "운용실적", "조기상환"]):
             positive_features.append("past_performance_claim")
@@ -335,17 +406,22 @@ def canonicalize_required_features(items: list[str], *, action_type: str = "") -
 
 
 def canonicalize_required_feature(item: str) -> list[str]:
+    """요건 문구 하나 → 대표 canonical feature 하나.
+
+    요건명은 하나의 행위요건을 지칭하므로 첫(우선순위 최상의) 매칭만 취한다 —
+    "수익을 반드시 지급받을 수 있다고 오인"이 certainty 와 benefit 둘 다에
+    걸릴 때 부수 어휘(수익)로 요건이 불어나는 것을 막는다.
+    """
     text = " ".join(str(item or "").split())
     if not text:
         return []
     if text in CANONICAL_POSITIVE_FEATURES:
         return [text]
     normalized = normalized_text(text)
-    matched: list[str] = []
     for feature, aliases in FEATURE_ALIAS_RULES:
         if any(normalized_text(alias) in normalized for alias in aliases):
-            matched.append(feature)
-    return dedupe(matched)
+            return [feature]
+    return []
 
 
 def unknown_canonical_features(items: list[str]) -> list[str]:
