@@ -8,6 +8,7 @@ nodes remain on-demand review artifacts.
 from __future__ import annotations
 
 import argparse
+import csv
 import logging
 import os
 import unicodedata
@@ -24,9 +25,14 @@ from utils import stable_id
 
 
 LOGGER = logging.getLogger(__name__)
+MODULE_DIR = Path(__file__).resolve().parent
 SOURCE = "graphcompliance_ccg_product_graph_loader"
 DEFAULT_WORKSPACE_ID = "graphcompliance_mvp_jb_20260530"
-DEFAULT_DISCLOSURE_ROOT = Path("/Users/barabonda/Downloads/jbbank_product_disclosures_20260528")
+# Default metadata (--metadata-path) is the repo-bundled demo CSV via
+# jb_data_context.DEFAULT_PRODUCT_META_PATH; the disclosure root defaults to the
+# same bundled document tree. Override with --disclosure-root / --metadata-path
+# to load the full JB dataset. No external absolute path is hardcoded.
+DEFAULT_DISCLOSURE_ROOT = MODULE_DIR / "data" / "demo_product_documents"
 
 
 def main() -> None:
@@ -70,7 +76,7 @@ def main() -> None:
 def build_product_graph_payload(*, metadata_path: Path, disclosure_root: Path, workspace_id: str) -> dict[str, list[dict[str, Any]]]:
     if not metadata_path.exists():
         raise FileNotFoundError(f"Product metadata not found: {metadata_path}")
-    df = pd.read_excel(metadata_path, sheet_name="jbbank_product_disclosures_meta").fillna("")
+    records = read_metadata_records(metadata_path)
     now = datetime.now(UTC).isoformat()
 
     groups: dict[str, dict[str, Any]] = {}
@@ -78,7 +84,7 @@ def build_product_graph_payload(*, metadata_path: Path, disclosure_root: Path, w
     documents: dict[str, dict[str, Any]] = {}
     labels: dict[str, dict[str, Any]] = {}
 
-    for row in df.to_dict(orient="records"):
+    for row in records:
         product_name = clean(row.get("product"))
         if not product_name:
             continue
@@ -285,6 +291,21 @@ def write_disclosure_requirements(session: Any, workspace_id: str, rows: list[di
         workspace_id=workspace_id,
         rows=rows,
     )
+
+
+def read_metadata_records(metadata_path: Path) -> list[dict[str, Any]]:
+    """Read product-disclosure metadata rows from an .xlsx or .csv source.
+
+    The bundled demo metadata ships as a UTF-8 CSV under
+    ``data/demo_product_documents`` so the deployment can select products without
+    the original Excel export; the JB hackathon export remains an .xlsx sheet.
+    """
+    suffix = metadata_path.suffix.lower()
+    if suffix == ".csv":
+        with metadata_path.open("r", encoding="utf-8-sig", newline="") as handle:
+            return [{str(key): (value or "") for key, value in row.items()} for row in csv.DictReader(handle)]
+    df = pd.read_excel(metadata_path, sheet_name="jbbank_product_disclosures_meta").fillna("")
+    return [{str(key): value for key, value in row.items()} for row in df.to_dict(orient="records")]
 
 
 def product_group_for(*, major: str, subcategory: str, category: str) -> str:

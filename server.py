@@ -505,21 +505,20 @@ def product_doc(document_id: str):
     from pathlib import Path as _Path
     from urllib.parse import quote
 
-    from product_facts import load_disclosure_metadata, resolve_document_path
+    from product_facts import BUNDLED_DISCLOSURE_ROOT, load_disclosure_metadata, resolve_document_path
 
-    # 1) KR disclosure CSV (PDF) — unchanged behaviour.
+    # 1) KR disclosure CSV (PDF). Default disclosure root is the repo-bundled
+    #    demo tree; JB_PRODUCT_DISCLOSURE_ROOT overrides it for the full dataset.
     row = next(
         (item for item in load_disclosure_metadata() if str(item.get("source_id") or "") == document_id),
         None,
     )
     if row is not None:
         path = resolve_document_path(str(row.get("relative_path") or "")).resolve()
-        root = _Path(os.environ.get("JB_PRODUCT_DISCLOSURE_ROOT", "")).resolve() if os.environ.get(
-            "JB_PRODUCT_DISCLOSURE_ROOT"
-        ) else path.parents[2] if len(path.parents) >= 3 else path.parent
+        root = _Path(os.environ.get("JB_PRODUCT_DISCLOSURE_ROOT") or str(BUNDLED_DISCLOSURE_ROOT)).resolve()
         if path.suffix.lower() != ".pdf" or not path.exists():
             raise HTTPException(status_code=404, detail={"error": "document_missing", "message": "PDF not available."})
-        if os.environ.get("JB_PRODUCT_DISCLOSURE_ROOT") and root not in path.parents:
+        if root not in path.parents:
             raise HTTPException(status_code=403, detail={"error": "document_outside_root", "message": "Path not allowed."})
         disposition = f"inline; filename*=UTF-8''{quote(str(row.get('file_name') or path.name))}"
         return FileResponse(path, media_type="application/pdf", headers={"Content-Disposition": disposition})

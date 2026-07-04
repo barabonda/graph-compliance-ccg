@@ -21,12 +21,14 @@ BUNDLED_PRODUCT_DISCLOSURE_ROOT = MODULE_DIR / "data" / "demo_product_documents"
 BUNDLED_PRODUCT_DISCLOSURE_META_PATH = (
     BUNDLED_PRODUCT_DISCLOSURE_ROOT / "jbbank_product_disclosures_metadata_20260528.csv"
 )
-DEFAULT_PRODUCT_META_PATH = Path(
-    "/Users/barabonda/Downloads/JB금융그룹해커톤_데이터셋/금융상품 데이터셋/전북은행 상품문서 메타데이터.xlsx"
-)
-DEFAULT_PRODUCT_DISCLOSURE_META_PATH = Path(
-    "/Users/barabonda/Downloads/jbbank_product_disclosures_20260528/jbbank_product_disclosures_metadata_20260528.csv"
-)
+# Default local product metadata is the repo-bundled demo CSV so the deployment
+# can select products without any external dataset present. Override with
+# JB_PRODUCT_METADATA_PATH to point at the full JB dataset export (.xlsx/.csv).
+# No external absolute path is hardcoded as a default.
+DEFAULT_PRODUCT_META_PATH = BUNDLED_PRODUCT_DISCLOSURE_META_PATH
+# Filename stem of the JB disclosure dataset export; used to pick the right
+# Excel sheet when JB_PRODUCT_METADATA_PATH points at that .xlsx.
+DISCLOSURE_DATASET_STEM = BUNDLED_PRODUCT_DISCLOSURE_META_PATH.stem
 
 
 DISCLOSURE_REQUIREMENTS: dict[str, list[dict[str, str]]] = {
@@ -593,18 +595,23 @@ def document_from_neo4j_node(node: Any) -> dict[str, Any]:
 @lru_cache(maxsize=1)
 def load_product_rows() -> dict[str, dict[str, Any]]:
     configured_path = Path(os.environ.get("JB_PRODUCT_METADATA_PATH", str(DEFAULT_PRODUCT_META_PATH)))
-    metadata_paths = [
-        configured_path,
-        DEFAULT_PRODUCT_DISCLOSURE_META_PATH,
-        BUNDLED_PRODUCT_DISCLOSURE_META_PATH,
-    ]
+    metadata_paths = [configured_path]
+    if BUNDLED_PRODUCT_DISCLOSURE_META_PATH not in metadata_paths:
+        metadata_paths.append(BUNDLED_PRODUCT_DISCLOSURE_META_PATH)
     records: list[dict[str, Any]] = []
     for path in metadata_paths:
         if not path.exists():
+            LOGGER.warning("Product metadata path not found, skipping: %s", path)
             continue
         records = load_product_metadata_records(path)
         if records:
             break
+    if not records:
+        LOGGER.warning(
+            "No local product metadata rows loaded (checked %s). "
+            "Set JB_PRODUCT_METADATA_PATH to a valid dataset to enable local product search.",
+            [str(path) for path in metadata_paths],
+        )
     return product_rows_from_records(records)
 
 
@@ -617,12 +624,12 @@ def load_product_metadata_records(path: Path) -> list[dict[str, Any]]:
     try:
         import pandas as pd
     except Exception:
-        LOGGER.warning("pandas is unavailable; falling back to disclosure CSV metadata for product rows.")
-        if path != DEFAULT_PRODUCT_DISCLOSURE_META_PATH:
-            return load_product_metadata_records(DEFAULT_PRODUCT_DISCLOSURE_META_PATH)
+        LOGGER.warning("pandas is unavailable; falling back to bundled CSV metadata for product rows.")
+        if path != BUNDLED_PRODUCT_DISCLOSURE_META_PATH:
+            return load_product_metadata_records(BUNDLED_PRODUCT_DISCLOSURE_META_PATH)
         return []
     sheet_name = "jbbank_product_disclosures_meta"
-    if path.name == DEFAULT_PRODUCT_DISCLOSURE_META_PATH.with_suffix(".xlsx").name:
+    if path.stem == DISCLOSURE_DATASET_STEM:
         sheet_name = "dataset_index"
     df = pd.read_excel(path, sheet_name=sheet_name)
     return [{str(key): value for key, value in row.items()} for row in df.fillna("").to_dict(orient="records")]

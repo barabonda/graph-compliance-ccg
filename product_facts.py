@@ -26,8 +26,14 @@ from utils import stable_id, to_jsonable, uses_korean_law_context
 LOGGER = logging.getLogger(__name__)
 MODULE_DIR = Path(__file__).resolve().parent
 BUNDLED_DISCLOSURE_ROOT = MODULE_DIR / "data" / "demo_product_documents"
-DEFAULT_DISCLOSURE_ROOT = Path("/Users/barabonda/Downloads/jbbank_product_disclosures_20260528")
-DEFAULT_DISCLOSURE_META = DEFAULT_DISCLOSURE_ROOT / "jbbank_product_disclosures_metadata_20260528.csv"
+BUNDLED_DISCLOSURE_META = BUNDLED_DISCLOSURE_ROOT / "jbbank_product_disclosures_metadata_20260528.csv"
+# Default disclosure source is the repo-bundled demo set so product-document
+# lookup/serving works out-of-the-box on any deployment. Point
+# JB_PRODUCT_DISCLOSURE_ROOT / JB_PRODUCT_DISCLOSURE_METADATA_PATH at the full
+# 6,098-row JB dataset export to use it instead. No external absolute path is
+# hardcoded as a default.
+DEFAULT_DISCLOSURE_ROOT = BUNDLED_DISCLOSURE_ROOT
+DEFAULT_DISCLOSURE_META = BUNDLED_DISCLOSURE_META
 MAX_DOCUMENTS = 3
 MAX_PAGES_PER_DOCUMENT = 8
 MAX_DOCUMENT_CHARS = 16000
@@ -1098,6 +1104,11 @@ def extract_pdf_text(path: Path) -> str:
 def load_disclosure_metadata() -> list[dict[str, Any]]:
     path = Path(os.environ.get("JB_PRODUCT_DISCLOSURE_METADATA_PATH", str(DEFAULT_DISCLOSURE_META)))
     if not path.exists():
+        LOGGER.warning(
+            "Disclosure metadata not found at %s; product-document lookup returns empty. "
+            "Set JB_PRODUCT_DISCLOSURE_METADATA_PATH to a valid metadata file (default is the bundled demo CSV).",
+            path,
+        )
         return []
     if path.suffix.lower() == ".csv":
         with path.open("r", encoding="utf-8-sig", newline="") as handle:
