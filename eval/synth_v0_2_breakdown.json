@@ -1,0 +1,361 @@
+{
+  "record_count": 34,
+  "axes": {
+    "A_violation_detection": {
+      "description": "final_verdict∈{reject,revise} vs gold.violation (이진)",
+      "counts": {
+        "tp": 10,
+        "fp": 0,
+        "fn": 14,
+        "tn": 10
+      },
+      "precision": 1.0,
+      "recall": 0.4167,
+      "f1": 0.5882
+    },
+    "B_articles": {
+      "description": "gold.articles vs 예측 조문 — 정확일치(조 레벨) vs 위임사슬 계열병합",
+      "exact_match": {
+        "counts": {
+          "tp": 14,
+          "fp": 41,
+          "fn": 35
+        },
+        "precision": 0.2545,
+        "recall": 0.2857,
+        "f1": 0.2692
+      },
+      "family_merged": {
+        "counts": {
+          "tp": 13,
+          "fp": 4,
+          "fn": 11
+        },
+        "precision": 0.7647,
+        "recall": 0.5417,
+        "f1": 0.6341
+      }
+    },
+    "C_required_disclosures": {
+      "description": "gold.required_disclosures vs 파이프라인 disclosure_requirements(커버리지)·missing(누락검출) 키워드 대조",
+      "coverage_recall": {
+        "detected": 14,
+        "total": 44,
+        "recall": 0.3182
+      },
+      "missing_detection_recall": {
+        "detected": 1,
+        "total": 44,
+        "recall": 0.0227
+      }
+    },
+    "D_routing_confusion": {
+      "description": "gold.expected_routing vs final_verdict (4x4) + 인접오차",
+      "matrix": {
+        "reject": {
+          "reject": 1,
+          "revise": 0,
+          "needs_review": 6,
+          "pass_candidate": 0
+        },
+        "revise": {
+          "reject": 6,
+          "revise": 3,
+          "needs_review": 8,
+          "pass_candidate": 0
+        },
+        "needs_review": {
+          "reject": 0,
+          "revise": 0,
+          "needs_review": 0,
+          "pass_candidate": 0
+        },
+        "pass_candidate": {
+          "reject": 0,
+          "revise": 0,
+          "needs_review": 9,
+          "pass_candidate": 1
+        }
+      },
+      "exact_accuracy": 0.1471,
+      "within_one_accuracy": 0.8235,
+      "total": 34
+    },
+    "E_violation_type_recall": {
+      "description": "택소노미 코드는 파이프라인 미출력 → 정확-코드 매칭 N/A; 유형별 위반검출률(recall)로 환산",
+      "exact_code_match": "N/A (라벨공간 불일치)",
+      "per_type": {
+        "금지행위": {
+          "mutations": 2,
+          "detected": 1,
+          "recall": 0.5
+        },
+        "대출": {
+          "mutations": 3,
+          "detected": 0,
+          "recall": 0.0
+        },
+        "부수혜택": {
+          "mutations": 4,
+          "detected": 2,
+          "recall": 0.5
+        },
+        "산정방법": {
+          "mutations": 2,
+          "detected": 1,
+          "recall": 0.5
+        },
+        "이자율수익률": {
+          "mutations": 10,
+          "detected": 3,
+          "recall": 0.3
+        },
+        "준수사항": {
+          "mutations": 3,
+          "detected": 3,
+          "recall": 1.0
+        }
+      },
+      "per_type_disclosure_coverage": {
+        "금지행위": {
+          "detected": 1,
+          "total": 5,
+          "recall": 0.2
+        },
+        "대출": {
+          "detected": 0,
+          "total": 6,
+          "recall": 0.0
+        },
+        "부수혜택": {
+          "detected": 1,
+          "total": 4,
+          "recall": 0.25
+        },
+        "산정방법": {
+          "detected": 0,
+          "total": 4,
+          "recall": 0.0
+        },
+        "이자율수익률": {
+          "detected": 9,
+          "total": 22,
+          "recall": 0.4091
+        },
+        "준수사항": {
+          "detected": 3,
+          "total": 3,
+          "recall": 1.0
+        }
+      }
+    },
+    "F_clean_control_overblocking": {
+      "description": "clean(violation=false) 대조군 오탐 — reject면 FP, non-pass면 soft FP",
+      "clean_total": 10,
+      "reject_fp": 0,
+      "non_pass": 9,
+      "overblocking_rate": 0.0,
+      "clean_non_pass_rate": 0.9
+    }
+  },
+  "per_product_group": {
+    "deposit": {
+      "counts": {
+        "tp": 5,
+        "fp": 0,
+        "fn": 10,
+        "tn": 6
+      },
+      "precision": 1.0,
+      "recall": 0.3333,
+      "f1": 0.5
+    },
+    "loan": {
+      "counts": {
+        "tp": 5,
+        "fp": 0,
+        "fn": 4,
+        "tn": 4
+      },
+      "precision": 1.0,
+      "recall": 0.5556,
+      "f1": 0.7143
+    }
+  },
+  "selected_product_names": [
+    "JB 골든에이지 예금(월이자지급식)",
+    "JB 새희망홀씨Ⅱ대출",
+    "JB 전세자금대출",
+    "JB 주거래통장(보통)",
+    "JB 참 괜찮은 정기예금",
+    "JB 청년도약계좌",
+    "JB 청년전세자금대출",
+    "도전 루틴 적금",
+    "비상금대출II",
+    "씨드모아 통장"
+  ],
+  "per_product_name": {
+    "JB 골든에이지 예금(월이자지급식)": {
+      "records": 3,
+      "violation_detection": {
+        "tp": 2,
+        "fp": 0,
+        "fn": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
+      },
+      "required_disclosure_coverage": {
+        "detected": 2,
+        "total": 4,
+        "recall": 0.5
+      }
+    },
+    "JB 새희망홀씨Ⅱ대출": {
+      "records": 2,
+      "violation_detection": {
+        "tp": 1,
+        "fp": 0,
+        "fn": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
+      },
+      "required_disclosure_coverage": {
+        "detected": 1,
+        "total": 2,
+        "recall": 0.5
+      }
+    },
+    "JB 전세자금대출": {
+      "records": 4,
+      "violation_detection": {
+        "tp": 3,
+        "fp": 0,
+        "fn": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
+      },
+      "required_disclosure_coverage": {
+        "detected": 4,
+        "total": 5,
+        "recall": 0.8
+      }
+    },
+    "JB 주거래통장(보통)": {
+      "records": 2,
+      "violation_detection": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 1,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0
+      },
+      "required_disclosure_coverage": {
+        "detected": 0,
+        "total": 2,
+        "recall": 0.0
+      }
+    },
+    "JB 참 괜찮은 정기예금": {
+      "records": 4,
+      "violation_detection": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 3,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0
+      },
+      "required_disclosure_coverage": {
+        "detected": 5,
+        "total": 7,
+        "recall": 0.7143
+      }
+    },
+    "JB 청년도약계좌": {
+      "records": 4,
+      "violation_detection": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 3,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0
+      },
+      "required_disclosure_coverage": {
+        "detected": 0,
+        "total": 4,
+        "recall": 0.0
+      }
+    },
+    "JB 청년전세자금대출": {
+      "records": 3,
+      "violation_detection": {
+        "tp": 1,
+        "fp": 0,
+        "fn": 1,
+        "precision": 1.0,
+        "recall": 0.5,
+        "f1": 0.6667
+      },
+      "required_disclosure_coverage": {
+        "detected": 1,
+        "total": 3,
+        "recall": 0.3333
+      }
+    },
+    "도전 루틴 적금": {
+      "records": 4,
+      "violation_detection": {
+        "tp": 3,
+        "fp": 0,
+        "fn": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
+      },
+      "required_disclosure_coverage": {
+        "detected": 1,
+        "total": 4,
+        "recall": 0.25
+      }
+    },
+    "비상금대출II": {
+      "records": 4,
+      "violation_detection": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 3,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0
+      },
+      "required_disclosure_coverage": {
+        "detected": 0,
+        "total": 6,
+        "recall": 0.0
+      }
+    },
+    "씨드모아 통장": {
+      "records": 4,
+      "violation_detection": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 3,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0
+      },
+      "required_disclosure_coverage": {
+        "detected": 0,
+        "total": 7,
+        "recall": 0.0
+      }
+    }
+  },
+  "product_selection_note": "3-way 심사 상품결속 구분: 합성셋=상품명 선택(selected_product, 전건 특정 상품문서 오픈) · JB 실광고(run_jbbank_eval)=상품군만(product_group_only, 실광고라 상품 매핑 없음) · 크롤링 위반스윕=미선택. 상품명 선택 레그에서만 required_disclosures 채점이 유효.",
+  "review_model": "claude-sonnet-5"
+}
