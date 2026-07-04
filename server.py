@@ -6,6 +6,7 @@ import json
 import logging
 import os
 import queue
+import re
 import threading
 import time
 from pathlib import Path
@@ -33,9 +34,9 @@ from ad_image import extract_ad_from_images, generate_revision_guide_image, refi
 from env_loader import load_local_env
 from jb_data_context import search_products
 from llm_gateway import LLMGateway
-from run_store import list_runs, load_run, record_run
+from run_store import list_runs, load_run, record_run, workspace_id_for_run
 from workflow import GraphComplianceCCGWorkflow, review_input_from_payload
-from utils import to_jsonable
+from utils import to_jsonable, uses_korean_law_context
 
 
 load_local_env(Path(__file__).resolve().parent / ".env")
@@ -76,7 +77,6 @@ def intake_ad_image(payload: dict[str, Any]) -> dict[str, str] | None:
     images = payload_ad_images(payload)
     if not images:
         return None
-    from utils import uses_korean_law_context
 
     # 레이아웃 소견은 심사자 언어를 따른다 — KR 한국어, 비-KR(영어 우선) 영어.
     extracted = extract_ad_from_images(
@@ -129,6 +129,11 @@ def attach_ad_image_result(jsonable: dict[str, Any], payload: dict[str, Any], ex
         "count": len(images),
         "layout_notes": extracted.get("layout_notes") or "",
         "extracted_title": extracted.get("title") or "",
+        # 이미지가 '스스로' 담고 있는 문안(비전 추출본). 본문 글과 이미지가 함께
+        # 접수되면 수정안은 본문 글 기준이라, 이미지 수정 가이드가 배너에 없는
+        # 문구까지 그려 넣는다. 이 텍스트를 기준으로 '이미지에 실제로 있는' 수정만
+        # 가이드에 남기기 위해 보존한다(revision_image 필터).
+        "extracted_content_text": extracted.get("content_text") or "",
     }
 
 # 심사 코파일럿(AG-UI/LangGraph) — 의존성 문제로 실패해도 심의 API 는 살아있어야 한다.
@@ -191,10 +196,23 @@ def health() -> dict[str, str]:
 
 
 @app.get("/api/products/search")
-def products_search(q: str = "", product_group: str = "auto", limit: int = 12) -> dict[str, Any]:
-    """Search product metadata so reviewers select a real Product row."""
+def products_search(
+    q: str = "", product_group: str = "auto", limit: int = 12, workspace_id: str = ""
+) -> dict[str, Any]:
+    """Search product metadata so reviewers select a real Product row.
 
-    return {"products": search_products(q, product_group=product_group, limit=limit)}
+    ``workspace_id`` scopes the search to that workspace's Product Graph (KR
+    ``graphcompliance_mvp_jb_20260530`` vs KH
+    ``graphcompliance_cambodia_ppcbank_20260630``) so KH reviewers see KH
+    products instead of the KR-hardcoded default. Omitted/empty preserves the
+    legacy KR-default behavior (no regression for callers not yet updated).
+    """
+
+    return {
+        "products": search_products(
+            q, product_group=product_group, limit=limit, workspace_id=workspace_id
+        )
+    }
 
 
 def require_review_content(payload: dict[str, Any]) -> None:
@@ -380,12 +398,39 @@ def ad_image_file(run_id: str, kind: str) -> FileResponse:
     return FileResponse(path, media_type=media)
 
 
+def _match_words(text: str) -> list[str]:
+    """한글/영숫자 토큰만 남긴다(공백·기호 무시) — 표기 차이에 관대한 대조용."""
+    return [w for w in re.findall(r"[0-9A-Za-z가-힣]+", str(text or "").lower()) if w]
+
+
+def _revision_in_image_text(before: str, image_text: str) -> bool:
+    """수정 대상 문구(before)가 이미지 자체 문안에 실제로 존재하는지.
+
+    이미지 문안을 공백 제거한 하나의 문자열로 만들고, before 의 의미있는 단어
+    (2자 이상)가 그 안에 얼마나 들어 있는지 비율로 판단한다. 본문 글에만 있고
+    배너엔 없는 문장은 겹치는 단어가 적어 걸러진다. 임계값은 env 로 조정.
+    """
+    words = [w for w in _match_words(before) if len(w) >= 2] or _match_words(before)
+    if not words:
+        return False
+    joined = "".join(_match_words(image_text))
+    if not joined:
+        return True  # 이미지 문안을 못 구하면 필터하지 않는다(무회귀).
+    hits = sum(1 for w in words if w in joined)
+    min_ratio = float(os.environ.get("CCG_IMAGE_REVISION_MATCH_MIN", "0.5"))
+    return (hits / len(words)) >= min_ratio
+
+
 @app.post("/api/revision-image")
 def revision_image(payload: dict[str, Any]) -> dict[str, Any]:
     """교정 문안을 반영한 수정 배너 이미지 생성.
 
-    입력: {review_run_id, corrected_text, disclosure_text?}
+    입력: {review_run_id, corrected_text, disclosure_text?, workspace_id?}
     원본 이미지는 심사 접수 시 저장된 파일을 사용한다(클라이언트 경로 입력 없음).
+    ``workspace_id``는 옵션 — 안 주면 review_run_id로 저장된 실행 요약에서
+    복원한다(run_store.workspace_id_for_run). 이미지 생성 프롬프트의 한국어
+    강제 여부(korean 게이트)를 이걸로 결정한다 — extract_ad_from_images와
+    동일한 게이팅 패턴.
     """
     run_id = str(payload.get("review_run_id") or "").strip()
     corrected_text = str(payload.get("corrected_text") or "").strip()
@@ -401,12 +446,14 @@ def revision_image(payload: dict[str, Any]) -> dict[str, Any]:
             status_code=404,
             detail={"error": "not_found", "message": "이 심사에는 저장된 원본 광고 이미지가 없습니다."},
         )
+    workspace_id = str(payload.get("workspace_id") or "").strip() or workspace_id_for_run(run_id)
+    korean = uses_korean_law_context(workspace_id)
     # 개선 지시(feedback)가 있고 직전 가이드가 저장돼 있으면 그 가이드를 베이스로
     # 재편집한다 — 반복 개선 루프. 없으면 원본에서 새 가이드를 생성.
     previous_guide = find_ad_image(run_id, "revised")
     if feedback and previous_guide is not None:
         try:
-            revised = refine_revision_guide_image(previous_guide.read_bytes(), feedback)
+            revised = refine_revision_guide_image(previous_guide.read_bytes(), feedback, korean=korean)
         except (BadRequestError, AuthenticationError, RateLimitError, APIConnectionError, APIStatusError) as exc:
             raise HTTPException(
                 status_code=502,
@@ -451,6 +498,31 @@ def revision_image(payload: dict[str, Any]) -> dict[str, Any]:
             continue
         if str(suggestion.get("before") or "").strip() and str(suggestion.get("after") or "").strip():
             revisions.append({"before": str(suggestion["before"]), "after": str(suggestion["after"])})
+    # '이미지에 실제로 있는 문구'의 수정만 이미지 가이드에 남긴다. 본문 글+이미지가
+    # 함께 접수되면 수정안은 본문 글 기준이라, 필터 없이는 배너에 없는 문장을
+    # gpt-image가 지어내 취소선을 얹는다("글의 수정사항이 이미지로 옮겨감"). 이미지
+    # 자체 추출 문안과 대조해, 배너에 없는 교정은 이미지에서 제외한다(텍스트 diff엔 유지).
+    image_text = str((result_doc.get("ad_image") or {}).get("extracted_content_text") or "").strip()
+    if not image_text:
+        # 예전 run 은 추출 문안을 저장하지 않았다 — 저장된 원본에서 1회 재추출.
+        try:
+            import base64 as _b64
+
+            image_text = extract_ad_from_images(
+                [{"base64": _b64.b64encode(original.read_bytes()).decode("ascii"),
+                  "media_type": "image/png" if original.suffix == ".png" else "image/jpeg"}],
+                korean=korean,
+            )["content_text"]
+        except Exception as exc:  # noqa: BLE001 - 재추출 실패 시 필터 없이(무회귀) 진행.
+            logging.getLogger(__name__).warning("revision_image reextract failed run=%s err=%s", run_id, exc)
+            image_text = ""
+    if image_text:
+        kept = [row for row in revisions if _revision_in_image_text(row["before"], image_text)]
+        logging.getLogger(__name__).info(
+            "revision_image filtered run=%s revisions=%d->%d (image-present only)",
+            run_id, len(revisions), len(kept),
+        )
+        revisions = kept
     media = "image/png" if original.suffix == ".png" else "image/jpeg"
     try:
         revised = generate_revision_guide_image(
@@ -460,6 +532,7 @@ def revision_image(payload: dict[str, Any]) -> dict[str, Any]:
             disclosures=disclosures,
             reviewer_items=reviewer_items,
             corrected_text=corrected_text,
+            korean=korean,
         )
     except (BadRequestError, AuthenticationError, RateLimitError, APIConnectionError, APIStatusError) as exc:
         raise HTTPException(

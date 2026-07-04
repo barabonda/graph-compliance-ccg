@@ -179,6 +179,7 @@ def generate_revision_guide_image(
     disclosures: list[str] | None = None,
     reviewer_items: list[str] | None = None,
     corrected_text: str = "",
+    korean: bool = True,
 ) -> bytes:
     """'수정 가이드' 마크업 이미지를 생성한다 — 완성 광고 재현이 아니라,
     원본 배너 위에 디자인 검수 스타일의 콜아웃(①②③)으로 '어느 자리에 어떤
@@ -186,13 +187,27 @@ def generate_revision_guide_image(
 
     완성본 재현은 원문 요소(헤드라인 등)를 유실하거나 수치를 왜곡할 위험이
     커서, 심사 실무에 맞는 '표시 위치 지시서'로 설계를 바꿨다.
+
+    ``korean``: KR 워크스페이스는 콜아웃 라벨(고지 영역 추가/심사자 보완)과
+    교정 문구 렌더링 지시를 한국어로 고정한다(기존 동작 유지). 비-KR(KH 등)은
+    라벨을 영어로 쓰고 "Korean" 언어 지정 없이 "as given"으로만 지시해, 원문이
+    영어/크메르어여도 한국어가 강제되지 않는다. ``extract_ad_from_images``의
+    ``korean`` 게이팅 패턴을 따른다.
     """
     if not os.environ.get("OPENAI_API_KEY"):
         raise RuntimeError("OPENAI_API_KEY is required for revision guide image generation.")
 
+    disclosure_zone_label = "고지 영역 추가" if korean else "REQUIRED DISCLOSURES ADDED"
+    reviewer_zone_label = "심사자 보완" if korean else "REVIEWER TO COMPLETE"
+    copy_language_note = "Korean copy" if korean else "copy"
+    disclosure_text_note = "Korean text" if korean else "text"
+
     callouts: list[str] = []
     marker = 1
-    for row in (revisions or [])[:4]:
+    # 넘겨받은 revisions 는 이미 '이 이미지에 실제로 있는 문구'만 필터링된
+    # 것이다(server.revision_image). 콜아웃 폭주 방지를 위한 안전 상한만 둔다.
+    max_revision_callouts = int(os.environ.get("CCG_IMAGE_MAX_REVISION_CALLOUTS", "8"))
+    for row in (revisions or [])[:max_revision_callouts]:
         before = (row.get("before") or "").strip()
         after = (row.get("after") or "").strip()
         if not before or not after:
@@ -200,47 +215,61 @@ def generate_revision_guide_image(
         callouts.append(
             f"({marker}) Point a red callout at the exact spot where the original text \"{before[:80]}\" "
             f"appears, cross that text out with a red strikethrough overlay, and show a green replacement "
-            f"box next to it containing EXACTLY this Korean copy: \"{after[:120]}\""
+            f"box next to it containing EXACTLY this {copy_language_note}: \"{after[:120]}\""
         )
         marker += 1
     if disclosures:
         lines = "\n".join(f"- {d}" for d in disclosures[:6])
         callouts.append(
             f"({marker}) Draw a green dashed rectangle over the bottom footer area labeled "
-            f"\"고지 영역 추가\" and list inside it, in small but clearly legible Korean text:\n{lines}"
+            f"\"{disclosure_zone_label}\" and list inside it, in small but clearly legible {disclosure_text_note}:\n{lines}"
         )
         marker += 1
     if reviewer_items:
         items = ", ".join(reviewer_items[:4])
         callouts.append(
-            f"({marker}) Add an orange callout in a corner labeled \"심사자 보완\" noting these "
+            f"({marker}) Add an orange callout in a corner labeled \"{reviewer_zone_label}\" noting these "
             f"product-specific items must be filled in by the reviewer: {items}"
         )
         marker += 1
     if not callouts and corrected_text.strip():
         callouts.append(
-            "(1) Add a green annotation box beside the main copy containing EXACTLY this corrected "
-            f"Korean copy: \"{corrected_text.strip()[:400]}\""
+            f"(1) Add a green annotation box beside the main copy containing EXACTLY this corrected "
+            f"{copy_language_note}: \"{corrected_text.strip()[:400]}\""
         )
 
+    render_instruction = (
+        "given (Korean), in a clear legible sans-serif."
+        if korean
+        else "given, in the ad's original language, in a clear legible sans-serif."
+    )
     prompt = (
         "You are producing a COMPLIANCE REVISION GUIDE (design-review markup), NOT a finished ad. "
         "Keep the original banner fully visible and unmodified as the base layer — do NOT redraw, "
         "remove or replace any original text or imagery. On top of it, add clean annotation graphics "
         "in the style of a professional design review: numbered circular markers with thin leader "
         "lines, red strikethrough overlays on problematic text, green suggestion boxes with the "
-        "replacement copy, and dashed zone rectangles. Render every annotation text VERBATIM as "
-        "given (Korean), in a clear legible sans-serif. Annotations:\n"
+        f"replacement copy, and dashed zone rectangles. Render every annotation text VERBATIM as "
+        f"{render_instruction} Annotations:\n"
         + "\n".join(callouts)
         + "\nCanvas: if needed, extend margins around the original banner to fit the annotation "
         "boxes without covering original content."
     )
     ext = "png" if "png" in media_type else "jpeg"
-    client = OpenAI(timeout=float(os.environ.get("CCG_IMAGE_TIMEOUT_SECONDS", "180")), max_retries=1)
+    # medium 품질이면 한 번 생성이 ~1분이라, 일시적 연결/5xx 오류엔 재시도가
+    # 맞다(예전엔 high 라 재시도=타임아웃 doubling 이 502의 원인이었지만, medium
+    # 에선 3회 시도해도 여유롭게 프론트 컷 안). 타임아웃은 넉넉히.
+    client = OpenAI(
+        timeout=float(os.environ.get("CCG_IMAGE_TIMEOUT_SECONDS", "300")),
+        max_retries=int(os.environ.get("CCG_IMAGE_MAX_RETRIES", "2")),
+    )
     result = client.images.edit(
         model=_image_model(),
         image=(f"ad.{ext}", io.BytesIO(original_bytes), media_type),
         prompt=prompt,
+        # 검수용 마크업은 medium 이면 충분하고, 기본(auto/high)보다 생성이 훨씬
+        # 빨라 타임아웃을 피한다. low/medium/high/auto 로 env 조정.
+        quality=os.environ.get("CCG_IMAGE_QUALITY", "medium"),
     )
     b64 = result.data[0].b64_json
     if not b64:
@@ -249,26 +278,37 @@ def generate_revision_guide_image(
     return base64.b64decode(b64)
 
 
-def refine_revision_guide_image(guide_bytes: bytes, feedback: str) -> bytes:
+def refine_revision_guide_image(guide_bytes: bytes, feedback: str, *, korean: bool = True) -> bytes:
     """생성된 수정 가이드에 심사자의 개선 지시를 반영해 재편집한다.
 
     전체 재생성이 아니라 직전 가이드 이미지를 베이스로 한 edit — 지시하지 않은
     부분(원본 배너·기존 콜아웃)은 유지된다.
+
+    ``korean``: KR 워크스페이스는 "Render any Korean text..."를 유지한다(기존
+    동작). 비-KR(KH 등)은 언어를 특정하지 않고 일반 텍스트 렌더링 지시로 바꿔,
+    원문이 한국어가 아닌 경우에도 한국어가 강제되지 않게 한다.
     """
     if not os.environ.get("OPENAI_API_KEY"):
         raise RuntimeError("OPENAI_API_KEY is required for revision guide refinement.")
+    render_note = "Render any Korean text verbatim and legibly." if korean else "Render any text verbatim and legibly."
     prompt = (
         "This image is a compliance revision GUIDE (design-review markup over an ad banner). "
         "Apply ONLY the following reviewer instruction, keeping everything else — the original "
-        "banner, existing callouts, numbering and text — unchanged. Render any Korean text "
-        "verbatim and legibly.\n"
+        f"banner, existing callouts, numbering and text — unchanged. {render_note}\n"
         f"Reviewer instruction: {feedback.strip()[:600]}"
     )
-    client = OpenAI(timeout=float(os.environ.get("CCG_IMAGE_TIMEOUT_SECONDS", "180")), max_retries=1)
+    # medium 품질이면 한 번 생성이 ~1분이라, 일시적 연결/5xx 오류엔 재시도가
+    # 맞다(예전엔 high 라 재시도=타임아웃 doubling 이 502의 원인이었지만, medium
+    # 에선 3회 시도해도 여유롭게 프론트 컷 안). 타임아웃은 넉넉히.
+    client = OpenAI(
+        timeout=float(os.environ.get("CCG_IMAGE_TIMEOUT_SECONDS", "300")),
+        max_retries=int(os.environ.get("CCG_IMAGE_MAX_RETRIES", "2")),
+    )
     result = client.images.edit(
         model=_image_model(),
         image=("guide.png", io.BytesIO(guide_bytes), "image/png"),
         prompt=prompt,
+        quality=os.environ.get("CCG_IMAGE_QUALITY", "medium"),
     )
     b64 = result.data[0].b64_json
     if not b64:

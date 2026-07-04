@@ -274,7 +274,7 @@ export function RevisionDiff({
             disabled={imageGenState === "loading"}
             className="mt-3 w-full rounded-[10px] bg-brand py-2.5 text-[13.5px] font-bold text-white transition hover:bg-brand/90 disabled:cursor-wait disabled:opacity-70"
           >
-            {imageGenState === "loading" ? "이미지 수정 가이드 생성 중… (약 1분)" : "이미지 수정 가이드 생성 — 교정 위치를 원본 위에 표시"}
+            {imageGenState === "loading" ? "이미지 수정 가이드 생성 중… (약 1~2분)" : "이미지 수정 가이드 생성 — 교정 위치를 원본 위에 표시"}
           </button>
         </div>
       )}
