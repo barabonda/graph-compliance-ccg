@@ -11,6 +11,7 @@ from pathlib import Path
 from typing import Any
 
 from schemas import Claim, ReviewInput
+from utils import uses_korean_law_context
 
 
 LOGGER = logging.getLogger(__name__)
@@ -118,7 +119,9 @@ def build_product_context(review_input: ReviewInput, claims: list[Claim]) -> tup
     selected_product = selected_product_match(review_input, products, product_group)
     if selected_product:
         products = [selected_product, *[product for product in products if product.get("product") != selected_product.get("product")]]
-    requirements = requirements_for_group(product_group)
+    # 고정 필수고지 카탈로그(금소법·은행 광고심의 기준)는 KR 관할 전용 —
+    # 비-KR 워크스페이스에 한국 고지 의무를 주입하지 않는다.
+    requirements = requirements_for_group(product_group) if uses_korean_law_context(review_input.workspace_id) else []
     source = "Neo4j Product Graph" if any(product.get("source") == PRODUCT_GRAPH_SOURCE for product in products) else "JB 금융상품 데이터셋 · 전북은행 상품문서 메타데이터.xlsx"
     return (
         {

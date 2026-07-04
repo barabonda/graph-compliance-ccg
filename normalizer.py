@@ -138,16 +138,34 @@ class PolicyGuidedNormalizer:
         )
         anchors: list[ContextAnchor] = []
         valid_claim_ids = {claim.claim_id for claim in claims}
+        dropped_items = 0
         for index, item in enumerate(result["anchors"]):
-            if item["claim_id"] not in valid_claim_ids:
-                raise RuntimeError(f"LLM returned unknown claim_id for ContextAnchor: {item['claim_id']}")
+            # Claude 비-strict 폴백(대형 enum 스키마가 strict 문법 한도를 넘는 경우)
+            # 에서는 형태·enum이 문법으로 강제되지 않는다. 개별 불량 항목은 전체
+            # 심사를 죽이는 대신 감사 로그와 함께 건너뛴다 — 전부 불량이면 실패.
+            if not isinstance(item, dict) or item.get("claim_id") not in valid_claim_ids:
+                dropped_items += 1
+                LOGGER.warning(
+                    "normalizer.anchor_dropped review_run_id=%s index=%d reason=invalid_item item=%s",
+                    review_run_id,
+                    index,
+                    str(item)[:200],
+                )
+                continue
             anchor_id = stable_id("anchor", review_run_id, index, item["claim_id"], item["text"])
             proposals: list[PolicyHypernymProposal] = []
             seen_hypernyms: set[str] = set()
             for h in item["hypernyms"]:
                 hypernym_id = str(h["hypernym_id"])
                 if hypernym_id not in allowed:
-                    raise RuntimeError(f"LLM returned unknown PolicyHypernym id: {hypernym_id}")
+                    dropped_items += 1
+                    LOGGER.warning(
+                        "normalizer.hypernym_dropped review_run_id=%s anchor_index=%d reason=unknown_hypernym_id id=%s",
+                        review_run_id,
+                        index,
+                        hypernym_id,
+                    )
+                    continue
                 if hypernym_id in seen_hypernyms:
                     continue
                 seen_hypernyms.add(hypernym_id)
@@ -177,6 +195,12 @@ class PolicyGuidedNormalizer:
                     facts=item["facts"],
                     hypernyms=proposals,
                 )
+            )
+        if dropped_items and not anchors:
+            # 관용은 부분 불량까지 — 전량 불량이면 어휘 거버넌스 실패로 그대로 알린다.
+            raise RuntimeError(
+                "LLM returned no usable ContextAnchor items "
+                f"({dropped_items} dropped: unknown claim_id/PolicyHypernym id or malformed shape)."
             )
         return anchors
 

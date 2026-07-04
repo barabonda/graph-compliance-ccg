@@ -60,7 +60,7 @@ def _get_driver() -> Any:
         try:
             from neo4j import GraphDatabase
 
-            _driver = GraphDatabase.driver(uri, auth=(user, password))
+            _driver = GraphDatabase.driver(uri, auth=(user, password), liveness_check_timeout=30)
             return _driver
         except Exception as exc:  # noqa: BLE001 - DB 부재가 심사를 막지 않게.
             LOGGER.warning("run_store neo4j driver init failed err=%s", exc)

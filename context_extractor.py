@@ -561,7 +561,7 @@ class LLMContextExtractor:
         )
         relations_by_index = {
             (int(row["source_index"]), int(row["target_index"]), row["relation_type"], row["evidence"]): row
-            for row in result["inter_sentence_relations"]
+            for row in (result.get("inter_sentence_relations") or [])
         }
         inter_sentence_relations = [
             InterSentenceRelation(
@@ -593,7 +593,9 @@ class LLMContextExtractor:
                     entity_type=entity["entity_type"],
                     span=Span(start=entity["start"], end=entity["end"], text=entity["name"]),
                 )
-                for entity in item["entities"]
+                # Claude 비-strict 폴백 경로에서는 스키마의 required 가 문법으로
+                # 강제되지 않아 목록 키가 통째로 빠질 수 있다 — 빈 목록으로 관용.
+                for entity in (item.get("entities") or [])
             ]
             by_name = {entity.name: entity.entity_id for entity in entities}
             relations = [
@@ -603,7 +605,7 @@ class LLMContextExtractor:
                     target_id=by_name.get(rel["target_name"], stable_id("entity_ref", claim_id, rel["target_name"])),
                     evidence=rel["evidence"],
                 )
-                for rel in item["relations"]
+                for rel in (item.get("relations") or [])
             ]
             qualifiers = [
                 ClaimQualifier(
@@ -616,7 +618,7 @@ class LLMContextExtractor:
                     confidence=float(qualifier["confidence"]),
                     prominence_tier=qualifier.get("prominence_tier") or "unknown",
                 )
-                for qualifier in item["qualifiers"]
+                for qualifier in (item.get("qualifiers") or [])
             ]
             claims.append(
                 Claim(

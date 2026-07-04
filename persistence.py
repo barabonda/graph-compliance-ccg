@@ -28,7 +28,10 @@ class Neo4jReviewWriter:
         self.password = password or os.environ.get("NEO4J_PASSWORD", "")
         if not self.uri or not self.user or not self.password:
             raise RuntimeError("NEO4J_URI, NEO4J_USER/NEO4J_USERNAME, and NEO4J_PASSWORD are required.")
-        self.driver = GraphDatabase.driver(self.uri, auth=(self.user, self.password))
+        # 30초 이상 쉰 풀 연결은 재사용 전 ping — 긴 LLM 단계 후 저장 시 SessionExpired 방지.
+        self.driver = GraphDatabase.driver(
+            self.uri, auth=(self.user, self.password), liveness_check_timeout=30
+        )
         self.database = os.environ.get("NEO4J_DATABASE")
 
     def close(self) -> None:

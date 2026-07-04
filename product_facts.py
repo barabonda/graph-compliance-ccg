@@ -20,7 +20,7 @@ from disclosure_catalog import (
 )
 from llm_gateway import LLMGateway
 from schemas import Claim, ReviewInput, SentenceUnit
-from utils import stable_id, to_jsonable
+from utils import stable_id, to_jsonable, uses_korean_law_context
 
 
 LOGGER = logging.getLogger(__name__)
@@ -594,7 +594,11 @@ def build_disclosure_checks(
     # 데이터 기반: 어떤 고지가 필요한가는 그래프 카탈로그(disc_*) 또는 코드
     # profile catalog에서 가져오고, check_type별 검사 방식은 profile이 결정한다.
     graph_catalog = disclosure_catalog_for_group(review_input.workspace_id, product_group)
-    catalog = merge_profile_and_graph_catalog(profile_catalog_all(), graph_catalog)
+    # 코드 내장 profile 카탈로그는 한국 법령·심의기준(금소법·신용정보법·자본시장법 등)
+    # 기준이므로 KR 관할에서만 병합한다. 비-KR(예: 캄보디아)은 해당 워크스페이스의
+    # 그래프 카탈로그(disc_*)만 사용해 타 관할 고지 의무가 주입되지 않게 한다.
+    profile_catalog = profile_catalog_all() if uses_korean_law_context(review_input.workspace_id) else []
+    catalog = merge_profile_and_graph_catalog(profile_catalog, graph_catalog)
     if catalog:
         enabled, skipped, gate_summary = gate_disclosure_catalog(review_input=review_input, catalog=catalog)
         checks = [

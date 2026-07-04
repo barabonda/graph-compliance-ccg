@@ -84,23 +84,30 @@ def build_output(
             # 대표 근거 선택: 항목 부재(missing)는 법령 근거가 있으면 법령 대표,
             # 위계 미달(prominence)은 구체 기준을 정한 심의기준 대표 + '법 위반 아님' 문구.
             if code == "PROMINENCE_INSUFFICIENT":
-                basis = {
-                    "representative_basis": PROMINENCE_BALANCE_BASIS["guideline"],
-                    "authority_tier": "guideline",
-                    "co_basis": PROMINENCE_BALANCE_BASIS["law"],
-                    "tier_note": "법령 위반이 아닌 심의기준 미흡입니다.",
-                }
+                if uses_korean_law_context(review_input.workspace_id):
+                    basis = {
+                        "representative_basis": PROMINENCE_BALANCE_BASIS["guideline"],
+                        "authority_tier": "guideline",
+                        "co_basis": PROMINENCE_BALANCE_BASIS["law"],
+                        "tier_note": "법령 위반이 아닌 심의기준 미흡입니다.",
+                    }
+                else:
+                    # 비-KR 관할: 균형 표시 원칙 자체는 유지하되 한국 심의기준을
+                    # 근거로 인용하지 않는다(DISCLOSURE_MISSING 폴백과 동일한 규율).
+                    basis = {"representative_basis": "", "authority_tier": "guideline", "co_basis": "", "tier_note": ""}
             else:
-                basis = resolve_representative_basis(
-                    disclosure_profile(str(diagnostic.get("check_id") or "")),
-                    situation="missing",
-                )
-                if not basis["representative_basis"]:
-                    # KR 폴백만 모법 하드코딩 — 비-KR 관할에 한국법을 주입하지 않는다.
-                    if uses_korean_law_context(review_input.workspace_id):
+                if uses_korean_law_context(review_input.workspace_id):
+                    basis = resolve_representative_basis(
+                        disclosure_profile(str(diagnostic.get("check_id") or "")),
+                        situation="missing",
+                    )
+                    if not basis["representative_basis"]:
+                        # KR 폴백만 모법 하드코딩 — 비-KR 관할에 한국법을 주입하지 않는다.
                         basis = {"representative_basis": "금소법 제22조", "authority_tier": "law", "co_basis": "", "tier_note": ""}
-                    else:
-                        basis = {"representative_basis": "", "authority_tier": "", "co_basis": "", "tier_note": ""}
+                else:
+                    # 비-KR 관할: 공시 카탈로그의 대표 근거는 한국 법령·심의기준이므로
+                    # 인용하지 않는다. 누락 진단 자체(항목·메시지)는 유지한다.
+                    basis = {"representative_basis": "", "authority_tier": "", "co_basis": "", "tier_note": ""}
             rationale = str(diagnostic.get("message") or "")
             if basis.get("tier_note"):
                 rationale = f"{basis['tier_note']} {rationale}".strip()
@@ -509,7 +516,7 @@ def retrieval_failure_rationale(code: str) -> str:
         "NO_ACTIVE_CU_AFTER_GATE": "관련 심의 기준 후보는 있었으나 이 상품군·채널에 적용되는 기준이 남지 않았습니다.",
         "RERANK_DROPPED_ALL": "관련 심의 기준 후보가 판단 대상으로 선정되지 않았습니다.",
         "MISSING_POLICY_COVERAGE": "이 표현과 연결할 수 있는 심의 기준이 부족합니다.",
-        "NO_LEGAL_ELEMENT_MATCH": "이 표현이 관련 심의 기준의 행위요건(금소법상 구성요건)에 해당하는지 자동으로 확인되지 않았습니다.",
+        "NO_LEGAL_ELEMENT_MATCH": "이 표현이 관련 심의 기준의 행위요건(법령상 구성요건)에 해당하는지 자동으로 확인되지 않았습니다.",
         "CU_PLAN_EMPTY": "이 표현에 연결된 심의 기준이 없어 자동 통과할 수 없습니다.",
     }.get(code, "정책 매칭 상태를 심사자가 확인해야 합니다.")
 

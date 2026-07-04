@@ -101,7 +101,12 @@ class Neo4jPolicyRetriever:
         self.password = password or os.environ.get("NEO4J_PASSWORD", "")
         if not self.uri or not self.user or not self.password:
             raise RuntimeError("NEO4J_URI, NEO4J_USER/NEO4J_USERNAME, and NEO4J_PASSWORD are required.")
-        self.driver = GraphDatabase.driver(self.uri, auth=(self.user, self.password))
+        # liveness_check_timeout: 긴 LLM 단계(수 분) 동안 풀에 방치된 연결을 Aura가
+        # 끊어버려 다음 조회가 SessionExpired(broken pipe)로 죽는 것을 막는다 —
+        # 30초 이상 쉰 연결은 재사용 전에 ping 으로 검증한다.
+        self.driver = GraphDatabase.driver(
+            self.uri, auth=(self.user, self.password), liveness_check_timeout=30
+        )
         self.database = os.environ.get("NEO4J_DATABASE")
         self.embedder = embedder or EmbeddingGateway()
         # 팀 공용 Aura(예: KR 법령 코퍼스) 읽기 전용 라우팅. TEAM_NEO4J_WORKSPACES에
@@ -124,7 +129,9 @@ class Neo4jPolicyRetriever:
             password = os.environ.get("TEAM_NEO4J_PASSWORD", "")
             if not uri or not user or not password:
                 return None
-            self._team_driver = GraphDatabase.driver(uri, auth=(user, password))
+            self._team_driver = GraphDatabase.driver(
+                uri, auth=(user, password), liveness_check_timeout=30
+            )
         return self._team_driver
 
     def _session_for(self, workspace_id: str):
