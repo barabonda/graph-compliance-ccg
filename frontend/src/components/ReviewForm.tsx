@@ -203,12 +203,16 @@ export function ReviewForm({ running, onSubmit, draftPreset, onLoadSample, onLoa
     }
   };
 
+  // 선택된 은행(bank)이 상품 검색 workspace_id를 결정한다 — PPCBank 선택 시
+  // KH_WORKSPACE_ID로 검색해야 KH 상품(ProductFact)을 찾을 수 있다.
+  const selectedBankWorkspaceId = (BANKS.find((item) => item.value === bank) ?? BANKS[0]).workspaceId;
+
   useEffect(() => {
     const controller = new AbortController();
     const timer = window.setTimeout(() => {
       setProductLoading(true);
       setProductSearchError("");
-      searchProducts(productQuery, productGroup, controller.signal)
+      searchProducts(productQuery, productGroup, selectedBankWorkspaceId, controller.signal)
         .then((products) => setProductResults(products))
         .catch((error: unknown) => {
           if (error instanceof DOMException && error.name === "AbortError") return;
@@ -222,7 +226,7 @@ export function ReviewForm({ running, onSubmit, draftPreset, onLoadSample, onLoa
       window.clearTimeout(timer);
       controller.abort();
     };
-  }, [productGroup, productQuery]);
+  }, [productGroup, productQuery, selectedBankWorkspaceId]);
 
   const chooseProduct = (product: ProductSearchResult) => {
     setSelectedProduct(product.product);

@@ -136,7 +136,54 @@ function diffFromSpans(text: string, revisions: RevisionMeta[]): { lines: Revisi
     lines.push({ type: "del", text: raw, segments: delSegments, anchorId: first.anchorId, reason: first.riskReason, basis: first.basis, label: first.label });
     lines.push({ type: "add", text: after, segments: addSegments, anchorId: first.anchorId, reason: first.fixReason, basis: first.basis, label: first.label });
   }
-  return { lines, changedCount };
+  // 여러 원문 줄이 같은 교정문 하나로 합쳐질 때(문단 재작성) 중복 `+` 를 접는다.
+  const collapsed = collapseRepeatedAdds(lines);
+  return { lines: collapsed.lines, changedCount: changedCount - collapsed.removedPairs };
+}
+
+/**
+ * 백엔드가 한 문단을 재작성하면서 그 문단에 속한 여러 anchor 에 '같은 교정문
+ * 전체'를 after 로 넣으면(또는 한 span 이 여러 줄을 덮으면), diffFromSpans 는
+ * 원문 줄마다 동일한 after 로 치환해 `+` 줄이 반복된다. 인접한 del/add 쌍에서
+ * add 텍스트가 같으면 "여러 del(취소선) → 교정문 한 줄"로 병합한다(GitHub N→1).
+ * removedPairs 로 접힌 쌍 수를 돌려주어 changedCount 를 논리적 변경 1건으로 보정.
+ */
+function collapseRepeatedAdds(lines: RevisionDiffLine[]): { lines: RevisionDiffLine[]; removedPairs: number } {
+  const out: RevisionDiffLine[] = [];
+  let removedPairs = 0;
+  let i = 0;
+  while (i < lines.length) {
+    if (lines[i]?.type === "del" && lines[i + 1]?.type === "add") {
+      const addKey = normalize(lines[i + 1].text);
+      const dels: RevisionDiffLine[] = [lines[i]];
+      const survivingAdd = lines[i + 1];
+      let j = i + 2;
+      while (
+        addKey.length > 0 &&
+        lines[j]?.type === "del" &&
+        lines[j + 1]?.type === "add" &&
+        normalize(lines[j + 1].text) === addKey
+      ) {
+        dels.push(lines[j]);
+        removedPairs += 1; // 이 add 는 앞 add 와 동일 — 버린다.
+        j += 2;
+      }
+      if (dels.length > 1) {
+        for (const del of dels) out.push(del);
+        // 병합된 교정문은 통문장 재작성이라 line1 기준 intra-line 강조가 오히려
+        // 오해를 부른다 — segments 를 떼고 순수 교정문만 `+` 로 보여준다.
+        out.push({ ...survivingAdd, segments: undefined });
+        i = j;
+        continue;
+      }
+      out.push(lines[i], lines[i + 1]);
+      i += 2;
+      continue;
+    }
+    out.push(lines[i]);
+    i += 1;
+  }
+  return { lines: out, removedPairs };
 }
 
 /** 문장(줄) 토큰화 — \n 우선, 긴 줄은 문장 경계로 추가 분할. */

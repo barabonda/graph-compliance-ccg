@@ -117,7 +117,7 @@ DISCLOSURE_REQUIREMENTS: dict[str, list[dict[str, str]]] = {
 
 def build_product_context(review_input: ReviewInput, claims: list[Claim]) -> tuple[dict[str, Any], list[dict[str, Any]]]:
     product_group = normalize_product_group(review_input.product_group, review_input.content_text)
-    products = match_products(review_input.content_text, claims, product_group)
+    products = match_products(review_input.content_text, claims, product_group, review_input.workspace_id)
     selected_product = selected_product_match(review_input, products, product_group)
     if selected_product:
         products = [selected_product, *[product for product in products if product.get("product") != selected_product.get("product")]]
@@ -165,10 +165,18 @@ def requirements_for_group(product_group: str) -> list[dict[str, Any]]:
     return [*base, review]
 
 
-def match_products(text: str, claims: list[Claim], product_group: str) -> list[dict[str, Any]]:
-    graph_matches = match_products_from_neo4j(text, claims, product_group)
+def match_products(text: str, claims: list[Claim], product_group: str, workspace_id: str = "") -> list[dict[str, Any]]:
+    graph_matches = match_products_from_neo4j(text, claims, product_group, workspace_id)
     if graph_matches:
         return graph_matches
+
+    if not uses_korean_law_context(workspace_id):
+        # 비-KR 워크스페이스(KH 등)는 로컬 JB(KR) 상품 CSV로 전체-텍스트 폴백하지
+        # 않는다 — 그 CSV는 KR 상품만 담고 있어, 매치가 없으면 KR 상품이 KH 심사에
+        # 섞여 들어가는 교차 오염이 된다. 그래프에 매치가 없으면 빈 결과로 둔다
+        # (선적재 ProductFact 경로 — CCG_PRELOADED_PRODUCT_FACTS_WORKSPACES — 가
+        # product_facts.py 쪽에서 별도로 이어받는다).
+        return []
 
     rows = load_product_rows()
     if not rows:
@@ -210,13 +218,21 @@ def selected_product_match(
         return None
 
     if selected_name:
-        search_matches = search_products(selected_name, product_group=product_group, limit=1)
+        search_matches = search_products(
+            selected_name,
+            product_group=product_group,
+            limit=1,
+            workspace_id=review_input.workspace_id,
+        )
         if search_matches and float(search_matches[0].get("score") or 0) >= 55:
             return selected_product_payload(search_matches[0], product_group)
 
     candidates = [*current_matches]
-    rows = load_product_rows()
-    candidates.extend({**meta, "match_basis": "selected_product"} for meta in rows.values())
+    if uses_korean_law_context(review_input.workspace_id):
+        # 로컬 JB(KR) CSV는 KR 상품만 담고 있다 — 비-KR 워크스페이스에서 이걸
+        # "selected_product" 후보로 섞으면 KH 심사에 KR 상품명이 새는 교차 오염이 된다.
+        rows = load_product_rows()
+        candidates.extend({**meta, "match_basis": "selected_product"} for meta in rows.values())
 
     for candidate in candidates:
         candidate_name = str(candidate.get("product") or "")
@@ -334,12 +350,17 @@ def product_search_score(query_variants: list[str], product: str, meta: dict[str
     return best_score, best_basis
 
 
-def all_product_rows() -> dict[str, dict[str, Any]]:
+def all_product_rows(workspace_id: str = "") -> dict[str, dict[str, Any]]:
     rows: dict[str, dict[str, Any]] = {}
     try:
-        rows.update(load_product_rows_from_neo4j())
+        rows.update(load_product_rows_from_neo4j(workspace_id))
     except Exception as exc:  # noqa: BLE001 - search should degrade to local metadata.
         LOGGER.warning("Neo4j Product Graph search failed; falling back to local metadata: %s", exc)
+    if not uses_korean_law_context(workspace_id):
+        # 비-KR 워크스페이스(KH 등)는 로컬 JB(KR) CSV를 병합하지 않는다 — 병합하면
+        # KR 상품명이 KH 검색 결과에 섞여 나가는 교차 오염이 된다. Neo4j의
+        # workspace_id 스코프 조회 결과만 반환한다.
+        return rows
     return merge_product_rows_with_local_documents(rows, load_product_rows())
 
 
@@ -395,12 +416,25 @@ def merge_product_rows_with_local_documents(
     return merged
 
 
-def search_products(query: str = "", product_group: str = "auto", limit: int = 12) -> list[dict[str, Any]]:
-    """Search product metadata for UI selection and selected-product resolution."""
+def search_products(
+    query: str = "",
+    product_group: str = "auto",
+    limit: int = 12,
+    workspace_id: str = "",
+) -> list[dict[str, Any]]:
+    """Search product metadata for UI selection and selected-product resolution.
+
+    ``workspace_id`` scopes the search to that workspace's Product Graph rows
+    (KR ``graphcompliance_mvp_jb_20260530`` vs KH
+    ``graphcompliance_cambodia_ppcbank_20260630``). Empty string preserves the
+    legacy default (KR via env fallback in ``load_product_rows_from_neo4j``) so
+    existing callers that have not yet been updated to pass workspace_id keep
+    their current behavior.
+    """
 
     capped_limit = max(1, min(int(limit or 12), 50))
     group = normalize_product_group(product_group, "")
-    rows = all_product_rows()
+    rows = all_product_rows(workspace_id)
     if not rows:
         return []
 
@@ -470,14 +504,18 @@ def preferred_product_variant(candidates: list[dict[str, Any]], context_text: st
     return sorted(candidates, key=score, reverse=True)[0]
 
 
-def match_products_from_neo4j(text: str, claims: list[Claim], product_group: str) -> list[dict[str, Any]]:
+def match_products_from_neo4j(
+    text: str, claims: list[Claim], product_group: str, workspace_id: str = ""
+) -> list[dict[str, Any]]:
     if not os.environ.get("NEO4J_URI") or not (os.environ.get("NEO4J_USER") or os.environ.get("NEO4J_USERNAME")):
         return []
     if not os.environ.get("NEO4J_PASSWORD"):
         return []
 
     try:
-        rows = merge_product_rows_with_local_documents(load_product_rows_from_neo4j(), load_product_rows())
+        rows = load_product_rows_from_neo4j(workspace_id)
+        if uses_korean_law_context(workspace_id):
+            rows = merge_product_rows_with_local_documents(rows, load_product_rows())
     except Exception as exc:  # noqa: BLE001
         LOGGER.warning("Neo4j Product Graph lookup failed; falling back to local metadata: %s", exc)
         return []
@@ -519,8 +557,17 @@ def match_products_from_neo4j(text: str, claims: list[Claim], product_group: str
     return sorted(group_rows, key=lambda item: (-int(item["document_count"]), item["product"]))[:5]
 
 
-@lru_cache(maxsize=1)
-def load_product_rows_from_neo4j() -> dict[str, dict[str, Any]]:
+@lru_cache(maxsize=8)
+def load_product_rows_from_neo4j(workspace_id: str = "") -> dict[str, dict[str, Any]]:
+    """Load Product Graph rows scoped to ``workspace_id``.
+
+    ``lru_cache`` keys on the argument, so KR
+    (``graphcompliance_mvp_jb_20260530``) and KH
+    (``graphcompliance_cambodia_ppcbank_20260630``) each get their own cache
+    entry — a single process no longer "locks" to whichever workspace queried
+    first. Empty string keeps the legacy process-env fallback for callers that
+    have not yet been updated to pass a workspace_id explicitly.
+    """
     try:
         from neo4j import GraphDatabase
     except Exception:
@@ -532,7 +579,12 @@ def load_product_rows_from_neo4j() -> dict[str, dict[str, Any]]:
     if not uri or not user or not password:
         return {}
 
-    workspace_id = os.environ.get("WORKSPACE_ID") or os.environ.get("GRAPHCOMPLIANCE_WORKSPACE_ID") or "graphcompliance_mvp_jb_20260530"
+    workspace_id = (
+        workspace_id
+        or os.environ.get("WORKSPACE_ID")
+        or os.environ.get("GRAPHCOMPLIANCE_WORKSPACE_ID")
+        or "graphcompliance_mvp_jb_20260530"
+    )
     database = os.environ.get("NEO4J_DATABASE")
     driver = GraphDatabase.driver(uri, auth=(user, password))
     try:

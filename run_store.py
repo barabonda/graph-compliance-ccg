@@ -319,6 +319,39 @@ def load_run(run_id: str) -> dict[str, Any] | None:
     return _load_neo4j(safe)
 
 
+def workspace_id_for_run(run_id: str) -> str:
+    """저장된 요약에서 run_id의 workspace_id를 best-effort로 복원한다(없으면 "").
+
+    ``ReviewOutput``(스냅샷 파일/노드에 통째로 저장되는 심사 결과) 자체엔
+    workspace_id 필드가 없다 — 판정 계약을 건드리지 않기 위해서다. 대신 실행
+    시점 요약(``index.jsonl`` 또는 Neo4j 스냅샷 노드 프로퍼티)에는 있으므로
+    거기서 복원한다. review_run_id만 들고 있는 호출부(예: 이미지 수정안
+    엔드포인트)가 해당 run의 워크스페이스(KR/KH)를 판별해 언어/법령 게이트를
+    올바르게 적용해야 할 때 쓴다.
+    """
+    safe = "".join(ch for ch in run_id if ch.isalnum() or ch in {"_", "-"})
+    if not safe:
+        return ""
+    for row in _list_filesystem():
+        if str(row.get("id") or "") == safe:
+            return str(row.get("workspace_id") or "")
+    driver = _get_driver()
+    if driver is None:
+        return ""
+    try:
+        with driver.session(**_session_kwargs()) as session:
+            result = session.run(
+                f"MATCH (n:{SNAPSHOT_LABEL} {{id: $id}}) RETURN n.workspace_id AS workspace_id LIMIT 1",
+                id=safe,
+            )
+            record = result.single()
+            if record:
+                return str(record["workspace_id"] or "")
+    except Exception as exc:  # noqa: BLE001 - 조회 실패는 "" 폴백(KR 기본 게이트)으로 흡수.
+        LOGGER.warning("run_store workspace lookup failed run_id=%s err=%s", run_id, exc)
+    return ""
+
+
 def backfill_neo4j() -> int:
     """로컬 파일에만 있는 실행 기록을 Neo4j 스냅샷으로 올린다(일회성 마이그레이션).
 

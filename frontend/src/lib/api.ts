@@ -126,11 +126,13 @@ export async function fetchEvalReport(name: string): Promise<EvalReportDetail> {
 export async function searchProducts(
   query: string,
   productGroup: string,
+  workspaceId?: string,
   signal?: AbortSignal,
 ): Promise<ProductSearchResult[]> {
   const params = new URLSearchParams();
   if (query.trim()) params.set("q", query.trim());
   if (productGroup) params.set("product_group", productGroup);
+  if (workspaceId) params.set("workspace_id", workspaceId);
   params.set("limit", "12");
   const response = await fetch(`/api/products/search?${params.toString()}`, {
     cache: "no-store",
