@@ -125,8 +125,10 @@ export function RevisionDiff({
   const [revisedImage, setRevisedImage] = useState<string | null>(null);
   const [imageGenError, setImageGenError] = useState("");
   const [zoomed, setZoomed] = useState<{ src: string; caption: string; downloadName?: string } | null>(null);
+  // 개선 지시(반복 루프) — 직전 가이드를 베이스로 재편집.
+  const [feedback, setFeedback] = useState("");
 
-  const generateRevisedImage = async () => {
+  const generateRevisedImage = async (feedbackText?: string) => {
     if (imageGenState === "loading") return;
     setImageGenState("loading");
     setImageGenError("");
@@ -137,6 +139,7 @@ export function RevisionDiff({
         body: JSON.stringify({
           review_run_id: result.review_run_id,
           corrected_text: correctedTextFromDiff(diff),
+          feedback: feedbackText || undefined,
         }),
       });
       if (!response.ok) {
@@ -146,6 +149,7 @@ export function RevisionDiff({
       const data = (await response.json()) as { image_base64: string; media_type: string };
       setRevisedImage(`data:${data.media_type};base64,${data.image_base64}`);
       setImageGenState("done");
+      if (feedbackText) setFeedback("");
     } catch (error) {
       setImageGenError(error instanceof Error ? error.message : "이미지 생성에 실패했습니다.");
       setImageGenState("error");
@@ -246,6 +250,30 @@ export function RevisionDiff({
                     })
                   }
                 />
+                {/* 개선 지시 — 직전 가이드를 베이스로 재편집하는 반복 루프 */}
+                <form
+                  className="mt-2 flex items-center gap-2 rounded-full border border-line bg-surface px-3 py-1.5"
+                  onSubmit={(event) => {
+                    event.preventDefault();
+                    if (feedback.trim() && imageGenState !== "loading") void generateRevisedImage(feedback.trim());
+                  }}
+                >
+                  <input
+                    type="text"
+                    value={feedback}
+                    onChange={(event) => setFeedback(event.target.value)}
+                    placeholder="가이드 개선 지시 — 예: 고지 영역 박스를 더 크게, ① 콜아웃을 오른쪽으로"
+                    className="min-w-0 flex-1 bg-transparent text-[12.5px] text-ink outline-none placeholder:text-ink-4"
+                    disabled={imageGenState === "loading"}
+                  />
+                  <button
+                    type="submit"
+                    disabled={imageGenState === "loading" || !feedback.trim()}
+                    className="shrink-0 rounded-full bg-brand px-3 py-1 text-[12px] font-bold text-white transition hover:bg-brand/90 disabled:cursor-not-allowed disabled:opacity-40"
+                  >
+                    {imageGenState === "loading" ? "적용 중…" : "개선 적용"}
+                  </button>
+                </form>
               </figure>
               <figure>
                 <figcaption className="mb-1 text-[11px] font-bold text-ink-4">BEFORE · 접수 원본</figcaption>

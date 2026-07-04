@@ -206,3 +206,31 @@ def generate_revision_guide_image(
         raise RuntimeError("Image model returned no image data.")
     LOGGER.info("ad_image.revision_guide model=%s callouts=%d prompt_chars=%d", _image_model(), len(callouts), len(prompt))
     return base64.b64decode(b64)
+
+
+def refine_revision_guide_image(guide_bytes: bytes, feedback: str) -> bytes:
+    """생성된 수정 가이드에 심사자의 개선 지시를 반영해 재편집한다.
+
+    전체 재생성이 아니라 직전 가이드 이미지를 베이스로 한 edit — 지시하지 않은
+    부분(원본 배너·기존 콜아웃)은 유지된다.
+    """
+    if not os.environ.get("OPENAI_API_KEY"):
+        raise RuntimeError("OPENAI_API_KEY is required for revision guide refinement.")
+    prompt = (
+        "This image is a compliance revision GUIDE (design-review markup over an ad banner). "
+        "Apply ONLY the following reviewer instruction, keeping everything else — the original "
+        "banner, existing callouts, numbering and text — unchanged. Render any Korean text "
+        "verbatim and legibly.\n"
+        f"Reviewer instruction: {feedback.strip()[:600]}"
+    )
+    client = OpenAI(timeout=float(os.environ.get("CCG_IMAGE_TIMEOUT_SECONDS", "180")), max_retries=1)
+    result = client.images.edit(
+        model=_image_model(),
+        image=("guide.png", io.BytesIO(guide_bytes), "image/png"),
+        prompt=prompt,
+    )
+    b64 = result.data[0].b64_json
+    if not b64:
+        raise RuntimeError("Image model returned no image data.")
+    LOGGER.info("ad_image.revision_guide_refined model=%s feedback_chars=%d", _image_model(), len(feedback))
+    return base64.b64decode(b64)

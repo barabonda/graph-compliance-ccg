@@ -29,7 +29,7 @@ except ImportError:  # pragma: no cover - optional provider.
     AnthropicAPIConnectionError = AnthropicAPIStatusError = AnthropicAuthenticationError = None  # type: ignore[assignment]
     AnthropicBadRequestError = AnthropicRateLimitError = None  # type: ignore[assignment]
 
-from ad_image import extract_ad_from_image, generate_revision_guide_image
+from ad_image import extract_ad_from_image, generate_revision_guide_image, refine_revision_guide_image
 from env_loader import load_local_env
 from jb_data_context import search_products
 from llm_gateway import LLMGateway
@@ -337,10 +337,11 @@ def revision_image(payload: dict[str, Any]) -> dict[str, Any]:
     """
     run_id = str(payload.get("review_run_id") or "").strip()
     corrected_text = str(payload.get("corrected_text") or "").strip()
-    if not run_id or not corrected_text:
+    feedback = str(payload.get("feedback") or "").strip()
+    if not run_id or (not corrected_text and not feedback):
         raise HTTPException(
             status_code=422,
-            detail={"error": "bad_request", "message": "review_run_id and corrected_text are required."},
+            detail={"error": "bad_request", "message": "review_run_id and corrected_text (or feedback) are required."},
         )
     original = find_ad_image(run_id, "original")
     if original is None:
@@ -348,6 +349,29 @@ def revision_image(payload: dict[str, Any]) -> dict[str, Any]:
             status_code=404,
             detail={"error": "not_found", "message": "이 심사에는 저장된 원본 광고 이미지가 없습니다."},
         )
+    # 개선 지시(feedback)가 있고 직전 가이드가 저장돼 있으면 그 가이드를 베이스로
+    # 재편집한다 — 반복 개선 루프. 없으면 원본에서 새 가이드를 생성.
+    previous_guide = find_ad_image(run_id, "revised")
+    if feedback and previous_guide is not None:
+        try:
+            revised = refine_revision_guide_image(previous_guide.read_bytes(), feedback)
+        except (BadRequestError, AuthenticationError, RateLimitError, APIConnectionError, APIStatusError) as exc:
+            raise HTTPException(
+                status_code=502,
+                detail={"error": "image_generation_failed", "message": "가이드 개선에 실패했습니다.", "cause": str(exc)[:400]},
+            ) from exc
+        except RuntimeError as exc:
+            raise HTTPException(status_code=503, detail={"error": "image_generation_unavailable", "message": str(exc)}) from exc
+        name = save_ad_image(run_id, "revised", revised, "image/png")
+        import base64 as _b64
+
+        return {
+            "review_run_id": run_id,
+            "file": name,
+            "image_base64": _b64.b64encode(revised).decode("ascii"),
+            "media_type": "image/png",
+            "refined": True,
+        }
     # 가이드 어노테이션 재료는 run 스냅샷의 수정안에서 직접 뽑는다 — 문구 교체
     # (before→after), 추가할 표준 고지, 심사자 보완 항목을 구분해 전달한다.
     run_snapshot = load_run(run_id) or {}
