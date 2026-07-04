@@ -28,5 +28,14 @@ class EmbeddingGateway:
     def embed_many(self, texts: list[str]) -> list[list[float]]:
         if not texts:
             return []
+        # OpenAI embeddings 는 빈 문자열을 400 으로 거부한다. 빈 텍스트가 여기까지
+        # 온 것은 상류(빈 문안·빈 anchor)의 논리 오류이므로, 알아볼 수 없는 provider
+        # 400 대신 어디가 비었는지 짚어주는 명시적 오류로 실패시킨다(no fallback).
+        empty_indexes = [i for i, text in enumerate(texts) if not str(text).strip()]
+        if empty_indexes:
+            raise ValueError(
+                f"embed_many received empty text at index {empty_indexes[:5]} of {len(texts)} — "
+                "심사 입력(광고 문안/anchor)이 비어 있습니다."
+            )
         response = self.client.embeddings.create(model=self.model, input=texts)
         return [list(item.embedding) for item in response.data]

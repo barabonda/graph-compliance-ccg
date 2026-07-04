@@ -197,9 +197,24 @@ def products_search(q: str = "", product_group: str = "auto", limit: int = 12) -
     return {"products": search_products(q, product_group=product_group, limit=limit)}
 
 
+def require_review_content(payload: dict[str, Any]) -> None:
+    """빈 문안 가드 — 문안도 이미지도 없으면 파이프라인에 들어가기 전에 명시적으로
+    거절한다(깊은 단계에서 embeddings 400 'input cannot be an empty string' 으로
+    죽는 것을 방지)."""
+    if not str(payload.get("content_text") or "").strip() and not payload_ad_images(payload):
+        raise HTTPException(
+            status_code=422,
+            detail={
+                "error": "empty_content",
+                "message": "광고 문안이 비어 있습니다 — 문안을 입력하거나 이미지를 첨부한 뒤 심사를 시작하세요.",
+            },
+        )
+
+
 @app.post("/api/review")
 def review(payload: dict[str, Any]) -> dict[str, Any]:
     try:
+        require_review_content(payload)
         extracted_image = intake_ad_image(payload)
         workflow = workflow_for(payload)
         output = workflow.review(review_input_from_payload(payload))
@@ -267,6 +282,8 @@ def review(payload: dict[str, Any]) -> dict[str, Any]:
 
 @app.post("/api/review/stream")
 def review_stream(payload: dict[str, Any]) -> StreamingResponse:
+    require_review_content(payload)  # 스트림 시작 전 빈 문안 거절(422)
+
     def event_lines():
         event_queue: queue.Queue[dict[str, Any] | None] = queue.Queue()
         heartbeat_seconds = float(os.environ.get("CCG_REVIEW_STREAM_HEARTBEAT_SECONDS", "15"))
