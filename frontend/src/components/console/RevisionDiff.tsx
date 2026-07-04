@@ -1,8 +1,10 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { tr, useLocale } from "@/lib/i18n";
 import { abbreviateLawNames } from "@/lib/labels";
 import { buildRevisionDiff, correctedTextFromDiff, type RevisionDiffLine } from "@/lib/revisionDiff";
+import { translationForRevisionLine, type SentenceTranslation } from "@/lib/selectors";
 import type { ReviewOutput } from "@/lib/types";
 import { Icon } from "../Icon";
 import { ImageLightbox } from "./ImageLightbox";
@@ -48,14 +50,20 @@ function DiffLine({
   line,
   selected,
   onSelectAnchor,
+  translation,
 }: {
   line: RevisionDiffLine;
   selected: boolean;
   onSelectAnchor: (anchorId: string) => void;
+  /** 수정문(+ 줄) 3개 언어 참고 번역(EN·KM·KO) — KH 심사에서만 채워진다. */
+  translation?: SentenceTranslation | null;
 }) {
+  const locale = useLocale();
   const style = LINE_STYLE[line.type];
   const interactive = Boolean(line.anchorId);
   const hasTooltip = Boolean(line.reason || line.basis);
+  const sameAsLine = (text: string) =>
+    text.replace(/\s+/g, " ").trim().toLowerCase() === line.text.replace(/\s+/g, " ").trim().toLowerCase();
 
   return (
     <div
@@ -82,6 +90,18 @@ function DiffLine({
         } ${line.type === "del" ? "line-through decoration-[color:var(--reject)]/40" : ""}`}
       >
         <LineBody line={line} />
+        {translation && translation.lines.length > 0 && (
+          <span className="mt-1 block space-y-0.5 text-[12px] leading-relaxed font-normal text-ink-3">
+            {translation.lines
+              .filter((t) => !sameAsLine(t.text))
+              .map((t) => (
+                <span key={t.label} className="flex gap-1.5 break-keep">
+                  <span className="mt-0.5 shrink-0 rounded bg-surface-2 px-1 font-mono text-[11px] font-bold text-ink-4">{t.label}</span>
+                  <span>{t.text}</span>
+                </span>
+              ))}
+          </span>
+        )}
       </span>
       {/* group/line 네임드 그룹 — 부모 details(.group)와의 중첩 호버 충돌 방지
           (일반 group-hover 는 조상 group 호버에도 반응해 툴팁이 전부 떴다). */}
@@ -89,14 +109,18 @@ function DiffLine({
         <div className="pointer-events-none absolute top-full right-2 left-8 z-30 hidden group-hover/line:block">
           <div className="mt-0.5 rounded-[10px] border border-line bg-surface px-3 py-2 shadow-panel">
             <div className="text-[11px] font-bold tracking-wider text-ink-4">
-              {line.type === "del" ? "위험 이유" : "수정 이유"}
+              {line.type === "del" ? tr(locale, "위험 이유", "Why risky") : tr(locale, "수정 이유", "Why revised")}
               {line.label ? ` · ${line.label}` : ""}
             </div>
             {line.reason && <p className="m-0 mt-1 text-[12px] leading-relaxed break-keep text-ink-2">{line.reason}</p>}
             {line.basis && (
               <div className="mt-1 text-[11px] text-ink-4">{abbreviateLawNames(line.basis)}</div>
             )}
-            {interactive && <div className="mt-1 text-[11px] font-semibold text-brand-2">클릭하면 판정 상세로 이동</div>}
+            {interactive && (
+              <div className="mt-1 text-[11px] font-semibold text-brand-2">
+                {tr(locale, "클릭하면 판정 상세로 이동", "Click to open the finding details")}
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -119,7 +143,8 @@ export function RevisionDiff({
   selectedAnchorId: string;
   onSelectAnchor: (anchorId: string) => void;
 }) {
-  const diff = useMemo(() => buildRevisionDiff(result, reviewedText), [result, reviewedText]);
+  const locale = useLocale();
+  const diff = useMemo(() => buildRevisionDiff(result, reviewedText, locale), [result, reviewedText, locale]);
   const hasChanges = diff.changedCount > 0 || diff.disclosureAddCount > 0;
   const [copied, setCopied] = useState(false);
   // 이미지 수정안(멀티모달) — 접수 이미지가 있는 run 에서만 노출.
@@ -169,14 +194,19 @@ export function RevisionDiff({
       });
       if (!response.ok) {
         const body = (await response.json().catch(() => null)) as { detail?: { message?: string } } | null;
-        throw new Error(body?.detail?.message ?? `이미지 생성 실패 (HTTP ${response.status})`);
+        throw new Error(
+          body?.detail?.message ??
+            tr(locale, `이미지 생성 실패 (HTTP ${response.status})`, `Image generation failed (HTTP ${response.status})`),
+        );
       }
       const data = (await response.json()) as { image_base64: string; media_type: string };
       setRevisedImage(`data:${data.media_type};base64,${data.image_base64}`);
       setImageGenState("done");
       if (feedbackText) setFeedback("");
     } catch (error) {
-      setImageGenError(error instanceof Error ? error.message : "이미지 생성에 실패했습니다.");
+      setImageGenError(
+        error instanceof Error ? error.message : tr(locale, "이미지 생성에 실패했습니다.", "Image generation failed."),
+      );
       setImageGenState("error");
     }
   };
@@ -206,11 +236,13 @@ export function RevisionDiff({
       {/* 크리에이티브 배너 — 원문 모드와 동일한 블루 그라데이션 */}
       <div className="px-5.5 py-5 text-white" style={{ background: "linear-gradient(135deg,#1d3a6e,#2f6df0)" }}>
         <div className="mb-3 flex items-center justify-between">
-          <span className="font-mono text-[11px] tracking-wider opacity-85">JB금융그룹 · AI 교정안</span>
-          <span className="rounded-full bg-white/18 px-2.5 py-0.5 text-[11px] font-bold">{productGroup || "광고"}</span>
+          <span className="font-mono text-[11px] tracking-wider opacity-85">
+            {tr(locale, "JB금융그룹 · AI 교정안", "PPCBank · AI revision draft")}
+          </span>
+          <span className="rounded-full bg-white/18 px-2.5 py-0.5 text-[11px] font-bold">{productGroup || tr(locale, "광고", "Ad")}</span>
         </div>
         <div className="text-[21px] leading-snug font-extrabold tracking-tight break-keep">
-          {reviewTitle || "광고 문안"}
+          {reviewTitle || tr(locale, "광고 문안", "Ad copy")}
         </div>
         {hasChanges && (
           <div className="mt-3.5 flex flex-wrap items-center gap-x-4 gap-y-2">
@@ -218,11 +250,21 @@ export function RevisionDiff({
                 (버튼들이 flex 폭을 잠식하면 텍스트가 1글자 폭까지 줄어드는 문제). */}
             <div className="min-w-[180px] flex-1 break-keep">
               <div className="text-[13.5px] font-bold">
-                위험 문구 {diff.changedCount}곳 완화
-                {diff.disclosureAddCount ? ` · 필수 고지 ${diff.disclosureAddCount}건 추가` : ""}
+                {tr(locale, `위험 문구 ${diff.changedCount}곳 완화`, `${diff.changedCount} risk expression(s) mitigated`)}
+                {diff.disclosureAddCount
+                  ? tr(
+                      locale,
+                      ` · 필수 고지 ${diff.disclosureAddCount}건 추가`,
+                      ` · ${diff.disclosureAddCount} required disclosure(s) added`,
+                    )
+                  : ""}
               </div>
               <div className="mt-0.5 text-[11px] opacity-80">
-                근거 조문 기반 최소 수정 — 최종 확정 책임은 심사자에게 있습니다.
+                {tr(
+                  locale,
+                  "근거 조문 기반 최소 수정 — 최종 확정 책임은 심사자에게 있습니다.",
+                  "Minimal edits grounded in the cited clauses — final sign-off remains with the reviewer.",
+                )}
               </div>
             </div>
             <button
@@ -231,7 +273,7 @@ export function RevisionDiff({
               className="flex shrink-0 items-center gap-1.5 rounded-[10px] bg-white/16 px-3 py-2 text-[12.5px] font-bold text-white transition hover:bg-white/28"
             >
               <Icon name={copied ? "check" : "clause"} size={14} color="#fff" />
-              {copied ? "복사됨" : "교정안 복사"}
+              {copied ? tr(locale, "복사됨", "Copied") : tr(locale, "교정안 복사", "Copy revision")}
             </button>
             {/* 첫 생성 CTA 는 아래 이미지 영역이 담당 — 배너 버튼은 재생성 전용 */}
             {result.ad_image?.available && revisedImage && (
@@ -242,7 +284,9 @@ export function RevisionDiff({
                 className="flex shrink-0 items-center gap-1.5 rounded-[10px] bg-white/16 px-3 py-2 text-[12.5px] font-bold text-white transition hover:bg-white/28 disabled:cursor-wait disabled:opacity-70"
               >
                 <Icon name="alert" size={14} color="#fff" />
-                {imageGenState === "loading" ? "가이드 생성 중…" : "가이드 다시 생성"}
+                {imageGenState === "loading"
+                  ? tr(locale, "가이드 생성 중…", "Generating guide…")
+                  : tr(locale, "가이드 다시 생성", "Regenerate guide")}
               </button>
             )}
           </div>
@@ -257,14 +301,19 @@ export function RevisionDiff({
             <p className="mb-2 text-[12.5px] font-semibold text-reject">{imageGenError}</p>
           )}
           <figure>
-            <figcaption className="mb-1 text-[11px] font-bold text-ink-3">접수 원본 (이미지 광고)</figcaption>
+            <figcaption className="mb-1 text-[11px] font-bold text-ink-3">
+              {tr(locale, "접수 원본 (이미지 광고)", "Submitted original (image ad)")}
+            </figcaption>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={`/api/ad-image/${result.review_run_id}/original`}
-              alt="원본 광고 이미지"
+              alt={tr(locale, "원본 광고 이미지", "Original ad image")}
               className="w-full cursor-zoom-in rounded-md border border-line bg-white object-contain"
               onClick={() =>
-                setZoomed({ src: `/api/ad-image/${result.review_run_id}/original`, caption: "접수 원본 광고 이미지" })
+                setZoomed({
+                  src: `/api/ad-image/${result.review_run_id}/original`,
+                  caption: tr(locale, "접수 원본 광고 이미지", "Submitted original ad image"),
+                })
               }
             />
           </figure>
@@ -274,7 +323,13 @@ export function RevisionDiff({
             disabled={imageGenState === "loading"}
             className="mt-3 w-full rounded-[10px] bg-brand py-2.5 text-[13.5px] font-bold text-white transition hover:bg-brand/90 disabled:cursor-wait disabled:opacity-70"
           >
-            {imageGenState === "loading" ? "이미지 수정 가이드 생성 중… (약 1~2분)" : "이미지 수정 가이드 생성 — 교정 위치를 원본 위에 표시"}
+            {imageGenState === "loading"
+              ? tr(locale, "이미지 수정 가이드 생성 중… (약 1~2분)", "Generating image revision guide… (about 1–2 min)")
+              : tr(
+                  locale,
+                  "이미지 수정 가이드 생성 — 교정 위치를 원본 위에 표시",
+                  "Generate image revision guide — marks each fix on the original",
+                )}
           </button>
         </div>
       )}
@@ -287,18 +342,20 @@ export function RevisionDiff({
             <div className="space-y-3">
               <figure>
                 <figcaption className="mb-1 flex items-center justify-between text-[11px] font-bold text-pass">
-                  <span>AFTER · AI 수정 가이드</span>
-                  <span className="font-normal text-ink-4">클릭하면 크게 보기 · 다운로드</span>
+                  <span>{tr(locale, "AFTER · AI 수정 가이드", "AFTER · AI revision guide")}</span>
+                  <span className="font-normal text-ink-4">
+                    {tr(locale, "클릭하면 크게 보기 · 다운로드", "Click to enlarge · download")}
+                  </span>
                 </figcaption>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={revisedImage}
-                  alt="교정 위치를 표시한 이미지 수정 가이드"
+                  alt={tr(locale, "교정 위치를 표시한 이미지 수정 가이드", "Image revision guide with each fix marked")}
                   className="w-full cursor-zoom-in rounded-md border border-pass/50 bg-white object-contain transition hover:shadow-panel"
                   onClick={() =>
                     setZoomed({
                       src: revisedImage,
-                      caption: "AI 수정 가이드 — 교정 위치 마크업",
+                      caption: tr(locale, "AI 수정 가이드 — 교정 위치 마크업", "AI revision guide — revision markup"),
                       downloadName: `${result.review_run_id}_revision_guide.png`,
                     })
                   }
@@ -315,7 +372,11 @@ export function RevisionDiff({
                     type="text"
                     value={feedback}
                     onChange={(event) => setFeedback(event.target.value)}
-                    placeholder="가이드 개선 지시 — 예: 고지 영역 박스를 더 크게, ① 콜아웃을 오른쪽으로"
+                    placeholder={tr(
+                      locale,
+                      "가이드 개선 지시 — 예: 고지 영역 박스를 더 크게, ① 콜아웃을 오른쪽으로",
+                      "Refinement instructions — e.g. enlarge the disclosure box, move callout ① to the right",
+                    )}
                     className="min-w-0 flex-1 bg-transparent text-[12.5px] text-ink outline-none placeholder:text-ink-4"
                     disabled={imageGenState === "loading"}
                   />
@@ -324,28 +385,33 @@ export function RevisionDiff({
                     disabled={imageGenState === "loading" || !feedback.trim()}
                     className="shrink-0 rounded-full bg-brand px-3 py-1 text-[12px] font-bold text-white transition hover:bg-brand/90 disabled:cursor-not-allowed disabled:opacity-40"
                   >
-                    {imageGenState === "loading" ? "적용 중…" : "개선 적용"}
+                    {imageGenState === "loading" ? tr(locale, "적용 중…", "Applying…") : tr(locale, "개선 적용", "Apply refinement")}
                   </button>
                 </form>
               </figure>
               <figure>
-                <figcaption className="mb-1 text-[11px] font-bold text-ink-4">BEFORE · 접수 원본</figcaption>
+                <figcaption className="mb-1 text-[11px] font-bold text-ink-4">
+                  {tr(locale, "BEFORE · 접수 원본", "BEFORE · Submitted original")}
+                </figcaption>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={`/api/ad-image/${result.review_run_id}/original`}
-                  alt="원본 광고 이미지"
+                  alt={tr(locale, "원본 광고 이미지", "Original ad image")}
                   className="w-full cursor-zoom-in rounded-md border border-line bg-white object-contain transition hover:shadow-panel"
                   onClick={() =>
                     setZoomed({
                       src: `/api/ad-image/${result.review_run_id}/original`,
-                      caption: "접수 원본 광고 이미지",
+                      caption: tr(locale, "접수 원본 광고 이미지", "Submitted original ad image"),
                     })
                   }
                 />
               </figure>
               <p className="text-[11px] leading-relaxed text-ink-4">
-                수정 가이드는 완성 시안이 아니라 어느 자리에 어떤 문구를 반영해야 하는지 표시한 검수 마크업입니다 —
-                실제 반영 문구는 아래 교정안(diff)을 기준으로 디자이너가 적용합니다.
+                {tr(
+                  locale,
+                  "수정 가이드는 완성 시안이 아니라 어느 자리에 어떤 문구를 반영해야 하는지 표시한 검수 마크업입니다 — 실제 반영 문구는 아래 교정안(diff)을 기준으로 디자이너가 적용합니다.",
+                  "The revision guide is review markup showing where each wording change belongs, not a finished design — the designer applies the actual wording from the revision diff below.",
+                )}
               </p>
             </div>
           )}
@@ -366,14 +432,20 @@ export function RevisionDiff({
       {result.ad_image?.available ? (
         <details className="group">
           <summary className="flex cursor-pointer flex-wrap items-center gap-x-3 gap-y-1 border-b border-line bg-surface-2 px-4 py-2.5 select-none">
-            <span className="font-mono text-[12px] font-bold text-ink-2">추출 문안 교정 (diff)</span>
+            <span className="font-mono text-[12px] font-bold text-ink-2">
+              {tr(locale, "추출 문안 교정 (diff)", "Extracted-copy revision (diff)")}
+            </span>
             <span className="font-mono text-[11.5px]">
               <span className="font-bold text-reject">−{diff.changedCount}</span>{" "}
               <span className="font-bold text-pass">+{diff.changedCount + diff.disclosureAddCount}</span>
             </span>
             <span className="ml-auto text-[11px] text-ink-4">
-              <span className="group-open:hidden">펼치기 — 가이드에 반영된 문구 교정 내역</span>
-              <span className="hidden group-open:inline">줄에 커서를 올리면 이유, 클릭하면 판정 상세</span>
+              <span className="group-open:hidden">
+                {tr(locale, "펼치기 — 가이드에 반영된 문구 교정 내역", "Expand — wording revisions reflected in the guide")}
+              </span>
+              <span className="hidden group-open:inline">
+                {tr(locale, "줄에 커서를 올리면 이유, 클릭하면 판정 상세", "Hover a line for the reason; click for finding details")}
+              </span>
             </span>
           </summary>
           {hasChanges ? (
@@ -384,24 +456,31 @@ export function RevisionDiff({
                   line={line}
                   selected={Boolean(line.anchorId && line.anchorId === selectedAnchorId)}
                   onSelectAnchor={onSelectAnchor}
+                  translation={line.type === "add" ? translationForRevisionLine(result, line.text) : null}
                 />
               ))}
             </div>
           ) : (
-            <div className="px-4 py-6 text-[13px] text-ink-4">수정이 필요한 표현이 없습니다 — 원문 그대로 게시 가능합니다.</div>
+            <div className="px-4 py-6 text-[13px] text-ink-4">
+              {tr(
+                locale,
+                "수정이 필요한 표현이 없습니다 — 원문 그대로 게시 가능합니다.",
+                "No expressions require revision — the original can be published as is.",
+              )}
+            </div>
           )}
         </details>
       ) : (
         <>
           {/* diff 헤더 — GitHub 파일 헤더 오마주 */}
           <div className="flex flex-wrap items-center gap-x-3 gap-y-1 border-b border-line bg-surface-2 px-4 py-2.5">
-            <span className="font-mono text-[12px] font-bold text-ink-2">광고 문안</span>
+            <span className="font-mono text-[12px] font-bold text-ink-2">{tr(locale, "광고 문안", "Ad copy")}</span>
             <span className="font-mono text-[11.5px]">
               <span className="font-bold text-reject">−{diff.changedCount}</span>{" "}
               <span className="font-bold text-pass">+{diff.changedCount + diff.disclosureAddCount}</span>
             </span>
             <span className="ml-auto text-[11px] text-ink-4">
-              줄에 커서를 올리면 이유, 클릭하면 판정 상세
+              {tr(locale, "줄에 커서를 올리면 이유, 클릭하면 판정 상세", "Hover a line for the reason; click for finding details")}
             </span>
           </div>
           {hasChanges ? (
@@ -412,11 +491,18 @@ export function RevisionDiff({
                   line={line}
                   selected={Boolean(line.anchorId && line.anchorId === selectedAnchorId)}
                   onSelectAnchor={onSelectAnchor}
+                  translation={line.type === "add" ? translationForRevisionLine(result, line.text) : null}
                 />
               ))}
             </div>
           ) : (
-            <div className="px-4 py-6 text-[13px] text-ink-4">수정이 필요한 표현이 없습니다 — 원문 그대로 게시 가능합니다.</div>
+            <div className="px-4 py-6 text-[13px] text-ink-4">
+              {tr(
+                locale,
+                "수정이 필요한 표현이 없습니다 — 원문 그대로 게시 가능합니다.",
+                "No expressions require revision — the original can be published as is.",
+              )}
+            </div>
           )}
         </>
       )}

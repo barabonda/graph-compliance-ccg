@@ -5,6 +5,14 @@
  */
 
 import {
+  HUMAN_ACTION_LABELS_EN,
+  HUMAN_FEATURE_LABELS_EN,
+  QUALIFIER_LABELS_EN,
+  riskGradeLabelEn,
+  tr,
+  type Locale,
+} from "./i18n";
+import {
   disclosureMeta as disclosureMetaResolved,
   DISCLOSURE_LABELS,
   HUMAN_ACTION_LABELS,
@@ -259,16 +267,19 @@ export function maxSeverity(result: ReviewOutput): number {
   return Math.max(0, ...(result.detected_issues ?? []).map((item) => Number(item.severity ?? 0)));
 }
 
-export function humanAnchorLabel(result: ReviewOutput, anchor: ContextAnchor): string {
+export function humanAnchorLabel(result: ReviewOutput, anchor: ContextAnchor, locale: Locale = "ko"): string {
+  const actionMap = locale === "en" ? HUMAN_ACTION_LABELS_EN : HUMAN_ACTION_LABELS;
+  const featureMap = locale === "en" ? HUMAN_FEATURE_LABELS_EN : HUMAN_FEATURE_LABELS;
+  const qualifierMap = locale === "en" ? QUALIFIER_LABELS_EN : QUALIFIER_LABELS;
   const featureSet =
     anchor.feature_set ??
     (result.anchor_feature_sets ?? []).find((item) => item.anchor_id === anchor.anchor_id);
-  const action = (featureSet?.action_types ?? []).find((item) => HUMAN_ACTION_LABELS[item]);
-  if (action) return HUMAN_ACTION_LABELS[action];
-  const feature = (featureSet?.positive_features ?? []).find((item) => HUMAN_FEATURE_LABELS[item]);
-  if (feature) return HUMAN_FEATURE_LABELS[feature];
-  const qualifier = claimQualifiers(result, anchor.claim_id).find((item) => QUALIFIER_LABELS[item.role]);
-  if (qualifier) return QUALIFIER_LABELS[qualifier.role];
+  const action = (featureSet?.action_types ?? []).find((item) => actionMap[item]);
+  if (action) return actionMap[action];
+  const feature = (featureSet?.positive_features ?? []).find((item) => featureMap[item]);
+  if (feature) return featureMap[feature];
+  const qualifier = claimQualifiers(result, anchor.claim_id).find((item) => qualifierMap[item.role]);
+  if (qualifier) return qualifierMap[qualifier.role];
   return "";
 }
 
@@ -310,6 +321,18 @@ export const TONE_WORD: Record<HighlightTone, string> = {
   scope: "범위",
 };
 
+const TONE_WORD_EN: Record<HighlightTone, string> = {
+  risk: "Risk",
+  review: "Review",
+  "keep-warning": "Disclosure · low prominence",
+  keep: "Disclosure",
+  scope: "Scope",
+};
+
+export function toneWord(tone: HighlightTone, locale: Locale = "ko"): string {
+  return locale === "en" ? TONE_WORD_EN[tone] : TONE_WORD[tone];
+}
+
 export interface HighlightCandidate {
   id: string;
   kind: "area" | "token";
@@ -333,7 +356,7 @@ export function verdictTone(verdict: string): HighlightTone {
 }
 
 /** "금소법 시행령 제20조 ①-4 외 2건" 형태의 근거 요약. */
-export function basisSummary(result: ReviewOutput, anchorId: string): string {
+export function basisSummary(result: ReviewOutput, anchorId: string, locale: Locale = "ko"): string {
   const articles = [
     ...new Set(
       planItemsForAnchor(result, anchorId)
@@ -342,7 +365,10 @@ export function basisSummary(result: ReviewOutput, anchorId: string): string {
     ),
   ];
   if (!articles.length) return "";
-  return articles.length > 1 ? `${articles[0]} 외 ${articles.length - 1}건` : articles[0];
+  if (articles.length === 1) return articles[0];
+  return locale === "en"
+    ? `${articles[0]} and ${articles.length - 1} more`
+    : `${articles[0]} 외 ${articles.length - 1}건`;
 }
 
 function areaPriority(tone: HighlightTone, anchorType: string): number {
@@ -365,20 +391,20 @@ function tokenPriority(role: string, tone: HighlightTone): number {
   return (roleScore[role] ?? 50) + TONE_RANK[tone];
 }
 
-function areaLabel(result: ReviewOutput, anchor: ContextAnchor, tone: HighlightTone): string {
-  if (tone === "scope") return "범위";
-  const human = humanAnchorLabel(result, anchor);
+function areaLabel(result: ReviewOutput, anchor: ContextAnchor, tone: HighlightTone, locale: Locale = "ko"): string {
+  if (tone === "scope") return tr(locale, "범위", "Scope");
+  const human = humanAnchorLabel(result, anchor, locale);
   if (human) return human;
-  if (tone === "risk") return "위험 표현";
-  if (tone === "review") return "검토 필요";
-  if (tone === "keep") return "유지 고지";
-  return "검토됨";
+  if (tone === "risk") return tr(locale, "위험 표현", "Risky wording");
+  if (tone === "review") return tr(locale, "검토 필요", "Review required");
+  if (tone === "keep") return tr(locale, "유지 고지", "Disclosure to keep");
+  return tr(locale, "검토됨", "Reviewed");
 }
 
-function withBasis(toneWord: string, label: string, basis: string, extra = ""): string {
-  const parts = [`${toneWord} · ${label}`];
+function withBasis(toneWordText: string, label: string, basis: string, extra = "", locale: Locale = "ko"): string {
+  const parts = [`${toneWordText} · ${label}`];
   if (extra) parts.push(extra);
-  if (basis) parts.push(`근거 ${basis}`);
+  if (basis) parts.push(locale === "en" ? `Basis ${basis}` : `근거 ${basis}`);
   return parts.join(" · ");
 }
 
@@ -395,6 +421,7 @@ export function highlightCandidates(
   result: ReviewOutput,
   text: string,
   selectedPrinciple: PrincipleKey | "",
+  locale: Locale = "ko",
 ): HighlightCandidate[] {
   const anchors = filteredAnchors(result, selectedPrinciple);
 
@@ -406,8 +433,8 @@ export function highlightCandidates(
       const role = display?.display_role ?? (isActionableAnchor(result, anchor.anchor_id) ? "actionable" : "scope");
       const tone: HighlightTone =
         role === "scope" ? "scope" : verdictTone(display?.display_verdict ?? "ANCHOR");
-      const label = areaLabel(result, anchor, tone);
-      const basis = basisSummary(result, anchor.anchor_id);
+      const label = areaLabel(result, anchor, tone, locale);
+      const basis = basisSummary(result, anchor.anchor_id, locale);
       return {
         id: anchor.anchor_id,
         kind: "area",
@@ -417,7 +444,7 @@ export function highlightCandidates(
         text: anchor.span.text,
         tone,
         label,
-        tooltip: withBasis(TONE_WORD[tone], label, basis),
+        tooltip: withBasis(toneWord(tone, locale), label, basis, "", locale),
         priority: areaPriority(tone, anchor.anchor_type),
       };
     })
@@ -441,8 +468,8 @@ export function highlightCandidates(
         : undefined;
       const tone: HighlightTone = insufficient ? "keep-warning" : "keep";
       const label = insufficient
-        ? "고지 있음 · 위계 낮음"
-        : DISCLOSURE_LABELS[String(link.check_id ?? "")] ?? check?.label ?? "유지 고지";
+        ? tr(locale, "고지 있음 · 위계 낮음", "Disclosure present · low prominence")
+        : DISCLOSURE_LABELS[String(link.check_id ?? "")] ?? check?.label ?? tr(locale, "유지 고지", "Disclosure to keep");
       return {
         id: `disclosure_${link.disclosure_sentence_id ?? index}`,
         kind: "area",
@@ -453,10 +480,11 @@ export function highlightCandidates(
         tone,
         label,
         tooltip: withBasis(
-          TONE_WORD[tone],
+          toneWord(tone, locale),
           label,
           "",
-          diagnostic?.message || link.reason || "수정 시 유지해야 할 고지입니다.",
+          diagnostic?.message || link.reason || tr(locale, "수정 시 유지해야 할 고지입니다.", "Keep this disclosure when revising."),
+          locale,
         ),
         priority: TONE_RANK[tone] * 10 + 3,
       };
@@ -469,12 +497,13 @@ export function highlightCandidates(
     .flatMap((anchor) => {
       const display = anchorDisplay(result, anchor.anchor_id);
       const claimTone = verdictTone(display?.display_verdict ?? "ANCHOR");
-      const basis = basisSummary(result, anchor.anchor_id);
+      const basis = basisSummary(result, anchor.anchor_id, locale);
+      const qualifierMap = locale === "en" ? QUALIFIER_LABELS_EN : QUALIFIER_LABELS;
       return claimQualifiers(result, anchor.claim_id).map((qualifier): HighlightCandidate => {
         const aligned = alignSpan(text, qualifier.span ?? { text: qualifier.text, start: -1, end: -1 });
         const isDisclosure = qualifier.role === "disclosure_qualifier";
         const tone: HighlightTone = isDisclosure ? "keep" : claimTone === "scope" ? "review" : claimTone;
-        const label = QUALIFIER_LABELS[qualifier.role] ?? "표현";
+        const label = qualifierMap[qualifier.role] ?? tr(locale, "표현", "Expression");
         return {
           id: qualifier.qualifier_id || `${anchor.anchor_id}_${qualifier.text}`,
           kind: "token",
@@ -484,7 +513,7 @@ export function highlightCandidates(
           text: qualifier.text,
           tone,
           label,
-          tooltip: withBasis(TONE_WORD[tone], label, basis, qualifier.meaning || qualifier.risk_reason || ""),
+          tooltip: withBasis(toneWord(tone, locale), label, basis, qualifier.meaning || qualifier.risk_reason || "", locale),
           priority: tokenPriority(qualifier.role, tone),
         };
       });
@@ -630,9 +659,9 @@ export interface AdLine {
  * SentenceUnit 기준으로 원문을 줄(블록)로 나눈다. 문장 사이 공백/문장부호
  * gap도 보존한다. sentence_units가 없거나 정렬이 깨지면 전체를 한 줄로.
  */
-export function buildAdLines(result: ReviewOutput, text: string): AdLine[] {
+export function buildAdLines(result: ReviewOutput, text: string, locale: Locale = "ko"): AdLine[] {
   if (!text) return [];
-  const candidates = highlightCandidates(result, text, "");
+  const candidates = highlightCandidates(result, text, "", locale);
   const annotateRange = (start: number, end: number): AnnotatedText => {
     const slice = text.slice(start, end);
     const local = candidates
@@ -728,7 +757,7 @@ export interface DisclosureSlot {
   evidence: ProductFact[];
 }
 
-export function requiredDisclosureSlots(result: ReviewOutput): DisclosureSlot[] {
+export function requiredDisclosureSlots(result: ReviewOutput, locale: Locale = "ko"): DisclosureSlot[] {
   const checks = result.product_fact_context?.disclosure_checks ?? [];
   return checks
     .filter((check) => !disclosureIsSatisfied(check) && disclosureStatus(check) !== "SKIPPED_BY_GATE")
@@ -737,7 +766,7 @@ export function requiredDisclosureSlots(result: ReviewOutput): DisclosureSlot[] 
       return {
         checkId: check.check_id,
         label: check.label,
-        source: String(check.source ?? "금융광고 심의기준"),
+        source: String(check.source ?? tr(locale, "금융광고 심의기준", "Financial-ad review standards")),
         status: cross.status,
         evidence: cross.facts,
       };
@@ -1017,6 +1046,13 @@ const RELATION_KO: Record<string, string> = {
   AMPLIFIES_RISK: "위험 증폭",
 };
 
+const RELATION_EN: Record<string, string> = {
+  QUALIFIES: "Qualifies",
+  MITIGATES: "Mitigates risk",
+  REINFORCES: "Reinforces impression",
+  AMPLIFIES_RISK: "Amplifies risk",
+};
+
 // 노드 역할 → 그래프 종류/색. 색은 관계 타입이 아니라 '문장 역할'로 정한다
 // (혜택=위험/빨강, 조건·위험 고지=완화/노랑, 보호 고지=강화/초록).
 const ROLE_NODE: Record<string, { kind: OverallNodeKind; title: string }> = {
@@ -1025,7 +1061,13 @@ const ROLE_NODE: Record<string, { kind: OverallNodeKind; title: string }> = {
   protection_disclosure: { kind: "reinforce", title: "보호 고지" },
 };
 
-export function buildOverallImpressionGraph(result: ReviewOutput): OverallImpressionGraphModel {
+const ROLE_NODE_TITLE_EN: Record<string, string> = {
+  condition_disclosure: "Condition disclosure",
+  risk_disclosure: "Risk disclosure",
+  protection_disclosure: "Protection disclosure",
+};
+
+export function buildOverallImpressionGraph(result: ReviewOutput, locale: Locale = "ko"): OverallImpressionGraphModel {
   const tb = result.overall_impression_judgment;
   const sentences = new Map((result.sentence_units ?? []).map((item) => [item.sentence_id, item]));
   const relations = result.inter_sentence_relations ?? [];
@@ -1046,7 +1088,7 @@ export function buildOverallImpressionGraph(result: ReviewOutput): OverallImpres
         salience(b.text) + degree(b.sentence_id) - (salience(a.text) + degree(a.sentence_id)),
     )[0];
   const benefit: OverallGraphNode | null = benefitSentence
-    ? { kind: "benefit", title: "혜택 주장", text: benefitSentence.text }
+    ? { kind: "benefit", title: tr(locale, "혜택 주장", "Benefit claim"), text: benefitSentence.text }
     : null;
 
   // 엣지: benefit_claim ↔ (조건/위험/보호 고지) 관계만, 노드 역할로 완화/강화 분류.
@@ -1062,10 +1104,14 @@ export function buildOverallImpressionGraph(result: ReviewOutput): OverallImpres
     const mapping = ROLE_NODE[other.role];
     if (!mapping || seen.has(other.sentence_id)) continue;
     seen.add(other.sentence_id);
-    const relKo = RELATION_KO[rel.relation_type] ?? "관계";
+    const relationLabel =
+      locale === "en"
+        ? RELATION_EN[rel.relation_type] ?? "Relation"
+        : RELATION_KO[rel.relation_type] ?? "관계";
+    const nodeTitle = locale === "en" ? ROLE_NODE_TITLE_EN[other.role] ?? mapping.title : mapping.title;
     edges.push({
-      label: `${mapping.title} · ${relKo}`,
-      node: { kind: mapping.kind, title: mapping.title, text: other.text },
+      label: `${nodeTitle} · ${relationLabel}`,
+      node: { kind: mapping.kind, title: nodeTitle, text: other.text },
     });
     if (edges.length >= 5) break;
   }
@@ -1073,7 +1119,7 @@ export function buildOverallImpressionGraph(result: ReviewOutput): OverallImpres
   return { benefit, edges, conclusion };
 }
 
-export function buildIssueCards(result: ReviewOutput): IssueCardModel[] {
+export function buildIssueCards(result: ReviewOutput, locale: Locale = "ko"): IssueCardModel[] {
   const cards: IssueCardModel[] = [];
 
   // claim_anchor + risk_anchor can alias the same claim — one card per claim,
@@ -1091,11 +1137,13 @@ export function buildIssueCards(result: ReviewOutput): IssueCardModel[] {
     const qualifiers = [...claimQualifiers(result, anchor.claim_id)].sort(
       (a, b) => tokenPriority(b.role, tone) - tokenPriority(a.role, tone),
     );
-    const label = humanAnchorLabel(result, anchor) || (tone === "risk" ? "위험 표현" : "검토 필요");
+    const label =
+      humanAnchorLabel(result, anchor, locale) ||
+      (tone === "risk" ? tr(locale, "위험 표현", "Risky wording") : tr(locale, "검토 필요", "Review required"));
     // 카드 인용은 실제 판정 근거(claim 전체)를 보여준다. 단일 qualifier("보장")만
     // 띄우면 결합 단정의 맥락이 사라져 무슨 위반인지 알기 어렵다.
     const quote = anchor.span.text || qualifiers[0]?.text || "";
-    const basis = [basisSummary(result, anchor.anchor_id), issues[0]?.risk_title]
+    const basis = [basisSummary(result, anchor.anchor_id, locale), issues[0]?.risk_title]
       .filter(Boolean)
       .join(" · ");
     const risky = effective.filter((item) => ["NON_COMPLIANT", "INSUFFICIENT"].includes(item.verdict));
@@ -1103,7 +1151,10 @@ export function buildIssueCards(result: ReviewOutput): IssueCardModel[] {
     const findings = risky[0]?.criteria_findings ?? [];
     const unmet = findings.filter((finding) => !finding.satisfied).length;
     // 미충족이 있을 때만 노출. INSUFFICIENT(증거 불충분)에서 '0개 미충족'은 오해 소지.
-    const criteriaSummary = unmet > 0 ? `요건 ${findings.length}개 중 ${unmet}개 미충족` : undefined;
+    const criteriaSummary =
+      unmet > 0
+        ? tr(locale, `요건 ${findings.length}개 중 ${unmet}개 미충족`, `${unmet} of ${findings.length} criteria not met`)
+        : undefined;
     const card: IssueCardModel = {
       id: anchor.anchor_id,
       code: "",
@@ -1144,6 +1195,7 @@ export function buildIssueCards(result: ReviewOutput): IssueCardModel[] {
     const requirement = requirements.find(
       (item) => item.label === check.label || String(item.check_id ?? "") === check.check_id,
     );
+    const missingLabel = tr(locale, "필수 고지 누락", "Missing required disclosure");
     cards.push({
       id: `disclosure_${check.check_id}`,
       code: "",
@@ -1151,12 +1203,17 @@ export function buildIssueCards(result: ReviewOutput): IssueCardModel[] {
       track: "A",
       grade: "중간",
       tone: "review",
-      label: "필수 고지 누락",
+      label: missingLabel,
       quote: check.label,
-      title: `필수 고지 누락 — ${check.label}`,
+      title: `${missingLabel} — ${check.label}`,
       // 근거 조문: tier 규칙이 고른 대표 근거 우선, 없으면 카탈로그 source.
-      basis: String(check.representative_basis ?? check.source ?? requirement?.source ?? "은행 광고심의 기준"),
-      rationale: [String(check.tier_note ?? ""), String(requirement?.why ?? "문안에서 해당 고지가 확인되지 않았습니다.")]
+      basis: String(
+        check.representative_basis ?? check.source ?? requirement?.source ?? tr(locale, "은행 광고심의 기준", "Bank ad review standards"),
+      ),
+      rationale: [
+        String(check.tier_note ?? ""),
+        String(requirement?.why ?? tr(locale, "문안에서 해당 고지가 확인되지 않았습니다.", "This disclosure was not found in the copy.")),
+      ]
         .filter(Boolean)
         .join(" "),
       authorityTier: cardTier(check.authority_tier),
@@ -1169,6 +1226,9 @@ export function buildIssueCards(result: ReviewOutput): IssueCardModel[] {
     const score = Number(trackB.misleading_risk_score ?? 0);
     // 점수 1차 노출 금지 — 등급으로만 표기 (수치는 상세 hover에서).
     const gradeLabel = score >= 0.7 ? "높음" : score >= 0.4 ? "중간" : "낮음";
+    const gradeText = locale === "en" ? riskGradeLabelEn(score) : gradeLabel;
+    const trackBLabel = tr(locale, "소비자 오인 · 종합 심사", "Consumer confusion · holistic review");
+    const riskText = tr(locale, `오인 위험 ${gradeText}`, `Confusion risk ${gradeText}`);
     cards.push({
       id: "trackB",
       code: "B",
@@ -1177,10 +1237,10 @@ export function buildIssueCards(result: ReviewOutput): IssueCardModel[] {
       grade: gradeLabel,
       score,
       tone: score >= 0.7 ? "risk" : score >= 0.4 ? "review" : "keep",
-      label: "소비자 오인 · 종합 심사",
-      quote: `오인 위험 ${gradeLabel}`,
-      title: `소비자 오인 · 종합 심사 — 오인 위험 ${gradeLabel}`,
-      basis: trackB.standard ?? "전체적·궁극적 인상 기준",
+      label: trackBLabel,
+      quote: riskText,
+      title: `${trackBLabel} — ${riskText}`,
+      basis: trackB.standard ?? tr(locale, "전체적·궁극적 인상 기준", "Overall net impression standard"),
       rationale: trackB.why || trackB.representative_consumer_impression || "",
     });
   }
@@ -1701,26 +1761,28 @@ export function aggregationForAnchor(result: ReviewOutput, anchor: ContextAnchor
   return [...articles, ...principles];
 }
 
-/** 참고 번역 표시행 — en 메인 + sub(신규 런 km, 과거 런 ko 레거시). */
+/** 참고 번역 표시행 — KH 콘솔은 3개 언어(EN·KM·KO)를 병기한다.
+ * lines 는 값이 있는 언어만 순서대로(EN→KM→KO). 과거 런은 일부만 채워질 수 있음. */
 export interface SentenceTranslation {
   en: string | null;
-  /** 서브 언어 번역 텍스트(km 우선, 없으면 레거시 ko). */
-  sub: string | null;
-  /** 서브 칩 라벨: 크메르어면 "KM", 레거시 한국어면 "KO". */
-  subLabel: "KM" | "KO" | null;
+  km: string | null;
+  ko: string | null;
+  /** 병기 렌더용 — [{label:"EN"|"KM"|"KO", text}] 값 있는 언어만. */
+  lines: { label: "EN" | "KM" | "KO"; text: string }[];
 }
 
 function translationRow(row: { en?: string | null; km?: string | null; ko?: string | null }): SentenceTranslation {
-  const sub = row.km ?? null;
-  const legacy = row.ko ?? null;
-  return {
-    en: row.en ?? null,
-    sub: sub ?? legacy,
-    subLabel: sub ? "KM" : legacy ? "KO" : null,
-  };
+  const en = row.en ?? null;
+  const km = row.km ?? null;
+  const ko = row.ko ?? null;
+  const lines: { label: "EN" | "KM" | "KO"; text: string }[] = [];
+  if (en) lines.push({ label: "EN", text: en });
+  if (km) lines.push({ label: "KM", text: km });
+  if (ko) lines.push({ label: "KO", text: ko });
+  return { en, km, ko, lines };
 }
 
-/** 문장별 참고 번역 매핑 — sentence_id → {en, sub, subLabel}.
+/** 문장별 참고 번역 매핑 — sentence_id → {en, km, ko, lines}.
  * ad_translations.sentences는 sentence_units와 같은 순서/개수로 생성된다(백엔드
  * 계약). 개수가 다르면(과거 run 등) 빈 맵을 돌려 렌더를 생략한다. 표시 전용. */
 export function sentenceTranslationsById(
@@ -1734,9 +1796,30 @@ export function sentenceTranslationsById(
     const row = sentences[index];
     if (!row) return;
     const t = translationRow(row);
-    if (t.en || t.sub) map.set(unit.sentence_id, t);
+    if (t.lines.length) map.set(unit.sentence_id, t);
   });
   return map;
+}
+
+/** 수정문(diff + 줄) 텍스트 → 참고 번역. 백엔드 ad_translations.revisions 와
+ * 정규화 텍스트로 매칭한다(줄바꿈·공백 차이에 관대). 없으면 null. 표시 전용. */
+export function translationForRevisionLine(
+  result: ReviewOutput,
+  lineText: string,
+): SentenceTranslation | null {
+  const rows = result.ad_translations?.revisions ?? null;
+  if (!rows?.length) return null;
+  const norm = (value: string) => value.replace(/\s+/g, " ").trim();
+  const core = norm(lineText);
+  if (!core) return null;
+  for (const row of rows) {
+    const original = norm(row.original);
+    if (original === core || original.includes(core) || core.includes(original)) {
+      const t = translationRow(row);
+      if (t.lines.length) return t;
+    }
+  }
+  return null;
 }
 
 /** 인용문(quote, 말줄임 가능) → 그 문장이 속한 참고 번역. 없으면 null. */
@@ -1753,7 +1836,7 @@ export function translationForQuote(
     const original = norm(row.original);
     if (original.includes(core) || core.includes(original)) {
       const t = translationRow(row);
-      if (t.en || t.sub) return t;
+      if (t.lines.length) return t;
     }
   }
   return null;

@@ -1,6 +1,26 @@
 "use client";
 
-import { principleColor, verdictBadgeTone, VERDICT_LABELS, abbreviateLawNames } from "@/lib/labels";
+import {
+  principleColor,
+  verdictBadgeTone,
+  VERDICT_LABELS,
+  abbreviateLawNames,
+  HUMAN_ACTION_LABELS,
+  HUMAN_FEATURE_LABELS,
+  QUALIFIER_LABELS,
+} from "@/lib/labels";
+import {
+  useLocale,
+  tr,
+  verdictLabel,
+  principleDisplay,
+  dataTitleDisplay,
+  HUMAN_ACTION_LABELS_EN,
+  HUMAN_FEATURE_LABELS_EN,
+  QUALIFIER_LABELS_EN,
+  JUDGMENT_STATUS_EN,
+  type Locale,
+} from "@/lib/i18n";
 import {
   buildEvidencePath,
   buildIssueCards,
@@ -39,6 +59,47 @@ const JUDGMENT_LABEL: Record<string, { word: string; color: string }> = {
   COMPLIANT: { word: "적합", color: "var(--pass)" },
   NOT_APPLICABLE: { word: "해당 없음", color: "var(--ink-4)" },
 };
+
+/** 개별 판정 단어 — en 로케일에서는 i18n 의 판정 상태 EN 맵으로 분기. */
+function judgmentWord(locale: Locale, verdict: string, koWord: string): string {
+  return locale === "en" ? (JUDGMENT_STATUS_EN[verdict] ?? koWord) : koWord;
+}
+
+/** RiskList 의 톤 단어(한국어)와 짝을 이루는 EN 표시 — 렌더 지점에서만 분기. */
+const TONE_WORD_SHORT_EN: Record<string, string> = {
+  risk: "Suspected violation",
+  review: "Review required",
+  "keep-warning": "Low prominence",
+  keep: "Disclosure",
+  scope: "Scope",
+};
+
+function toneWordShort(locale: Locale, tone: keyof typeof TONE_WORD_SHORT): string {
+  return locale === "en" ? (TONE_WORD_SHORT_EN[tone] ?? TONE_WORD_SHORT[tone]) : TONE_WORD_SHORT[tone];
+}
+
+/** selectors 가 만들어 주는 위험 라벨(한국어 값) → EN 표시 역매핑. */
+const RISK_LABEL_EN: Record<string, string> = {
+  "위반 의심": "Suspected violation",
+  "검토 필요": "Review required",
+  "위험 표현": "Risky wording",
+  "유지 고지": "Keep disclosure",
+  검토됨: "Reviewed",
+};
+for (const [koMap, enMap] of [
+  [HUMAN_ACTION_LABELS, HUMAN_ACTION_LABELS_EN],
+  [HUMAN_FEATURE_LABELS, HUMAN_FEATURE_LABELS_EN],
+  [QUALIFIER_LABELS, QUALIFIER_LABELS_EN],
+] as const) {
+  for (const [key, ko] of Object.entries(koMap)) {
+    if (enMap[key]) RISK_LABEL_EN[ko] = enMap[key];
+  }
+}
+
+function riskLabelDisplay(locale: Locale, label: string): string {
+  if (locale !== "en") return label;
+  return RISK_LABEL_EN[label] ?? dataTitleDisplay(locale, label);
+}
 
 const FINAL_TONE_BG: Record<string, string> = {
   pass: "linear-gradient(150deg,#0a7550,#0a5f42)",
@@ -119,16 +180,25 @@ function Layer({ no, title, sub, children }: { no: string; title: string; sub?: 
 }
 
 export function GraphView({ result, selectedAnchorId, onSelectAnchor }: Props) {
+  const locale = useLocale();
   if (!result) {
-    return <EmptyState>Review를 실행하면 근거 경로 그래프가 표시됩니다.</EmptyState>;
+    return (
+      <EmptyState>
+        {tr(locale, "Review를 실행하면 근거 경로 그래프가 표시됩니다.", "Run a review to see the evidence path graph.")}
+      </EmptyState>
+    );
   }
-  const anchorCards = buildIssueCards(result).filter((card) => card.kind === "anchor" && card.anchorId);
+  const anchorCards = buildIssueCards(result, locale).filter((card) => card.kind === "anchor" && card.anchorId);
   const activeId =
     anchorCards.find((card) => card.anchorId === selectedAnchorId)?.anchorId ?? anchorCards[0]?.anchorId ?? "";
   const path = activeId ? buildEvidencePath(result, activeId) : null;
 
   if (!path) {
-    return <EmptyState>경로를 추적할 Claim anchor가 없습니다.</EmptyState>;
+    return (
+      <EmptyState>
+        {tr(locale, "경로를 추적할 Claim anchor가 없습니다.", "No claim anchor available to trace.")}
+      </EmptyState>
+    );
   }
 
   const activeCard = anchorCards.find((card) => card.anchorId === activeId);
@@ -149,8 +219,12 @@ export function GraphView({ result, selectedAnchorId, onSelectAnchor }: Props) {
       {/* 좌: claim 선택 */}
       <div className="flex min-h-0 flex-col overflow-hidden rounded-[14px] border border-line bg-surface shadow-card">
         <div className="border-b border-line px-4 py-3.5">
-          <div className="text-[11px] font-bold tracking-wider text-ink-4 uppercase">설명 경로 선택</div>
-          <div className="mt-1 text-[12.5px] text-ink-3">Claim을 선택해 근거 경로를 추적합니다.</div>
+          <div className="text-[11px] font-bold tracking-wider text-ink-4 uppercase">
+            {tr(locale, "설명 경로 선택", "Select explanation path")}
+          </div>
+          <div className="mt-1 text-[12.5px] text-ink-3">
+            {tr(locale, "Claim을 선택해 근거 경로를 추적합니다.", "Select a claim to trace its evidence path.")}
+          </div>
         </div>
         <div className="flex flex-1 flex-col gap-2 overflow-y-auto p-2.5">
           {anchorCards.map((card) => {
@@ -183,31 +257,39 @@ export function GraphView({ result, selectedAnchorId, onSelectAnchor }: Props) {
       <div className="flex min-h-0 flex-col overflow-hidden rounded-[14px] border border-line bg-surface shadow-card">
         <PaneHeader
           icon="graph"
-          title="근거 경로"
-          sub={`${activeCard?.code ?? ""} · 광고 표현 → 법령 위임 사슬 → 판정`}
+          title={tr(locale, "근거 경로", "Evidence path")}
+          sub={`${activeCard?.code ?? ""} · ${tr(locale, "광고 표현 → 법령 위임 사슬 → 판정", "Ad expression → Legal delegation chain → Verdict")}`}
           right={
             <span
               className="rounded-full px-2 py-0.5 text-[11px] font-bold"
               style={{ color: TONE_COLOR[path.tone], background: TONE_BG[path.tone] }}
             >
-              {TONE_WORD_SHORT[path.tone]}
+              {toneWordShort(locale, path.tone)}
             </span>
           }
         />
         <div className="flex-1 overflow-y-auto px-5 py-5">
           {/* ① Context Graph — 광고 표현과 그 의미(위험 유형·정책어 정규화) */}
-          <Layer no="①" title="Context Graph" sub="광고 표현 · 위험 분류 · 정책어 정규화">
+          <Layer
+            no="①"
+            title="Context Graph"
+            sub={tr(locale, "광고 표현 · 위험 분류 · 정책어 정규화", "Ad expression · Risk classification · Policy term normalization")}
+          >
             <div className="rounded-[11px] border bg-surface p-3" style={{ borderColor: "color-mix(in srgb, var(--reject) 35%, var(--line))" }}>
               <div className="text-[14px] leading-snug font-bold break-keep text-ink">“{path.quote}”</div>
               <div className="mt-2 flex flex-wrap items-center gap-1.5">
                 <span className="rounded-md px-2 py-0.5 text-[11px] font-bold" style={{ color: "#b45309", background: "#fdf3e3" }}>
-                  위험 유형 · {path.riskLabel}
+                  {tr(locale, "위험 유형", "Risk type")} · {riskLabelDisplay(locale, path.riskLabel)}
                 </span>
                 {hypernyms.map((h) => (
                   <span
                     key={h.proposal_id}
                     className="rounded-md bg-surface-3 px-2 py-0.5 text-[11px] font-semibold text-ink-2"
-                    title={`정책어 정규화 (confidence ${(h.confidence * 100).toFixed(0)}%)`}
+                    title={tr(
+                      locale,
+                      `정책어 정규화 (confidence ${(h.confidence * 100).toFixed(0)}%)`,
+                      `Policy term normalization (confidence ${(h.confidence * 100).toFixed(0)}%)`,
+                    )}
                   >
                     {h.hypernym}
                     {h.support === "STRONG" ? " ●" : ""}
@@ -222,7 +304,11 @@ export function GraphView({ result, selectedAnchorId, onSelectAnchor }: Props) {
               CU 카드 → 그 CU 의 위임 사슬 → 그 CU 의 개별 판정 (ŷ, s). */}
           <div className="flex flex-col items-center pt-1">
             <span className="rounded-full border border-line bg-surface px-2.5 py-0.5 text-[11px] font-bold text-ink-3">
-              grounding — 심의 기준 {plans.length}건, 각자 다른 근거 법령으로
+              {tr(
+                locale,
+                `grounding — 심의 기준 ${plans.length}건, 각자 다른 근거 법령으로`,
+                `grounding — ${plans.length} review criteria, each with its own legal basis`,
+              )}
             </span>
           </div>
           <FanEdges n={plans.length} />
@@ -248,34 +334,44 @@ export function GraphView({ result, selectedAnchorId, onSelectAnchor }: Props) {
                     >
                       <div className="flex items-center gap-1.5">
                         <span className="font-mono text-[11px] font-bold text-ink-4">CU</span>
-                        {item.principle && <Tag color={principleColor(item.principle)}>{item.principle}</Tag>}
+                        {item.principle && (
+                          <Tag color={principleColor(item.principle)}>{principleDisplay(locale, item.principle)}</Tag>
+                        )}
                       </div>
                       <div className="line-clamp-2 text-[12.5px] leading-snug font-semibold break-keep text-ink">
-                        {item.risk_title || item.constraint || item.subject}
+                        {dataTitleDisplay(locale, item.risk_title || item.constraint || item.subject)}
                       </div>
                       {item.subject && item.constraint && (
                         <div className="line-clamp-2 text-[11px] leading-relaxed text-ink-3">
-                          {item.subject} · {item.constraint}
+                          {dataTitleDisplay(locale, item.subject)} · {dataTitleDisplay(locale, item.constraint)}
                         </div>
                       )}
                     </div>
-                    <BranchLink label="대표 근거 경로" />
+                    <BranchLink label={tr(locale, "대표 근거 경로", "Representative evidence path")} />
                     {/* 이 CU 의 법령 위임 사슬 — CU는 여러 조문·심의기준 원문과 연결되지만
                         (전부 판정 증거창에 투입), 사슬 요약은 CU가 형식화된 모(母)조문
                         기준의 대표 경로다. 나머지 연결 근거는 아래 접이식으로 공개. */}
                     <div className="flex-1 rounded-[11px] border border-line bg-surface px-3.5 py-3">
                       <div
                         className="mb-2 flex items-center gap-1 text-[11px] font-bold text-ink-4"
-                        title="이 CU가 형식화된 원천(모조문)을 뿌리로 한 위임 경로입니다. CU에 연결된 다른 조문·심의기준 원문도 판정 증거로 함께 투입됩니다."
+                        title={tr(
+                          locale,
+                          "이 CU가 형식화된 원천(모조문)을 뿌리로 한 위임 경로입니다. CU에 연결된 다른 조문·심의기준 원문도 판정 증거로 함께 투입됩니다.",
+                          "Delegation path rooted at the parent article this CU was formalized from. Other clauses and guideline texts linked to this CU are also fed in as judgment evidence.",
+                        )}
                       >
-                        대표 근거 경로 <span className="font-normal">· 모조문 기준</span>
+                        {tr(locale, "대표 근거 경로", "Representative evidence path")}{" "}
+                        <span className="font-normal">· {tr(locale, "모조문 기준", "based on parent article")}</span>
                       </div>
                       {deleg && deleg.steps.length > 0 ? (
                         <DelegationChain steps={deleg.steps} />
                       ) : (
                         <div className="text-[11.5px] leading-relaxed text-ink-3">
-                          <span className="mr-1.5 inline-block rounded bg-surface-3 px-1.5 py-0.5 text-[11px] font-bold text-ink-2">조문</span>
-                          {abbreviateLawNames(item.source_article) || "근거 조문 확인 필요"}
+                          <span className="mr-1.5 inline-block rounded bg-surface-3 px-1.5 py-0.5 text-[11px] font-bold text-ink-2">
+                            {tr(locale, "조문", "Clause")}
+                          </span>
+                          {abbreviateLawNames(item.source_article) ||
+                            tr(locale, "근거 조문 확인 필요", "Source clause needs confirmation")}
                         </div>
                       )}
                       {(() => {
@@ -285,9 +381,17 @@ export function GraphView({ result, selectedAnchorId, onSelectAnchor }: Props) {
                         return (
                           <details className="mt-2 border-t border-line pt-2">
                             <summary className="cursor-pointer text-[11px] font-bold text-ink-3 select-none">
-                              연결 근거 {evidence.length}건
-                              {judgment?.used_policy_evidence?.length ? ` · 판정 인용 ${judgment.used_policy_evidence.length}건` : ""}
-                              <span className="ml-1 font-normal text-ink-4">— 전부 판정 증거로 투입됨</span>
+                              {tr(locale, `연결 근거 ${evidence.length}건`, `${evidence.length} linked evidence items`)}
+                              {judgment?.used_policy_evidence?.length
+                                ? tr(
+                                    locale,
+                                    ` · 판정 인용 ${judgment.used_policy_evidence.length}건`,
+                                    ` · ${judgment.used_policy_evidence.length} cited in judgment`,
+                                  )
+                                : ""}
+                              <span className="ml-1 font-normal text-ink-4">
+                                {tr(locale, "— 전부 판정 증거로 투입됨", "— all fed in as judgment evidence")}
+                              </span>
                             </summary>
                             <ul className="mt-1.5 space-y-1 pl-0.5">
                               {evidence.slice(0, 4).map((text, i) => (
@@ -296,14 +400,20 @@ export function GraphView({ result, selectedAnchorId, onSelectAnchor }: Props) {
                                 </li>
                               ))}
                               {evidence.length > 4 && (
-                                <li className="text-[11px] text-ink-4">외 {evidence.length - 4}건 — 판정 상세에서 확인</li>
+                                <li className="text-[11px] text-ink-4">
+                                  {tr(
+                                    locale,
+                                    `외 ${evidence.length - 4}건 — 판정 상세에서 확인`,
+                                    `${evidence.length - 4} more — see judgment details`,
+                                  )}
+                                </li>
                               )}
                             </ul>
                           </details>
                         );
                       })()}
                     </div>
-                    <BranchLink label="판정" />
+                    <BranchLink label={tr(locale, "판정", "Verdict")} />
                     {/* 이 CU 의 개별 판정 (ŷ, s) */}
                     <div
                       className="rounded-[11px] px-3 py-2 text-center text-[12.5px] font-bold"
@@ -313,8 +423,14 @@ export function GraphView({ result, selectedAnchorId, onSelectAnchor }: Props) {
                         border: `1px solid ${meta ? `color-mix(in srgb, ${meta.color} 35%, var(--line))` : "var(--line)"}`,
                       }}
                     >
-                      {meta ? meta.word : "판정 없음"}
-                      {judgment && judgment.verdict !== "NOT_APPLICABLE" ? ` · 위반 가능성 ${(judgment.score * 100).toFixed(0)}%` : ""}
+                      {meta && judgment ? judgmentWord(locale, judgment.verdict, meta.word) : tr(locale, "판정 없음", "No judgment")}
+                      {judgment && judgment.verdict !== "NOT_APPLICABLE"
+                        ? tr(
+                            locale,
+                            ` · 위반 가능성 ${(judgment.score * 100).toFixed(0)}%`,
+                            ` · violation likelihood ${(judgment.score * 100).toFixed(0)}%`,
+                          )
+                        : ""}
                     </div>
                   </div>
                 );
@@ -324,15 +440,25 @@ export function GraphView({ result, selectedAnchorId, onSelectAnchor }: Props) {
           <FanEdges n={plans.length} invert />
           <div className="flex flex-col items-center pb-1">
             <span className="rounded-full border border-line bg-surface px-2.5 py-0.5 text-[11px] font-bold text-ink-3">
-              판정 종합 — 기준별 판정이 최종 결과로 수렴
+              {tr(
+                locale,
+                "판정 종합 — 기준별 판정이 최종 결과로 수렴",
+                "Verdict aggregation — per-criterion judgments converge to the final result",
+              )}
             </span>
           </div>
 
           {/* ③ 최종 결과 — 수렴 노드 */}
-          <Layer no="③" title="최종 결과" sub="이 표현의 판정 집계 → 광고 전체 판정">
+          <Layer
+            no="③"
+            title={tr(locale, "최종 결과", "Final result")}
+            sub={tr(locale, "이 표현의 판정 집계 → 광고 전체 판정", "Judgment aggregation for this expression → verdict for the whole ad")}
+          >
             <div className="flex flex-wrap items-stretch gap-3">
               <div className="min-w-[200px] flex-1 rounded-[11px] border border-line bg-surface p-3">
-                <div className="mb-1.5 text-[11px] font-bold text-ink-4">이 표현의 개별 판정</div>
+                <div className="mb-1.5 text-[11px] font-bold text-ink-4">
+                  {tr(locale, "이 표현의 개별 판정", "Individual judgments for this expression")}
+                </div>
                 <div className="flex flex-wrap gap-1.5">
                   {Object.entries(verdictCounts).map(([verdict, count]) => {
                     const meta = JUDGMENT_LABEL[verdict];
@@ -343,15 +469,20 @@ export function GraphView({ result, selectedAnchorId, onSelectAnchor }: Props) {
                         className="rounded-md px-2 py-1 text-[12px] font-bold"
                         style={{ color: meta.color, background: `color-mix(in srgb, ${meta.color} 10%, white)` }}
                       >
-                        {meta.word} {count}건
+                        {tr(locale, `${meta.word} ${count}건`, `${judgmentWord(locale, verdict, meta.word)} × ${count}`)}
                       </span>
                     );
                   })}
-                  {judgments.length === 0 && <span className="text-[12px] text-ink-4">판정 없음 — 심사자 확인 필요</span>}
+                  {judgments.length === 0 && (
+                    <span className="text-[12px] text-ink-4">
+                      {tr(locale, "판정 없음 — 심사자 확인 필요", "No judgment — reviewer confirmation required")}
+                    </span>
+                  )}
                 </div>
                 {path.disclosure && (
                   <div className="mt-2 border-t border-line pt-2 text-[11.5px] leading-relaxed text-ink-3">
-                    <b className="text-ink-2">필요 고지/예외</b> · {path.disclosure}
+                    <b className="text-ink-2">{tr(locale, "필요 고지/예외", "Required disclosures / exceptions")}</b> ·{" "}
+                    {dataTitleDisplay(locale, path.disclosure)}
                   </div>
                 )}
               </div>
@@ -359,43 +490,87 @@ export function GraphView({ result, selectedAnchorId, onSelectAnchor }: Props) {
                 className="flex min-w-[190px] flex-col justify-center gap-1 rounded-[11px] px-4 py-3 text-white"
                 style={{ background: FINAL_TONE_BG[finalTone] }}
               >
-                <div className="text-[11px] font-bold tracking-wider uppercase opacity-85">최종 결과 · 광고 전체</div>
-                <div className="text-[18px] font-extrabold">{VERDICT_LABELS[finalVerdict]?.[0] ?? finalVerdict}</div>
-                <div className="text-[11px] opacity-85">이 표현을 포함한 전체 판정의 종합 — 최종 승인은 심사자</div>
+                <div className="text-[11px] font-bold tracking-wider uppercase opacity-85">
+                  {tr(locale, "최종 결과 · 광고 전체", "Final result · Whole ad")}
+                </div>
+                <div className="text-[18px] font-extrabold">
+                  {verdictLabel(locale, finalVerdict, VERDICT_LABELS)?.[0] ?? finalVerdict}
+                </div>
+                <div className="text-[11px] opacity-85">
+                  {tr(
+                    locale,
+                    "이 표현을 포함한 전체 판정의 종합 — 최종 승인은 심사자",
+                    "Aggregate of all judgments including this expression — final approval rests with the reviewer",
+                  )}
+                </div>
               </div>
             </div>
           </Layer>
 
           {/* 자연어 해설 */}
           <div className="mt-5">
-            <div className="mb-2.5 text-[11px] font-bold tracking-wider text-ink-4 uppercase">경로 해설</div>
+            <div className="mb-2.5 text-[11px] font-bold tracking-wider text-ink-4 uppercase">
+              {tr(locale, "경로 해설", "Path explanation")}
+            </div>
             <div className="rounded-[12px] border border-line bg-surface-2 px-4.5 py-4">
-              <p className="m-0 text-[13.5px] leading-[1.75] text-ink-2">
-                광고 표현 <b className="text-ink">“{path.quote}”</b> 은(는){" "}
-                <b style={{ color: NODE_META.risk.color }}>{path.riskLabel}</b> 위험으로 분류되어,{" "}
-                {hypernyms.length > 0 ? (
-                  <>
-                    정책어 <b style={{ color: NODE_META.policy.color }}>{hypernyms[0].hypernym}</b>
-                    {hypernyms.length > 1 ? ` 외 ${hypernyms.length - 1}건` : ""}을 통해{" "}
-                  </>
-                ) : null}
-                {path.cuName ? (
-                  <>
-                    심의 기준 <b style={{ color: NODE_META.cu.color }}>{path.cuName}</b>
-                    {plans.length > 1 ? ` 외 ${plans.length - 1}건` : ""}에 연결되었습니다.{" "}
-                  </>
-                ) : (
-                  <>관련 심의 기준이 아직 연결되지 않아 검토가 필요합니다. </>
-                )}
-                {path.articles.length > 0 ? (
-                  <>
-                    법적 근거는 <b style={{ color: NODE_META.clause.color }}>{abbreviateLawNames(path.articles.join(", "))}</b> 이며,
-                    위임 사슬을 따라 적용되어{" "}
-                  </>
-                ) : null}
-                최종적으로 <b style={{ color: TONE_COLOR[path.tone] }}>{TONE_WORD_SHORT[path.tone]}</b> 판정에 기여했습니다.{" "}
-                <span className="text-ink-4">— AI 권고이며 최종 판단은 심사자 검토를 따릅니다.</span>
-              </p>
+              {locale === "en" ? (
+                <p className="m-0 text-[13.5px] leading-[1.75] text-ink-2">
+                  The ad expression <b className="text-ink">“{path.quote}”</b> was classified as a{" "}
+                  <b style={{ color: NODE_META.risk.color }}>{riskLabelDisplay(locale, path.riskLabel)}</b> risk
+                  {hypernyms.length > 0 ? (
+                    <>
+                      {" "}and, through the policy term <b style={{ color: NODE_META.policy.color }}>{hypernyms[0].hypernym}</b>
+                      {hypernyms.length > 1 ? ` and ${hypernyms.length - 1} more` : ""},
+                    </>
+                  ) : null}{" "}
+                  {path.cuName ? (
+                    <>
+                      was linked to the review criterion{" "}
+                      <b style={{ color: NODE_META.cu.color }}>{dataTitleDisplay(locale, path.cuName)}</b>
+                      {plans.length > 1 ? ` and ${plans.length - 1} more` : ""}.{" "}
+                    </>
+                  ) : (
+                    <>has no linked review criterion yet, so further review is required. </>
+                  )}
+                  {path.articles.length > 0 ? (
+                    <>
+                      The legal basis is{" "}
+                      <b style={{ color: NODE_META.clause.color }}>{abbreviateLawNames(path.articles.join(", "))}</b>, applied along
+                      the delegation chain,{" "}
+                    </>
+                  ) : null}
+                  and it contributed to the final{" "}
+                  <b style={{ color: TONE_COLOR[path.tone] }}>{toneWordShort(locale, path.tone)}</b> assessment.{" "}
+                  <span className="text-ink-4">— AI recommendation; the final decision follows reviewer review.</span>
+                </p>
+              ) : (
+                <p className="m-0 text-[13.5px] leading-[1.75] text-ink-2">
+                  광고 표현 <b className="text-ink">“{path.quote}”</b> 은(는){" "}
+                  <b style={{ color: NODE_META.risk.color }}>{path.riskLabel}</b> 위험으로 분류되어,{" "}
+                  {hypernyms.length > 0 ? (
+                    <>
+                      정책어 <b style={{ color: NODE_META.policy.color }}>{hypernyms[0].hypernym}</b>
+                      {hypernyms.length > 1 ? ` 외 ${hypernyms.length - 1}건` : ""}을 통해{" "}
+                    </>
+                  ) : null}
+                  {path.cuName ? (
+                    <>
+                      심의 기준 <b style={{ color: NODE_META.cu.color }}>{path.cuName}</b>
+                      {plans.length > 1 ? ` 외 ${plans.length - 1}건` : ""}에 연결되었습니다.{" "}
+                    </>
+                  ) : (
+                    <>관련 심의 기준이 아직 연결되지 않아 검토가 필요합니다. </>
+                  )}
+                  {path.articles.length > 0 ? (
+                    <>
+                      법적 근거는 <b style={{ color: NODE_META.clause.color }}>{abbreviateLawNames(path.articles.join(", "))}</b> 이며,
+                      위임 사슬을 따라 적용되어{" "}
+                    </>
+                  ) : null}
+                  최종적으로 <b style={{ color: TONE_COLOR[path.tone] }}>{TONE_WORD_SHORT[path.tone]}</b> 판정에 기여했습니다.{" "}
+                  <span className="text-ink-4">— AI 권고이며 최종 판단은 심사자 검토를 따릅니다.</span>
+                </p>
+              )}
             </div>
           </div>
         </div>

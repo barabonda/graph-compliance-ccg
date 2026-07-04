@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { tr, useLocale } from "@/lib/i18n";
 
 /** 광고 이미지 확대 뷰 — 배경 클릭 또는 ESC로 닫기. 표시 전용(포털 없이 fixed). */
 export function ImageLightbox({
@@ -16,6 +17,7 @@ export function ImageLightbox({
   downloadName?: string;
   onClose: () => void;
 }) {
+  const locale = useLocale();
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
       if (event.key === "Escape") onClose();
@@ -47,7 +49,7 @@ export function ImageLightbox({
             download={downloadName}
             className="rounded-md bg-white/15 px-3 py-1.5 text-[12.5px] font-bold text-white transition hover:bg-white/30"
           >
-            다운로드
+            {tr(locale, "다운로드", "Download")}
           </a>
         )}
         <button
@@ -55,7 +57,7 @@ export function ImageLightbox({
           onClick={onClose}
           className="rounded-md bg-white/15 px-3 py-1.5 text-[12.5px] font-bold text-white transition hover:bg-white/30"
         >
-          닫기 (ESC)
+          {tr(locale, "닫기 (ESC)", "Close (ESC)")}
         </button>
       </div>
     </div>

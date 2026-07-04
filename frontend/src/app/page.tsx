@@ -23,6 +23,7 @@ import { SentenceMapTab } from "@/components/tabs/SentenceMapTab";
 import { EmptyState, Expandable } from "@/components/ui";
 import { useReview } from "@/hooks/useReview";
 import { fetchRun } from "@/lib/api";
+import { LocaleProvider, localeForResult, tr } from "@/lib/i18n";
 import { CHANNELS, DECISIONS, WORKSPACE_ID, type DecisionKey } from "@/lib/labels";
 import type { ReviewOutput, ReviewRequest, RunSummary } from "@/lib/types";
 
@@ -212,9 +213,12 @@ export default function Page() {
   }, []);
 
   const result = state.result;
+  // UI 로케일 — KH(비-KR) 심사 결과가 열려 있으면 콘솔 전체가 영어로 표시된다.
+  const locale = localeForResult(result);
 
   return (
     <CopilotKit runtimeUrl="/api/copilotkit" useSingleEndpoint={false}>
+    <LocaleProvider locale={locale}>
     <div className="flex h-screen overflow-hidden">
       <Sidebar view={view} setView={setView} result={result} resolvedCount={resolved.size} />
       <main className="flex min-w-0 flex-1 flex-col">
@@ -321,13 +325,13 @@ export default function Page() {
                 <ExecSummary result={result} resolved={resolved} />
                 {/* 발표용 화면 포커스 — 한 페인만 전폭으로. 단축키 1·2·3, ESC 복귀 */}
                 <div className="flex items-center justify-end gap-1 text-[11.5px]">
-                  <span className="mr-1 font-bold text-ink-4">화면</span>
+                  <span className="mr-1 font-bold text-ink-4">{tr(locale, "화면", "View")}</span>
                   {(
                     [
-                      { key: "all", label: "전체" },
-                      { key: "ad", label: "원문 ¹" },
-                      { key: "risk", label: "위험 카드 ²" },
-                      { key: "detail", label: "판정 상세 ³" },
+                      { key: "all", label: tr(locale, "전체", "All") },
+                      { key: "ad", label: tr(locale, "원문 ¹", "Original ¹") },
+                      { key: "risk", label: tr(locale, "위험 카드 ²", "Risk cards ²") },
+                      { key: "detail", label: tr(locale, "판정 상세 ³", "Details ³") },
                     ] as const
                   ).map((option) => (
                     <button
@@ -390,7 +394,7 @@ export default function Page() {
                 </div>
               </div>
             ) : (
-              <EmptyState>아직 심사 결과가 없습니다. 새 심사에서 문안을 접수하세요.</EmptyState>
+              <EmptyState>{tr(locale, "아직 심사 결과가 없습니다. 새 심사에서 문안을 접수하세요.", "No review results yet. Submit ad copy from New Review.")}</EmptyState>
             ))}
 
           {view === "graph" && (
@@ -453,6 +457,7 @@ export default function Page() {
         <ReviewCopilot result={result} resolved={resolved} title={meta.title} reviewedText={state.reviewedText} />
       )}
     </div>
+    </LocaleProvider>
     </CopilotKit>
   );
 }

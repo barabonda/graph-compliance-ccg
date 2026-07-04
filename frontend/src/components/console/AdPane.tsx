@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { tr, useLocale } from "@/lib/i18n";
 import { PRODUCT_GROUPS } from "@/lib/labels";
 import { buildRevisionDiff } from "@/lib/revisionDiff";
 import {
@@ -45,6 +46,7 @@ function LineText({
   resolved: Set<string>;
   onSelectAnchor: (anchorId: string) => void;
 }) {
+  const locale = useLocale();
   return (
     <>
       {annotated.segments.map((segment) => {
@@ -87,7 +89,7 @@ function LineText({
             onClick={() => chip.anchorId && onSelectAnchor(chip.anchorId)}
             className={`ann-label ann-label-${chip.tone}`}
           >
-            {isResolved ? "해소 ✓" : chip.label}
+            {isResolved ? tr(locale, "해소 ✓", "Resolved ✓") : chip.label}
           </button>
         ) : null;
         return label ? [body, label] : body;
@@ -109,11 +111,12 @@ export function AdPane({
 }: Props) {
   // null = 아직 사용자가 안 골랐음 → 수정할 게 있으면 '수정안'이 기본(결론부터),
   // 클린 광고면 원문. 사용자가 토글하면 그 선택을 따른다.
+  const locale = useLocale();
   const [modeChoice, setModeChoice] = useState<"original" | "diff" | null>(null);
   const [imageZoomed, setImageZoomed] = useState(false);
-  const lines = useMemo(() => buildAdLines(result, reviewedText), [result, reviewedText]);
+  const lines = useMemo(() => buildAdLines(result, reviewedText, locale), [result, reviewedText, locale]);
   // 수정안 diff — GitHub unified diff 형태 (구 '교정본'/수정안 탭 통합)
-  const diff = useMemo(() => buildRevisionDiff(result, reviewedText), [result, reviewedText]);
+  const diff = useMemo(() => buildRevisionDiff(result, reviewedText, locale), [result, reviewedText, locale]);
   const diffCount = diff.changedCount + diff.disclosureAddCount;
   const mode = modeChoice ?? (diffCount > 0 ? "diff" : "original");
   const conditional = conditionalDisclosures(result, reviewedText);
@@ -137,7 +140,7 @@ export function AdPane({
     <div className="flex h-full min-w-0 flex-col">
       <PaneHeader
         icon="eye"
-        title="광고 원문"
+        title={tr(locale, "광고 원문", "Ad original")}
         sub={channelLabel}
         right={
           <div className="flex items-center gap-2">
@@ -147,19 +150,19 @@ export function AdPane({
                 onClick={() => setModeChoice("diff")}
                 className={`rounded-md px-2.5 py-1 text-[11.5px] font-bold ${mode === "diff" ? "bg-surface text-pass shadow-card" : "text-ink-3"}`}
               >
-                수정안{diffCount ? ` ${diffCount}` : ""}
+                {tr(locale, "수정안", "Revision")}{diffCount ? ` ${diffCount}` : ""}
               </button>
               <button
                 type="button"
                 onClick={() => setModeChoice("original")}
                 className={`rounded-md px-2.5 py-1 text-[11.5px] font-bold ${mode === "original" ? "bg-surface text-ink shadow-card" : "text-ink-3"}`}
               >
-                원문
+                {tr(locale, "원문", "Original")}
               </button>
             </div>
             <Tag>
               <Icon name="alert" size={13} color="var(--reject)" style={{ marginRight: 4 }} />
-              위험 {actionable}
+              {tr(locale, `위험 ${actionable}`, `Risks ${actionable}`)}
             </Tag>
           </div>
         }
@@ -181,8 +184,17 @@ export function AdPane({
         {result.ad_image?.available && (
           <div className="mb-3 overflow-hidden rounded-[14px] border border-line bg-white shadow-panel">
             <div className="border-b border-line bg-surface-2 px-4 py-2 text-xs font-bold text-ink-2">
-              접수된 광고 이미지{(result.ad_image.count ?? 1) > 1 ? ` · ${result.ad_image.count}페이지` : ""}{" "}
-              <span className="font-normal text-ink-4">아래 문안은 이미지에서 자동 추출됨 · 클릭하면 크게 보기</span>
+              {tr(locale, "접수된 광고 이미지", "Submitted ad image")}
+              {(result.ad_image.count ?? 1) > 1
+                ? tr(locale, ` · ${result.ad_image.count}페이지`, ` · ${result.ad_image.count} pages`)
+                : ""}{" "}
+              <span className="font-normal text-ink-4">
+                {tr(
+                  locale,
+                  "아래 문안은 이미지에서 자동 추출됨 · 클릭하면 크게 보기",
+                  "Copy below auto-extracted from the image · click to enlarge",
+                )}
+              </span>
             </div>
             {Array.from({ length: result.ad_image.count ?? 1 }, (_, i) => {
               const kind = i === 0 ? "original" : `original_${i + 1}`;
@@ -191,7 +203,7 @@ export function AdPane({
                 <img
                   key={kind}
                   src={`/api/ad-image/${result.review_run_id}/${kind}`}
-                  alt={`접수된 광고 이미지 ${i + 1}페이지`}
+                  alt={tr(locale, `접수된 광고 이미지 ${i + 1}페이지`, `Submitted ad image, page ${i + 1}`)}
                   className="max-h-105 w-full cursor-zoom-in border-b border-line bg-white object-contain transition last:border-b-0 hover:opacity-95"
                   onClick={() => setImageZoomed(true)}
                 />
@@ -199,7 +211,7 @@ export function AdPane({
             })}
             {result.ad_image.layout_notes && (
               <div className="border-t border-line px-4 py-2 text-[12px] leading-relaxed text-ink-3">
-                <strong className="text-ink-2">레이아웃 소견</strong> · {result.ad_image.layout_notes}
+                <strong className="text-ink-2">{tr(locale, "레이아웃 소견", "Layout notes")}</strong> · {result.ad_image.layout_notes}
               </div>
             )}
           </div>
@@ -208,11 +220,13 @@ export function AdPane({
         <div className="overflow-hidden rounded-[14px] border border-line bg-white shadow-panel">
           <div className="px-5.5 py-5 text-white" style={{ background: "linear-gradient(135deg,#1d3a6e,#2f6df0)" }}>
             <div className="mb-3 flex items-center justify-between">
-              <span className="font-mono text-[11px] tracking-wider opacity-85">JB금융그룹 · 사전심의 초안</span>
-              <span className="rounded-full bg-white/18 px-2.5 py-0.5 text-[11px] font-bold">{productGroup || "광고"}</span>
+              <span className="font-mono text-[11px] tracking-wider opacity-85">
+                {tr(locale, "JB금융그룹 · 사전심의 초안", "PPCBank · Pre-review draft")}
+              </span>
+              <span className="rounded-full bg-white/18 px-2.5 py-0.5 text-[11px] font-bold">{productGroup || tr(locale, "광고", "Ad")}</span>
             </div>
             <div className="text-[21px] leading-snug font-extrabold tracking-tight break-keep">
-              {reviewTitle || "광고 문안"}
+              {reviewTitle || tr(locale, "광고 문안", "Ad copy")}
             </div>
           </div>
 
@@ -232,19 +246,15 @@ export function AdPane({
                   />
                   {lineT && (
                     <div className="mt-0.5 mb-2 space-y-0.5 text-[12px] leading-relaxed text-ink-3">
-                      {/* 영어 메인: 원문이 이미 영어면 EN 줄은 중복이라 생략 */}
-                      {lineT.en && !sameText(lineT.en, line.text) && (
-                        <div className="flex gap-1.5">
-                          <span className="mt-0.5 shrink-0 rounded bg-surface-2 px-1 font-mono text-[11px] font-bold text-ink-4">EN</span>
-                          <span>{lineT.en}</span>
-                        </div>
-                      )}
-                      {lineT.sub && (
-                        <div className="flex gap-1.5 break-keep">
-                          <span className="mt-0.5 shrink-0 rounded bg-surface-2 px-1 font-mono text-[11px] font-bold text-ink-4">{lineT.subLabel}</span>
-                          <span>{lineT.sub}</span>
-                        </div>
-                      )}
+                      {/* 3개 언어 병기(EN·KM·KO) — 원문과 동일한 언어 줄은 중복이라 생략 */}
+                      {lineT.lines
+                        .filter((t) => !sameText(t.text, line.text))
+                        .map((t) => (
+                          <div key={t.label} className="flex gap-1.5 break-keep">
+                            <span className="mt-0.5 shrink-0 rounded bg-surface-2 px-1 font-mono text-[11px] font-bold text-ink-4">{t.label}</span>
+                            <span>{t.text}</span>
+                          </div>
+                        ))}
                     </div>
                   )}
                 </div>
@@ -257,20 +267,22 @@ export function AdPane({
           <div className="border-t border-line bg-surface-2 px-5.5 py-2.5 text-[11.5px] leading-relaxed text-ink-3">
             <span>
               {channelLabel}
-              {matchedProduct ? ` · 대상 상품: ${matchedProduct}` : ""} · 원문 {reviewedText.length}자
+              {matchedProduct ? tr(locale, ` · 대상 상품: ${matchedProduct}`, ` · Target product: ${matchedProduct}`) : ""}
+              {tr(locale, ` · 원문 ${reviewedText.length}자`, ` · Original ${reviewedText.length} chars`)}
             </span>
           </div>
         </div>
         </>
         )}
 
-        {/* 문장별 참고 번역 — 영어 메인 · 크메르어(KM) 서브 병기 (표시 전용) */}
+        {/* 문장별 참고 번역 — 3개 언어(EN·KM·KO) 병기 (표시 전용) */}
         {mode === "original" && translations && (translations.sentences?.length ?? 0) > 0 && (
           <div className="mt-3 overflow-hidden rounded-lg border border-line bg-surface-2">
             <div className="border-b border-line px-3 py-2 text-xs font-bold text-ink-2">
-              문장별 참고 번역
+              {tr(locale, "문장별 참고 번역", "Per-sentence reference translation")}
               <span className="ml-2 font-normal text-[11px] text-ink-4">
-                {translations.note ?? "참고용 번역 — 심사 근거는 원문 기준"}
+                {translations.note ??
+                  tr(locale, "참고용 번역 — 심사 근거는 원문 기준", "Reference translation — findings are based on the original text")}
               </span>
             </div>
             <div className="divide-y divide-line">
@@ -280,18 +292,18 @@ export function AdPane({
                   <div className="text-[13px] leading-relaxed font-medium break-keep whitespace-pre-wrap text-ink">
                     {s.original}
                   </div>
-                  {s.en && !sameText(s.en, s.original) && (
-                    <div className="mt-1 flex gap-1.5 text-[12px] leading-relaxed text-ink-2">
-                      <span className="mt-0.5 shrink-0 rounded bg-surface px-1 font-mono text-[11px] font-bold text-ink-4">EN</span>
-                      <span className="whitespace-pre-wrap">{s.en}</span>
-                    </div>
-                  )}
-                  {(s.km ?? s.ko) && (
-                    <div className="mt-1 flex gap-1.5 text-[12px] leading-relaxed break-keep text-ink-2">
-                      <span className="mt-0.5 shrink-0 rounded bg-surface px-1 font-mono text-[11px] font-bold text-ink-4">{s.km ? "KM" : "KO"}</span>
-                      <span className="whitespace-pre-wrap">{s.km ?? s.ko}</span>
-                    </div>
-                  )}
+                  {([
+                    ["EN", s.en],
+                    ["KM", s.km ?? null],
+                    ["KO", s.ko ?? null],
+                  ] as const)
+                    .filter(([, text]) => Boolean(text) && !sameText(String(text), s.original))
+                    .map(([label, text]) => (
+                      <div key={label} className="mt-1 flex gap-1.5 text-[12px] leading-relaxed break-keep text-ink-2">
+                        <span className="mt-0.5 shrink-0 rounded bg-surface px-1 font-mono text-[11px] font-bold text-ink-4">{label}</span>
+                        <span className="whitespace-pre-wrap">{text}</span>
+                      </div>
+                    ))}
                 </div>
               ))}
             </div>
@@ -303,20 +315,38 @@ export function AdPane({
             {translations.en && (
               <details className="rounded-lg border border-line bg-surface-2 px-3 py-2">
                 <summary className="cursor-pointer text-xs font-bold text-ink-2 select-none">
-                  English (참고용 번역)
+                  {tr(locale, "English (참고용 번역)", "English (reference translation)")}
                 </summary>
                 {/* 표시 전용 — 하이라이트는 원문에만 적용(원문-번역 위치 정렬 불가) */}
                 <div className="mt-2 text-[13.5px] leading-relaxed whitespace-pre-wrap text-ink">{translations.en}</div>
-                <div className="mt-1.5 text-[11px] text-ink-4">{translations.note ?? "참고용 번역 — 심사 근거는 원문 기준"}</div>
+                <div className="mt-1.5 text-[11px] text-ink-4">
+                  {translations.note ??
+                    tr(locale, "참고용 번역 — 심사 근거는 원문 기준", "Reference translation — findings are based on the original text")}
+                </div>
               </details>
             )}
-            {(translations.km ?? translations.ko) && (
+            {translations.km && (
               <details className="rounded-lg border border-line bg-surface-2 px-3 py-2">
                 <summary className="cursor-pointer text-xs font-bold text-ink-2 select-none">
-                  {translations.km ? "ភាសាខ្មែរ · 크메르어 (참고용 번역)" : "한국어 (참고용 번역)"}
+                  {tr(locale, "ភាសាខ្មែរ · 크메르어 (참고용 번역)", "ភាសាខ្មែរ · Khmer (reference translation)")}
                 </summary>
-                <div className="mt-2 text-[13.5px] leading-relaxed break-keep whitespace-pre-wrap text-ink">{translations.km ?? translations.ko}</div>
-                <div className="mt-1.5 text-[11px] text-ink-4">{translations.note ?? "참고용 번역 — 심사 근거는 원문 기준"}</div>
+                <div className="mt-2 text-[13.5px] leading-relaxed break-keep whitespace-pre-wrap text-ink">{translations.km}</div>
+                <div className="mt-1.5 text-[11px] text-ink-4">
+                  {translations.note ??
+                    tr(locale, "참고용 번역 — 심사 근거는 원문 기준", "Reference translation — findings are based on the original text")}
+                </div>
+              </details>
+            )}
+            {translations.ko && (
+              <details className="rounded-lg border border-line bg-surface-2 px-3 py-2">
+                <summary className="cursor-pointer text-xs font-bold text-ink-2 select-none">
+                  {tr(locale, "한국어 (참고용 번역)", "한국어 · Korean (reference translation)")}
+                </summary>
+                <div className="mt-2 text-[13.5px] leading-relaxed break-keep whitespace-pre-wrap text-ink">{translations.ko}</div>
+                <div className="mt-1.5 text-[11px] text-ink-4">
+                  {translations.note ??
+                    tr(locale, "참고용 번역 — 심사 근거는 원문 기준", "Reference translation — findings are based on the original text")}
+                </div>
               </details>
             )}
           </div>
@@ -325,7 +355,11 @@ export function AdPane({
         {mode === "original" && translations && crossLanguageAnchors.length > 0 && (
           <details className="mt-2 rounded-lg border border-line bg-surface-2 px-3 py-2">
             <summary className="cursor-pointer text-xs font-bold text-ink-2 select-none">
-              원문 표현 → 정규화된 개념 (교차언어 매핑 {crossLanguageAnchors.length}건)
+              {tr(
+                locale,
+                `원문 표현 → 정규화된 개념 (교차언어 매핑 ${crossLanguageAnchors.length}건)`,
+                `Original expressions → normalized concepts (${crossLanguageAnchors.length} cross-language mappings)`,
+              )}
             </summary>
             <div className="mt-2 space-y-1.5">
               {crossLanguageAnchors.map((anchor) => (
@@ -341,7 +375,11 @@ export function AdPane({
               ))}
             </div>
             <div className="mt-1.5 text-[11px] text-ink-4">
-              원문(외국어) 표현이 정책 개념 사전(PolicyHypernym)으로 정규화된 결과입니다.
+              {tr(
+                locale,
+                "원문(외국어) 표현이 정책 개념 사전(PolicyHypernym)으로 정규화된 결과입니다.",
+                "Original (foreign-language) expressions normalized against the policy concept dictionary (PolicyHypernym).",
+              )}
             </div>
           </details>
         )}
@@ -350,16 +388,20 @@ export function AdPane({
           <>
             <div className="mt-3.5 flex flex-wrap items-center gap-x-3 gap-y-1.5 text-[12px] text-ink-3">
               <Icon name="alert" size={14} color="var(--ink-4)" />
-              표시 구간을 클릭하면 우측 판정 상세에서 근거와 수정안을 확인할 수 있습니다.
+              {tr(
+                locale,
+                "표시 구간을 클릭하면 우측 판정 상세에서 근거와 수정안을 확인할 수 있습니다.",
+                "Click a highlighted span to see the evidence and suggested revision in the finding details on the right.",
+              )}
             </div>
-            <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-[11px] text-ink-3" aria-label="범례">
-              <span><i className="legend-token-risk not-italic">위반 의심</i></span>
-              <span><i className="legend-token-review not-italic">검토 필요</i></span>
-              <span><i className="legend-token-keep not-italic">유지 고지</i></span>
+            <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-[11px] text-ink-3" aria-label={tr(locale, "범례", "Legend")}>
+              <span><i className="legend-token-risk not-italic">{tr(locale, "위반 의심", "Suspected violation")}</i></span>
+              <span><i className="legend-token-review not-italic">{tr(locale, "검토 필요", "Review required")}</i></span>
+              <span><i className="legend-token-keep not-italic">{tr(locale, "유지 고지", "Disclosure to keep")}</i></span>
             </div>
             {conditional.length > 0 && (
               <div className="mt-3 rounded-lg border border-line bg-surface-2 px-3 py-2 text-xs text-ink-3">
-                <strong className="text-ink">유지해야 할 고지</strong>
+                <strong className="text-ink">{tr(locale, "유지해야 할 고지", "Disclosures to keep")}</strong>
                 <span className="ml-2 inline-flex flex-wrap gap-1.5 align-middle">
                   {conditional.map((item) => (
                     <Tag key={item} tone="ok">
@@ -367,7 +409,13 @@ export function AdPane({
                     </Tag>
                   ))}
                 </span>
-                <span className="ml-2">— 초록 표시 구간은 수정 시 삭제하면 안 되는 문구입니다.</span>
+                <span className="ml-2">
+                  {tr(
+                    locale,
+                    "— 초록 표시 구간은 수정 시 삭제하면 안 되는 문구입니다.",
+                    "— Green spans mark wording that must not be removed when revising.",
+                  )}
+                </span>
               </div>
             )}
           </>
@@ -376,8 +424,8 @@ export function AdPane({
       {imageZoomed && result.ad_image?.available && (
         <ImageLightbox
           src={`/api/ad-image/${result.review_run_id}/original`}
-          alt="접수된 광고 이미지 원본"
-          caption="접수 원본 광고 이미지"
+          alt={tr(locale, "접수된 광고 이미지 원본", "Submitted original ad image")}
+          caption={tr(locale, "접수 원본 광고 이미지", "Submitted original ad image")}
           onClose={() => setImageZoomed(false)}
         />
       )}

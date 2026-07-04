@@ -8,6 +8,7 @@
  *  B. 백엔드 전체 일관 교정본(correctedDocument)이 있을 때 — 문장 단위 LCS diff
  * 공통으로 누락 필수 고지 블록은 문서 끝에 `+` 줄로 붙는다.
  */
+import { tr, type Locale } from "./i18n";
 import {
   alignSpan,
   buildIssueCards,
@@ -203,6 +204,7 @@ function diffFromDocument(
   corrected: string,
   revisions: RevisionMeta[],
   originalText: string,
+  locale: Locale = "ko",
 ): { lines: RevisionDiffLine[]; changedCount: number } {
   const a = tokenize(original);
   const b = tokenize(corrected);
@@ -224,13 +226,25 @@ function diffFromDocument(
     });
     return hit
       ? { anchorId: hit.anchorId, reason: hit.riskReason, basis: hit.basis, label: hit.label }
-      : { reason: "일관 재작성 교정안에서 대체·삭제된 문장입니다." };
+      : {
+          reason: tr(
+            locale,
+            "일관 재작성 교정안에서 대체·삭제된 문장입니다.",
+            "Sentence replaced or removed in the consistent rewrite.",
+          ),
+        };
   };
   const metaForAdd = (line: string): Partial<RevisionDiffLine> => {
     const hit = revisions.find((rev) => rev.after && (line.includes(rev.after) || rev.after.includes(line)));
     return hit
       ? { anchorId: hit.anchorId, reason: hit.fixReason, basis: hit.basis, label: hit.label }
-      : { reason: "일관 재작성 교정안에서 새로 쓴 문장입니다." };
+      : {
+          reason: tr(
+            locale,
+            "일관 재작성 교정안에서 새로 쓴 문장입니다.",
+            "Sentence newly written in the consistent rewrite.",
+          ),
+        };
   };
   let i = 0;
   let j = 0;
@@ -260,32 +274,56 @@ function diffFromDocument(
   return { lines, changedCount };
 }
 
-export function buildRevisionDiff(result: ReviewOutput, reviewedText: string): RevisionDiff {
+export function buildRevisionDiff(result: ReviewOutput, reviewedText: string, locale: Locale = "ko"): RevisionDiff {
   const revisions = collectRevisions(result, reviewedText);
   const docRevision = correctedDocument(result);
   const body = docRevision
-    ? diffFromDocument(reviewedText, docRevision, revisions, reviewedText)
+    ? diffFromDocument(reviewedText, docRevision, revisions, reviewedText, locale)
     : diffFromSpans(reviewedText, revisions);
 
   const lines = [...body.lines];
   let disclosureAddCount = 0;
   const block = correctedDisclosureBlock(result);
   if (block) {
-    const slots = requiredDisclosureSlots(result);
+    const slots = requiredDisclosureSlots(result, locale);
     const sourceByCheck = new Map(slots.map((slot) => [slot.checkId, slot.source]));
     const hasNoticeHeader = /꼭\s*확인해\s*주세요|유의\s*사항/.test(reviewedText);
-    if (!hasNoticeHeader) lines.push({ type: "add", text: "꼭 확인해 주세요", reason: "누락된 필수 고지를 모으는 하단 고지 블록 헤더입니다." });
+    if (!hasNoticeHeader)
+      lines.push({
+        type: "add",
+        text: tr(locale, "꼭 확인해 주세요", "Please read carefully"),
+        reason: tr(
+          locale,
+          "누락된 필수 고지를 모으는 하단 고지 블록 헤더입니다.",
+          "Header for the bottom disclosure block collecting the missing required disclosures.",
+        ),
+      });
     for (const item of block.items) {
       disclosureAddCount += 1;
       lines.push({
         type: "add",
-        text: item.status === "add" ? item.text : `${item.label} — 심사자 보완 (심의필 번호 등 상품별 정보)`,
+        text:
+          item.status === "add"
+            ? item.text
+            : tr(
+                locale,
+                `${item.label} — 심사자 보완 (심의필 번호 등 상품별 정보)`,
+                `${item.label} — reviewer to complete (product-specific details such as the approval number)`,
+              ),
         reason:
           item.status === "add"
-            ? `누락된 필수 고지(${item.label})를 추가합니다.`
-            : `필수 고지(${item.label})가 필요하지만 상품별 정보가 있어야 완성됩니다 — 심사자 보완 항목.`,
+            ? tr(
+                locale,
+                `누락된 필수 고지(${item.label})를 추가합니다.`,
+                `Adds the missing required disclosure (${item.label}).`,
+              )
+            : tr(
+                locale,
+                `필수 고지(${item.label})가 필요하지만 상품별 정보가 있어야 완성됩니다 — 심사자 보완 항목.`,
+                `Required disclosure (${item.label}) is needed but cannot be completed without product-specific details — reviewer action item.`,
+              ),
         basis: sourceByCheck.get(item.check_id),
-        label: "필수 고지",
+        label: tr(locale, "필수 고지", "Required disclosure"),
       });
     }
   }

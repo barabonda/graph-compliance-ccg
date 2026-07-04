@@ -1,8 +1,20 @@
 "use client";
 
 import { DECISIONS, riskGrade, VERDICT_LABELS, verdictBadgeTone, type DecisionKey } from "@/lib/labels";
+import { riskGradeLabelEn, tr, useLocale, verdictLabel, type Locale } from "@/lib/i18n";
 import type { ReviewOutput, StreamEvent } from "@/lib/types";
 import { Badge } from "../ui";
+
+/** 심사자 결정 어휘(확정형)의 EN 짝 — 표시 전용, 데이터 키는 그대로. */
+const DECISION_LABELS_EN: Record<DecisionKey, string> = {
+  approve: "Approve",
+  revise: "Request revision",
+  reject: "Reject",
+};
+
+function decisionLabel(locale: Locale, key: DecisionKey): string {
+  return locale === "en" ? (DECISION_LABELS_EN[key] ?? DECISIONS[key].label) : DECISIONS[key].label;
+}
 
 interface Props {
   status: "idle" | "running" | "done" | "error";
@@ -14,24 +26,30 @@ interface Props {
 }
 
 export function ContextBar({ status, result, reviewTitle, events, decision, onDecide }: Props) {
+  const locale = useLocale();
   const last = events.at(-1);
   const misleading = Number(result?.overall_impression_judgment?.misleading_risk_score ?? 0);
   const grade = riskGrade(misleading);
-  const [aiLabel] = result ? (VERDICT_LABELS[result.final_verdict] ?? [result.final_verdict]) : [""];
+  const gradeLabel = locale === "en" ? riskGradeLabelEn(misleading) : grade.label;
+  const [aiLabel] = result
+    ? VERDICT_LABELS[result.final_verdict]
+      ? verdictLabel(locale, result.final_verdict, VERDICT_LABELS)
+      : [result.final_verdict]
+    : [""];
 
   return (
     <header className="flex shrink-0 flex-wrap items-center gap-x-4 gap-y-2 border-b border-line bg-surface px-5 py-2.5">
       <div className="min-w-0">
         <div className="flex items-center gap-2">
           <span className="text-[15px] font-extrabold tracking-tight whitespace-nowrap">
-            {reviewTitle || "심사 대기"}
+            {reviewTitle || tr(locale, "심사 대기", "Awaiting review")}
           </span>
         </div>
         <div className="mt-0.5 flex flex-wrap gap-x-2.5 text-[11.5px] text-ink-3">
-          <span className="font-mono">{result?.review_run_id ?? "run 없음"}</span>
+          <span className="font-mono">{result?.review_run_id ?? tr(locale, "run 없음", "No run")}</span>
           {status === "running" && (
             <span className="font-semibold text-brand">
-              실행 중 · {last?.step ?? "시작"} ({events.length} events)
+              {tr(locale, "실행 중", "Running")} · {last?.step ?? tr(locale, "시작", "start")} ({events.length} events)
             </span>
           )}
         </div>
@@ -41,16 +59,16 @@ export function ContextBar({ status, result, reviewTitle, events, decision, onDe
         {result && (
           <div className="text-right">
             <div className="flex items-center justify-end gap-2">
-              <span className="text-[11px] font-bold tracking-wider text-ink-4">AI 판정</span>
+              <span className="text-[11px] font-bold tracking-wider text-ink-4">{tr(locale, "AI 판정", "AI verdict")}</span>
               <Badge tone={verdictBadgeTone(result.final_verdict)}>{aiLabel}</Badge>
             </div>
             <div className="mt-1 flex items-center justify-end gap-1.5 text-[11px] text-ink-3">
-              <span>오인 위험</span>
+              <span>{tr(locale, "오인 위험", "Misleading risk")}</span>
               <span
                 title={`misleading_risk_score ${misleading.toFixed(2)}`}
                 className={`font-bold ${grade.tone === "reject" ? "text-reject" : grade.tone === "review" ? "text-revise" : "text-pass"}`}
               >
-                {grade.label}
+                {gradeLabel}
               </span>
             </div>
           </div>
@@ -64,15 +82,15 @@ export function ContextBar({ status, result, reviewTitle, events, decision, onDe
             style={{ background: DECISIONS[decision].bg }}
           >
             <div>
-              <div className="text-[11px] font-bold text-ink-4">심사자 확정</div>
+              <div className="text-[11px] font-bold text-ink-4">{tr(locale, "심사자 확정", "Reviewer decision")}</div>
               <div className="text-[13.5px] font-extrabold" style={{ color: DECISIONS[decision].color }}>
-                {DECISIONS[decision].label}
+                {decisionLabel(locale, decision)}
               </div>
             </div>
             <button
               type="button"
               onClick={() => onDecide(null)}
-              title="결정 취소"
+              title={tr(locale, "결정 취소", "Cancel decision")}
               className="grid h-6 w-6 place-items-center rounded-md bg-white/70 text-ink-3"
             >
               ✕
@@ -96,7 +114,7 @@ export function ContextBar({ status, result, reviewTitle, events, decision, onDe
                       : { background: item.bg, color: item.color, border: `1px solid ${item.color}40` }
                   }
                 >
-                  {item.label}
+                  {decisionLabel(locale, key)}
                 </button>
               );
             })}

@@ -2,6 +2,7 @@
 
 import { useMemo } from "react";
 import { abbreviateLawNames } from "@/lib/labels";
+import { useLocale, tr, dataTitleDisplay } from "@/lib/i18n";
 import { buildDisclosureItems, type DisclosureItem } from "@/lib/selectors";
 import type { ReviewOutput } from "@/lib/types";
 import { Icon } from "../Icon";
@@ -17,13 +18,18 @@ interface Props {
 
 /** 권위 계층 배지 — 이 프로젝트의 핵심 구분(법령 위반 근거 vs 심의기준 미흡). */
 function TierBadge({ tier, note }: { tier: string; note?: string }) {
+  const locale = useLocale();
   if (tier === "law") {
     return (
       <span
         className="rounded-full bg-reject-bg px-1.5 py-px text-[11px] font-bold whitespace-nowrap text-reject"
-        title="법령이 표시를 요구하는 항목 — 누락 시 법령 위반 근거가 됩니다."
+        title={tr(
+          locale,
+          "법령이 표시를 요구하는 항목 — 누락 시 법령 위반 근거가 됩니다.",
+          "Disclosure required by law — omission constitutes grounds for a legal violation.",
+        )}
       >
-        법령 근거
+        {tr(locale, "법령 근거", "Legal basis")}
       </span>
     );
   }
@@ -31,9 +37,12 @@ function TierBadge({ tier, note }: { tier: string; note?: string }) {
     return (
       <span
         className="rounded-full bg-revise-bg px-1.5 py-px text-[11px] font-bold whitespace-nowrap text-revise"
-        title={note || "법령 위반이 아닌 심의기준(자율규제) 미흡입니다."}
+        title={
+          note ||
+          tr(locale, "법령 위반이 아닌 심의기준(자율규제) 미흡입니다.", "A guideline (self-regulatory) shortfall, not a legal violation.")
+        }
       >
-        심의기준
+        {tr(locale, "심의기준", "Guideline")}
       </span>
     );
   }
@@ -74,6 +83,7 @@ function VerifyRow({
   acknowledged: boolean;
   onAck: () => void;
 }) {
+  const locale = useLocale();
   const barColor = acknowledged ? "var(--pass)" : item.authorityTier === "law" ? "var(--reject)" : "var(--revise)";
   return (
     <div
@@ -84,21 +94,29 @@ function VerifyRow({
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-center gap-2">
           <span className={`text-[14px] font-bold text-ink ${acknowledged ? "line-through decoration-ink-4" : ""}`}>
-            {item.label}
+            {dataTitleDisplay(locale, item.label)}
           </span>
           {item.required && (
-            <span className="rounded-full bg-reject-bg px-1.5 py-px text-[11px] font-bold text-reject">필수</span>
+            <span className="rounded-full bg-reject-bg px-1.5 py-px text-[11px] font-bold text-reject">
+              {tr(locale, "필수", "Required")}
+            </span>
           )}
           <TierBadge tier={item.authorityTier} note={item.tierNote} />
         </div>
         <div className="mt-1 text-[12.5px] leading-relaxed break-keep text-ink-2">
-          광고에서 이 고지를 자동으로 찾지 못했습니다. 표시 위치·맥락을 직접 확인하세요.
-          {item.desc ? ` (${item.desc})` : ""}
+          {tr(
+            locale,
+            "광고에서 이 고지를 자동으로 찾지 못했습니다. 표시 위치·맥락을 직접 확인하세요.",
+            "This disclosure was not found automatically in the ad. Verify its placement and context manually.",
+          )}
+          {item.desc ? ` (${dataTitleDisplay(locale, item.desc)})` : ""}
         </div>
         {item.basis && (
           <div className="mt-1.5 text-[12px] leading-relaxed break-keep text-ink-3" title={item.basis}>
-            <b className="text-ink-2">근거</b> · {abbreviateLawNames(item.basis)}
-            {item.coBasis ? ` · 병기 ${abbreviateLawNames(item.coBasis)}` : ""}
+            <b className="text-ink-2">{tr(locale, "근거", "Basis")}</b> · {abbreviateLawNames(item.basis)}
+            {item.coBasis
+              ? tr(locale, ` · 병기 ${abbreviateLawNames(item.coBasis)}`, ` · co-cited ${abbreviateLawNames(item.coBasis)}`)
+              : ""}
           </div>
         )}
       </div>
@@ -114,17 +132,22 @@ function VerifyRow({
         }
       >
         <Icon name="check" size={13} color={acknowledged ? "var(--pass)" : "var(--ink-3)"} />
-        {acknowledged ? "확인함" : "심사자 확인"}
+        {acknowledged ? tr(locale, "확인함", "Confirmed") : tr(locale, "심사자 확인", "Reviewer confirm")}
       </button>
     </div>
   );
 }
 
 export function ExceptionView({ result, acknowledged, onToggleAck }: Props) {
+  const locale = useLocale();
   const items = useMemo(() => (result ? buildDisclosureItems(result) : []), [result]);
 
   if (!result) {
-    return <EmptyState>Review를 실행하면 사전심사 체크리스트가 표시됩니다.</EmptyState>;
+    return (
+      <EmptyState>
+        {tr(locale, "Review를 실행하면 사전심사 체크리스트가 표시됩니다.", "Run a review to see the pre-review checklist.")}
+      </EmptyState>
+    );
   }
 
   // 적용범위(gate ON) 안에서만 충족/확인필요를 가른다. OFF는 '해당 없음'.
@@ -150,8 +173,12 @@ export function ExceptionView({ result, acknowledged, onToggleAck }: Props) {
     <div className="mx-auto flex h-full min-h-0 w-full max-w-5xl flex-col overflow-hidden rounded-[14px] border border-line bg-surface shadow-card">
       <PaneHeader
         icon="shield"
-        title="사전심사 체크리스트"
-        sub="충족 · 확인 필요 · 해당 없음 — 결과를 단정하지 않는 보조 점검"
+        title={tr(locale, "사전심사 체크리스트", "Pre-review checklist")}
+        sub={tr(
+          locale,
+          "충족 · 확인 필요 · 해당 없음 — 결과를 단정하지 않는 보조 점검",
+          "Satisfied · Needs confirmation · Not applicable — an assistive check that does not predetermine the outcome",
+        )}
         right={
           <div className="flex items-center gap-2">
             <span
@@ -162,13 +189,13 @@ export function ExceptionView({ result, acknowledged, onToggleAck }: Props) {
                   : { color: "var(--revise)", background: "var(--revise-bg)" }
               }
             >
-              심사자 확인 {ackCount}/{toVerify.length}
+              {tr(locale, `심사자 확인 ${ackCount}/${toVerify.length}`, `Reviewer confirmed ${ackCount}/${toVerify.length}`)}
             </span>
             <span
               className="rounded-full px-2.5 py-0.5 text-[12px] font-bold"
               style={{ color: "var(--pass)", background: "var(--pass-bg)" }}
             >
-              충족 {satisfied.length}/{applicable.length}
+              {tr(locale, `충족 ${satisfied.length}/${applicable.length}`, `Satisfied ${satisfied.length}/${applicable.length}`)}
             </span>
           </div>
         }
@@ -178,12 +205,24 @@ export function ExceptionView({ result, acknowledged, onToggleAck }: Props) {
         <div className="mb-4">
           <div className="mb-1 flex items-baseline justify-between text-[11.5px] text-ink-3">
             <span className="font-bold">
-              점검 진행률 {progress}%
+              {tr(locale, `점검 진행률 ${progress}%`, `Check progress ${progress}%`)}
               {lawPending > 0 && (
-                <span className="ml-2 font-semibold text-reject">법령 근거 미확인 {lawPending}건 우선 확인</span>
+                <span className="ml-2 font-semibold text-reject">
+                  {tr(
+                    locale,
+                    `법령 근거 미확인 ${lawPending}건 우선 확인`,
+                    `${lawPending} legal-basis items unconfirmed — check these first`,
+                  )}
+                </span>
               )}
             </span>
-            <span className="text-ink-4">충족 {satisfied.length} + 확인 {ackCount} / 적용 {applicable.length}</span>
+            <span className="text-ink-4">
+              {tr(
+                locale,
+                `충족 ${satisfied.length} + 확인 ${ackCount} / 적용 ${applicable.length}`,
+                `Satisfied ${satisfied.length} + confirmed ${ackCount} / ${applicable.length} applicable`,
+              )}
+            </span>
           </div>
           <div className="h-2 overflow-hidden rounded-full bg-surface-3">
             <div
@@ -194,23 +233,31 @@ export function ExceptionView({ result, acknowledged, onToggleAck }: Props) {
         </div>
 
         <div className="mb-5 grid grid-cols-4 gap-3">
-          <SummaryChip label="충족" value={satisfied.length} color="var(--pass)" />
+          <SummaryChip label={tr(locale, "충족", "Satisfied")} value={satisfied.length} color="var(--pass)" />
           <SummaryChip
-            label="확인 필요 · 법령 근거"
+            label={tr(locale, "확인 필요 · 법령 근거", "Needs confirmation · Legal basis")}
             value={toVerify.filter((i) => i.authorityTier === "law").length}
-            sub="누락 시 법령 위반"
+            sub={tr(locale, "누락 시 법령 위반", "Violation if omitted")}
             color="var(--reject)"
           />
           <SummaryChip
-            label="확인 필요 · 심의기준"
+            label={tr(locale, "확인 필요 · 심의기준", "Needs confirmation · Guideline")}
             value={toVerify.filter((i) => i.authorityTier !== "law").length}
-            sub="자율규제 보완"
+            sub={tr(locale, "자율규제 보완", "Self-regulatory fix")}
             color="var(--revise)"
           />
-          <SummaryChip label="해당 없음" value={notApplicable.length} color="var(--ink-4)" />
+          <SummaryChip label={tr(locale, "해당 없음", "Not applicable")} value={notApplicable.length} color="var(--ink-4)" />
         </div>
 
-        <SectionTitle icon="alert" color="var(--revise)" text="놓쳤을 수 있는 것 — 직접 확인 권장 (법령 근거 우선 정렬)" />
+        <SectionTitle
+          icon="alert"
+          color="var(--revise)"
+          text={tr(
+            locale,
+            "놓쳤을 수 있는 것 — 직접 확인 권장 (법령 근거 우선 정렬)",
+            "Possibly missed — manual check recommended (legal basis first)",
+          )}
+        />
         {toVerify.length ? (
           <div className="mb-5 flex flex-col gap-2">
             {toVerify.map((item) => (
@@ -224,12 +271,19 @@ export function ExceptionView({ result, acknowledged, onToggleAck }: Props) {
           </div>
         ) : (
           <p className="mb-5 rounded-[10px] bg-surface-2 px-3.5 py-2.5 text-[12.5px] leading-relaxed text-ink-3">
-            적용 대상 고지 중 자동 점검으로 빠진 항목이 없습니다. 단, 자동 점검은 완전하지 않으니 표현·맥락은 직접
-            확인하세요.
+            {tr(
+              locale,
+              "적용 대상 고지 중 자동 점검으로 빠진 항목이 없습니다. 단, 자동 점검은 완전하지 않으니 표현·맥락은 직접 확인하세요.",
+              "No applicable disclosures were missed by the automated check. The automated check is not exhaustive, though — verify wording and context manually.",
+            )}
           </p>
         )}
 
-        <SectionTitle icon="check" color="var(--pass)" text="지금 충족된 것 — 근거가 광고에 보임" />
+        <SectionTitle
+          icon="check"
+          color="var(--pass)"
+          text={tr(locale, "지금 충족된 것 — 근거가 광고에 보임", "Currently satisfied — evidence visible in the ad")}
+        />
         <div className="mb-5 flex flex-col gap-1.5">
           {satisfied.length ? (
             satisfied.map((item) => (
@@ -239,15 +293,17 @@ export function ExceptionView({ result, acknowledged, onToggleAck }: Props) {
               >
                 <span className="absolute top-2.5 bottom-2.5 left-0 w-[3px] rounded-full bg-pass" />
                 <Icon name="check" size={15} color="var(--pass)" stroke={2.4} style={{ flexShrink: 0 }} />
-                <span className="min-w-0 flex-1 text-[13.5px] font-bold text-ink">{item.label}</span>
+                <span className="min-w-0 flex-1 text-[13.5px] font-bold text-ink">{dataTitleDisplay(locale, item.label)}</span>
                 <TierBadge tier={item.authorityTier} note={item.tierNote} />
                 <span className="max-w-[45%] truncate text-[12px] text-ink-3" title={item.basis || item.desc}>
-                  {item.basis ? abbreviateLawNames(item.basis) : item.desc}
+                  {item.basis ? abbreviateLawNames(item.basis) : dataTitleDisplay(locale, item.desc)}
                 </span>
               </div>
             ))
           ) : (
-            <p className="text-[12.5px] text-ink-3">충족으로 확인된 고지가 아직 없습니다.</p>
+            <p className="text-[12.5px] text-ink-3">
+              {tr(locale, "충족으로 확인된 고지가 아직 없습니다.", "No disclosures confirmed as satisfied yet.")}
+            </p>
           )}
         </div>
 
@@ -256,7 +312,11 @@ export function ExceptionView({ result, acknowledged, onToggleAck }: Props) {
             <SectionTitle
               icon="x"
               color="var(--ink-4)"
-              text={`해당 없음 — 상품군/채널 적용범위 밖 (${notApplicable.length})`}
+              text={tr(
+                locale,
+                `해당 없음 — 상품군/채널 적용범위 밖 (${notApplicable.length})`,
+                `Not applicable — outside product/channel scope (${notApplicable.length})`,
+              )}
             />
             <div className="mb-4 flex flex-wrap gap-1.5">
               {notApplicable.map((item) => (
@@ -265,7 +325,7 @@ export function ExceptionView({ result, acknowledged, onToggleAck }: Props) {
                   className="rounded-md bg-surface-2 px-2.5 py-1 text-[11.5px] text-ink-3"
                   title={item.gateReason || undefined}
                 >
-                  {item.label}
+                  {dataTitleDisplay(locale, item.label)}
                 </span>
               ))}
             </div>
@@ -275,8 +335,11 @@ export function ExceptionView({ result, acknowledged, onToggleAck }: Props) {
         <div className="mt-1 flex items-start gap-2 rounded-[11px] border border-line bg-surface-2 px-3.5 py-3 text-[12px] leading-relaxed text-ink-2">
           <Icon name="alert" size={15} color="var(--ink-4)" style={{ flexShrink: 0, marginTop: 1 }} />
           <span>
-            자동 점검은 완전하지 않습니다. ‘충족’도 표시 위계·맥락에 따라 달라질 수 있으니, 이 화면은 통과 여부를
-            예측하지 않으며 최종 판단은 심사자 검토를 따릅니다.
+            {tr(
+              locale,
+              "자동 점검은 완전하지 않습니다. ‘충족’도 표시 위계·맥락에 따라 달라질 수 있으니, 이 화면은 통과 여부를 예측하지 않으며 최종 판단은 심사자 검토를 따릅니다.",
+              "The automated check is not exhaustive. Even “satisfied” items can vary with display prominence and context; this screen does not predict approval, and the final decision follows reviewer review.",
+            )}
           </span>
         </div>
       </div>

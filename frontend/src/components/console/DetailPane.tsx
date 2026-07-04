@@ -18,6 +18,7 @@ import {
   productComparisonsForClaimFact,
 } from "@/lib/selectors";
 import type { ReviewOutput } from "@/lib/types";
+import { dataTitleDisplay, JUDGMENT_STATUS_EN, principleDisplay, riskGradeLabelEn, tr, useLocale, type Locale } from "@/lib/i18n";
 import { Icon } from "../Icon";
 import { Badge, Expandable, KeyValueText, Meter, Tag } from "../ui";
 import { DelegationChain } from "./DelegationChain";
@@ -33,19 +34,37 @@ interface Props {
   onGotoGraph: () => void;
 }
 
+// KH 표시용 — RiskList.TONE_WORD_SHORT 의 EN 짝(공유 파일 불변, 표시 전용).
+const TONE_WORD_SHORT_EN: Record<string, string> = {
+  risk: "Suspected violation",
+  review: "Review required",
+  "keep-warning": "Low prominence",
+  keep: "Disclosure",
+  scope: "Scope",
+};
+
+function toneWordShort(locale: Locale, tone: keyof typeof TONE_WORD_SHORT): string {
+  return locale === "en" ? (TONE_WORD_SHORT_EN[tone] ?? TONE_WORD_SHORT[tone]) : TONE_WORD_SHORT[tone];
+}
+
 function EmptyDetail() {
+  const locale = useLocale();
   return (
     <div className="flex h-full flex-col">
-      <PaneHeader icon="target" title="판정 상세" sub="항목을 선택하세요" />
+      <PaneHeader
+        icon="target"
+        title={tr(locale, "판정 상세", "Judgment details")}
+        sub={tr(locale, "항목을 선택하세요", "Select an item")}
+      />
       <div className="grid flex-1 place-items-center p-6 text-center text-[13px] text-ink-4">
         <div>
           <Icon name="target" size={34} color="var(--line-2)" style={{ margin: "0 auto" }} />
           <div className="mt-3">
-            좌측 광고의 위험 표현 또는
+            {tr(locale, "좌측 광고의 위험 표현 또는", "Select a flagged expression in the ad")}
             <br />
-            중앙 위험 카드를 선택하면
+            {tr(locale, "중앙 위험 카드를 선택하면", "or a risk card in the center pane")}
             <br />
-            판정 근거가 여기에 표시됩니다.
+            {tr(locale, "판정 근거가 여기에 표시됩니다.", "to see the judgment basis here.")}
           </div>
         </div>
       </div>
@@ -54,11 +73,13 @@ function EmptyDetail() {
 }
 
 function TrackBDetail({ result }: { result: ReviewOutput }) {
+  const locale = useLocale();
   const trackB = result.overall_impression_judgment ?? {};
   const score = Number(trackB.misleading_risk_score ?? 0);
   const grade = riskGrade(score);
+  const gradeLabel = locale === "en" ? riskGradeLabelEn(score) : grade.label;
   const color = grade.tone === "reject" ? "var(--reject)" : grade.tone === "review" ? "var(--revise)" : "var(--pass)";
-  const graph = buildOverallImpressionGraph(result);
+  const graph = buildOverallImpressionGraph(result, locale);
   const syn = trackB.synthesized_evidence;
   const ROLE_KO: Record<string, string> = {
     benefit_claim: "혜택",
@@ -66,18 +87,29 @@ function TrackBDetail({ result }: { result: ReviewOutput }) {
     risk_disclosure: "위험 고지",
     protection_disclosure: "보호 고지",
   };
+  const ROLE_EN: Record<string, string> = {
+    benefit_claim: "Benefit",
+    condition_disclosure: "Condition disclosure",
+    risk_disclosure: "Risk disclosure",
+    protection_disclosure: "Protection disclosure",
+  };
+  const roleLabel = (role: string) => (locale === "en" ? (ROLE_EN[role] ?? ROLE_KO[role]) : ROLE_KO[role]);
   return (
     <div className="flex h-full flex-col">
-      <PaneHeader icon="target" title="판정 상세" sub="소비자 오인 · 종합 심사" />
+      <PaneHeader
+        icon="target"
+        title={tr(locale, "판정 상세", "Judgment details")}
+        sub={tr(locale, "소비자 오인 · 종합 심사", "Consumer misleading · Holistic review")}
+      />
       <div className="flex-1 overflow-y-auto px-4.5 pt-4 pb-6" style={{ animation: "nodeIn .3s" }}>
         {/* 헤더 등급 (수치는 hover) */}
         <div className="mb-2 flex items-center justify-between gap-2">
           <span className="flex items-center gap-2 text-[13px] font-bold" style={{ color }}>
             <span className="h-2 w-2 rounded-full" style={{ background: color }} />
-            전체 인상 판단
+            {tr(locale, "전체 인상 판단", "Overall impression judgment")}
           </span>
           <span className="text-[12px] font-bold" style={{ color }} title={`misleading_risk_score ${score.toFixed(2)}`}>
-            오인 위험 {grade.label}
+            {tr(locale, `오인 위험 ${grade.label}`, `Misleading risk ${gradeLabel}`)}
           </span>
         </div>
         {/* 종합 결론 한 단락 */}
@@ -91,22 +123,32 @@ function TrackBDetail({ result }: { result: ReviewOutput }) {
         )}
         {/* 근거 그래프 (혜택 주장 ← 완화/강화) */}
         <div className="mt-3">
-          <div className="mb-1.5 text-[11px] font-bold tracking-wider text-ink-4">근거 · 혜택 주장과 완화/강화</div>
+          <div className="mb-1.5 text-[11px] font-bold tracking-wider text-ink-4">
+            {tr(locale, "근거 · 혜택 주장과 완화/강화", "Basis · Benefit claim vs. mitigation/reinforcement")}
+          </div>
           <OverallImpressionGraph graph={graph} />
         </div>
         {/* 점진적 공개 — 문장별 상세는 펼쳐야 보인다 */}
         <div className="mt-3">
-          <Expandable header={<span className="text-[12px] font-bold text-ink-2">문장별 상세 · 근거 더보기</span>}>
+          <Expandable
+            header={
+              <span className="text-[12px] font-bold text-ink-2">
+                {tr(locale, "문장별 상세 · 근거 더보기", "Sentence-level detail · More evidence")}
+              </span>
+            }
+          >
             <div className="space-y-3 px-3 py-2.5">
               {trackB.why && (
                 <div>
-                  <div className="mb-1 text-[11px] font-bold tracking-wider text-ink-4">판단 이유</div>
+                  <div className="mb-1 text-[11px] font-bold tracking-wider text-ink-4">{tr(locale, "판단 이유", "Reasoning")}</div>
                   <p className="m-0 text-[12.5px] leading-relaxed text-ink-2">{humanizeJudgment(trackB.why)}</p>
                 </div>
               )}
               {(trackB.misleading_factors?.length ?? 0) > 0 && (
                 <div>
-                  <div className="mb-1 text-[11px] font-bold tracking-wider text-ink-4">오인 요인</div>
+                  <div className="mb-1 text-[11px] font-bold tracking-wider text-ink-4">
+                    {tr(locale, "오인 요인", "Misleading factors")}
+                  </div>
                   <ul className="m-0 list-disc space-y-1 pl-4 text-[12px] leading-relaxed text-ink-2">
                     {trackB.misleading_factors!.map((factor, index) => (
                       <li key={index}>{humanizeJudgment(factor)}</li>
@@ -116,12 +158,14 @@ function TrackBDetail({ result }: { result: ReviewOutput }) {
               )}
               {(syn?.sentence_layers?.length ?? 0) > 0 && (
                 <div>
-                  <div className="mb-1 text-[11px] font-bold tracking-wider text-ink-4">문장 위계</div>
+                  <div className="mb-1 text-[11px] font-bold tracking-wider text-ink-4">
+                    {tr(locale, "문장 위계", "Sentence hierarchy")}
+                  </div>
                   <div className="space-y-1">
                     {syn!.sentence_layers!.map((layer, index) => (
                       <div key={index} className="flex items-start gap-2 text-[12px]">
                         <span className="shrink-0 rounded bg-surface-3 px-1.5 py-0.5 text-[11px] font-bold text-ink-3">
-                          {ROLE_KO[layer.role ?? ""] ?? layer.role}
+                          {roleLabel(layer.role ?? "") ?? layer.role}
                         </span>
                         <span className="min-w-0 text-ink-2">{layer.text}</span>
                       </div>
@@ -132,17 +176,24 @@ function TrackBDetail({ result }: { result: ReviewOutput }) {
             </div>
           </Expandable>
         </div>
-        <p className="mt-3 text-[11px] text-ink-4">대법원 ‘전체적·궁극적 인상’ 기준(2017두60109)에 대응하는 판단입니다.</p>
+        <p className="mt-3 text-[11px] text-ink-4">
+          {tr(
+            locale,
+            "대법원 ‘전체적·궁극적 인상’ 기준(2017두60109)에 대응하는 판단입니다.",
+            "This judgment applies the overall, ultimate impression standard (Supreme Court 2017Du60109).",
+          )}
+        </p>
       </div>
     </div>
   );
 }
 
 export function DetailPane({ result, selectedAnchorId, resolved, onToggleResolve, onGotoGraph }: Props) {
+  const locale = useLocale();
   if (selectedAnchorId === "trackB") return <TrackBDetail result={result} />;
 
   const anchor = result.context_anchors?.find((item) => item.anchor_id === selectedAnchorId);
-  const cards = buildIssueCards(result);
+  const cards = buildIssueCards(result, locale);
   const card = cards.find((item) => item.id === selectedAnchorId || item.anchorId === selectedAnchorId);
 
   // 고지 누락 카드 (anchor 없음)
@@ -150,12 +201,18 @@ export function DetailPane({ result, selectedAnchorId, resolved, onToggleResolve
     const isResolved = resolved.has(card.id);
     return (
       <div className="flex h-full flex-col">
-        <PaneHeader icon="flag" title="판정 상세" sub={`${card.code} · 필수 고지`} />
+        <PaneHeader
+          icon="flag"
+          title={tr(locale, "판정 상세", "Judgment details")}
+          sub={tr(locale, `${card.code} · 필수 고지`, `${card.code} · Required disclosure`)}
+        />
         <div className="flex-1 overflow-y-auto px-4.5 pt-4 pb-6" style={{ animation: "nodeIn .3s" }}>
           <div className="mb-2 flex items-center gap-2">
             <span className="h-2 w-2 rounded-full" style={{ background: isResolved ? "var(--pass)" : "var(--revise)" }} />
             <span className="text-[13px] font-bold" style={{ color: isResolved ? "var(--pass)" : "var(--revise)" }}>
-              {isResolved ? "고지 반영 · 해소" : "필수 고지 누락"}
+              {isResolved
+                ? tr(locale, "고지 반영 · 해소", "Disclosure applied · Resolved")
+                : tr(locale, "필수 고지 누락", "Required disclosure missing")}
             </span>
           </div>
           <div
@@ -164,29 +221,33 @@ export function DetailPane({ result, selectedAnchorId, resolved, onToggleResolve
           >
             {card.quote}
           </div>
-          <DetailRow icon="clause" label="근거">
+          <DetailRow icon="clause" label={tr(locale, "근거", "Basis")}>
             {/* 출처 계층: 이 근거가 국가 법령인지, 금소법 §22 위임 자율규제(심의기준)인지. */}
             {card.authorityTier === "guideline" && (
               <div className="mb-1 flex items-center gap-1.5">
                 <span className="rounded bg-surface-3 px-1.5 py-0.5 text-[11px] font-bold text-ink-2">
-                  자율규제 · 은행연합회 심의기준
+                  {tr(locale, "자율규제 · 은행연합회 심의기준", "Self-regulatory · Banking federation review guideline")}
                 </span>
-                <span className="text-[11px] text-ink-4">금소법 제22조 위임</span>
+                <span className="text-[11px] text-ink-4">
+                  {tr(locale, "금소법 제22조 위임", "Delegated under Financial Consumer Protection Act Art. 22")}
+                </span>
               </div>
             )}
             {card.authorityTier === "law" && (
               <div className="mb-1">
                 <span className="rounded bg-reject-bg px-1.5 py-0.5 text-[11px] font-bold text-reject">
-                  법령 · 국가 법규범
+                  {tr(locale, "법령 · 국가 법규범", "Statute · National legal norm")}
                 </span>
               </div>
             )}
             <div className="font-mono text-[12px] font-bold text-brand-2">{card.basis}</div>
             {card.coBasis && (
-              <div className="mt-1 font-mono text-[11px] text-ink-4">병기 · {card.coBasis}</div>
+              <div className="mt-1 font-mono text-[11px] text-ink-4">
+                {tr(locale, `병기 · ${card.coBasis}`, `Co-cited · ${card.coBasis}`)}
+              </div>
             )}
           </DetailRow>
-          <DetailRow icon="alert" label="누락 사유">
+          <DetailRow icon="alert" label={tr(locale, "누락 사유", "Reason for omission")}>
             <p className="m-0 text-[13px] leading-relaxed text-ink-2">{card.rationale}</p>
           </DetailRow>
           {(() => {
@@ -195,7 +256,7 @@ export function DetailPane({ result, selectedAnchorId, resolved, onToggleResolve
             if (crossRef.status === "no_doc") return null;
             const inDoc = crossRef.status === "in_doc";
             return (
-              <DetailRow icon="layers" label="상품설명서 대조">
+              <DetailRow icon="layers" label={tr(locale, "상품설명서 대조", "Product document cross-check")}>
                 <div
                   className="rounded-[10px] p-3"
                   style={{
@@ -208,13 +269,29 @@ export function DetailPane({ result, selectedAnchorId, resolved, onToggleResolve
                     style={{ color: inDoc ? "var(--revise)" : "var(--ink-2)" }}
                   >
                     {inDoc
-                      ? "상품설명서에는 명시되어 있으나 광고 문안에 없습니다"
-                      : "광고와 상품설명서 모두에서 확인되지 않았습니다"}
+                      ? tr(
+                          locale,
+                          "상품설명서에는 명시되어 있으나 광고 문안에 없습니다",
+                          "Stated in the product document but missing from the ad copy",
+                        )
+                      : tr(
+                          locale,
+                          "광고와 상품설명서 모두에서 확인되지 않았습니다",
+                          "Not found in either the ad or the product document",
+                        )}
                   </div>
                   <p className="m-0 mb-2 text-[12px] leading-relaxed text-ink-3">
                     {inDoc
-                      ? "상품설명서·약관에 근거가 있으므로 해당 내용을 광고 문안에 함께 표시하면 누락이 해소됩니다."
-                      : "상품설명서에서도 근거를 찾지 못했습니다. 표시 가능 여부를 상품 부서와 확인하세요."}
+                      ? tr(
+                          locale,
+                          "상품설명서·약관에 근거가 있으므로 해당 내용을 광고 문안에 함께 표시하면 누락이 해소됩니다.",
+                          "The product document/terms support this content; adding it to the ad copy resolves the omission.",
+                        )
+                      : tr(
+                          locale,
+                          "상품설명서에서도 근거를 찾지 못했습니다. 표시 가능 여부를 상품 부서와 확인하세요.",
+                          "No basis was found in the product document either. Confirm with the product team whether it can be stated.",
+                        )}
                   </p>
                   {crossRef.facts.map((fact) => (
                     <div
@@ -243,7 +320,7 @@ export function DetailPane({ result, selectedAnchorId, resolved, onToggleResolve
               }`}
             >
               <Icon name={isResolved ? "x" : "check"} size={15} />
-              {isResolved ? "반영 취소" : "고지 반영 처리"}
+              {isResolved ? tr(locale, "반영 취소", "Undo") : tr(locale, "고지 반영 처리", "Mark disclosure applied")}
             </button>
           </div>
         </div>
@@ -264,6 +341,7 @@ export function DetailPane({ result, selectedAnchorId, resolved, onToggleResolve
   const topPlan = plans.find((item) => item.plan_item_id === topJudgment?.plan_item_id) ?? plans[0];
   const score = Number(topJudgment?.score ?? 0);
   const grade = riskGrade(score);
+  const gradeLabel = locale === "en" ? riskGradeLabelEn(score) : grade.label;
   const issues = (result.detected_issues ?? []).filter((issue) =>
     effective.some((judgment) => judgment.cu_id === issue.risk_code),
   );
@@ -287,19 +365,19 @@ export function DetailPane({ result, selectedAnchorId, resolved, onToggleResolve
     <div className="flex h-full flex-col">
       <PaneHeader
         icon="target"
-        title="판정 상세"
-        sub={`${card.code} · ${card.label}`}
+        title={tr(locale, "판정 상세", "Judgment details")}
+        sub={`${card.code} · ${dataTitleDisplay(locale, card.label)}`}
         right={
           isResolved ? (
             <Tag tone="ok">
-              <Icon name="check" size={12} style={{ marginRight: 3 }} /> 해소됨
+              <Icon name="check" size={12} style={{ marginRight: 3 }} /> {tr(locale, "해소됨", "Resolved")}
             </Tag>
           ) : (
             <span
               className="rounded-full px-2 py-0.5 text-[11px] font-bold"
               style={{ color, background: TONE_BG[tone] }}
             >
-              {TONE_WORD_SHORT[tone]}
+              {toneWordShort(locale, tone)}
             </span>
           )
         }
@@ -309,7 +387,9 @@ export function DetailPane({ result, selectedAnchorId, resolved, onToggleResolve
         <div className="mb-2 flex items-center gap-2">
           <span className="h-2 w-2 shrink-0 rounded-full" style={{ background: headColor }} />
           <span className="text-[13px] font-bold" style={{ color: headColor }}>
-            {isResolved ? "수정안 적용 · 해소" : `${TONE_WORD_SHORT[tone]} · ${card.label}`}
+            {isResolved
+              ? tr(locale, "수정안 적용 · 해소", "Revision applied · Resolved")
+              : `${toneWordShort(locale, tone)} · ${dataTitleDisplay(locale, card.label)}`}
           </span>
         </div>
         <div
@@ -325,23 +405,25 @@ export function DetailPane({ result, selectedAnchorId, resolved, onToggleResolve
             색은 상태 텍스트와 게이지에만, 셀은 테두리 없이 배경 톤으로만 구분. */}
         <div className="mt-2.5 grid grid-cols-2 gap-2">
           <div className="rounded-[10px] bg-surface-2 px-3 py-2">
-            <div className="text-[11px] font-bold tracking-wider text-ink-4">판정</div>
+            <div className="text-[11px] font-bold tracking-wider text-ink-4">{tr(locale, "판정", "Verdict")}</div>
             <div className="mt-1 text-[12px] leading-relaxed">
               <span className="font-bold" style={{ color: headColor }}>
-                {isResolved ? "수정안 적용 · 해소" : TONE_WORD_SHORT[tone]}
+                {isResolved ? tr(locale, "수정안 적용 · 해소", "Revision applied · Resolved") : toneWordShort(locale, tone)}
               </span>
               {!isResolved && card.authorityTier === "law" && (
-                <span className="text-ink-3"> · 법령 근거</span>
+                <span className="text-ink-3">{tr(locale, " · 법령 근거", " · Legal basis")}</span>
               )}
               {!isResolved && card.authorityTier === "guideline" && (
-                <span className="text-ink-3"> · 심의기준 미흡(법령 위반 아님)</span>
+                <span className="text-ink-3">
+                  {tr(locale, " · 심의기준 미흡(법령 위반 아님)", " · Guideline shortfall (not a legal violation)")}
+                </span>
               )}
             </div>
           </div>
           <div className="rounded-[10px] bg-surface-2 px-3 py-2">
             <div className="flex justify-between text-[11px] font-bold tracking-wider text-ink-4">
-              <span>위반 가능성</span>
-              <span style={{ color: headColor }}>{grade.label}</span>
+              <span>{tr(locale, "위반 가능성", "Violation likelihood")}</span>
+              <span style={{ color: headColor }}>{gradeLabel}</span>
             </div>
             <div className="mt-2.5">
               <Meter value={score * 100} color={headColor} title={`score ${score.toFixed(2)}`} />
@@ -349,10 +431,14 @@ export function DetailPane({ result, selectedAnchorId, resolved, onToggleResolve
           </div>
           {card.basis ? (
             <div className="col-span-2 rounded-[10px] bg-surface-2 px-3 py-2">
-              <div className="text-[11px] font-bold tracking-wider text-ink-4">대표 근거</div>
+              <div className="text-[11px] font-bold tracking-wider text-ink-4">
+                {tr(locale, "대표 근거", "Representative basis")}
+              </div>
               <div className="mt-1 text-[12.5px] leading-relaxed font-medium break-keep text-ink">{card.basis}</div>
               {card.coBasis && (
-                <div className="mt-0.5 text-[11px] text-ink-4">병기 · {card.coBasis}</div>
+                <div className="mt-0.5 text-[11px] text-ink-4">
+                  {tr(locale, `병기 · ${card.coBasis}`, `Co-cited · ${card.coBasis}`)}
+                </div>
               )}
             </div>
           ) : null}
@@ -360,28 +446,30 @@ export function DetailPane({ result, selectedAnchorId, resolved, onToggleResolve
         {/* 금소법 6대 판매원칙 — 이 사안이 어느 원칙 위반 후보인지가 준법 보고서의 1차 분류다 */}
         {principles.length > 0 && (
           <div className="mt-2 flex flex-wrap items-center gap-1.5 px-0.5">
-            <span className="text-[11px] font-bold tracking-wider text-ink-4">판매원칙</span>
+            <span className="text-[11px] font-bold tracking-wider text-ink-4">{tr(locale, "판매원칙", "Sales principle")}</span>
             {principles.map((principle) => (
               <Tag key={principle} color={principleColor(principle)}>
-                {principle}
+                {principleDisplay(locale, principle)}
               </Tag>
             ))}
           </div>
         )}
 
         {/* 판정 사유 — 금감원 답변식: 정의 → 요건별 사실 적용 → 결론 → 유보 */}
-        <DetailRow icon="alert" label="판정 사유">
+        <DetailRow icon="alert" label={tr(locale, "판정 사유", "Reasons")}>
           {topJudgment?.legal_basis || (topJudgment?.criteria_findings?.length ?? 0) > 0 ? (
             <div className="space-y-2.5">
               {topJudgment?.legal_basis && (
                 <div className="rounded-md border border-line bg-surface-2 px-3 py-2">
-                  <span className="text-[11px] font-bold tracking-wider text-ink-4">적용 법리</span>
+                  <span className="text-[11px] font-bold tracking-wider text-ink-4">{tr(locale, "적용 법리", "Applicable law")}</span>
                   <p className="mt-0.5 text-[13px] leading-relaxed text-ink-2">{humanizeJudgment(topJudgment.legal_basis)}</p>
                 </div>
               )}
               {(topJudgment?.criteria_findings?.length ?? 0) > 0 && (
                 <div>
-                  <span className="text-[11px] font-bold tracking-wider text-ink-4">판단 기준별 적용</span>
+                  <span className="text-[11px] font-bold tracking-wider text-ink-4">
+                    {tr(locale, "판단 기준별 적용", "Criteria application")}
+                  </span>
                   <ol className="mt-1 space-y-1.5">
                     {topJudgment!.criteria_findings!.map((cf, i) => (
                       <li key={i} className="flex gap-2 rounded-md border border-line px-2.5 py-1.5">
@@ -397,7 +485,7 @@ export function DetailPane({ result, selectedAnchorId, resolved, onToggleResolve
                         <div className="min-w-0">
                           <span className="text-[12.5px] font-bold text-ink">{cf.criterion}</span>
                           <span className={`ml-1.5 text-[11px] ${cf.satisfied ? "text-reject" : "text-ink-4"}`}>
-                            {cf.satisfied ? "충족" : "불충족"}
+                            {cf.satisfied ? tr(locale, "충족", "Met") : tr(locale, "불충족", "Not met")}
                           </span>
                           <p className="mt-0.5 text-[12px] leading-relaxed text-ink-2">{humanizeJudgment(cf.finding)}</p>
                         </div>
@@ -408,27 +496,29 @@ export function DetailPane({ result, selectedAnchorId, resolved, onToggleResolve
               )}
               {topJudgment?.conclusion && (
                 <div className="rounded-md border-l-2 border-reject bg-reject-bg/40 px-3 py-2">
-                  <span className="text-[11px] font-bold tracking-wider text-reject">결론</span>
+                  <span className="text-[11px] font-bold tracking-wider text-reject">{tr(locale, "결론", "Conclusion")}</span>
                   <p className="mt-0.5 text-[13px] leading-relaxed text-ink-2">{humanizeJudgment(topJudgment.conclusion)}</p>
                 </div>
               )}
               {topJudgment?.reservation && (
                 <div className="flex gap-1.5 px-1 text-[11.5px] leading-relaxed text-ink-3">
-                  <span className="font-bold text-ink-4">유보</span>
+                  <span className="font-bold text-ink-4">{tr(locale, "유보", "Reservation")}</span>
                   <span>{humanizeJudgment(topJudgment.reservation)}</span>
                 </div>
               )}
             </div>
           ) : (
             <p className="m-0 text-[13.5px] leading-relaxed text-ink-2">
-              {card.rationale || topJudgment?.why || "이 표현은 정책 매칭 결과 확인이 필요합니다."}
+              {card.rationale ||
+                topJudgment?.why ||
+                tr(locale, "이 표현은 정책 매칭 결과 확인이 필요합니다.", "Policy matching for this expression needs confirmation.")}
             </p>
           )}
         </DetailRow>
 
         {/* 문제 표현 */}
         {qualifiers.length > 0 && (
-          <DetailRow icon="flag" label="문제 표현">
+          <DetailRow icon="flag" label={tr(locale, "문제 표현", "Flagged expressions")}>
             <div className="flex flex-wrap gap-1.5">
               {qualifiers.map((item) => (
                 <Tag key={item.qualifier_id || item.text} tone="review">
@@ -441,7 +531,7 @@ export function DetailPane({ result, selectedAnchorId, resolved, onToggleResolve
 
         {/* 연결된 심의 기준 (CU) — 클릭하면 전체 조건/근거 펼침 */}
         {topPlan && (
-          <DetailRow icon="layers" label="연결된 심의 기준">
+          <DetailRow icon="layers" label={tr(locale, "연결된 심의 기준", "Linked review criteria")}>
             <Expandable
               header={
                 <div className="flex items-start gap-2.5">
@@ -449,7 +539,11 @@ export function DetailPane({ result, selectedAnchorId, resolved, onToggleResolve
                     CU
                   </span>
                   <div className="min-w-0">
-                    <div className="text-[13.5px] font-bold text-ink">{topPlan.risk_title || topPlan.principle}</div>
+                    <div className="text-[13.5px] font-bold text-ink">
+                      {topPlan.risk_title
+                        ? dataTitleDisplay(locale, topPlan.risk_title)
+                        : principleDisplay(locale, topPlan.principle ?? "")}
+                    </div>
                     <div className="mt-0.5 line-clamp-1 text-[12px] text-ink-3">
                       {topPlan.constraint || topPlan.context}
                     </div>
@@ -459,10 +553,10 @@ export function DetailPane({ result, selectedAnchorId, resolved, onToggleResolve
             >
               <KeyValueText
                 items={[
-                  ["원칙", topPlan.principle || "-"],
-                  ["대상", topPlan.subject || "-"],
-                  ["요건/제약", topPlan.constraint || topPlan.context || "-"],
-                  ["맥락", topPlan.context || "-"],
+                  [tr(locale, "원칙", "Principle"), topPlan.principle ? principleDisplay(locale, topPlan.principle) : "-"],
+                  [tr(locale, "대상", "Subject"), topPlan.subject || "-"],
+                  [tr(locale, "요건/제약", "Requirement/constraint"), topPlan.constraint || topPlan.context || "-"],
+                  [tr(locale, "맥락", "Context"), topPlan.context || "-"],
                 ]}
               />
             </Expandable>
@@ -471,13 +565,15 @@ export function DetailPane({ result, selectedAnchorId, resolved, onToggleResolve
 
         {/* 근거 조문 — 판매원칙별 법령 위임 사슬(법률→시행령→감독규정→심의기준) */}
         {delegationGroups.length > 0 && (
-          <DetailRow icon="clause" label="근거 조문 · 법령 위임 사슬">
+          <DetailRow icon="clause" label={tr(locale, "근거 조문 · 법령 위임 사슬", "Basis clauses · Delegation chain")}>
             <div className="space-y-2.5">
               {delegationGroups.map((group) => (
                 <div key={group.principle} className="rounded-[10px] border border-line bg-surface-2 p-3">
                   <div className="mb-2 flex items-center gap-1.5">
-                    <Tag tone="danger">{group.principle}</Tag>
-                    <span className="text-[11px] text-ink-4">원칙 기준 위임 사슬</span>
+                    <Tag tone="danger">{principleDisplay(locale, group.principle)}</Tag>
+                    <span className="text-[11px] text-ink-4">
+                      {tr(locale, "원칙 기준 위임 사슬", "Delegation chain for this principle")}
+                    </span>
                   </div>
                   <DelegationChain steps={group.steps} />
                 </div>
@@ -485,7 +581,11 @@ export function DetailPane({ result, selectedAnchorId, resolved, onToggleResolve
               {/* 조문 원문은 별도 드릴다운(평면 중복 제거, 난수 id 비노출) */}
               {clauseEvidence.some((c) => c.texts.length || c.constraint) && (
                 <Expandable
-                  header={<span className="text-[12px] font-bold text-ink-2">조문·근거 원문 보기</span>}
+                  header={
+                    <span className="text-[12px] font-bold text-ink-2">
+                      {tr(locale, "조문·근거 원문 보기", "View clause and evidence text")}
+                    </span>
+                  }
                 >
                   <div className="space-y-2.5">
                     {clauseEvidence.map((c) => (
@@ -508,7 +608,7 @@ export function DetailPane({ result, selectedAnchorId, resolved, onToggleResolve
 
         {/* 조항별 / 원칙별 영향 집계 — 심사 보고서 단위 */}
         {aggregationRows.length > 0 && (
-          <DetailRow icon="layers" label="조항·원칙별 영향">
+          <DetailRow icon="layers" label={tr(locale, "조항·원칙별 영향", "Impact by clause and principle")}>
             <div className="space-y-1.5">
               {aggregationRows.map((row, i) => (
                 <div
@@ -516,14 +616,21 @@ export function DetailPane({ result, selectedAnchorId, resolved, onToggleResolve
                   className="flex items-center gap-2 rounded-md border border-line bg-surface-2 px-2.5 py-1.5"
                 >
                   <span className="rounded bg-surface-3 px-1.5 py-0.5 text-[11px] font-bold text-ink-3">
-                    {row.axis === "article" ? "조항" : "원칙"}
+                    {row.axis === "article" ? tr(locale, "조항", "Clause") : tr(locale, "원칙", "Principle")}
                   </span>
-                  <span className="min-w-0 flex-1 truncate font-mono text-[11.5px] text-ink" title={row.key}>
-                    {row.key}
+                  <span
+                    className="min-w-0 flex-1 truncate font-mono text-[11.5px] text-ink"
+                    title={row.axis === "article" ? row.key : principleDisplay(locale, String(row.key))}
+                  >
+                    {row.axis === "article" ? row.key : principleDisplay(locale, String(row.key))}
                   </span>
                   <span className="text-[11px] text-ink-4">CU {Number(row.cu_count ?? 0)}</span>
                   <Badge tone={judgmentBadgeTone(String(row.effective_verdict ?? ""))}>
-                    {JUDGMENT_STATUS[String(row.effective_verdict ?? "")] ?? row.effective_verdict}
+                    {locale === "en"
+                      ? (JUDGMENT_STATUS_EN[String(row.effective_verdict ?? "")] ??
+                        JUDGMENT_STATUS[String(row.effective_verdict ?? "")] ??
+                        row.effective_verdict)
+                      : (JUDGMENT_STATUS[String(row.effective_verdict ?? "")] ?? row.effective_verdict)}
                   </Badge>
                 </div>
               ))}
@@ -532,7 +639,7 @@ export function DetailPane({ result, selectedAnchorId, resolved, onToggleResolve
         )}
 
         {/* 예외 · 고지 검토 — 완화 사유 클릭 펼침 */}
-        <DetailRow icon="shield" label="예외 · 고지 검토">
+        <DetailRow icon="shield" label={tr(locale, "예외 · 고지 검토", "Exception and disclosure review")}>
           {exceptions.length ? (
             <div className="space-y-2">
               {exceptions.map((review) => (
@@ -548,7 +655,9 @@ export function DetailPane({ result, selectedAnchorId, resolved, onToggleResolve
                           background: review.applies ? "var(--revise-bg)" : "var(--surface-3)",
                         }}
                       >
-                        {review.applies ? `완화 가능 · ${review.effect}` : "완화 불가"}
+                        {review.applies
+                          ? tr(locale, `완화 가능 · ${review.effect}`, `Mitigation possible · ${review.effect}`)
+                          : tr(locale, "완화 불가", "No mitigation")}
                       </span>
                       <span className="line-clamp-1 text-[12px] text-ink-3">{review.why}</span>
                     </div>
@@ -580,7 +689,7 @@ export function DetailPane({ result, selectedAnchorId, resolved, onToggleResolve
 
         {/* 상품 사실 대조 — 수치 클레임이 있을 때만, 클릭 시 근거 펼침 */}
         {comparisons.length > 0 && (
-          <DetailRow icon="layers" label="상품 사실 대조">
+          <DetailRow icon="layers" label={tr(locale, "상품 사실 대조", "Product fact cross-check")}>
             <div className="space-y-2">
               {comparisons.slice(0, 4).map((item) => {
                 const statusColor =
@@ -602,8 +711,8 @@ export function DetailPane({ result, selectedAnchorId, resolved, onToggleResolve
                   >
                     <KeyValueText
                       items={[
-                        ["판단", item.rationale || "-"],
-                        ["근거", item.evidence_text || "-"],
+                        [tr(locale, "판단", "Judgment"), item.rationale || "-"],
+                        [tr(locale, "근거", "Basis"), item.evidence_text || "-"],
                       ]}
                     />
                   </Expandable>
@@ -614,9 +723,12 @@ export function DetailPane({ result, selectedAnchorId, resolved, onToggleResolve
         )}
 
         {/* 필요한 고지 */}
-        <DetailRow icon="flag" label="필요한 고지">
+        <DetailRow icon="flag" label={tr(locale, "필요한 고지", "Required disclosures")}>
           <div className="space-y-1.5">
-            {[...(suggestion?.required_disclosures ?? []), ...missingChecks.map((check) => check.label)].map(
+            {[
+              ...(suggestion?.required_disclosures ?? []),
+              ...missingChecks.map((check) => dataTitleDisplay(locale, check.label)),
+            ].map(
               (item, index) => (
                 <div key={index} className="flex items-center gap-2 text-[13px] text-ink-2">
                   <span
@@ -635,19 +747,21 @@ export function DetailPane({ result, selectedAnchorId, resolved, onToggleResolve
               ),
             )}
             {!missingChecks.length && !(suggestion?.required_disclosures ?? []).length && (
-              <span className="text-[12.5px] text-ink-3">추가로 요구되는 고지가 없습니다.</span>
+              <span className="text-[12.5px] text-ink-3">
+                {tr(locale, "추가로 요구되는 고지가 없습니다.", "No additional disclosures required.")}
+              </span>
             )}
           </div>
         </DetailRow>
 
         {/* 필요한 조치 */}
         {(issues[0]?.required_action || suggestion?.notes_for_reviewer) && (
-          <DetailRow icon="target" label="필요한 조치">
+          <DetailRow icon="target" label={tr(locale, "필요한 조치", "Required action")}>
             <div className="flex items-start gap-2.5">
               <Icon name="arrowR" size={16} color="var(--brand)" style={{ marginTop: 2, flexShrink: 0 }} />
               <div>
                 <div className="text-[13.5px] font-bold text-ink">
-                  {issues[0]?.required_action || "표현 수정 및 고지 보완"}
+                  {issues[0]?.required_action || tr(locale, "표현 수정 및 고지 보완", "Revise wording and supplement disclosures")}
                 </div>
                 {suggestion?.notes_for_reviewer && (
                   <p className="m-0 mt-1 text-[12.5px] leading-relaxed text-ink-3">{suggestion.notes_for_reviewer}</p>
@@ -659,12 +773,14 @@ export function DetailPane({ result, selectedAnchorId, resolved, onToggleResolve
 
         {/* 수정 제안 — 실제 LLM 교체 문안이 있을 때만. 없으면 조언을 지어내지 않는다. */}
         {String(suggestion?.after ?? "").trim() && (
-          <DetailRow icon="spark" label="수정 제안">
+          <DetailRow icon="spark" label={tr(locale, "수정 제안", "Suggested revision")}>
             <div className="overflow-hidden rounded-[10px] border border-line">
               <div className="border-b border-[#f3d3cf] bg-reject-bg px-3 py-2.5">
                 <div className="mb-1 flex items-center gap-1.5">
                   <span className="h-1.5 w-1.5 rounded-full bg-reject" />
-                  <span className="text-[11px] font-bold tracking-wider text-reject">BEFORE · 현재 문안</span>
+                  <span className="text-[11px] font-bold tracking-wider text-reject">
+                    {tr(locale, "BEFORE · 현재 문안", "BEFORE · Current copy")}
+                  </span>
                 </div>
                 <div className="text-[13px] leading-relaxed text-[#8a2e26] line-through decoration-[#d6453a66]">
                   {suggestion?.before ?? anchor.span.text}
@@ -673,8 +789,12 @@ export function DetailPane({ result, selectedAnchorId, resolved, onToggleResolve
               <div className="bg-pass-bg px-3 py-2.5">
                 <div className="mb-1 flex items-center gap-1.5">
                   <span className="h-1.5 w-1.5 rounded-full bg-pass" />
-                  <span className="text-[11px] font-bold tracking-wider text-pass">AFTER · 제안 문안</span>
-                  <span className="ml-auto font-mono text-[11px] font-bold text-ink-4">Revision LLM · 권고</span>
+                  <span className="text-[11px] font-bold tracking-wider text-pass">
+                    {tr(locale, "AFTER · 제안 문안", "AFTER · Suggested copy")}
+                  </span>
+                  <span className="ml-auto font-mono text-[11px] font-bold text-ink-4">
+                    {tr(locale, "Revision LLM · 권고", "Revision LLM · Advisory")}
+                  </span>
                 </div>
                 <div className="text-[13px] leading-relaxed font-medium text-[#0c6b4a]">{suggestion?.after}</div>
               </div>
@@ -692,14 +812,14 @@ export function DetailPane({ result, selectedAnchorId, resolved, onToggleResolve
             }`}
           >
             <Icon name={isResolved ? "x" : "check"} size={15} />
-            {isResolved ? "적용 취소" : "수정안 적용"}
+            {isResolved ? tr(locale, "적용 취소", "Undo") : tr(locale, "수정안 적용", "Apply revision")}
           </button>
           <button
             type="button"
             onClick={onGotoGraph}
             className="flex items-center gap-1.5 rounded-lg border border-line-2 bg-surface px-3.5 py-2.5 text-[13.5px] font-bold whitespace-nowrap text-ink-2"
           >
-            <Icon name="graph" size={15} color="var(--ink-3)" /> 근거 경로
+            <Icon name="graph" size={15} color="var(--ink-3)" /> {tr(locale, "근거 경로", "Evidence path")}
           </button>
         </div>
       </div>

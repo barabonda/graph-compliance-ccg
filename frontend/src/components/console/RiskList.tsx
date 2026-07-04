@@ -1,6 +1,26 @@
 "use client";
 
-import { abbreviateLawNames, AUTHORITY_GROUP, principleColor, REVIEW_LAYER } from "@/lib/labels";
+import {
+  abbreviateLawNames,
+  AUTHORITY_GROUP,
+  HUMAN_ACTION_LABELS,
+  HUMAN_FEATURE_LABELS,
+  principleColor,
+  QUALIFIER_LABELS,
+  REVIEW_LAYER,
+} from "@/lib/labels";
+import {
+  AUTHORITY_GROUP_EN,
+  dataTitleDisplay,
+  HUMAN_ACTION_LABELS_EN,
+  HUMAN_FEATURE_LABELS_EN,
+  principleDisplay,
+  QUALIFIER_LABELS_EN,
+  REVIEW_LAYER_EN,
+  tr,
+  useLocale,
+  type Locale,
+} from "@/lib/i18n";
 import {
   buildIssueCards,
   planItemsForAnchor,
@@ -44,6 +64,54 @@ export const TONE_WORD_SHORT: Record<HighlightTone, string> = {
   scope: "범위",
 };
 
+/** TONE_WORD_SHORT 의 EN 짝 — en 로케일 표시 전용. */
+export const TONE_WORD_SHORT_EN: Record<HighlightTone, string> = {
+  risk: "Possible violation",
+  review: "Review required",
+  "keep-warning": "Low authority",
+  keep: "Disclosure",
+  scope: "Scope",
+};
+
+function toneWord(locale: Locale, tone: HighlightTone): string {
+  return locale === "en" ? (TONE_WORD_SHORT_EN[tone] ?? TONE_WORD_SHORT[tone]) : TONE_WORD_SHORT[tone];
+}
+
+/** riskGrade 라벨("높음" 등)의 표시용 EN — 데이터 값(card.grade)은 그대로 둔다. */
+const GRADE_EN: Record<string, string> = { 높음: "High", 중간: "Medium", 낮음: "Low" };
+
+function gradeDisplay(locale: Locale, grade: string): string {
+  return locale === "en" ? (GRADE_EN[grade] ?? grade) : grade;
+}
+
+// selectors.ts 가 만드는 한국어 카드 라벨(라벨 맵 값·고정 폴백)의 표시용 EN 역매핑.
+const CARD_LABEL_EN: Record<string, string> = {
+  ...Object.fromEntries(
+    Object.keys(HUMAN_ACTION_LABELS).map((key) => [HUMAN_ACTION_LABELS[key], HUMAN_ACTION_LABELS_EN[key] ?? HUMAN_ACTION_LABELS[key]]),
+  ),
+  ...Object.fromEntries(
+    Object.keys(HUMAN_FEATURE_LABELS).map((key) => [HUMAN_FEATURE_LABELS[key], HUMAN_FEATURE_LABELS_EN[key] ?? HUMAN_FEATURE_LABELS[key]]),
+  ),
+  ...Object.fromEntries(
+    Object.keys(QUALIFIER_LABELS).map((key) => [QUALIFIER_LABELS[key], QUALIFIER_LABELS_EN[key] ?? QUALIFIER_LABELS[key]]),
+  ),
+  "위험 표현": "Risky wording",
+  "검토 필요": "Review required",
+  "필수 고지 누락": "Missing required disclosure",
+};
+
+function cardLabelDisplay(locale: Locale, label: string): string {
+  if (locale !== "en") return label;
+  return CARD_LABEL_EN[label] ?? dataTitleDisplay(locale, label);
+}
+
+/** selectors 의 "요건 x개 중 y개 미충족" 요약을 en 표시로 변환(표시 전용). */
+function criteriaSummaryDisplay(locale: Locale, summary: string): string {
+  if (locale !== "en") return summary;
+  const match = /^요건 (\d+)개 중 (\d+)개 미충족$/.exec(summary);
+  return match ? `${match[2]} of ${match[1]} criteria unmet` : summary;
+}
+
 function IssueCard({
   card,
   result,
@@ -57,6 +125,7 @@ function IssueCard({
   isResolved: boolean;
   onSelectAnchor: (anchorId: string) => void;
 }) {
+  const locale = useLocale();
   const color = TONE_COLOR[card.tone];
   const principles = card.anchorId
     ? [...new Set(planItemsForAnchor(result, card.anchorId).map((item) => item.principle).filter(Boolean))]
@@ -88,7 +157,7 @@ function IssueCard({
         <span className="font-mono text-[11px] font-bold text-ink-4">{card.code}</span>
         {isResolved ? (
           <span className="flex items-center gap-1 text-[11px] font-bold text-pass">
-            <Icon name="check" size={12} /> 수정안 적용
+            <Icon name="check" size={12} /> {tr(locale, "수정안 적용", "Fix applied")}
           </span>
         ) : (
           <span
@@ -96,19 +165,29 @@ function IssueCard({
             style={{ color: statusColor }}
             title={
               isGuideline
-                ? `법령 위반이 아닌 심의기준 미흡입니다.${card.coBasis ? ` 병기: ${card.coBasis}` : ""}`
+                ? tr(
+                    locale,
+                    `법령 위반이 아닌 심의기준 미흡입니다.${card.coBasis ? ` 병기: ${card.coBasis}` : ""}`,
+                    `Guideline shortfall, not a legal violation.${card.coBasis ? ` Co-cited: ${card.coBasis}` : ""}`,
+                  )
                 : undefined
             }
           >
-            {isGuideline ? "심의기준 미흡 · 법령 위반 아님" : TONE_WORD_SHORT[card.tone]}
+            {isGuideline
+              ? tr(locale, "심의기준 미흡 · 법령 위반 아님", "Guideline shortfall · Not a legal violation")
+              : toneWord(locale, card.tone)}
           </span>
         )}
         <span
           className="ml-auto text-[11px] whitespace-nowrap text-ink-3"
-          title={card.score != null ? `위반 가능성 ${(card.score * 100).toFixed(0)}%` : undefined}
+          title={
+            card.score != null
+              ? tr(locale, `위반 가능성 ${(card.score * 100).toFixed(0)}%`, `Violation likelihood ${(card.score * 100).toFixed(0)}%`)
+              : undefined
+          }
         >
-          {isResolved ? "해소" : (
-            <>위반 가능성 <span className={card.grade === "높음" ? "font-bold text-ink" : "font-semibold"}>{card.grade}</span></>
+          {isResolved ? tr(locale, "해소", "Resolved") : (
+            <>{tr(locale, "위반 가능성", "Violation likelihood")} <span className={card.grade === "높음" ? "font-bold text-ink" : "font-semibold"}>{gradeDisplay(locale, card.grade)}</span></>
           )}
         </span>
       </div>
@@ -118,36 +197,34 @@ function IssueCard({
           isResolved ? "line-through decoration-ink-4" : ""
         }`}
       >
-        “{card.quote}”
+        “{card.kind === "disclosure" ? dataTitleDisplay(locale, card.quote) : card.quote}”
       </div>
       {/* 인용 문장의 참고 번역 — 영어 메인·크메르어 서브, 심사 근거는 원문 기준 */}
       {quoteTranslation && (
         <div className="mt-1 space-y-0.5 text-[11px] leading-relaxed text-ink-3">
-          {/* 원문이 이미 영어(EN 번역이 인용문을 포함)면 EN 줄은 중복이라 생략 */}
-          {quoteTranslation.en &&
-            !quoteTranslation.en
-              .replace(/\s+/g, " ")
-              .trim()
-              .toLowerCase()
-              .includes(card.quote.replace(/\s+/g, " ").replace(/[…]+$|\.{3}$/g, "").trim().toLowerCase()) && (
-            <div className="flex gap-1.5">
-              <span className="mt-0.5 shrink-0 rounded bg-surface-2 px-1 font-mono text-[11px] font-bold text-ink-4">EN</span>
-              <span>{quoteTranslation.en}</span>
-            </div>
-          )}
-          {quoteTranslation.sub && (
-            <div className="flex gap-1.5 break-keep">
-              <span className="mt-0.5 shrink-0 rounded bg-surface-2 px-1 font-mono text-[11px] font-bold text-ink-4">{quoteTranslation.subLabel}</span>
-              <span>{quoteTranslation.sub}</span>
-            </div>
-          )}
+          {/* 3개 언어 병기(EN·KM·KO) — 원문과 같은 언어 줄(인용을 포함)은 중복이라 생략 */}
+          {quoteTranslation.lines
+            .filter(
+              (t) =>
+                !t.text
+                  .replace(/\s+/g, " ")
+                  .trim()
+                  .toLowerCase()
+                  .includes(card.quote.replace(/\s+/g, " ").replace(/[…]+$|\.{3}$/g, "").trim().toLowerCase()),
+            )
+            .map((t) => (
+              <div key={t.label} className="flex gap-1.5 break-keep">
+                <span className="mt-0.5 shrink-0 rounded bg-surface-2 px-1 font-mono text-[11px] font-bold text-ink-4">{t.label}</span>
+                <span>{t.text}</span>
+              </div>
+            ))}
         </div>
       )}
       {/* 위반 유형 + 요건 요약 */}
       <div className="mt-0.5 flex items-baseline gap-2 text-[12.5px] text-ink-3">
-        <span>{card.label}</span>
+        <span>{cardLabelDisplay(locale, card.label)}</span>
         {card.criteriaSummary ? (
-          <span className="text-[11px] text-ink-4">· {card.criteriaSummary}</span>
+          <span className="text-[11px] text-ink-4">· {criteriaSummaryDisplay(locale, card.criteriaSummary)}</span>
         ) : null}
       </div>
       {/* 근거 조문 — 본문과 같은 서체로 조용히, 자르지 않고 (mono는 코드·ID 전용).
@@ -155,7 +232,9 @@ function IssueCard({
       {card.basis ? (
         <div className="mt-1.5 line-clamp-2 text-[11.5px] leading-relaxed break-keep text-ink-4" title={card.basis}>
           {abbreviateLawNames(card.basis)}
-          {isGuideline && card.coBasis ? ` · 병기 ${abbreviateLawNames(card.coBasis)}` : ""}
+          {isGuideline && card.coBasis
+            ? tr(locale, ` · 병기 ${abbreviateLawNames(card.coBasis)}`, ` · Co-cited ${abbreviateLawNames(card.coBasis)}`)
+            : ""}
         </div>
       ) : null}
       {/* 6대 판매원칙 — 준법감시인의 1차 분류 좌표. 심각도(경보)와 달리
@@ -164,7 +243,7 @@ function IssueCard({
         <div className="mt-2 flex flex-wrap items-center gap-1.5">
           {principles.slice(0, 2).map((principle) => (
             <Tag key={principle} color={principleColor(principle)}>
-              {principle}
+              {principleDisplay(locale, principle)}
             </Tag>
           ))}
           {principles.length > 2 && (
@@ -186,6 +265,7 @@ function HolisticBand({
   selected: boolean;
   onSelectAnchor: (anchorId: string) => void;
 }) {
+  const locale = useLocale();
   const color = TONE_COLOR[card.tone];
   return (
     <button
@@ -201,17 +281,21 @@ function HolisticBand({
       <div className="mb-1 flex items-baseline gap-2">
         <span className="font-mono text-[11px] font-bold text-ink-4">{card.code}</span>
         <span className="text-[11px] font-bold whitespace-nowrap" style={{ color }}>
-          {TONE_WORD_SHORT[card.tone]}
+          {toneWord(locale, card.tone)}
         </span>
         <span
           className="ml-auto text-[11px] whitespace-nowrap text-ink-3"
-          title={card.score != null ? `오인 위험 ${(card.score * 100).toFixed(0)}%` : undefined}
+          title={
+            card.score != null
+              ? tr(locale, `오인 위험 ${(card.score * 100).toFixed(0)}%`, `Misleading risk ${(card.score * 100).toFixed(0)}%`)
+              : undefined
+          }
         >
-          오인 위험 <span className={card.grade === "높음" ? "font-bold text-ink" : "font-semibold"}>{card.grade}</span>
+          {tr(locale, "오인 위험", "Misleading risk")} <span className={card.grade === "높음" ? "font-bold text-ink" : "font-semibold"}>{gradeDisplay(locale, card.grade)}</span>
         </span>
       </div>
       <div className="text-[14px] leading-[1.5] font-semibold break-keep text-ink">
-        광고 전체를 종합한 소비자 인상
+        {tr(locale, "광고 전체를 종합한 소비자 인상", "Overall consumer impression of the ad as a whole")}
       </div>
       {/* 개별 표현이 모두 통과해도, 전체 인상에서 오인 위험이 생길 수 있음 */}
       {card.rationale ? (
@@ -259,7 +343,11 @@ function TierSubHeader({
 }
 
 export function RiskList({ result, selectedAnchorId, resolved, onSelectAnchor }: Props) {
-  const cards = buildIssueCards(result);
+  const locale = useLocale();
+  // 라벨 맵 로케일 분기 — ko 는 labels.ts 원본, en 은 i18n 의 EN 짝.
+  const layer = locale === "en" ? REVIEW_LAYER_EN : REVIEW_LAYER;
+  const authority = locale === "en" ? AUTHORITY_GROUP_EN : AUTHORITY_GROUP;
+  const cards = buildIssueCards(result, locale);
   const resolvedCount = cards.filter((card) => resolved.has(card.id)).length;
   const trackA = cards.filter((card) => card.track === "A");
   const trackB = cards.filter((card) => card.track === "B");
@@ -290,17 +378,21 @@ export function RiskList({ result, selectedAnchorId, resolved, onSelectAnchor }:
     <div className="flex h-full flex-col border-r border-l border-line">
       <PaneHeader
         icon="review"
-        title="위험 카드"
-        sub={`${REVIEW_LAYER.individual.name} + ${REVIEW_LAYER.holistic.name}`}
-        right={<Tag tone={resolvedCount ? "ok" : undefined}>{resolvedCount}건 조치</Tag>}
+        title={tr(locale, "위험 카드", "Risk cards")}
+        sub={`${layer.individual.name} + ${layer.holistic.name}`}
+        right={
+          <Tag tone={resolvedCount ? "ok" : undefined}>
+            {tr(locale, `${resolvedCount}건 조치`, `${resolvedCount} action(s)`)}
+          </Tag>
+        }
       />
       <div className="flex flex-1 flex-col gap-2 overflow-y-auto p-3">
         {cards.length ? (
           <>
             {/* 개별 심사 — 각 표현·고지를 조항별로, 법령/심의기준/확인필요 순으로 구분 */}
             <SectionHeader
-              title={REVIEW_LAYER.individual.name}
-              sub={REVIEW_LAYER.individual.sub}
+              title={layer.individual.name}
+              sub={layer.individual.sub}
               count={trackA.length}
             />
             {trackA.length ? (
@@ -309,8 +401,8 @@ export function RiskList({ result, selectedAnchorId, resolved, onSelectAnchor }:
                   <div className="flex flex-col gap-2">
                     <TierSubHeader
                       color="var(--reject)"
-                      title={AUTHORITY_GROUP.law.name}
-                      sub={AUTHORITY_GROUP.law.sub}
+                      title={authority.law.name}
+                      sub={authority.law.sub}
                       count={lawCards.length}
                     />
                     {lawCards.map(renderCard)}
@@ -320,8 +412,8 @@ export function RiskList({ result, selectedAnchorId, resolved, onSelectAnchor }:
                   <div className="flex flex-col gap-2">
                     <TierSubHeader
                       color="var(--revise)"
-                      title={AUTHORITY_GROUP.guideline.name}
-                      sub={AUTHORITY_GROUP.guideline.sub}
+                      title={authority.guideline.name}
+                      sub={authority.guideline.sub}
                       count={guidelineCards.length}
                     />
                     {guidelineCards.map(renderCard)}
@@ -330,22 +422,22 @@ export function RiskList({ result, selectedAnchorId, resolved, onSelectAnchor }:
                 {uncertainCards.length ? (
                   <details className="mt-1 rounded-[10px] border border-line px-2 py-1.5">
                     <summary className="cursor-pointer list-none text-[11.5px] font-semibold text-ink-4">
-                      {AUTHORITY_GROUP.uncertain.name} · {AUTHORITY_GROUP.uncertain.sub} ({uncertainCards.length})
+                      {authority.uncertain.name} · {authority.uncertain.sub} ({uncertainCards.length})
                     </summary>
                     <div className="mt-2 flex flex-col gap-2">{uncertainCards.map(renderCard)}</div>
                   </details>
                 ) : null}
               </>
             ) : (
-              <div className="px-1 pb-1 text-[12px] text-ink-4">조각 단위 이슈 없음.</div>
+              <div className="px-1 pb-1 text-[12px] text-ink-4">{tr(locale, "조각 단위 이슈 없음.", "No fragment-level issues.")}</div>
             )}
 
             {/* 종합 심사 — 광고 전체 인상 (전체적·궁극적 인상 기준) */}
             {trackB.length ? (
               <div className="mt-2 border-t border-dashed border-line pt-3">
                 <SectionHeader
-                  title={REVIEW_LAYER.holistic.name}
-                  sub={REVIEW_LAYER.holistic.sub}
+                  title={layer.holistic.name}
+                  sub={layer.holistic.sub}
                   count={trackB.length}
                 />
                 {trackB.map((card) => (
@@ -357,7 +449,7 @@ export function RiskList({ result, selectedAnchorId, resolved, onSelectAnchor }:
             ) : null}
           </>
         ) : (
-          <EmptyState>현재 문안 기준 별도 이슈가 없습니다.</EmptyState>
+          <EmptyState>{tr(locale, "현재 문안 기준 별도 이슈가 없습니다.", "No outstanding issues in the current copy.")}</EmptyState>
         )}
       </div>
     </div>

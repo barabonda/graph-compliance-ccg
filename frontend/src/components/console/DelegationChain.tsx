@@ -1,4 +1,5 @@
 import { principleColor } from "@/lib/labels";
+import { principleDisplay, tr, useLocale, type Locale } from "@/lib/i18n";
 import type { DelegationStep } from "@/lib/selectors";
 import { Tag } from "../ui";
 
@@ -12,8 +13,23 @@ export const LAYER_STYLE: Record<string, string> = {
   판매원칙: "bg-reject-bg text-reject",
 };
 
+// KH 표시용 — 위임 단계명(데이터 키는 한국어 유지)의 EN 표기.
+const LAYER_LABEL_EN: Record<string, string> = {
+  법률: "Act",
+  시행령: "Enforcement Decree",
+  감독규정: "Supervisory Regulation",
+  위임기준: "Delegated standard",
+  심의기준: "Review guideline",
+  판매원칙: "Sales principle",
+};
+
+function layerLabel(locale: Locale, layer: string): string {
+  return locale === "en" ? (LAYER_LABEL_EN[layer] ?? layer) : layer;
+}
+
 /** 온톨로지 DELEGATES_TO 위계를 세로 사슬로. 법률→시행령→감독규정→심의기준. */
 export function DelegationChain({ steps }: { steps: DelegationStep[] }) {
+  const locale = useLocale();
   return (
     <ol className="relative space-y-0">
       {steps.map((step, i) => (
@@ -24,12 +40,12 @@ export function DelegationChain({ steps }: { steps: DelegationStep[] }) {
             <span
               className={`inline-block rounded px-1.5 py-0.5 text-[11px] font-bold ${LAYER_STYLE[step.layer] ?? "bg-surface-3 text-ink-2"}`}
             >
-              {step.layer}
+              {layerLabel(locale, step.layer)}
             </span>
             <span className="ml-1.5 font-mono text-[12px] font-bold text-ink">{step.label}</span>
             {step.why && (
               <p className="mt-0.5 flex items-center gap-1 text-[11px] leading-relaxed text-ink-3">
-                <span className="text-ink-4">↳ 위임</span> {step.why}
+                <span className="text-ink-4">{tr(locale, "↳ 위임", "↳ Delegates")}</span> {step.why}
               </p>
             )}
           </div>
@@ -57,13 +73,14 @@ export function sortDelegationSteps(steps: DelegationStep[]): DelegationStep[] {
 }
 
 export function PrincipleTags({ principles }: { principles: string[] }) {
+  const locale = useLocale();
   if (!principles.length) return null;
   return (
     <div className="flex flex-wrap items-center gap-1.5">
-      <span className="text-[11px] font-bold tracking-wider text-ink-4">판매원칙</span>
+      <span className="text-[11px] font-bold tracking-wider text-ink-4">{tr(locale, "판매원칙", "Sales principle")}</span>
       {principles.map((p) => (
         <Tag key={p} color={principleColor(p)} tone="danger">
-          {p}
+          {principleDisplay(locale, p)}
         </Tag>
       ))}
     </div>
