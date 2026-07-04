@@ -124,3 +124,13 @@ main의 `feat: guideline-tier grounding, redesigned review console, compliance c
 4. [ ] 코파일럿 결정(§4b): main UI 유지 + `copilot_tools.py` 보존 권장
 5. [ ] env 이름 채우기(§2; 값은 kunwoo에게) 후: KR 회귀(`test_workflow.py` + KR 심사 1건, 번역 null 확인) → KH 스모크(`run_kh_eval.py` 1건)
 6. [ ] `WORKSPACE_ID` 정책 결정(단일 배포면 KH/KR 중 택1 또는 per-review 스레딩 과제로)
+
+## 9. 추가 업데이트 (2026-07-04, CC-13)
+
+원격 팀원이 Aura에 직접 접속해 text2cypher/쿼리로 상품 문서를 조회할 때 로컬 파일 없이도 내용이 나오도록 보강. 전부 **additive**(기존 스키마·라이브 심사·KR 무영향), KH workspace 한정.
+
+- **`build_ppcbank_product_graph.py`** (M): 각 `ProductDocument`에 크롤 전문을 `full_text`(+`content_chars`) 속성으로 임베드(신규 `clean_doc_text()`). 문서 노드가 포인터만이 아니라 본문을 자체 보유.
+- **`structure_ppcbank_docs.py`** (신규): 문서를 **구조화 그래프**로 분해(하이브리드 GraphRAG) — `(:ProductDocument)-[:HAS_SECTION]->(:DocSection)` 아래 표를 셀 단위 노드로: `RateEntry{term_months,currency,channel,payment,rate_kind,holding_period,amount_tier,rate_pa}`·`EligibilityItem`·`LoanCondition`·`FeeItem`, 산문은 `DocChunk`(`NEXT` 체인). Claude Opus 4.8 오프라인 추출(`--structure/--ingest/--verify/--all/--replace`). 규모: DocSection 112·RateEntry 202·EligibilityItem 99·LoanCondition 64·FeeItem 51·DocChunk 262. 검증: 금리 매트릭스 원문 셀 12/12, 24-에이전트 적대적 감사 GOOD 85→수정 후 금리셀 178/178 정확. 새 라벨(`DocSection`/`RateEntry`/`EligibilityItem`/`LoanCondition`/`FeeItem`/`DocChunk`)은 KR 스키마와 무충돌.
+- **`server.py`** `/api/product-doc/{id}` (이미 이전 커밋 포함): KR 공시 CSV에 없으면 Neo4j `ProductDocument`로 폴백해 `source_url` 307 리다이렉트(웹 소스 상품용). KR PDF 경로 불변.
+- **데이터**: `data/cambodia/products/_doc_structure.json`(구조화 결과), 실제 **크메르어** 페이지 크롤(`ppcbank_*_km.{html,txt}`), 복사용 광고 원문 `docs/ppcbank_ad_samples/`(영어·크메르어).
+- 재현: `python3 build_ppcbank_product_graph.py --all --replace-facts && python3 structure_ppcbank_docs.py --all`(둘 다 `ANTHROPIC_API_KEY` 필요).
