@@ -131,6 +131,67 @@ export function verdictColor(verdict: string): string {
   return VERDICT_COLOR[verdict] ?? "var(--ink-2)";
 }
 
+/**
+ * 평가 로그 `report_kind`별 표시(라벨·색) — 대시보드 평가 로그 카드/상세 시각 구분용.
+ * gold=정밀도·재현율 산출된 합성 gold셋, live=JB 실제광고 판정 로그(정답 라벨 없음),
+ * synthetic=합성 v0.2 위반유형 분해 리포트, guideline=금감원 가이드라인 판단사례 검증.
+ */
+export const REPORT_KIND_META: Record<string, { label: string; color: string; bg: string }> = {
+  gold: { label: "GOLD", color: "var(--brand)", bg: "var(--brand-tint)" },
+  live: { label: "LIVE", color: "var(--revise)", bg: "var(--revise-bg)" },
+  synthetic: { label: "SYNTHETIC", color: "#7c5cde", bg: "#efe9fb" },
+  guideline: { label: "GUIDELINE", color: "var(--pass)", bg: "var(--pass-bg)" },
+  unknown: { label: "기타", color: "var(--ink-3)", bg: "var(--surface-3)" },
+};
+
+export function reportKindMeta(kind?: string): { label: string; color: string; bg: string } {
+  if (kind && REPORT_KIND_META[kind]) return REPORT_KIND_META[kind];
+  return { label: (kind ?? "REPORT").toUpperCase(), color: "var(--ink-3)", bg: "var(--surface-3)" };
+}
+
+/** 평가 리포트 상품 선택 provenance 뱃지 문구 — 합성평가(선택) vs 크롤링 스윕(미선택). */
+export const PRODUCT_SELECTION_LABEL = {
+  selected: "상품 선택됨",
+  sweep: "상품 미선택 (크롤링 스윕)",
+} as const;
+
+/**
+ * `product_selection`이 문자열 코드로 오는 경우(JB 실제광고 라이브 리포트 `run_jbbank_eval.py`의
+ * `product_selection: str` 등)의 사람이 읽을 수 있는 라벨 매핑. 알려지지 않은 코드는 원문 문자열을
+ * 그대로 노출한다(임의 창작 금지 — labels.ts 밖에서 매핑을 하드코딩하지 말 것).
+ */
+export const PRODUCT_SELECTION_STRING_LABEL: Record<string, string> = {
+  product_group_only: "상품군만 선택",
+};
+
+export function productSelectionStringLabel(value: string): string {
+  return PRODUCT_SELECTION_STRING_LABEL[value] ?? value;
+}
+
+/** `breakdown[].dimension` 표시명 — 평가 로그 카드/상세 분해 테이블 헤더용. */
+export const EVAL_BREAKDOWN_DIMENSION_LABEL: Record<string, string> = {
+  article: "조문",
+  violation_type: "위반유형",
+  product_group: "상품군",
+};
+
+/**
+ * 합성 gold 레코드별 통과(`overall_pass`) 배지 — `true`/`false`/`undefined`(구버전 리포트,
+ * 백엔드 `matches` 보강 전) 3상태. "판정 없음"은 실패로 세지 않는다(과대 통과도, 임의 실패
+ * 처리도 하지 않음 — 정의된 값이 없다는 사실 그대로 표시).
+ */
+export const RECORD_PASS_META = {
+  pass: { label: "통과", color: "var(--pass)", bg: "var(--pass-bg)" },
+  fail: { label: "실패", color: "var(--reject)", bg: "var(--reject-bg)" },
+  unknown: { label: "판정 없음", color: "var(--ink-4)", bg: "var(--surface-3)" },
+} as const;
+
+export function recordPassMeta(overallPass?: boolean): { label: string; color: string; bg: string } {
+  if (overallPass === true) return RECORD_PASS_META.pass;
+  if (overallPass === false) return RECORD_PASS_META.fail;
+  return RECORD_PASS_META.unknown;
+}
+
 /** 심사자 결정 어휘(확정형) — 로컬 데모 상태로만 기록. */
 export const DECISIONS = {
   approve: { label: "승인", color: "var(--pass)", bg: "var(--pass-bg)" },

@@ -346,6 +346,82 @@ export interface EvalCcgMetrics {
 }
 
 /**
+ * 리포트 분류 — 카드 시각 구분용. `_workspace_evallog/contract_api.md` 확정 계약:
+ * `report_kind`는 summary에 항상 채워지며(즉시 계산, is_report와 독립적), 값은 이
+ * 5종으로 고정된다(서버가 그 외 값을 내려주지 않음).
+ */
+export type EvalReportCategory = "gold" | "live" | "synthetic" | "guideline" | "unknown";
+
+/** 조문별(article) 분해 행 — gold 리포트 `article_metrics.per_article`(실제 산출 필드). */
+export interface EvalPerArticleRow {
+  tp?: number;
+  fp?: number;
+  fn?: number;
+  tn?: number;
+  f1?: number;
+  f2?: number;
+  precision?: number;
+  recall?: number;
+  [key: string]: number | undefined;
+}
+
+/** 조문 레벨 분류 지표 — gold 리포트 원본 JSON의 `article_metrics` 필드(요약 `metrics`와 별개). */
+export interface EvalArticleMetrics extends EvalMetrics {
+  article_universe_size?: number;
+  counts?: EvalConfusionCounts;
+  per_article?: Record<string, EvalPerArticleRow>;
+}
+
+/** 위반유형별 재현율 행 — `synth_v0_2_breakdown.py`의 `per_violation_type_recall` 산출 그대로. */
+export interface EvalViolationTypeRow {
+  mutations?: number;
+  detected?: number;
+  recall?: number;
+  [key: string]: number | undefined;
+}
+
+/** 상품군별 정밀도/재현율 행 — `synth_v0_2_breakdown.py`의 `per_product_group` 산출 그대로. */
+export interface EvalProductGroupRow {
+  counts?: EvalConfusionCounts;
+  precision?: number;
+  recall?: number;
+  f1?: number;
+  [key: string]: unknown;
+}
+
+/**
+ * 상품 선택 provenance — 합성평가는 상품 선택 상태, 크롤링 스윕은 미선택으로 실행된다.
+ * 계약상 타입은 `any`(리포트 JSON 최상위 `product_selection` 키를 그대로 pass-through) —
+ * 프론트는 shape을 가정하지 않고 런타임에 안전하게 narrowing한다(`productSelectionInfo`).
+ */
+export type EvalProductSelection = unknown;
+
+/** `breakdown` 분해 차원 — 계약 고정 3종. */
+export type EvalBreakdownDimension = "article" | "violation_type" | "product_group";
+
+/**
+ * `breakdown[].top` 행 — 차원별로 존재하는 필드가 다르다(계약 참조):
+ * - article/product_group: precision·recall·f1 존재
+ * - violation_type: recall·detected만 존재(precision 없음 — gold 위반 레코드만 대상)
+ * - support: 정렬 기준(내림차순, tp+fn 또는 mutations 수) — 모든 차원 공통.
+ */
+export interface EvalBreakdownTopEntry {
+  key: string;
+  precision?: number;
+  recall?: number;
+  f1?: number;
+  detected?: number;
+  support?: number;
+  [key: string]: unknown;
+}
+
+/** 유형별/조문별/상품군별 top-N(최대 5) 정밀도·재현율 분해 그룹 — `EvalReportSummary.breakdown`. */
+export interface EvalBreakdownGroup {
+  dimension: EvalBreakdownDimension;
+  top: EvalBreakdownTopEntry[];
+}
+
+/**
  * 평가 리포트 요약(운영 대시보드 평가 로그 목록). `GET /api/eval/reports`.
  * - 합성 gold 리포트: `metrics`/`counts`/`ccg_metrics` 존재(정밀도·재현율 산출).
  * - JB 실제광고 로그: `kind:"jbbank_live_eval"`, `gold_available:false`, `verdict_counts` 존재.
@@ -369,6 +445,18 @@ export interface EvalReportSummary {
   counts?: EvalConfusionCounts;
   /** 합성 gold: 위반 검출 지표(정밀도/재현율). */
   ccg_metrics?: EvalCcgMetrics;
+  /** 리포트 분류(gold|live|synthetic|guideline|unknown) — 항상 채워짐(계약 확정, is_report와 독립적). */
+  report_kind: EvalReportCategory;
+  /** 실제 "리포트"(카드 노출 대상)인지 — 하드 필터 아닌 플래그, 항상 채워짐. false면
+   * 중간 산출물(batch·quality·grounding·metrics 중간본) — 목록 기본 숨김, "원자료 포함"
+   * 토글로 노출. 방어적으로 `!== false` 비교 권장(값 자체는 항상 존재). */
+  is_report: boolean;
+  /** 리포트 JSON 최상위에 `model` 키가 있을 때만 존재(옵셔널, 없으면 키 자체 생략). */
+  model?: unknown;
+  /** 리포트 JSON 최상위에 `product_selection` 키가 있을 때만 존재(옵셔널). */
+  product_selection?: EvalProductSelection;
+  /** 알려진 분해 shape(article/violation_type/product_group)이 있을 때만 존재(옵셔널). */
+  breakdown?: EvalBreakdownGroup[];
 }
 
 /** JB 실제광고 로그의 개별 심사 레코드. `run_id`로 `/api/runs/{run_id}` 상세에 연결. */
@@ -399,6 +487,89 @@ export interface JbLiveEvalReport {
   verdict_counts?: EvalVerdictCounts;
   product_group_counts?: Record<string, number>;
   records?: JbLiveEvalRecord[];
+  /** 리포트 JSON 최상위에 `model` 키가 있을 때만 존재(옵셔널, 없으면 키 자체 생략). */
+  model?: unknown;
+  /** 리포트 JSON 최상위에 `product_selection` 키가 있을 때만 존재(옵셔널). */
+  product_selection?: EvalProductSelection;
+}
+
+/**
+ * 합성 gold 레코드의 정답 라벨 — `records[].gold`. `violation_types`·`required_disclosures`는
+ * 검증 핵심 축이지만 구버전 리포트엔 없을 수 있어 옵셔널(백엔드 보강 대상, `_workspace_recordview/
+ * contract_api.md` 확정 전까지는 없을 수 있다고 가정).
+ */
+export interface EvalGoldRecordGold {
+  violation: boolean;
+  articles: string[];
+  risk_level?: string;
+  expected_routing?: string;
+  /** 위반유형 정답(백엔드 보강 예정 — 없으면 레코드 뷰에서 해당 축 "판정 없음"). */
+  violation_types?: string[];
+  /** 필수 고지사항 정답(백엔드 보강 예정 — 없으면 재현율 계산 불가, "판정 없음" 폴백). */
+  required_disclosures?: string[];
+  [key: string]: unknown;
+}
+
+/** 합성 gold 레코드의 파이프라인 예측 — `records[].prediction`(실제 산출 필드, `predict_*` 접두). */
+export interface EvalGoldRecordPrediction {
+  record_id?: string;
+  predicted_articles?: string[];
+  predicted_violation?: boolean;
+  predicted_violation_types?: string[];
+  predicted_sales_principles?: string[];
+  predicted_required_disclosures?: string[];
+  predicted_risk_level?: string;
+  predicted_routing?: string;
+  cu_plan_count?: number;
+  context_triple_count?: number;
+  has_policy_evidence?: boolean;
+  has_cu0_failure?: boolean;
+  /** 콘솔 딥링크 키(백엔드 보강 예정 — record 최상위에 실릴 수도 있어 두 위치 모두 확인). */
+  review_run_id?: string;
+  [key: string]: unknown;
+}
+
+/** 고지사항 재현율 축 판정 — `records[].matches.disclosures`(백엔드 보강 예정, 옵셔널). */
+export interface EvalRecordDisclosureMatch {
+  gold_n?: number;
+  matched_n?: number;
+  recall?: number;
+}
+
+/** 라우팅 축 판정 — `records[].matches.routing`(백엔드 보강 예정, 옵셔널). 인접(±1)까지 포함. */
+export interface EvalRecordRoutingMatch {
+  gold?: string;
+  pred?: string;
+  exact?: boolean;
+  adjacent?: boolean;
+}
+
+/**
+ * 레코드별 축별 통과 판정 — `records[].matches`. 백엔드가 집계와 동일 로직(예: `article_family`는
+ * `compare_guideline_vlm.article_family`)으로 계산해 채운다. 구버전 리포트엔 필드 자체가 없으므로
+ * 전부 옵셔널 — 프론트는 없으면 "판정 없음"으로 폴백하고 자체 로직으로 재계산하지 않는다.
+ */
+export interface EvalRecordMatches {
+  violation?: boolean;
+  article_exact?: boolean;
+  article_family?: boolean;
+  disclosures?: EvalRecordDisclosureMatch;
+  routing?: EvalRecordRoutingMatch;
+  [key: string]: unknown;
+}
+
+/** 합성 gold 레코드(gold vs prediction 병치 + 축별 통과 판정) — `GoldEvalReport.records`. */
+export interface EvalGoldRecord {
+  id: string;
+  gold: EvalGoldRecordGold;
+  prediction: EvalGoldRecordPrediction;
+  /** 축별 match 판정(백엔드 보강 예정, 옵셔널 — 없으면 레코드 뷰가 "판정 없음"으로 폴백). */
+  matches?: EvalRecordMatches;
+  /** 종합 통과 여부(백엔드 보강 예정, 옵셔널). 정의는 `GoldEvalReport.overall_pass_definition` 참고. */
+  overall_pass?: boolean;
+  /** 콘솔 딥링크(백엔드 보강 예정 — 없으면 `prediction.review_run_id`도 확인). */
+  review_run_id?: string;
+  [key: string]: unknown;
 }
 
 /** 합성 gold 리포트 본문(`EvalReportDetail.content`). 확정 필드만 명시, 나머지는 원본 JSON. */
@@ -407,6 +578,24 @@ export interface GoldEvalReport {
   metrics?: EvalMetrics;
   counts?: EvalConfusionCounts;
   ccg_metrics?: EvalCcgMetrics;
+  /** 조문 레벨 원본 지표 — 실제 리포트(regulator_vlm_full_report.json 등)에 존재하는
+   * 필드. 조문별 정밀도/재현율 테이블의 데이터 출처. */
+  article_metrics?: EvalArticleMetrics;
+  /** 위반유형별 재현율 분해(`synth_v0_2_breakdown.py` 산출, 있을 때). */
+  per_violation_type_recall?: Record<string, EvalViolationTypeRow>;
+  /** 상품군별 정밀도/재현율 분해(`synth_v0_2_breakdown.py` 산출, 있을 때). */
+  per_product_group?: Record<string, EvalProductGroupRow>;
+  /** `synth_v0_2_breakdown.py` 산출의 대안 상단 요약(article_metrics 없이 이 shape만 있는
+   * 리포트도 있음 — build() 참조). */
+  overall?: { counts?: EvalConfusionCounts; precision?: number; recall?: number; f1?: number };
+  /** 상품 선택 provenance(리포트 JSON 최상위에 있으면 pass-through, 없으면 생략). */
+  product_selection?: EvalProductSelection;
+  /** 리포트 JSON 최상위 `model` 키(있으면 pass-through, 없으면 생략). */
+  model?: unknown;
+  /** 레코드별 gold vs prediction 병치(실제 산출 필드, 34건 등). 없으면 레코드 뷰 자체를 숨긴다. */
+  records?: EvalGoldRecord[];
+  /** `overall_pass` 판정 기준 한 줄 설명(백엔드 보강 예정, 옵셔널 — 없으면 레코드 뷰에 일반 안내만). */
+  overall_pass_definition?: string;
   [key: string]: unknown;
 }
 
