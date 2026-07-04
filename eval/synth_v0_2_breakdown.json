@@ -4,64 +4,64 @@
     "A_violation_detection": {
       "description": "final_verdict∈{reject,revise} vs gold.violation (이진)",
       "counts": {
-        "tp": 10,
+        "tp": 20,
         "fp": 0,
-        "fn": 14,
+        "fn": 4,
         "tn": 10
       },
       "precision": 1.0,
-      "recall": 0.4167,
-      "f1": 0.5882
+      "recall": 0.8333,
+      "f1": 0.9091
     },
     "B_articles": {
       "description": "gold.articles vs 예측 조문 — 정확일치(조 레벨) vs 위임사슬 계열병합",
       "exact_match": {
         "counts": {
-          "tp": 14,
-          "fp": 41,
-          "fn": 35
+          "tp": 25,
+          "fp": 77,
+          "fn": 24
         },
-        "precision": 0.2545,
-        "recall": 0.2857,
-        "f1": 0.2692
+        "precision": 0.2451,
+        "recall": 0.5102,
+        "f1": 0.3311
       },
       "family_merged": {
         "counts": {
-          "tp": 13,
-          "fp": 4,
-          "fn": 11
+          "tp": 24,
+          "fp": 6,
+          "fn": 0
         },
-        "precision": 0.7647,
-        "recall": 0.5417,
-        "f1": 0.6341
+        "precision": 0.8,
+        "recall": 1.0,
+        "f1": 0.8889
       }
     },
     "C_required_disclosures": {
       "description": "gold.required_disclosures vs 파이프라인 disclosure_requirements(커버리지)·missing(누락검출) 키워드 대조",
       "coverage_recall": {
-        "detected": 14,
+        "detected": 29,
         "total": 44,
-        "recall": 0.3182
+        "recall": 0.6591
       },
       "missing_detection_recall": {
-        "detected": 1,
+        "detected": 3,
         "total": 44,
-        "recall": 0.0227
+        "recall": 0.0682
       }
     },
     "D_routing_confusion": {
       "description": "gold.expected_routing vs final_verdict (4x4) + 인접오차",
       "matrix": {
         "reject": {
-          "reject": 1,
-          "revise": 0,
-          "needs_review": 6,
+          "reject": 3,
+          "revise": 1,
+          "needs_review": 3,
           "pass_candidate": 0
         },
         "revise": {
-          "reject": 6,
-          "revise": 3,
-          "needs_review": 8,
+          "reject": 11,
+          "revise": 5,
+          "needs_review": 1,
           "pass_candidate": 0
         },
         "needs_review": {
@@ -77,8 +77,8 @@
           "pass_candidate": 1
         }
       },
-      "exact_accuracy": 0.1471,
-      "within_one_accuracy": 0.8235,
+      "exact_accuracy": 0.2647,
+      "within_one_accuracy": 0.9118,
       "total": 34
     },
     "E_violation_type_recall": {
@@ -87,28 +87,28 @@
       "per_type": {
         "금지행위": {
           "mutations": 2,
-          "detected": 1,
-          "recall": 0.5
+          "detected": 2,
+          "recall": 1.0
         },
         "대출": {
           "mutations": 3,
-          "detected": 0,
-          "recall": 0.0
+          "detected": 3,
+          "recall": 1.0
         },
         "부수혜택": {
           "mutations": 4,
-          "detected": 2,
-          "recall": 0.5
+          "detected": 4,
+          "recall": 1.0
         },
         "산정방법": {
           "mutations": 2,
-          "detected": 1,
-          "recall": 0.5
+          "detected": 2,
+          "recall": 1.0
         },
         "이자율수익률": {
           "mutations": 10,
-          "detected": 3,
-          "recall": 0.3
+          "detected": 6,
+          "recall": 0.6
         },
         "준수사항": {
           "mutations": 3,
@@ -118,19 +118,19 @@
       },
       "per_type_disclosure_coverage": {
         "금지행위": {
-          "detected": 1,
+          "detected": 3,
           "total": 5,
-          "recall": 0.2
+          "recall": 0.6
         },
         "대출": {
-          "detected": 0,
+          "detected": 6,
           "total": 6,
-          "recall": 0.0
+          "recall": 1.0
         },
         "부수혜택": {
-          "detected": 1,
+          "detected": 2,
           "total": 4,
-          "recall": 0.25
+          "recall": 0.5
         },
         "산정방법": {
           "detected": 0,
@@ -138,9 +138,9 @@
           "recall": 0.0
         },
         "이자율수익률": {
-          "detected": 9,
+          "detected": 15,
           "total": 22,
-          "recall": 0.4091
+          "recall": 0.6818
         },
         "준수사항": {
           "detected": 3,
@@ -161,25 +161,25 @@
   "per_product_group": {
     "deposit": {
       "counts": {
-        "tp": 5,
+        "tp": 11,
         "fp": 0,
-        "fn": 10,
+        "fn": 4,
         "tn": 6
       },
       "precision": 1.0,
-      "recall": 0.3333,
-      "f1": 0.5
+      "recall": 0.7333,
+      "f1": 0.8462
     },
     "loan": {
       "counts": {
-        "tp": 5,
+        "tp": 9,
         "fp": 0,
-        "fn": 4,
+        "fn": 0,
         "tn": 4
       },
       "precision": 1.0,
-      "recall": 0.5556,
-      "f1": 0.7143
+      "recall": 1.0,
+      "f1": 1.0
     }
   },
   "selected_product_names": [
@@ -254,9 +254,9 @@
         "f1": 0.0
       },
       "required_disclosure_coverage": {
-        "detected": 0,
+        "detected": 1,
         "total": 2,
-        "recall": 0.0
+        "recall": 0.5
       }
     },
     "JB 참 괜찮은 정기예금": {
@@ -278,33 +278,33 @@
     "JB 청년도약계좌": {
       "records": 4,
       "violation_detection": {
-        "tp": 0,
+        "tp": 3,
         "fp": 0,
-        "fn": 3,
-        "precision": 0.0,
-        "recall": 0.0,
-        "f1": 0.0
+        "fn": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
       },
       "required_disclosure_coverage": {
-        "detected": 0,
+        "detected": 1,
         "total": 4,
-        "recall": 0.0
+        "recall": 0.25
       }
     },
     "JB 청년전세자금대출": {
       "records": 3,
       "violation_detection": {
-        "tp": 1,
+        "tp": 2,
         "fp": 0,
-        "fn": 1,
+        "fn": 0,
         "precision": 1.0,
-        "recall": 0.5,
-        "f1": 0.6667
+        "recall": 1.0,
+        "f1": 1.0
       },
       "required_disclosure_coverage": {
-        "detected": 1,
+        "detected": 3,
         "total": 3,
-        "recall": 0.3333
+        "recall": 1.0
       }
     },
     "도전 루틴 적금": {
@@ -326,33 +326,33 @@
     "비상금대출II": {
       "records": 4,
       "violation_detection": {
-        "tp": 0,
+        "tp": 3,
         "fp": 0,
-        "fn": 3,
-        "precision": 0.0,
-        "recall": 0.0,
-        "f1": 0.0
+        "fn": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
       },
       "required_disclosure_coverage": {
-        "detected": 0,
+        "detected": 6,
         "total": 6,
-        "recall": 0.0
+        "recall": 1.0
       }
     },
     "씨드모아 통장": {
       "records": 4,
       "violation_detection": {
-        "tp": 0,
+        "tp": 3,
         "fp": 0,
-        "fn": 3,
-        "precision": 0.0,
-        "recall": 0.0,
-        "f1": 0.0
+        "fn": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
       },
       "required_disclosure_coverage": {
-        "detected": 0,
+        "detected": 5,
         "total": 7,
-        "recall": 0.0
+        "recall": 0.7143
       }
     }
   },

@@ -1,48 +1,48 @@
 {
   "record_count": 34,
   "article_metrics": {
-    "article_universe_size": 23,
-    "micro_f1": 0.23333333333333334,
-    "macro_f1": 0.05590062111801242,
-    "micro_f2": 0.26217228464419473,
-    "macro_f2": 0.06102212051868802,
-    "mcc": 0.17540762059046858,
+    "article_universe_size": 29,
+    "micro_f1": 0.24752475247524752,
+    "macro_f1": 0.04233055885850178,
+    "micro_f2": 0.35816618911174786,
+    "macro_f2": 0.05338196286472149,
+    "mcc": 0.22423532791437564,
     "counts": {
-      "tp": 14,
-      "fp": 57,
-      "fn": 35,
-      "tn": 676
+      "tp": 25,
+      "fp": 128,
+      "fn": 24,
+      "tn": 809
     },
     "per_article": {
       "금융소비자보호에관한감독규정제12조": {
         "tp": 0,
-        "fp": 1,
+        "fp": 5,
         "fn": 0,
-        "tn": 33,
+        "tn": 29,
         "f1": 0.0,
         "f2": 0.0
       },
       "금융소비자보호에관한감독규정제13조": {
         "tp": 0,
-        "fp": 1,
+        "fp": 7,
         "fn": 0,
-        "tn": 33,
+        "tn": 27,
         "f1": 0.0,
         "f2": 0.0
       },
       "금융소비자보호에관한감독규정제14조": {
         "tp": 0,
-        "fp": 6,
+        "fp": 7,
         "fn": 0,
-        "tn": 28,
+        "tn": 27,
         "f1": 0.0,
         "f2": 0.0
       },
       "금융소비자보호에관한감독규정제15조": {
         "tp": 0,
-        "fp": 1,
+        "fp": 5,
         "fn": 0,
-        "tn": 33,
+        "tn": 29,
         "f1": 0.0,
         "f2": 0.0
       },
@@ -64,41 +64,65 @@
       },
       "금융소비자보호에관한감독규정제18조": {
         "tp": 0,
-        "fp": 1,
-        "fn": 0,
-        "tn": 33,
-        "f1": 0.0,
-        "f2": 0.0
-      },
-      "금융소비자보호에관한감독규정제19조": {
-        "tp": 1,
-        "fp": 1,
-        "fn": 0,
-        "tn": 32,
-        "f1": 0.6666666666666666,
-        "f2": 0.8333333333333334
-      },
-      "금융소비자보호에관한법률시행령제13조": {
-        "tp": 0,
         "fp": 4,
         "fn": 0,
         "tn": 30,
         "f1": 0.0,
         "f2": 0.0
       },
+      "금융소비자보호에관한감독규정제19조": {
+        "tp": 1,
+        "fp": 3,
+        "fn": 0,
+        "tn": 30,
+        "f1": 0.4,
+        "f2": 0.625
+      },
+      "금융소비자보호에관한법률시행령제12조": {
+        "tp": 0,
+        "fp": 5,
+        "fn": 0,
+        "tn": 29,
+        "f1": 0.0,
+        "f2": 0.0
+      },
+      "금융소비자보호에관한법률시행령제13조": {
+        "tp": 0,
+        "fp": 7,
+        "fn": 0,
+        "tn": 27,
+        "f1": 0.0,
+        "f2": 0.0
+      },
       "금융소비자보호에관한법률시행령제14조": {
         "tp": 0,
-        "fp": 1,
+        "fp": 2,
         "fn": 0,
-        "tn": 33,
+        "tn": 32,
         "f1": 0.0,
         "f2": 0.0
       },
       "금융소비자보호에관한법률시행령제20조": {
         "tp": 0,
-        "fp": 9,
+        "fp": 19,
         "fn": 0,
-        "tn": 25,
+        "tn": 15,
+        "f1": 0.0,
+        "f2": 0.0
+      },
+      "금융소비자보호에관한법률시행령제22조": {
+        "tp": 0,
+        "fp": 2,
+        "fn": 0,
+        "tn": 32,
+        "f1": 0.0,
+        "f2": 0.0
+      },
+      "금융소비자보호에관한법률제17조": {
+        "tp": 0,
+        "fp": 1,
+        "fn": 0,
+        "tn": 33,
         "f1": 0.0,
         "f2": 0.0
       },
@@ -112,27 +136,35 @@
       },
       "금융소비자보호에관한법률제19조": {
         "tp": 0,
-        "fp": 8,
+        "fp": 18,
         "fn": 0,
-        "tn": 26,
+        "tn": 16,
+        "f1": 0.0,
+        "f2": 0.0
+      },
+      "금융소비자보호에관한법률제20조": {
+        "tp": 0,
+        "fp": 1,
+        "fn": 0,
+        "tn": 33,
         "f1": 0.0,
         "f2": 0.0
       },
       "금융소비자보호에관한법률제21조": {
         "tp": 0,
-        "fp": 2,
+        "fp": 7,
         "fn": 0,
-        "tn": 32,
+        "tn": 27,
         "f1": 0.0,
         "f2": 0.0
       },
       "금융소비자보호에관한법률제22조": {
-        "tp": 13,
-        "fp": 5,
-        "fn": 11,
-        "tn": 5,
-        "f1": 0.619047619047619,
-        "f2": 0.5701754385964912
+        "tp": 24,
+        "fp": 10,
+        "fn": 0,
+        "tn": 0,
+        "f1": 0.8275862068965517,
+        "f2": 0.9230769230769231
       },
       "은행광고심의기준제16조": {
         "tp": 0,
@@ -158,11 +190,19 @@
         "f1": 0.0,
         "f2": 0.0
       },
-      "표시ㆍ광고의공정화에관한법률시행령제3조": {
+      "표시ㆍ광고의공정화에관한법률시행령제12조": {
         "tp": 0,
         "fp": 1,
         "fn": 0,
         "tn": 33,
+        "f1": 0.0,
+        "f2": 0.0
+      },
+      "표시ㆍ광고의공정화에관한법률시행령제3조": {
+        "tp": 0,
+        "fp": 3,
+        "fn": 0,
+        "tn": 31,
         "f1": 0.0,
         "f2": 0.0
       },
@@ -176,9 +216,9 @@
       },
       "표시ㆍ광고의공정화에관한법률제3조": {
         "tp": 0,
-        "fp": 5,
+        "fp": 8,
         "fn": 0,
-        "tn": 29,
+        "tn": 26,
         "f1": 0.0,
         "f2": 0.0
       },
@@ -192,24 +232,32 @@
       },
       "표시ㆍ광고의공정화에관한법률제5조": {
         "tp": 0,
-        "fp": 3,
+        "fp": 4,
         "fn": 0,
-        "tn": 31,
+        "tn": 30,
+        "f1": 0.0,
+        "f2": 0.0
+      },
+      "표시ㆍ광고의공정화에관한법률제6조": {
+        "tp": 0,
+        "fp": 1,
+        "fn": 0,
+        "tn": 33,
         "f1": 0.0,
         "f2": 0.0
       }
     }
   },
   "ccg_metrics": {
-    "cuplan_recall": 0.5416666666666666,
+    "cuplan_recall": 1.0,
     "violation_precision": 1.0,
-    "violation_recall": 0.4166666666666667,
+    "violation_recall": 0.8333333333333334,
     "evidence_grounding_rate": 1.0,
-    "cu0_rate": 0.35294117647058826,
+    "cu0_rate": 0.7647058823529411,
     "overblocking_rate": 0.0,
     "clean_non_pass_rate": 0.9,
     "exception_sanity_rate": 1.0,
-    "average_context_triples": 76.08823529411765
+    "average_context_triples": 147.7058823529412
   },
   "records": [
     {
@@ -815,29 +863,43 @@
       },
       "prediction": {
         "record_id": "syn_jb_전세자금대출_web_page_clean",
-        "predicted_articles": [],
+        "predicted_articles": [
+          "금융소비자 보호에 관한 감독규정 제12조",
+          "금융소비자 보호에 관한 법률 제22조 ④-4"
+        ],
         "predicted_violation": false,
         "predicted_violation_types": [
-          "LIVE_REVIEW_ERROR"
+          "PROMINENCE_INSUFFICIENT",
+          "TRACK_B_OVERALL_IMPRESSION",
+          "cu_legal_clause_0647d96420c425cd"
         ],
-        "predicted_sales_principles": [],
-        "predicted_required_disclosures": [],
+        "predicted_sales_principles": [
+          "광고규제",
+          "적정성원칙"
+        ],
+        "predicted_required_disclosures": [
+          "대출금리 범위 및 산출기준",
+          "수수료 등 부대비용",
+          "심사 조건 및 대출 가능 여부",
+          "심의필 번호 및 유효기간",
+          "준법감시인 사전승인 및 심의필 표시"
+        ],
         "predicted_risk_level": "medium",
         "predicted_routing": "needs_review",
-        "cu_plan_count": 0,
-        "context_triple_count": 0,
-        "has_policy_evidence": false,
+        "cu_plan_count": 17,
+        "context_triple_count": 107,
+        "has_policy_evidence": true,
         "has_cu0_failure": false
       },
-      "review_run_id": "",
+      "review_run_id": "review_run_f0c99054c175abcf",
       "matches": {
         "violation": true,
         "article_exact": true,
         "article_family": true,
         "disclosures": {
           "gold_n": 5,
-          "matched_n": 0,
-          "recall": 0.0
+          "matched_n": 5,
+          "recall": 1.0
         },
         "routing": {
           "gold": "pass_candidate",
@@ -1141,38 +1203,56 @@
       },
       "prediction": {
         "record_id": "syn_비상금대출ii_web_page_loan_partial_sale_as_all",
-        "predicted_articles": [],
-        "predicted_violation": false,
-        "predicted_violation_types": [
-          "LIVE_REVIEW_ERROR"
+        "predicted_articles": [
+          "금융소비자 보호에 관한 감독규정 제19조 ③-1",
+          "금융소비자 보호에 관한 법률 시행령 제20조 ①",
+          "금융소비자 보호에 관한 법률 제22조",
+          "금융소비자 보호에 관한 법률 제22조 ④-4"
         ],
-        "predicted_sales_principles": [],
-        "predicted_required_disclosures": [],
-        "predicted_risk_level": "medium",
-        "predicted_routing": "needs_review",
-        "cu_plan_count": 0,
-        "context_triple_count": 0,
-        "has_policy_evidence": false,
-        "has_cu0_failure": false
+        "predicted_violation": true,
+        "predicted_violation_types": [
+          "PROMINENCE_INSUFFICIENT",
+          "TRACK_B_OVERALL_IMPRESSION",
+          "cu_legal_article_30dce47c48d34de4",
+          "cu_legal_clause_0647d96420c425cd",
+          "cu_legal_clause_97f258351c3d8dbb",
+          "cu_legal_clause_d5d6f71aa0d25024"
+        ],
+        "predicted_sales_principles": [
+          "광고규제"
+        ],
+        "predicted_required_disclosures": [
+          "대출금리 범위 및 산출기준",
+          "수수료 등 부대비용",
+          "심사 조건 및 대출 가능 여부",
+          "심의필 번호 및 유효기간",
+          "준법감시인 사전승인 및 심의필 표시"
+        ],
+        "predicted_risk_level": "high",
+        "predicted_routing": "reject",
+        "cu_plan_count": 20,
+        "context_triple_count": 144,
+        "has_policy_evidence": true,
+        "has_cu0_failure": true
       },
-      "review_run_id": "",
+      "review_run_id": "review_run_561e85c06cf6a3c0",
       "matches": {
-        "violation": false,
-        "article_exact": false,
-        "article_family": false,
+        "violation": true,
+        "article_exact": true,
+        "article_family": true,
         "disclosures": {
           "gold_n": 1,
-          "matched_n": 0,
-          "recall": 0.0
+          "matched_n": 1,
+          "recall": 1.0
         },
         "routing": {
           "gold": "revise",
-          "pred": "needs_review",
+          "pred": "reject",
           "exact": false,
           "adjacent": true
         }
       },
-      "overall_pass": false
+      "overall_pass": true
     },
     {
       "id": "syn_비상금대출ii_web_page_loan_daily_interest_minimize",
@@ -1194,38 +1274,58 @@
       },
       "prediction": {
         "record_id": "syn_비상금대출ii_web_page_loan_daily_interest_minimize",
-        "predicted_articles": [],
-        "predicted_violation": false,
-        "predicted_violation_types": [
-          "LIVE_REVIEW_ERROR"
+        "predicted_articles": [
+          "금융소비자 보호에 관한 감독규정 제12조",
+          "금융소비자 보호에 관한 감독규정 제14조 ②",
+          "금융소비자 보호에 관한 감독규정 제14조 ⑥-7",
+          "금융소비자 보호에 관한 법률 제19조 ①-3",
+          "금융소비자 보호에 관한 법률 제22조"
         ],
-        "predicted_sales_principles": [],
-        "predicted_required_disclosures": [],
+        "predicted_violation": true,
+        "predicted_violation_types": [
+          "PROMINENCE_INSUFFICIENT",
+          "TRACK_B_OVERALL_IMPRESSION",
+          "cu_legal_clause_05a08f8b1215f5c6",
+          "cu_legal_clause_47503c5fae4fbfd8"
+        ],
+        "predicted_sales_principles": [
+          "광고규제",
+          "불공정영업행위 금지",
+          "설명의무",
+          "적정성원칙"
+        ],
+        "predicted_required_disclosures": [
+          "대출금리 범위 및 산출기준",
+          "수수료 등 부대비용",
+          "심사 조건 및 대출 가능 여부",
+          "심의필 번호 및 유효기간",
+          "준법감시인 사전승인 및 심의필 표시"
+        ],
         "predicted_risk_level": "medium",
-        "predicted_routing": "needs_review",
-        "cu_plan_count": 0,
-        "context_triple_count": 0,
-        "has_policy_evidence": false,
-        "has_cu0_failure": false
+        "predicted_routing": "revise",
+        "cu_plan_count": 20,
+        "context_triple_count": 136,
+        "has_policy_evidence": true,
+        "has_cu0_failure": true
       },
-      "review_run_id": "",
+      "review_run_id": "review_run_1dcedfda6eff76ca",
       "matches": {
-        "violation": false,
-        "article_exact": false,
-        "article_family": false,
+        "violation": true,
+        "article_exact": true,
+        "article_family": true,
         "disclosures": {
           "gold_n": 2,
-          "matched_n": 0,
-          "recall": 0.0
+          "matched_n": 2,
+          "recall": 1.0
         },
         "routing": {
           "gold": "revise",
-          "pred": "needs_review",
-          "exact": false,
-          "adjacent": true
+          "pred": "revise",
+          "exact": true,
+          "adjacent": false
         }
       },
-      "overall_pass": false
+      "overall_pass": true
     },
     {
       "id": "syn_비상금대출ii_web_page_loan_easy_approval_misleading",
@@ -1248,38 +1348,51 @@
       },
       "prediction": {
         "record_id": "syn_비상금대출ii_web_page_loan_easy_approval_misleading",
-        "predicted_articles": [],
-        "predicted_violation": false,
-        "predicted_violation_types": [
-          "LIVE_REVIEW_ERROR"
+        "predicted_articles": [
+          "금융소비자 보호에 관한 감독규정 제15조 ⑤-5",
+          "금융소비자 보호에 관한 법률 제21조",
+          "금융소비자 보호에 관한 법률 제22조"
         ],
-        "predicted_sales_principles": [],
-        "predicted_required_disclosures": [],
-        "predicted_risk_level": "medium",
-        "predicted_routing": "needs_review",
-        "cu_plan_count": 0,
-        "context_triple_count": 0,
-        "has_policy_evidence": false,
-        "has_cu0_failure": false
+        "predicted_violation": true,
+        "predicted_violation_types": [
+          "TRACK_B_OVERALL_IMPRESSION",
+          "cu_legal_clause_09e6d7c89d22b6a9"
+        ],
+        "predicted_sales_principles": [
+          "부당권유행위 금지"
+        ],
+        "predicted_required_disclosures": [
+          "대출금리 범위 및 산출기준",
+          "수수료 등 부대비용",
+          "심사 조건 및 대출 가능 여부",
+          "심의필 번호 및 유효기간",
+          "준법감시인 사전승인 및 심의필 표시"
+        ],
+        "predicted_risk_level": "high",
+        "predicted_routing": "reject",
+        "cu_plan_count": 11,
+        "context_triple_count": 137,
+        "has_policy_evidence": true,
+        "has_cu0_failure": true
       },
-      "review_run_id": "",
+      "review_run_id": "review_run_33ecbef2e26cba61",
       "matches": {
-        "violation": false,
-        "article_exact": false,
-        "article_family": false,
+        "violation": true,
+        "article_exact": true,
+        "article_family": true,
         "disclosures": {
           "gold_n": 3,
-          "matched_n": 0,
-          "recall": 0.0
+          "matched_n": 3,
+          "recall": 1.0
         },
         "routing": {
           "gold": "revise",
-          "pred": "needs_review",
+          "pred": "reject",
           "exact": false,
           "adjacent": true
         }
       },
-      "overall_pass": false
+      "overall_pass": true
     },
     {
       "id": "syn_씨드모아_통장_web_page_clean",
@@ -1299,29 +1412,62 @@
       },
       "prediction": {
         "record_id": "syn_씨드모아_통장_web_page_clean",
-        "predicted_articles": [],
+        "predicted_articles": [
+          "금융소비자 보호에 관한 감독규정 제12조",
+          "금융소비자 보호에 관한 감독규정 제13조",
+          "금융소비자 보호에 관한 감독규정 제15조",
+          "금융소비자 보호에 관한 감독규정 제18조",
+          "금융소비자 보호에 관한 법률 시행령 제12조",
+          "금융소비자 보호에 관한 법률 시행령 제13조",
+          "금융소비자 보호에 관한 법률 시행령 제20조 ①",
+          "금융소비자 보호에 관한 법률 시행령 제20조 ①-5",
+          "금융소비자 보호에 관한 법률 시행령 제20조 ④",
+          "금융소비자 보호에 관한 법률 제19조 ①-3",
+          "금융소비자 보호에 관한 법률 제21조",
+          "금융소비자 보호에 관한 법률 제22조",
+          "금융소비자 보호에 관한 법률 제22조 ④-3"
+        ],
         "predicted_violation": false,
         "predicted_violation_types": [
-          "LIVE_REVIEW_ERROR"
+          "PROMINENCE_INSUFFICIENT",
+          "TRACK_B_OVERALL_IMPRESSION",
+          "cu_legal_article_1f5237d19fdfa401",
+          "cu_legal_article_b1f9c13b24c1b213",
+          "cu_legal_article_ff8b28548170a851",
+          "cu_legal_clause_2dd9ac7e2afcbe92",
+          "cu_legal_clause_650899399a966b2e",
+          "cu_legal_clause_d5d6f71aa0d25024",
+          "cu_legal_clause_dbee00e9c5f702f5"
         ],
-        "predicted_sales_principles": [],
-        "predicted_required_disclosures": [],
+        "predicted_sales_principles": [
+          "광고규제",
+          "부당권유행위 금지",
+          "설명의무",
+          "적정성원칙"
+        ],
+        "predicted_required_disclosures": [
+          "금리 범위 및 산정방법",
+          "심의필 번호 및 유효기간",
+          "예금자보호 부보내용",
+          "우대조건 및 적용기간",
+          "준법감시인 사전승인 및 심의필 표시"
+        ],
         "predicted_risk_level": "medium",
         "predicted_routing": "needs_review",
-        "cu_plan_count": 0,
-        "context_triple_count": 0,
-        "has_policy_evidence": false,
-        "has_cu0_failure": false
+        "cu_plan_count": 20,
+        "context_triple_count": 159,
+        "has_policy_evidence": true,
+        "has_cu0_failure": true
       },
-      "review_run_id": "",
+      "review_run_id": "review_run_8094f0c7b47e2644",
       "matches": {
         "violation": true,
         "article_exact": true,
         "article_family": true,
         "disclosures": {
           "gold_n": 5,
-          "matched_n": 0,
-          "recall": 0.0
+          "matched_n": 5,
+          "recall": 1.0
         },
         "routing": {
           "gold": "pass_candidate",
@@ -1353,34 +1499,52 @@
       },
       "prediction": {
         "record_id": "syn_씨드모아_통장_web_page_rate_relative_superiority_unfounded",
-        "predicted_articles": [],
-        "predicted_violation": false,
-        "predicted_violation_types": [
-          "LIVE_REVIEW_ERROR"
+        "predicted_articles": [
+          "금융소비자 보호에 관한 법률 시행령 제12조",
+          "금융소비자 보호에 관한 법률 제19조 ①-3",
+          "금융소비자 보호에 관한 법률 제22조",
+          "표시ㆍ광고의 공정화에 관한 법률 시행령 제3조",
+          "표시ㆍ광고의 공정화에 관한 법률 제3조"
         ],
-        "predicted_sales_principles": [],
-        "predicted_required_disclosures": [],
-        "predicted_risk_level": "medium",
-        "predicted_routing": "needs_review",
-        "cu_plan_count": 0,
-        "context_triple_count": 0,
-        "has_policy_evidence": false,
-        "has_cu0_failure": false
+        "predicted_violation": true,
+        "predicted_violation_types": [
+          "TRACK_B_OVERALL_IMPRESSION",
+          "cu_legal_article_30dce47c48d34de4",
+          "cu_legal_article_f8241f122edc6be9"
+        ],
+        "predicted_sales_principles": [
+          "광고규제",
+          "설명의무",
+          "적정성원칙"
+        ],
+        "predicted_required_disclosures": [
+          "금리 범위 및 산정방법",
+          "심의필 번호 및 유효기간",
+          "예금자보호 부보내용",
+          "우대조건 및 적용기간",
+          "준법감시인 사전승인 및 심의필 표시"
+        ],
+        "predicted_risk_level": "high",
+        "predicted_routing": "reject",
+        "cu_plan_count": 13,
+        "context_triple_count": 153,
+        "has_policy_evidence": true,
+        "has_cu0_failure": true
       },
-      "review_run_id": "",
+      "review_run_id": "review_run_d98d7bd5d0cc961b",
       "matches": {
-        "violation": false,
-        "article_exact": false,
-        "article_family": false,
+        "violation": true,
+        "article_exact": true,
+        "article_family": true,
         "disclosures": {
           "gold_n": 3,
-          "matched_n": 0,
-          "recall": 0.0
+          "matched_n": 2,
+          "recall": 0.6667
         },
         "routing": {
           "gold": "reject",
-          "pred": "needs_review",
-          "exact": false,
+          "pred": "reject",
+          "exact": true,
           "adjacent": false
         }
       },
@@ -1406,38 +1570,61 @@
       },
       "prediction": {
         "record_id": "syn_씨드모아_통장_web_page_rate_overstated_or_stale",
-        "predicted_articles": [],
-        "predicted_violation": false,
-        "predicted_violation_types": [
-          "LIVE_REVIEW_ERROR"
+        "predicted_articles": [
+          "금융소비자 보호에 관한 감독규정 제13조",
+          "금융소비자 보호에 관한 법률 시행령 제12조",
+          "금융소비자 보호에 관한 법률 제19조 ①-3",
+          "금융소비자 보호에 관한 법률 제22조",
+          "금융소비자 보호에 관한 법률 제22조 ④-3",
+          "금융소비자 보호에 관한 법률 제22조 ⑤"
         ],
-        "predicted_sales_principles": [],
-        "predicted_required_disclosures": [],
+        "predicted_violation": true,
+        "predicted_violation_types": [
+          "PROMINENCE_INSUFFICIENT",
+          "TRACK_B_OVERALL_IMPRESSION",
+          "cu_legal_article_30dce47c48d34de4",
+          "cu_legal_article_78b842b24e59a9c8",
+          "cu_legal_article_b1f9c13b24c1b213",
+          "cu_legal_clause_2dd9ac7e2afcbe92",
+          "cu_legal_clause_650899399a966b2e"
+        ],
+        "predicted_sales_principles": [
+          "광고규제",
+          "설명의무",
+          "적정성원칙"
+        ],
+        "predicted_required_disclosures": [
+          "금리 범위 및 산정방법",
+          "심의필 번호 및 유효기간",
+          "예금자보호 부보내용",
+          "우대조건 및 적용기간",
+          "준법감시인 사전승인 및 심의필 표시"
+        ],
         "predicted_risk_level": "medium",
-        "predicted_routing": "needs_review",
-        "cu_plan_count": 0,
-        "context_triple_count": 0,
-        "has_policy_evidence": false,
-        "has_cu0_failure": false
+        "predicted_routing": "revise",
+        "cu_plan_count": 20,
+        "context_triple_count": 157,
+        "has_policy_evidence": true,
+        "has_cu0_failure": true
       },
-      "review_run_id": "",
+      "review_run_id": "review_run_1c897404d5b44e32",
       "matches": {
-        "violation": false,
-        "article_exact": false,
-        "article_family": false,
+        "violation": true,
+        "article_exact": true,
+        "article_family": true,
         "disclosures": {
           "gold_n": 2,
-          "matched_n": 0,
-          "recall": 0.0
+          "matched_n": 2,
+          "recall": 1.0
         },
         "routing": {
           "gold": "reject",
-          "pred": "needs_review",
+          "pred": "revise",
           "exact": false,
-          "adjacent": false
+          "adjacent": true
         }
       },
-      "overall_pass": false
+      "overall_pass": true
     },
     {
       "id": "syn_씨드모아_통장_web_page_rate_best_among_all_firms",
@@ -1459,34 +1646,59 @@
       },
       "prediction": {
         "record_id": "syn_씨드모아_통장_web_page_rate_best_among_all_firms",
-        "predicted_articles": [],
-        "predicted_violation": false,
-        "predicted_violation_types": [
-          "LIVE_REVIEW_ERROR"
+        "predicted_articles": [
+          "금융소비자 보호에 관한 감독규정 제18조",
+          "금융소비자 보호에 관한 법률 시행령 제20조 ①",
+          "금융소비자 보호에 관한 법률 시행령 제20조 ①-5",
+          "금융소비자 보호에 관한 법률 제19조 ①-3",
+          "금융소비자 보호에 관한 법률 제21조 제21조-4",
+          "금융소비자 보호에 관한 법률 제22조",
+          "표시ㆍ광고의 공정화에 관한 법률 시행령 제3조 ③",
+          "표시ㆍ광고의 공정화에 관한 법률 제3조"
         ],
-        "predicted_sales_principles": [],
-        "predicted_required_disclosures": [],
-        "predicted_risk_level": "medium",
-        "predicted_routing": "needs_review",
-        "cu_plan_count": 0,
-        "context_triple_count": 0,
-        "has_policy_evidence": false,
-        "has_cu0_failure": false
+        "predicted_violation": true,
+        "predicted_violation_types": [
+          "PROMINENCE_INSUFFICIENT",
+          "TRACK_B_OVERALL_IMPRESSION",
+          "cu_legal_article_30dce47c48d34de4",
+          "cu_legal_article_ff8b28548170a851",
+          "cu_legal_clause_9cbddee5baa7c200",
+          "cu_legal_clause_d5d6f71aa0d25024",
+          "cu_legal_clause_f4dcc2967cc01694"
+        ],
+        "predicted_sales_principles": [
+          "광고규제",
+          "부당권유행위 금지",
+          "설명의무"
+        ],
+        "predicted_required_disclosures": [
+          "금리 범위 및 산정방법",
+          "심의필 번호 및 유효기간",
+          "예금자보호 부보내용",
+          "우대조건 및 적용기간",
+          "준법감시인 사전승인 및 심의필 표시"
+        ],
+        "predicted_risk_level": "high",
+        "predicted_routing": "reject",
+        "cu_plan_count": 20,
+        "context_triple_count": 167,
+        "has_policy_evidence": true,
+        "has_cu0_failure": true
       },
-      "review_run_id": "",
+      "review_run_id": "review_run_b05877b0765ada24",
       "matches": {
-        "violation": false,
-        "article_exact": false,
-        "article_family": false,
+        "violation": true,
+        "article_exact": true,
+        "article_family": true,
         "disclosures": {
           "gold_n": 2,
-          "matched_n": 0,
-          "recall": 0.0
+          "matched_n": 1,
+          "recall": 0.5
         },
         "routing": {
           "gold": "reject",
-          "pred": "needs_review",
-          "exact": false,
+          "pred": "reject",
+          "exact": true,
           "adjacent": false
         }
       },
@@ -1510,29 +1722,42 @@
       },
       "prediction": {
         "record_id": "syn_jb_주거래통장_보통__web_page_clean",
-        "predicted_articles": [],
+        "predicted_articles": [
+          "금융소비자 보호에 관한 법률 제19조 ①-3",
+          "금융소비자 보호에 관한 법률 제22조"
+        ],
         "predicted_violation": false,
         "predicted_violation_types": [
-          "LIVE_REVIEW_ERROR"
+          "PROMINENCE_INSUFFICIENT",
+          "TRACK_B_OVERALL_IMPRESSION",
+          "cu_legal_clause_2dd9ac7e2afcbe92"
         ],
-        "predicted_sales_principles": [],
-        "predicted_required_disclosures": [],
+        "predicted_sales_principles": [
+          "설명의무"
+        ],
+        "predicted_required_disclosures": [
+          "금리 범위 및 산정방법",
+          "심의필 번호 및 유효기간",
+          "예금자보호 부보내용",
+          "우대조건 및 적용기간",
+          "준법감시인 사전승인 및 심의필 표시"
+        ],
         "predicted_risk_level": "medium",
         "predicted_routing": "needs_review",
-        "cu_plan_count": 0,
-        "context_triple_count": 0,
-        "has_policy_evidence": false,
-        "has_cu0_failure": false
+        "cu_plan_count": 8,
+        "context_triple_count": 94,
+        "has_policy_evidence": true,
+        "has_cu0_failure": true
       },
-      "review_run_id": "",
+      "review_run_id": "review_run_3ea635f0640ca14a",
       "matches": {
         "violation": true,
         "article_exact": true,
         "article_family": true,
         "disclosures": {
           "gold_n": 5,
-          "matched_n": 0,
-          "recall": 0.0
+          "matched_n": 5,
+          "recall": 1.0
         },
         "routing": {
           "gold": "pass_candidate",
@@ -1563,29 +1788,50 @@
       },
       "prediction": {
         "record_id": "syn_jb_주거래통장_보통__web_page_rate_pretax_posttax_omitted",
-        "predicted_articles": [],
+        "predicted_articles": [
+          "금융소비자 보호에 관한 감독규정 제13조",
+          "금융소비자 보호에 관한 법률 시행령 제20조 ①",
+          "금융소비자 보호에 관한 법률 제19조 ①-3",
+          "금융소비자 보호에 관한 법률 제22조",
+          "금융소비자 보호에 관한 법률 제22조 ④-3"
+        ],
         "predicted_violation": false,
         "predicted_violation_types": [
-          "LIVE_REVIEW_ERROR"
+          "PROMINENCE_INSUFFICIENT",
+          "TRACK_B_OVERALL_IMPRESSION",
+          "cu_legal_article_30dce47c48d34de4",
+          "cu_legal_article_b1f9c13b24c1b213",
+          "cu_legal_clause_2dd9ac7e2afcbe92",
+          "cu_legal_clause_650899399a966b2e",
+          "cu_legal_clause_d5d6f71aa0d25024"
         ],
-        "predicted_sales_principles": [],
-        "predicted_required_disclosures": [],
+        "predicted_sales_principles": [
+          "광고규제",
+          "설명의무"
+        ],
+        "predicted_required_disclosures": [
+          "금리 범위 및 산정방법",
+          "심의필 번호 및 유효기간",
+          "예금자보호 부보내용",
+          "우대조건 및 적용기간",
+          "준법감시인 사전승인 및 심의필 표시"
+        ],
         "predicted_risk_level": "medium",
         "predicted_routing": "needs_review",
-        "cu_plan_count": 0,
-        "context_triple_count": 0,
-        "has_policy_evidence": false,
+        "cu_plan_count": 20,
+        "context_triple_count": 118,
+        "has_policy_evidence": true,
         "has_cu0_failure": false
       },
-      "review_run_id": "",
+      "review_run_id": "review_run_965d8a1bd162e12d",
       "matches": {
         "violation": false,
-        "article_exact": false,
-        "article_family": false,
+        "article_exact": true,
+        "article_family": true,
         "disclosures": {
           "gold_n": 2,
-          "matched_n": 0,
-          "recall": 0.0
+          "matched_n": 1,
+          "recall": 0.5
         },
         "routing": {
           "gold": "revise",
@@ -1614,29 +1860,58 @@
       },
       "prediction": {
         "record_id": "syn_jb_청년도약계좌_web_page_clean",
-        "predicted_articles": [],
+        "predicted_articles": [
+          "금융소비자 보호에 관한 감독규정 제15조",
+          "금융소비자 보호에 관한 법률 시행령 제12조",
+          "금융소비자 보호에 관한 법률 시행령 제13조",
+          "금융소비자 보호에 관한 법률 시행령 제20조 ①",
+          "금융소비자 보호에 관한 법률 시행령 제20조 ①-5",
+          "금융소비자 보호에 관한 법률 시행령 제22조",
+          "금융소비자 보호에 관한 법률 제19조 ①-3",
+          "금융소비자 보호에 관한 법률 제21조",
+          "금융소비자 보호에 관한 법률 제22조",
+          "금융소비자 보호에 관한 법률 제22조 ④-3",
+          "금융소비자 보호에 관한 법률 제22조 ⑤"
+        ],
         "predicted_violation": false,
         "predicted_violation_types": [
-          "LIVE_REVIEW_ERROR"
+          "PROMINENCE_INSUFFICIENT",
+          "TRACK_B_OVERALL_IMPRESSION",
+          "cu_legal_article_1f5237d19fdfa401",
+          "cu_legal_clause_2dd9ac7e2afcbe92",
+          "cu_legal_clause_5a9a77e0886826da",
+          "cu_legal_clause_650899399a966b2e",
+          "cu_legal_clause_d5d6f71aa0d25024"
         ],
-        "predicted_sales_principles": [],
-        "predicted_required_disclosures": [],
+        "predicted_sales_principles": [
+          "광고규제",
+          "부당권유행위 금지",
+          "설명의무",
+          "적정성원칙"
+        ],
+        "predicted_required_disclosures": [
+          "금리 범위 및 산정방법",
+          "심의필 번호 및 유효기간",
+          "예금자보호 부보내용",
+          "우대조건 및 적용기간",
+          "준법감시인 사전승인 및 심의필 표시"
+        ],
         "predicted_risk_level": "medium",
         "predicted_routing": "needs_review",
-        "cu_plan_count": 0,
-        "context_triple_count": 0,
-        "has_policy_evidence": false,
-        "has_cu0_failure": false
+        "cu_plan_count": 20,
+        "context_triple_count": 179,
+        "has_policy_evidence": true,
+        "has_cu0_failure": true
       },
-      "review_run_id": "",
+      "review_run_id": "review_run_14e91b4f8dd4c3bb",
       "matches": {
         "violation": true,
         "article_exact": true,
         "article_family": true,
         "disclosures": {
           "gold_n": 5,
-          "matched_n": 0,
-          "recall": 0.0
+          "matched_n": 5,
+          "recall": 1.0
         },
         "routing": {
           "gold": "pass_candidate",
@@ -1667,25 +1942,44 @@
       },
       "prediction": {
         "record_id": "syn_jb_청년도약계좌_web_page_always_compound_regardless_early_termination",
-        "predicted_articles": [],
-        "predicted_violation": false,
-        "predicted_violation_types": [
-          "LIVE_REVIEW_ERROR"
+        "predicted_articles": [
+          "금융소비자 보호에 관한 감독규정 제13조",
+          "금융소비자 보호에 관한 법률 시행령 제20조 ①",
+          "금융소비자 보호에 관한 법률 시행령 제20조 ①-5",
+          "금융소비자 보호에 관한 법률 제22조",
+          "금융소비자 보호에 관한 법률 제22조 ④-3"
         ],
-        "predicted_sales_principles": [],
-        "predicted_required_disclosures": [],
-        "predicted_risk_level": "medium",
-        "predicted_routing": "needs_review",
-        "cu_plan_count": 0,
-        "context_triple_count": 0,
-        "has_policy_evidence": false,
-        "has_cu0_failure": false
+        "predicted_violation": true,
+        "predicted_violation_types": [
+          "TRACK_B_OVERALL_IMPRESSION",
+          "cu_legal_article_b1f9c13b24c1b213",
+          "cu_legal_clause_10b53bd2cf638c2c",
+          "cu_legal_clause_650899399a966b2e",
+          "cu_legal_clause_d5d6f71aa0d25024"
+        ],
+        "predicted_sales_principles": [
+          "광고규제",
+          "설명의무"
+        ],
+        "predicted_required_disclosures": [
+          "금리 범위 및 산정방법",
+          "심의필 번호 및 유효기간",
+          "예금자보호 부보내용",
+          "우대조건 및 적용기간",
+          "준법감시인 사전승인 및 심의필 표시"
+        ],
+        "predicted_risk_level": "high",
+        "predicted_routing": "reject",
+        "cu_plan_count": 20,
+        "context_triple_count": 187,
+        "has_policy_evidence": true,
+        "has_cu0_failure": true
       },
-      "review_run_id": "",
+      "review_run_id": "review_run_25b43ee042a0da00",
       "matches": {
-        "violation": false,
-        "article_exact": false,
-        "article_family": false,
+        "violation": true,
+        "article_exact": true,
+        "article_family": true,
         "disclosures": {
           "gold_n": 2,
           "matched_n": 0,
@@ -1693,7 +1987,7 @@
         },
         "routing": {
           "gold": "revise",
-          "pred": "needs_review",
+          "pred": "reject",
           "exact": false,
           "adjacent": true
         }
@@ -1719,25 +2013,45 @@
       },
       "prediction": {
         "record_id": "syn_jb_청년도약계좌_web_page_tax_benefit_limit_omitted",
-        "predicted_articles": [],
-        "predicted_violation": false,
-        "predicted_violation_types": [
-          "LIVE_REVIEW_ERROR"
+        "predicted_articles": [
+          "금융소비자 보호에 관한 감독규정 제19조 ③-1",
+          "금융소비자 보호에 관한 법률 시행령 제20조 ①-5",
+          "금융소비자 보호에 관한 법률 제22조",
+          "금융소비자 보호에 관한 법률 제22조 ①-6",
+          "금융소비자 보호에 관한 법률 제22조 ④-3"
         ],
-        "predicted_sales_principles": [],
-        "predicted_required_disclosures": [],
-        "predicted_risk_level": "medium",
-        "predicted_routing": "needs_review",
-        "cu_plan_count": 0,
-        "context_triple_count": 0,
-        "has_policy_evidence": false,
-        "has_cu0_failure": false
+        "predicted_violation": true,
+        "predicted_violation_types": [
+          "PROMINENCE_INSUFFICIENT",
+          "TRACK_B_OVERALL_IMPRESSION",
+          "cu_legal_article_30dce47c48d34de4",
+          "cu_legal_clause_10b53bd2cf638c2c",
+          "cu_legal_clause_2bee8ef4f9ace609",
+          "cu_legal_clause_650899399a966b2e",
+          "cu_legal_clause_97f258351c3d8dbb"
+        ],
+        "predicted_sales_principles": [
+          "광고규제"
+        ],
+        "predicted_required_disclosures": [
+          "금리 범위 및 산정방법",
+          "심의필 번호 및 유효기간",
+          "예금자보호 부보내용",
+          "우대조건 및 적용기간",
+          "준법감시인 사전승인 및 심의필 표시"
+        ],
+        "predicted_risk_level": "high",
+        "predicted_routing": "reject",
+        "cu_plan_count": 20,
+        "context_triple_count": 179,
+        "has_policy_evidence": true,
+        "has_cu0_failure": true
       },
-      "review_run_id": "",
+      "review_run_id": "review_run_87584616daf7383b",
       "matches": {
-        "violation": false,
-        "article_exact": false,
-        "article_family": false,
+        "violation": true,
+        "article_exact": true,
+        "article_family": true,
         "disclosures": {
           "gold_n": 1,
           "matched_n": 0,
@@ -1745,7 +2059,7 @@
         },
         "routing": {
           "gold": "revise",
-          "pred": "needs_review",
+          "pred": "reject",
           "exact": false,
           "adjacent": true
         }
@@ -1771,38 +2085,63 @@
       },
       "prediction": {
         "record_id": "syn_jb_청년도약계좌_web_page_special_rate_gift_money_implied",
-        "predicted_articles": [],
-        "predicted_violation": false,
-        "predicted_violation_types": [
-          "LIVE_REVIEW_ERROR"
+        "predicted_articles": [
+          "금융소비자 보호에 관한 감독규정 제13조",
+          "금융소비자 보호에 관한 법률 시행령 제20조 ①",
+          "금융소비자 보호에 관한 법률 제19조 ①-3",
+          "금융소비자 보호에 관한 법률 제20조",
+          "금융소비자 보호에 관한 법률 제20조 ①",
+          "금융소비자 보호에 관한 법률 제22조",
+          "금융소비자 보호에 관한 법률 제22조 ④-3"
         ],
-        "predicted_sales_principles": [],
-        "predicted_required_disclosures": [],
+        "predicted_violation": true,
+        "predicted_violation_types": [
+          "PROMINENCE_INSUFFICIENT",
+          "TRACK_B_OVERALL_IMPRESSION",
+          "cu_legal_article_30dce47c48d34de4",
+          "cu_legal_article_b1f9c13b24c1b213",
+          "cu_legal_article_ee6e73b3b8018a29",
+          "cu_legal_clause_2dd9ac7e2afcbe92",
+          "cu_legal_clause_bcde5063a5e4a041",
+          "cu_legal_clause_d5d6f71aa0d25024"
+        ],
+        "predicted_sales_principles": [
+          "광고규제",
+          "불공정영업행위 금지",
+          "설명의무"
+        ],
+        "predicted_required_disclosures": [
+          "금리 범위 및 산정방법",
+          "심의필 번호 및 유효기간",
+          "예금자보호 부보내용",
+          "우대조건 및 적용기간",
+          "준법감시인 사전승인 및 심의필 표시"
+        ],
         "predicted_risk_level": "medium",
-        "predicted_routing": "needs_review",
-        "cu_plan_count": 0,
-        "context_triple_count": 0,
-        "has_policy_evidence": false,
-        "has_cu0_failure": false
+        "predicted_routing": "revise",
+        "cu_plan_count": 20,
+        "context_triple_count": 181,
+        "has_policy_evidence": true,
+        "has_cu0_failure": true
       },
-      "review_run_id": "",
+      "review_run_id": "review_run_fe01f0df7154dbd6",
       "matches": {
-        "violation": false,
-        "article_exact": false,
-        "article_family": false,
+        "violation": true,
+        "article_exact": true,
+        "article_family": true,
         "disclosures": {
           "gold_n": 1,
-          "matched_n": 0,
-          "recall": 0.0
+          "matched_n": 1,
+          "recall": 1.0
         },
         "routing": {
           "gold": "revise",
-          "pred": "needs_review",
-          "exact": false,
-          "adjacent": true
+          "pred": "revise",
+          "exact": true,
+          "adjacent": false
         }
       },
-      "overall_pass": false
+      "overall_pass": true
     },
     {
       "id": "syn_jb_골든에이지_예금_월이자지급식__web_page_clean",
@@ -1822,29 +2161,62 @@
       },
       "prediction": {
         "record_id": "syn_jb_골든에이지_예금_월이자지급식__web_page_clean",
-        "predicted_articles": [],
+        "predicted_articles": [
+          "금융소비자 보호에 관한 감독규정 제12조",
+          "금융소비자 보호에 관한 감독규정 제13조",
+          "금융소비자 보호에 관한 법률 시행령 제12조",
+          "금융소비자 보호에 관한 법률 시행령 제13조 ③",
+          "금융소비자 보호에 관한 법률 시행령 제14조",
+          "금융소비자 보호에 관한 법률 시행령 제20조 ①",
+          "금융소비자 보호에 관한 법률 시행령 제20조 ④-2",
+          "금융소비자 보호에 관한 법률 시행령 제22조",
+          "금융소비자 보호에 관한 법률 제19조 ①-3",
+          "금융소비자 보호에 관한 법률 제22조",
+          "금융소비자 보호에 관한 법률 제22조 ⑤",
+          "표시ㆍ광고의 공정화에 관한 법률 시행령 제12조",
+          "표시ㆍ광고의 공정화에 관한 법률 제3조",
+          "표시ㆍ광고의 공정화에 관한 법률 제5조",
+          "표시ㆍ광고의 공정화에 관한 법률 제6조"
+        ],
         "predicted_violation": false,
         "predicted_violation_types": [
-          "LIVE_REVIEW_ERROR"
+          "PROMINENCE_INSUFFICIENT",
+          "cu_legal_article_78b842b24e59a9c8",
+          "cu_legal_article_abc0be825cfadcf8",
+          "cu_legal_article_adc63713d9914cd1",
+          "cu_legal_article_b1f9c13b24c1b213",
+          "cu_legal_clause_0947815a243dbb0f",
+          "cu_legal_clause_2dd9ac7e2afcbe92",
+          "cu_legal_clause_d5d6f71aa0d25024"
         ],
-        "predicted_sales_principles": [],
-        "predicted_required_disclosures": [],
+        "predicted_sales_principles": [
+          "광고규제",
+          "설명의무",
+          "적정성원칙"
+        ],
+        "predicted_required_disclosures": [
+          "금리 범위 및 산정방법",
+          "심의필 번호 및 유효기간",
+          "예금자보호 부보내용",
+          "우대조건 및 적용기간",
+          "준법감시인 사전승인 및 심의필 표시"
+        ],
         "predicted_risk_level": "medium",
         "predicted_routing": "needs_review",
-        "cu_plan_count": 0,
-        "context_triple_count": 0,
-        "has_policy_evidence": false,
-        "has_cu0_failure": false
+        "cu_plan_count": 20,
+        "context_triple_count": 170,
+        "has_policy_evidence": true,
+        "has_cu0_failure": true
       },
-      "review_run_id": "",
+      "review_run_id": "review_run_2409afbc99fd0677",
       "matches": {
         "violation": true,
         "article_exact": true,
         "article_family": true,
         "disclosures": {
           "gold_n": 5,
-          "matched_n": 0,
-          "recall": 0.0
+          "matched_n": 5,
+          "recall": 1.0
         },
         "routing": {
           "gold": "pass_candidate",
@@ -2298,44 +2670,64 @@
       },
       "prediction": {
         "record_id": "syn_jb_청년전세자금대출_web_page_loan_eligibility_limits_omitted",
-        "predicted_articles": [],
-        "predicted_violation": false,
-        "predicted_violation_types": [
-          "LIVE_REVIEW_ERROR"
+        "predicted_articles": [
+          "금융소비자 보호에 관한 감독규정 제15조",
+          "금융소비자 보호에 관한 감독규정 제18조",
+          "금융소비자 보호에 관한 법률 시행령 제20조 ①-5",
+          "금융소비자 보호에 관한 법률 제17조 ②-3",
+          "금융소비자 보호에 관한 법률 제21조",
+          "금융소비자 보호에 관한 법률 제22조",
+          "금융소비자 보호에 관한 법률 제22조 ④-4"
         ],
-        "predicted_sales_principles": [],
-        "predicted_required_disclosures": [],
-        "predicted_risk_level": "medium",
-        "predicted_routing": "needs_review",
-        "cu_plan_count": 0,
-        "context_triple_count": 0,
-        "has_policy_evidence": false,
-        "has_cu0_failure": false
+        "predicted_violation": true,
+        "predicted_violation_types": [
+          "TRACK_B_OVERALL_IMPRESSION",
+          "cu_legal_article_1f5237d19fdfa401",
+          "cu_legal_clause_10b53bd2cf638c2c"
+        ],
+        "predicted_sales_principles": [
+          "광고규제",
+          "부당권유행위 금지",
+          "적합성원칙"
+        ],
+        "predicted_required_disclosures": [
+          "대출금리 범위 및 산출기준",
+          "수수료 등 부대비용",
+          "심사 조건 및 대출 가능 여부",
+          "심의필 번호 및 유효기간",
+          "준법감시인 사전승인 및 심의필 표시"
+        ],
+        "predicted_risk_level": "high",
+        "predicted_routing": "reject",
+        "cu_plan_count": 20,
+        "context_triple_count": 167,
+        "has_policy_evidence": true,
+        "has_cu0_failure": true
       },
-      "review_run_id": "",
+      "review_run_id": "review_run_adeca4ea66b85c0b",
       "matches": {
-        "violation": false,
-        "article_exact": false,
-        "article_family": false,
+        "violation": true,
+        "article_exact": true,
+        "article_family": true,
         "disclosures": {
           "gold_n": 2,
-          "matched_n": 0,
-          "recall": 0.0
+          "matched_n": 2,
+          "recall": 1.0
         },
         "routing": {
           "gold": "revise",
-          "pred": "needs_review",
+          "pred": "reject",
           "exact": false,
           "adjacent": true
         }
       },
-      "overall_pass": false
+      "overall_pass": true
     }
   ],
   "overall_pass_definition": "violation ∧ article_family ∧ (routing.exact ∨ (routing.adjacent ∧ pred_routing≠needs_review)) ∧ disclosures(matched_n==gold_n). needs_review 예측은 gold도 needs_review로 정확히 일치할 때만 통과로 인정 — 인접성만으로 유보(hold)를 통과로 세지 않는다.",
   "overall_pass_summary": {
-    "pass": 6,
+    "pass": 12,
     "total": 34,
-    "rate": 0.1765
+    "rate": 0.3529
   }
 }
