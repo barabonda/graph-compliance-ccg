@@ -18,7 +18,13 @@ def build_output(
     *,
     revision_suggestions: list[dict[str, object]] | None = None,
 ) -> ReviewOutput:
-    effective = unique_judgments(effective_judgments(graph.judgments, graph.exception_reviews))
+    effective = unique_judgments(
+        effective_judgments(
+            graph.judgments,
+            graph.exception_reviews,
+            korean=uses_korean_law_context(review_input.workspace_id),
+        )
+    )
     anchor_by_id = {anchor.anchor_id: anchor for anchor in graph.anchors}
     actionable_effective = [
         judgment for judgment in effective if anchor_is_actionable_for_issues(graph, judgment.anchor_id)
@@ -145,7 +151,7 @@ def build_output(
                     ),
                 }
             )
-    system_review_items = system_review_items_for(graph)
+    system_review_items = system_review_items_for(graph, korean=korean_ws)
     routing = {
         "ad_scope": "product_ad",
         "preapproval_required_status": "required",
@@ -156,10 +162,11 @@ def build_output(
     return ReviewOutput(
         dataset_item_id=review_input.dataset_item_id,
         final_verdict=final,
+        workspace_id=review_input.workspace_id,
         routing=routing,
         detected_issues=detected_issues,
         post_approval_required_actions=["assign_review_number", "insert_review_phrase_before_publication"],
-        rationale=summary_rationale(final, actionable_effective, detected_issues),
+        rationale=summary_rationale(final, actionable_effective, detected_issues, korean=korean_ws),
         review_run_id=graph.review_run_id,
         context_frame=graph.context_frame,
         sentence_units=to_jsonable(graph.sentence_units),
@@ -173,7 +180,7 @@ def build_output(
         judgments=to_jsonable(graph.judgments),
         effective_judgments=to_jsonable(effective),
         exception_reviews=to_jsonable(graph.exception_reviews),
-        anchor_display=anchor_display(graph, effective),
+        anchor_display=anchor_display(graph, effective, korean=korean_ws),
         system_review_items=system_review_items,
         revision_suggestions=revision_suggestions or [],
         product_context=graph.product_context,
@@ -186,8 +193,8 @@ def build_output(
         policy_evidence_chains=graph.policy_evidence_chains,
         overall_impression_judgment=graph.overall_impression_judgment,
         track_c_summary=graph.track_c_summary,
-        article_aggregation=article_aggregation(graph, effective),
-        principle_aggregation=principle_aggregation(graph, effective),
+        article_aggregation=article_aggregation(graph, effective, korean=korean_ws),
+        principle_aggregation=principle_aggregation(graph, effective, korean=korean_ws),
         reference_paths_summary=reference_paths_summary(graph),
         graph_paths=graph.graph_paths,
         highlight_spans=highlight_spans(graph, effective),
@@ -204,8 +211,12 @@ def cu_plan_with_parent_articles(graph: ReviewGraph, workspace_id: str) -> list[
     return rows
 
 
-def effective_judgments(judgments: list[LLMJudgment], reviews: list[ExceptionReview]) -> list[LLMJudgment]:
+def effective_judgments(
+    judgments: list[LLMJudgment], reviews: list[ExceptionReview], *, korean: bool = True
+) -> list[LLMJudgment]:
     by_judgment = {review.judgment_id: review for review in reviews if review.applies}
+    override_label = "예외 override" if korean else "exception override"
+    downgrade_label = "예외 검토 필요" if korean else "exception review required"
     effective: list[LLMJudgment] = []
     for judgment in judgments:
         review = by_judgment.get(judgment.judgment_id)
@@ -218,7 +229,7 @@ def effective_judgments(judgments: list[LLMJudgment], reviews: list[ExceptionRev
                     **{
                         **judgment.__dict__,
                         "verdict": "COMPLIANT",
-                        "why": f"{judgment.why} / 예외 override: {review.why}",
+                        "why": f"{judgment.why} / {override_label}: {review.why}",
                     }
                 )
             )
@@ -228,7 +239,7 @@ def effective_judgments(judgments: list[LLMJudgment], reviews: list[ExceptionRev
                     **{
                         **judgment.__dict__,
                         "verdict": "INSUFFICIENT",
-                        "why": f"{judgment.why} / 예외 검토 필요: {review.why}",
+                        "why": f"{judgment.why} / {downgrade_label}: {review.why}",
                     }
                 )
             )
@@ -301,19 +312,44 @@ FINAL_VERDICT_KO = {
     "reject": "반려 권고",
 }
 
+# 비-KR(영어 우선) 관할용 판정 어휘 — 의견서 요지(rationale)에 노출된다.
+FINAL_VERDICT_EN = {
+    "pass_candidate": "pass candidate",
+    "needs_review": "review required",
+    "revise": "revision recommended",
+    "reject": "rejection recommended",
+}
+
 
 def summary_rationale(
     final: str,
     judgments: list[LLMJudgment],
     detected_issues: list[dict[str, object]] | None = None,
+    *,
+    korean: bool = True,
 ) -> str:
-    final_ko = FINAL_VERDICT_KO.get(final, final)
-    if not judgments:
-        return "연결된 심의 기준이 없어 자동 통과하지 않고 심사자 추가 검토로 회부합니다."
     risky = [judgment for judgment in judgments if judgment.verdict in {"NON_COMPLIANT", "INSUFFICIENT"}]
     guideline_issues = [
         issue for issue in (detected_issues or []) if str(issue.get("authority_tier") or "") == "guideline"
     ]
+    if not korean:
+        final_en = FINAL_VERDICT_EN.get(final, final)
+        if not judgments:
+            return "No review criteria could be linked — routed to reviewer for manual review instead of auto-passing."
+        if not risky and not guideline_issues:
+            return "No material violation signals were identified against the linked review criteria and evidence."
+        parts_en: list[str] = []
+        if risky:
+            parts_en.append(f"{len(risky)} item(s) requiring legal-basis review")
+        if guideline_issues:
+            parts_en.append(f"{len(guideline_issues)} guideline shortfall(s)")
+        summary_en = f"{' · '.join(parts_en)} identified — referred with the opinion '{final_en}'."
+        if guideline_issues and not any(j.verdict == "NON_COMPLIANT" for j in risky):
+            summary_en += " Guideline shortfalls are self-regulatory improvement recommendations, not legal violations."
+        return summary_en
+    final_ko = FINAL_VERDICT_KO.get(final, final)
+    if not judgments:
+        return "연결된 심의 기준이 없어 자동 통과하지 않고 심사자 추가 검토로 회부합니다."
     if not risky and not guideline_issues:
         return "연결된 심의 기준과 근거 자료를 기준으로 중대한 위반 신호가 확인되지 않았습니다."
     # 판정 어휘 원칙: 법령 근거 검토와 심의기준 미흡(자율규제 보완 권고)은 다른 말이다.
@@ -328,15 +364,17 @@ def summary_rationale(
     return summary
 
 
-def article_aggregation(graph: ReviewGraph, effective: list[LLMJudgment]) -> list[dict[str, object]]:
-    return aggregate_by_policy_axis(graph, effective, axis="article")
+def article_aggregation(graph: ReviewGraph, effective: list[LLMJudgment], *, korean: bool = True) -> list[dict[str, object]]:
+    return aggregate_by_policy_axis(graph, effective, axis="article", korean=korean)
 
 
-def principle_aggregation(graph: ReviewGraph, effective: list[LLMJudgment]) -> list[dict[str, object]]:
-    return aggregate_by_policy_axis(graph, effective, axis="principle")
+def principle_aggregation(graph: ReviewGraph, effective: list[LLMJudgment], *, korean: bool = True) -> list[dict[str, object]]:
+    return aggregate_by_policy_axis(graph, effective, axis="principle", korean=korean)
 
 
-def aggregate_by_policy_axis(graph: ReviewGraph, effective: list[LLMJudgment], *, axis: str) -> list[dict[str, object]]:
+def aggregate_by_policy_axis(
+    graph: ReviewGraph, effective: list[LLMJudgment], *, axis: str, korean: bool = True
+) -> list[dict[str, object]]:
     anchor_by_id = {anchor.anchor_id: anchor for anchor in graph.anchors}
     groups: dict[str, dict[str, object]] = {}
     for judgment in unique_judgments(effective):
@@ -348,7 +386,10 @@ def aggregate_by_policy_axis(graph: ReviewGraph, effective: list[LLMJudgment], *
             continue
         key = plan_item.source_article if axis == "article" else plan_item.principle
         if not key:
-            key = "근거 미상" if axis == "article" else "원칙 미상"
+            if korean:
+                key = "근거 미상" if axis == "article" else "원칙 미상"
+            else:
+                key = "basis unknown" if axis == "article" else "principle unknown"
         row = groups.setdefault(
             key,
             {
@@ -429,11 +470,11 @@ def reference_paths_summary(graph: ReviewGraph) -> list[dict[str, object]]:
     return rows[:40]
 
 
-def anchor_display(graph: ReviewGraph, effective: list[LLMJudgment]) -> list[dict[str, object]]:
+def anchor_display(graph: ReviewGraph, effective: list[LLMJudgment], *, korean: bool = True) -> list[dict[str, object]]:
     raw_by_anchor = judgments_by_anchor(graph.judgments)
     effective_by_anchor = judgments_by_anchor(unique_judgments(effective))
     plan_counts = plan_count_by_anchor(graph)
-    system_items = {item["anchor_id"]: item for item in system_review_items_for(graph)}
+    system_items = {item["anchor_id"]: item for item in system_review_items_for(graph, korean=korean)}
     diagnostics = graph.retrieval_diagnostics
     rows = []
     for anchor in graph.anchors:
@@ -506,7 +547,7 @@ def unmatched_anchors(graph: ReviewGraph, *, anchor_types: set[str] | None = Non
     ]
 
 
-def system_review_items_for(graph: ReviewGraph) -> list[dict[str, object]]:
+def system_review_items_for(graph: ReviewGraph, *, korean: bool = True) -> list[dict[str, object]]:
     rows: list[dict[str, object]] = []
     for anchor in unmatched_anchors(graph):
         if not anchor_is_actionable_for_issues(graph, anchor.anchor_id):
@@ -520,16 +561,25 @@ def system_review_items_for(graph: ReviewGraph) -> list[dict[str, object]]:
                 "risk_code": code,
                 "severity": 3 if anchor.anchor_type in ACTIONABLE_ANCHOR_TYPES else 1,
                 "problem_span": anchor.span.text,
-                "rationale": retrieval_failure_rationale(code),
-                "required_action": retrieval_failure_action(code),
+                "rationale": retrieval_failure_rationale(code, korean=korean),
+                "required_action": retrieval_failure_action(code, korean=korean),
                 "diagnostic": diagnostic,
             }
         )
     return rows
 
 
-def retrieval_failure_rationale(code: str) -> str:
+def retrieval_failure_rationale(code: str, *, korean: bool = True) -> str:
     # 사용자 노출 문구 — 심사 실무 언어로. (내부 스키마·컴포넌트명 노출 금지)
+    if not korean:
+        return {
+            "NO_HYPERNYM_MATCH": "This expression could not be classified under the review policy vocabulary, so automated judgment did not complete.",
+            "NO_ACTIVE_CU_AFTER_GATE": "Candidate review criteria existed, but none remained applicable to this product group/channel.",
+            "RERANK_DROPPED_ALL": "No candidate review criteria were selected for judgment.",
+            "MISSING_POLICY_COVERAGE": "There are not enough review criteria that can be linked to this expression.",
+            "NO_LEGAL_ELEMENT_MATCH": "It could not be automatically confirmed whether this expression meets the conduct elements of the related review criteria.",
+            "CU_PLAN_EMPTY": "No review criteria are linked to this expression, so it cannot auto-pass.",
+        }.get(code, "The policy-matching status requires reviewer confirmation.")
     return {
         "NO_HYPERNYM_MATCH": "이 표현을 심의 정책 용어로 분류하지 못해 자동 판단이 완료되지 않았습니다.",
         "NO_ACTIVE_CU_AFTER_GATE": "관련 심의 기준 후보는 있었으나 이 상품군·채널에 적용되는 기준이 남지 않았습니다.",
@@ -540,8 +590,17 @@ def retrieval_failure_rationale(code: str) -> str:
     }.get(code, "정책 매칭 상태를 심사자가 확인해야 합니다.")
 
 
-def retrieval_failure_action(code: str) -> str:
+def retrieval_failure_action(code: str, *, korean: bool = True) -> str:
     # 심사자가 취할 행동 중심으로. 시스템 보강이 필요한 경우는 그렇게 말한다.
+    if not korean:
+        return {
+            "NO_HYPERNYM_MATCH": "Please judge this expression manually. (System: policy vocabulary needs expansion.)",
+            "NO_ACTIVE_CU_AFTER_GATE": "Please confirm whether any criteria actually apply to this product group/channel.",
+            "RERANK_DROPPED_ALL": "Please confirm manually whether this expression is violating.",
+            "MISSING_POLICY_COVERAGE": "Please judge this expression manually. (System: review-criteria linkage needs expansion.)",
+            "NO_LEGAL_ELEMENT_MATCH": "Please confirm manually whether the conduct elements are met.",
+            "CU_PLAN_EMPTY": "Please judge this expression manually. (System: review-criteria linkage needs expansion.)",
+        }.get(code, "Please confirm the policy-matching status.")
     return {
         "NO_HYPERNYM_MATCH": "해당 표현은 심사자가 직접 판단해 주세요. (시스템: 정책 용어 사전 보강 필요)",
         "NO_ACTIVE_CU_AFTER_GATE": "이 상품군·채널에 실제로 적용될 기준인지 심사자가 확인해 주세요.",

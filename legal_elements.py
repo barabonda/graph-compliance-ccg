@@ -178,6 +178,7 @@ def attach_anchor_feature_sets(
     anchors: list[ContextAnchor],
     claims: list[Claim],
     relations: list | None = None,
+    korean: bool = True,
 ) -> tuple[list[ContextAnchor], list[AnchorFeatureSet]]:
     claim_by_id = {claim.claim_id: claim for claim in claims}
     enriched: list[ContextAnchor] = []
@@ -188,6 +189,7 @@ def attach_anchor_feature_sets(
             anchor=anchor,
             claim=claim_by_id.get(anchor.claim_id),
             relations=relations,
+            korean=korean,
         )
         feature_sets.append(feature_set)
         enriched.append(replace(anchor, feature_set=feature_set))
@@ -215,7 +217,7 @@ def claim_has_relation_hedge(claim: Claim | None, relations: list | None) -> boo
 
 
 def build_anchor_feature_set(
-    *, review_run_id: str, anchor: ContextAnchor, claim: Claim | None, relations: list | None = None
+    *, review_run_id: str, anchor: ContextAnchor, claim: Claim | None, relations: list | None = None, korean: bool = True
 ) -> AnchorFeatureSet:
     """토큰 매칭은 '위험 확신 성립'의 1차 스크리닝일 뿐이다.
 
@@ -231,7 +233,11 @@ def build_anchor_feature_set(
     haystack = normalized_text(" ".join([anchor.span.text, *anchor.facts, *(h.hypernym for h in anchor.hypernyms)]))
     relation_hedge = claim_has_relation_hedge(claim, relations)
     if relation_hedge:
-        evidence.append("관계 기반 헤지: 이 claim 문장에 QUALIFIES/MITIGATES 연결 문장 존재")
+        evidence.append(
+            "관계 기반 헤지: 이 claim 문장에 QUALIFIES/MITIGATES 연결 문장 존재"
+            if korean
+            else "Relation-based hedge: a QUALIFIES/MITIGATES-linked sentence exists for this claim."
+        )
     if claim:
         for qualifier in claim.qualifiers:
             if normalized_text(qualifier.text) not in haystack and not (
@@ -252,11 +258,21 @@ def build_anchor_feature_set(
                 if relation_hedge:
                     evidence.append(
                         f"ClaimQualifier role={qualifier.role} 명시 단정 표현 text='{qualifier.text}' — 단, 관계 기반 헤지와 충돌: judge 최종 판단"
+                        if korean
+                        else f"ClaimQualifier role={qualifier.role} explicit definitive expression text='{qualifier.text}' — conflicts with relation-based hedge: judge decides."
                     )
                 else:
-                    evidence.append(f"ClaimQualifier role={qualifier.role} 명시 단정 표현 text='{qualifier.text}'")
+                    evidence.append(
+                        f"ClaimQualifier role={qualifier.role} 명시 단정 표현 text='{qualifier.text}'"
+                        if korean
+                        else f"ClaimQualifier role={qualifier.role} explicit definitive expression text='{qualifier.text}'"
+                    )
             else:
-                evidence.append(f"완화 한정어(문맥 의존, 결정론 미발화 → judge 판단): role={qualifier.role} text='{qualifier.text}'")
+                evidence.append(
+                    f"완화 한정어(문맥 의존, 결정론 미발화 → judge 판단): role={qualifier.role} text='{qualifier.text}'"
+                    if korean
+                    else f"Mitigating qualifier (context-dependent, no deterministic trigger — judge decides): role={qualifier.role} text='{qualifier.text}'"
+                )
         risk_text = normalized_text(" ".join([claim.risk_hypernym, claim.meaning, claim.implicature, claim.consumer_effect]))
         if any(token in risk_text for token in ["과거", "수익률", "운용실적", "조기상환"]):
             positive_features.append("past_performance_claim")

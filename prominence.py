@@ -13,7 +13,7 @@ from typing import Any
 
 from disclosure_catalog import DISCLOSURE_PROFILES
 from schemas import Claim, ReviewInput, SentenceUnit
-from utils import stable_id
+from utils import stable_id, uses_korean_law_context
 
 
 PROMINENCE_SCORE = {
@@ -113,6 +113,7 @@ def build_diagnostics(
     product_fact_context: dict[str, Any],
 ) -> list[dict[str, Any]]:
     diagnostics: list[dict[str, Any]] = []
+    korean = uses_korean_law_context(review_input.workspace_id)
     # 혜택 문구 기준으로 묶어, 동등 이상 위계의 관련 고지가 하나라도 있으면
     # 충족으로 본다. 약한 고지 페어가 따로 있다는 이유만으로 발화하면 같은
     # 위계 고지를 이미 갖춘 문안까지 전부 위반으로 집계된다.
@@ -131,7 +132,11 @@ def build_diagnostics(
                 "benefit_sentence_id": best_link["benefit_sentence_id"],
                 "disclosure_sentence_id": best_link["disclosure_sentence_id"],
                 "prominence_gap": best_link["prominence_gap"],
-                "message": "고지는 존재하지만 혜택 문구보다 낮은 위계로 표시되어 완화 근거가 약합니다.",
+                "message": (
+                    "고지는 존재하지만 혜택 문구보다 낮은 위계로 표시되어 완화 근거가 약합니다."
+                    if korean
+                    else "A disclosure exists but is displayed with lower prominence than the benefit claim, weakening its mitigating effect."
+                ),
                 "evidence": f"{best_link['benefit_text']} / {best_link['disclosure_text']}",
             }
         )
@@ -154,7 +159,11 @@ def build_diagnostics(
                     "benefit_sentence_id": benefit_sentences[0].sentence_id,
                     "disclosure_sentence_id": "",
                     "prominence_gap": None,
-                    "message": f"{check.get('label', '필수고지')} 고지가 문안에서 확인되지 않습니다.",
+                    "message": (
+                        f"{check.get('label', '필수고지')} 고지가 문안에서 확인되지 않습니다."
+                        if korean
+                        else f"Required disclosure '{check.get('label', 'disclosure')}' was not found in the copy."
+                    ),
                     "evidence": benefit_sentences[0].text,
                 }
             )

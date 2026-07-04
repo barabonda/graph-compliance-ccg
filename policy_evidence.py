@@ -21,6 +21,7 @@ def build_policy_evidence_chains(
     product_context: dict[str, Any],
     workspace_id: str = "",
 ) -> dict[str, list[dict[str, Any]]]:
+    korean = uses_korean_law_context(workspace_id)
     legal_basis = [legal_basis_chain(review_run_id, item, workspace_id) for item in cu_plan]
     disclosures = [
         disclosure_chain(
@@ -28,10 +29,11 @@ def build_policy_evidence_chains(
             item,
             disclosure_requirements=matching_disclosures(item, disclosure_requirements),
             product_context=product_context,
+            korean=korean,
         )
         for item in cu_plan
     ]
-    exceptions = [exception_chain(review_run_id, item) for item in cu_plan]
+    exceptions = [exception_chain(review_run_id, item, korean=korean) for item in cu_plan]
     diagnostics = [
         diagnostic
         for chain in [*legal_basis, *disclosures, *exceptions]
@@ -68,10 +70,16 @@ def legal_basis_chain(review_run_id: str, item: CUPlanItem, workspace_id: str = 
     delegation_edges = delegation_edges_for(item, workspace_id)
     nodes.extend(edge["target_node"] for edge in delegation_edges)
     status = "FOUND" if nodes else "INCOMPLETE"
-    summary = (
-        f"{item.risk_title or item.subject or item.cu_id} 판단은 "
-        f"{item.source_article or item.principle or '명시 근거 미상'} 근거에 연결됩니다."
-    )
+    if uses_korean_law_context(workspace_id):
+        summary = (
+            f"{item.risk_title or item.subject or item.cu_id} 판단은 "
+            f"{item.source_article or item.principle or '명시 근거 미상'} 근거에 연결됩니다."
+        )
+    else:
+        summary = (
+            f"The judgment on '{item.subject or item.risk_title or item.cu_id}' is grounded in "
+            f"{item.source_article or item.principle or 'an unspecified basis'}."
+        )
     return {
         "chain_id": stable_id("legal_basis_chain", review_run_id, item.plan_item_id),
         "chain_type": "LegalBasisChain",
@@ -125,15 +133,23 @@ def disclosure_chain(
     *,
     disclosure_requirements: list[dict[str, Any]],
     product_context: dict[str, Any],
+    korean: bool = True,
 ) -> dict[str, Any]:
     status = "FOUND" if disclosure_requirements else "NOT_FOUND"
     product_group = str(product_context.get("product_group") or "auto")
     labels = [str(row.get("label") or row.get("id") or "") for row in disclosure_requirements]
-    summary = (
-        f"{product_group} 상품군 기준 보완 고지 후보: {', '.join(labels[:4])}"
-        if labels
-        else "이 CU에 직접 연결된 필수고지 후보가 없습니다."
-    )
+    if korean:
+        summary = (
+            f"{product_group} 상품군 기준 보완 고지 후보: {', '.join(labels[:4])}"
+            if labels
+            else "이 CU에 직접 연결된 필수고지 후보가 없습니다."
+        )
+    else:
+        summary = (
+            f"Candidate supplementary disclosures for the {product_group} product group: {', '.join(labels[:4])}"
+            if labels
+            else "No required-disclosure candidates are directly linked to this review criterion."
+        )
     return {
         "chain_id": stable_id("disclosure_chain", review_run_id, item.plan_item_id),
         "chain_type": "DisclosureChain",
@@ -156,14 +172,21 @@ def disclosure_chain(
     }
 
 
-def exception_chain(review_run_id: str, item: CUPlanItem) -> dict[str, Any]:
+def exception_chain(review_run_id: str, item: CUPlanItem, *, korean: bool = True) -> dict[str, Any]:
     eligible = bool(item.legal_element_profile and item.legal_element_profile.exception_eligible)
     status = "INCOMPLETE" if eligible else "NOT_FOUND"
-    summary = (
-        "이 CU는 예외/완화 가능성이 있으나 현재 runtime chain에는 명시적 예외 증거가 연결되지 않았습니다."
-        if eligible
-        else "이 CU는 v1 runtime 기준 직접 예외 chain 대상으로 분류되지 않았습니다."
-    )
+    if korean:
+        summary = (
+            "이 CU는 예외/완화 가능성이 있으나 현재 runtime chain에는 명시적 예외 증거가 연결되지 않았습니다."
+            if eligible
+            else "이 CU는 v1 runtime 기준 직접 예외 chain 대상으로 분류되지 않았습니다."
+        )
+    else:
+        summary = (
+            "This criterion may allow an exception/mitigation, but no explicit exception evidence is linked in the current chain."
+            if eligible
+            else "This criterion is not classified as a direct exception-chain target in the current runtime."
+        )
     return {
         "chain_id": stable_id("exception_chain", review_run_id, item.plan_item_id),
         "chain_type": "ExceptionChain",

@@ -156,6 +156,7 @@ class GraphComplianceCCGWorkflow:
             claims=claims,
             policy_context=policy_context,
             top_n=5,
+            korean=uses_korean_law_context(review_input.workspace_id),
         )
         anchors = fold_qualifier_anchors_into_parent_claims(anchors, claims)
         anchors, anchor_feature_sets = attach_anchor_feature_sets(
@@ -163,6 +164,7 @@ class GraphComplianceCCGWorkflow:
             anchors=anchors,
             claims=claims,
             relations=extraction.inter_sentence_relations,
+            korean=uses_korean_law_context(review_input.workspace_id),
         )
         yield workflow_event(
             "step_completed",
@@ -510,12 +512,17 @@ class GraphComplianceCCGWorkflow:
         # Track C(표현·브랜드세이프티): 게이트(CCG_ENABLE_TRACK_C) OFF 면 정적 extension
         # 요약(무회귀), ON 이면 로컬 리스크 코퍼스로 실판정. additive shape 이므로 기존
         # 프론트 OverallTab 은 그대로 동작한다.
-        track_c_summary = run_track_c(
-            review_input=review_input,
-            sentences=[unit.text for unit in extraction.sentence_units],
-            retriever=self.retriever,
-            llm=self.llm,
-        )
+        # 비-KR 관할 제외: Track C 의 리스크 축·판례 코퍼스(UnSmile 등)와 정적 요약은
+        # 전부 한국 표현·한국어 기준이라 다른 관할에 적용되지 않는다 — 주입하지 않는다.
+        if uses_korean_law_context(review_input.workspace_id):
+            track_c_summary = run_track_c(
+                review_input=review_input,
+                sentences=[unit.text for unit in extraction.sentence_units],
+                retriever=self.retriever,
+                llm=self.llm,
+            )
+        else:
+            track_c_summary = {}
 
         graph = ReviewGraph(
             review_run_id=review_run_id,
@@ -561,14 +568,16 @@ class GraphComplianceCCGWorkflow:
         # 참고용 번역(표시 전용) — 비-KR workspace에서만. 판정은 이미 끝났으므로
         # 파이프라인에 개입할 수 없고, 실패해도 심사 결과는 그대로 전달된다.
         if not uses_korean_law_context(review_input.workspace_id):
-            yield workflow_event("step_started", "Reference translation", review_run_id=review_run_id, summary="Display-only EN/KO reference translation of the original ad text.")
+            yield workflow_event("step_started", "Reference translation", review_run_id=review_run_id, summary="Display-only EN/KM/KO reference translation of the original ad text and revisions.")
             translations = translate_ad_for_display(
                 self.llm,
                 review_input.content_text,
                 review_input.workspace_id,
                 # 파이프라인의 문장 분할(sentence_units) 그대로 — 콘솔이 문장별로
-                # 원문 바로 아래 EN/KO를 병기한다.
+                # 원문 바로 아래 EN/KM/KO 3개 언어를 병기한다.
                 sentence_texts=[unit.text for unit in extraction.sentence_units],
+                # 수정문(교정안) 줄 — diff의 + 줄과 하단 고지 블록에도 3개 언어 병기.
+                revision_texts=revision_display_texts(revision_suggestions),
             )
             output = dataclasses.replace(output, ad_translations=translations)
             yield workflow_event("step_completed", "Reference translation", review_run_id=review_run_id, summary="reference translation attached" if translations and (translations.get("en") or translations.get("ko")) else "translation unavailable (review unaffected)")
@@ -592,6 +601,34 @@ def review_input_from_payload(payload: dict[str, Any]) -> ReviewInput:
         workspace_id=str(payload.get("workspace_id", "graphcompliance_mvp_jb_20260530")),
         language=str(payload.get("language", "ko")),
     )
+
+
+def revision_display_texts(revision_suggestions: list[dict[str, Any]]) -> list[str]:
+    """수정문 표시 줄(diff의 + 줄이 되는 텍스트) 수집 — 참고 번역 대상.
+
+    개별 교정(after), 전체 일관 교정본(__document__)의 줄 분할, 하단 고지 블록
+    (add 항목)을 모아 프론트 diff 가 줄 단위로 3개 언어를 병기할 수 있게 한다.
+    """
+    texts: list[str] = []
+    for suggestion in revision_suggestions or []:
+        if not isinstance(suggestion, dict):
+            continue
+        anchor_id = str(suggestion.get("anchor_id") or "")
+        after = str(suggestion.get("after") or "").strip()
+        if anchor_id == "__document__":
+            # 프론트 diff 는 교정본을 줄/문장 단위로 나눠 + 줄을 만든다 — 같은
+            # 단위로 번역해야 줄별 매칭이 된다(tokenize 규칙과 동일: 개행 우선).
+            for line in after.splitlines():
+                line = line.strip()
+                if line:
+                    texts.append(line)
+            continue
+        if after:
+            texts.append(after)
+        for item in suggestion.get("disclosure_block") or []:
+            if isinstance(item, dict) and item.get("status") == "add" and str(item.get("text") or "").strip():
+                texts.append(str(item["text"]).strip())
+    return texts
 
 
 def graph_path_summary(cu_plan, judgments) -> list[dict[str, Any]]:

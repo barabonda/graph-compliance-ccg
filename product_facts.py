@@ -187,7 +187,11 @@ class ProductFactAnalyzer:
             return empty_product_fact_context(
                 status="NEEDS_PRODUCT_SELECTION",
                 matched_products=matched_products,
-                reason="광고 문안에서 특정 상품명이 하나로 확정되지 않아 상품문서 본문 fact 대조를 수행하지 않았습니다.",
+                reason=(
+                    "광고 문안에서 특정 상품명이 하나로 확정되지 않아 상품문서 본문 fact 대조를 수행하지 않았습니다."
+                    if uses_korean_law_context(review_input.workspace_id)
+                    else "No single product name could be resolved from the ad copy, so product-document fact comparison was skipped."
+                ),
                 disclosure_checks=build_disclosure_checks(review_input, sentence_units=sentence_units),
             )
 
@@ -206,7 +210,11 @@ class ProductFactAnalyzer:
             if kh_loaded is not None:
                 preloaded_facts, preloaded_documents = kh_loaded
                 preloaded_status = "PRELOADED"
-                preloaded_reason = "Neo4j에 선적재된 검증 ProductFact를 사용했습니다(문서 재추출 생략)."
+                preloaded_reason = (
+                    "Neo4j에 선적재된 검증 ProductFact를 사용했습니다(문서 재추출 생략)."
+                    if uses_korean_law_context(review_input.workspace_id)
+                    else "Used verified ProductFacts preloaded in Neo4j (document re-extraction skipped)."
+                )
         else:
             kr_loaded = load_preloaded_product_facts_from_neo4j(
                 product=product,
@@ -259,7 +267,11 @@ class ProductFactAnalyzer:
                 status="NO_PRODUCT_DOCUMENT",
                 matched_products=matched_products,
                 matched_product=product,
-                reason="선택된 상품의 상품주요내용/상품설명서/약관 PDF를 찾지 못했습니다.",
+                reason=(
+                    "선택된 상품의 상품주요내용/상품설명서/약관 PDF를 찾지 못했습니다."
+                    if uses_korean_law_context(review_input.workspace_id)
+                    else "No product-summary/description/terms PDF could be found for the selected product."
+                ),
                 disclosure_checks=build_disclosure_checks(review_input, sentence_units=sentence_units),
             )
         selected_documents = documents[:MAX_DOCUMENTS]
@@ -269,7 +281,11 @@ class ProductFactAnalyzer:
                     status="DOCUMENT_NOT_FOUND",
                     matched_product=product,
                     selected_documents=selected_documents,
-                    reason="상품문서 메타데이터는 있으나 로컬 PDF 파일이 없습니다.",
+                    reason=(
+                        "상품문서 메타데이터는 있으나 로컬 PDF 파일이 없습니다."
+                        if uses_korean_law_context(review_input.workspace_id)
+                        else "Product-document metadata exists, but the local PDF file is missing."
+                    ),
                 )
 
         snippets: list[dict[str, str]] = []

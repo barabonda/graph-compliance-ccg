@@ -70,6 +70,7 @@ class PolicyGuidedNormalizer:
         claims: list[Claim],
         policy_context: dict[str, Any],
         top_n: int = 5,
+        korean: bool = True,
     ) -> list[ContextAnchor]:
         allowed = {
             str(item["hypernym_id"]): str(item["name"])
@@ -121,6 +122,16 @@ class PolicyGuidedNormalizer:
                 "or '보장'. Those expressions should remain inside the parent claim/risk anchor because "
                 "their compliance meaning depends on the whole claim they modify. Use target_consumer_anchor "
                 "only for concrete audience segments such as '고령층 고객', '중위험 투자자', or '소상공인'."
+                # 비-KR(영어 우선) 관할: anchor text/span 은 원문 그대로(무번역),
+                # facts·why 등 분석 필드는 영어로 — KR 프롬프트는 바이트 동일 유지.
+                + (
+                    ""
+                    if korean
+                    else " OUTPUT LANGUAGE OVERRIDE: this workspace reviews ads in a non-Korean "
+                    "(English-first) jurisdiction. Anchor text/span values MUST be verbatim copies "
+                    "from the original ad (never translate). Write all free-text analysis fields "
+                    "(facts, why, explanations) in ENGLISH."
+                )
             ),
             user=(
                 "[claims]\n"

@@ -407,3 +407,6 @@ class ReviewOutput:
     # 참고용 번역(표시 전용) — 비-KR workspace에서만 채워진다({en, ko, note}).
     # 판정 파이프라인에는 절대 개입하지 않는다. KR 응답은 None(기존과 동일).
     ad_translations: dict[str, Any] | None = None
+    # 심사 워크스페이스(관할 라우팅 키) — 프론트가 UI 로케일(KH=영어)을 결정하는 데
+    # 사용한다. 빈 값은 구버전 run(기본 KR)과의 하위호환.
+    workspace_id: str = ""
