@@ -1,6 +1,15 @@
 import type { FinalVerdict } from "./types";
 
 export const WORKSPACE_ID = "graphcompliance_mvp_jb_20260530";
+export const KH_WORKSPACE_ID = "graphcompliance_cambodia_ppcbank_20260630";
+
+// 관할(시장) 선택 — workspace_id가 데이터 라우팅을 담당하고(백엔드 CC-4 배선),
+// language는 기록·참고 번역 표시용 메타데이터다.
+export const JURISDICTIONS = [
+  { value: "KR", label: "한국 (Korea)", workspaceId: WORKSPACE_ID, language: "ko" },
+  { value: "KH", label: "캄보디아 (Cambodia)", workspaceId: KH_WORKSPACE_ID, language: "en" },
+] as const;
+export type JurisdictionValue = (typeof JURISDICTIONS)[number]["value"];
 
 // 원칙(심의 카테고리)별 색 — 의미별로 구분되게(레퍼런스: 설명의무=보라/부당권유=
 // 빨강/광고규제=파랑). 변형 표기('부당권유행위 금지' 등)도 포함 매칭으로 잡는다.

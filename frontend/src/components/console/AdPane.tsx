@@ -5,6 +5,7 @@ import { PRODUCT_GROUPS } from "@/lib/labels";
 import {
   type AnnotatedText,
   buildAdLines,
+  sentenceTranslationsById,
   buildCorrectedCopy,
   buildDocumentDiff,
   conditionalDisclosures,
@@ -114,6 +115,15 @@ export function AdPane({
   );
   const conditional = conditionalDisclosures(result, reviewedText);
   const actionable = (result.anchor_display ?? []).filter((item) => item.display_role === "actionable").length;
+  // 참고용 번역(표시 전용) — 비-KR workspace에서만 채워짐. KR이면 null → 아무것도 렌더 안 함.
+  const translations = result.ad_translations ?? null;
+  // 교차언어 정규화 패널 — 원문 표현 → PolicyHypernym. 번역이 있는(비-KR) 심사에서만 표시.
+  const crossLanguageAnchors = useMemo(
+    () => (result.context_anchors ?? []).filter((anchor) => (anchor.hypernyms ?? []).length > 0),
+    [result],
+  );
+  // 원문 각 문장 줄 바로 아래 병기할 문장별 번역(sentence_id 기준). KR이면 빈 맵.
+  const lineTranslations = useMemo(() => sentenceTranslationsById(result), [result]);
   const productGroup =
     PRODUCT_GROUPS.find((item) => item.value === result.product_context?.product_group)?.label ??
     result.product_context?.product_group ??
@@ -166,18 +176,38 @@ export function AdPane({
 
           {mode === "original" ? (
             <div className="px-5.5 py-5 text-[16px] leading-[1.95] break-keep text-ink">
-              {lines.map((line) => (
-                <div key={line.key}>
-                  <span className="whitespace-pre-wrap">
-                    <LineText
-                      annotated={line.annotated}
-                      selectedAnchorId={selectedAnchorId}
-                      resolved={resolved}
-                      onSelectAnchor={onSelectAnchor}
-                    />
-                  </span>
-                </div>
-              ))}
+              {lines.map((line) => {
+                const t = line.sentenceId ? lineTranslations.get(line.sentenceId) : undefined;
+                return (
+                  <div key={line.key}>
+                    <span className="whitespace-pre-wrap">
+                      <LineText
+                        annotated={line.annotated}
+                        selectedAnchorId={selectedAnchorId}
+                        resolved={resolved}
+                        onSelectAnchor={onSelectAnchor}
+                      />
+                    </span>
+                    {/* 문장 바로 아래 참고 번역 — 표시 전용, 하이라이트는 위 원문에만 */}
+                    {t && (
+                      <div className="mt-0.5 mb-2 space-y-0.5 text-[12px] leading-relaxed text-ink-3">
+                        {t.en && (
+                          <div className="flex gap-1.5">
+                            <span className="mt-0.5 shrink-0 rounded bg-surface-2 px-1 font-mono text-[9px] font-bold text-ink-4">EN</span>
+                            <span>{t.en}</span>
+                          </div>
+                        )}
+                        {t.ko && (
+                          <div className="flex gap-1.5 break-keep">
+                            <span className="mt-0.5 shrink-0 rounded bg-surface-2 px-1 font-mono text-[9px] font-bold text-ink-4">KO</span>
+                            <span>{t.ko}</span>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           ) : (
             <div className="px-5.5 py-5 text-[16px] leading-[1.95] break-keep whitespace-pre-wrap text-ink">
@@ -219,6 +249,88 @@ export function AdPane({
             )}
           </div>
         </div>
+
+        {/* 문장별 참고 번역 — 원문 문장 바로 아래 EN·KO 병기 (표시 전용) */}
+        {mode === "original" && translations && (translations.sentences?.length ?? 0) > 0 && (
+          <div className="mt-3 overflow-hidden rounded-lg border border-line bg-surface-2">
+            <div className="border-b border-line px-3 py-2 text-xs font-bold text-ink-2">
+              문장별 참고 번역
+              <span className="ml-2 font-normal text-[10.5px] text-ink-4">
+                {translations.note ?? "참고용 번역 — 심사 근거는 원문 기준"}
+              </span>
+            </div>
+            <div className="divide-y divide-line">
+              {translations.sentences!.map((s, i) => (
+                <div key={i} className="px-3 py-2.5">
+                  {/* 하이라이트는 위 원문 렌더에만 — 여기 번역/원문 재표기는 plain text */}
+                  <div className="text-[13px] leading-relaxed font-medium break-keep whitespace-pre-wrap text-ink">
+                    {s.original}
+                  </div>
+                  {s.en && (
+                    <div className="mt-1 flex gap-1.5 text-[12px] leading-relaxed text-ink-2">
+                      <span className="mt-0.5 shrink-0 rounded bg-surface px-1 font-mono text-[9.5px] font-bold text-ink-4">EN</span>
+                      <span className="whitespace-pre-wrap">{s.en}</span>
+                    </div>
+                  )}
+                  {s.ko && (
+                    <div className="mt-1 flex gap-1.5 text-[12px] leading-relaxed break-keep text-ink-2">
+                      <span className="mt-0.5 shrink-0 rounded bg-surface px-1 font-mono text-[9.5px] font-bold text-ink-4">KO</span>
+                      <span className="whitespace-pre-wrap">{s.ko}</span>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {mode === "original" && translations && !(translations.sentences?.length) && (translations.en || translations.ko) && (
+          <div className="mt-3 space-y-2">
+            {translations.en && (
+              <details className="rounded-lg border border-line bg-surface-2 px-3 py-2">
+                <summary className="cursor-pointer text-xs font-bold text-ink-2 select-none">
+                  English (참고용 번역)
+                </summary>
+                {/* 표시 전용 — 하이라이트는 원문에만 적용(원문-번역 위치 정렬 불가) */}
+                <div className="mt-2 text-[13.5px] leading-relaxed whitespace-pre-wrap text-ink">{translations.en}</div>
+                <div className="mt-1.5 text-[10.5px] text-ink-4">{translations.note ?? "참고용 번역 — 심사 근거는 원문 기준"}</div>
+              </details>
+            )}
+            {translations.ko && (
+              <details className="rounded-lg border border-line bg-surface-2 px-3 py-2">
+                <summary className="cursor-pointer text-xs font-bold text-ink-2 select-none">
+                  한국어 (참고용 번역)
+                </summary>
+                <div className="mt-2 text-[13.5px] leading-relaxed break-keep whitespace-pre-wrap text-ink">{translations.ko}</div>
+                <div className="mt-1.5 text-[10.5px] text-ink-4">{translations.note ?? "참고용 번역 — 심사 근거는 원문 기준"}</div>
+              </details>
+            )}
+          </div>
+        )}
+
+        {mode === "original" && translations && crossLanguageAnchors.length > 0 && (
+          <details className="mt-2 rounded-lg border border-line bg-surface-2 px-3 py-2">
+            <summary className="cursor-pointer text-xs font-bold text-ink-2 select-none">
+              원문 표현 → 정규화된 개념 (교차언어 매핑 {crossLanguageAnchors.length}건)
+            </summary>
+            <div className="mt-2 space-y-1.5">
+              {crossLanguageAnchors.map((anchor) => (
+                <div key={anchor.anchor_id} className="text-[12px] leading-relaxed">
+                  <span className="font-mono text-ink-2">“{anchor.span?.text}”</span>
+                  <span className="mx-1.5 text-ink-4">→</span>
+                  <span className="inline-flex flex-wrap gap-1 align-middle">
+                    {anchor.hypernyms.map((proposal) => (
+                      <Tag key={proposal.hypernym_id}>{proposal.hypernym}</Tag>
+                    ))}
+                  </span>
+                </div>
+              ))}
+            </div>
+            <div className="mt-1.5 text-[10.5px] text-ink-4">
+              원문(외국어) 표현이 정책 개념 사전(PolicyHypernym)으로 정규화된 결과입니다.
+            </div>
+          </details>
+        )}
 
         {mode === "original" && (
           <>

@@ -3,7 +3,7 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { getActor } from "@/lib/actor";
 import { searchProducts } from "@/lib/api";
-import { CHANNELS, EXAMPLES, LLM_MODELS, PRODUCT_GROUPS, WORKSPACE_ID, type ExamplePreset } from "@/lib/labels";
+import { CHANNELS, EXAMPLES, JURISDICTIONS, KH_WORKSPACE_ID, LLM_MODELS, PRODUCT_GROUPS, type ExamplePreset, type JurisdictionValue } from "@/lib/labels";
 import type { ProductSearchResult, ReviewRequest } from "@/lib/types";
 import { Icon } from "./Icon";
 
@@ -44,6 +44,10 @@ export function ReviewForm({ running, onSubmit, draftPreset, onLoadSample, onLoa
   const [productSearchError, setProductSearchError] = useState("");
   const [text, setText] = useState(draftPreset?.content_text ?? DEFAULT_EXAMPLE.text);
   const [llmModel, setLlmModel] = useState(draftPreset?.llm_model ?? "");
+  // 관할(시장). 재실행 프리셋의 workspace_id가 KH면 캄보디아로 복원.
+  const [jurisdiction, setJurisdiction] = useState<JurisdictionValue>(
+    draftPreset?.workspace_id === KH_WORKSPACE_ID ? "KH" : "KR",
+  );
   const [draftQueue, setDraftQueue] = useState<ReviewRequest[]>([]);
   const [queueRunning, setQueueRunning] = useState(false);
 
@@ -90,17 +94,21 @@ export function ReviewForm({ running, onSubmit, draftPreset, onLoadSample, onLoa
     setProductOpen(true);
   };
 
-  const buildPayload = (): ReviewRequest => ({
+  const buildPayload = (): ReviewRequest => {
+    const juris = JURISDICTIONS.find((item) => item.value === jurisdiction) ?? JURISDICTIONS[0];
+    return {
       dataset_item_id: `console_${Date.now()}`,
       title,
       content_text: text,
       channel,
       product_group: productGroup,
       selected_product_name: selectedProduct.trim(),
-      workspace_id: WORKSPACE_ID,
+      workspace_id: juris.workspaceId,
+      language: juris.language,
       llm_model: llmModel || undefined,
       actor: getActor(),
-    });
+    };
+  };
 
   const handleSubmit = (event: FormEvent) => {
     event.preventDefault();
@@ -185,6 +193,27 @@ export function ReviewForm({ running, onSubmit, draftPreset, onLoadSample, onLoa
           onChange={(event) => setTitle(event.target.value)}
           placeholder="예: 스텝다운 ELS 다이렉트 배너"
         />
+      </label>
+
+      <label className="block">
+        <span className="mb-1 block text-xs font-bold text-ink-3">관할(시장)</span>
+        <select
+          className={fieldClass}
+          value={jurisdiction}
+          onChange={(event) => setJurisdiction(event.target.value as JurisdictionValue)}
+        >
+          {JURISDICTIONS.map((item) => (
+            <option key={item.value} value={item.value}>
+              {item.label}
+            </option>
+          ))}
+        </select>
+        {jurisdiction === "KH" && (
+          <span className="mt-1 block text-[11px] leading-relaxed text-ink-3">
+            캄보디아 법령(소비자보호법·Sub-Decree 232 등) 기준으로 심사합니다. 원문 아래에 참고용
+            영어·한국어 번역이 함께 표시됩니다(심사 근거는 원문 기준).
+          </span>
+        )}
       </label>
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">

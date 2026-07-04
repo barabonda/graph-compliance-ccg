@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useState } from "react";
+import { CopilotPanel } from "@/components/CopilotPanel";
 import { AdPane } from "@/components/console/AdPane";
 import { DetailPane } from "@/components/console/DetailPane";
 import { ExceptionView } from "@/components/console/ExceptionView";
@@ -40,9 +41,12 @@ export default function Page() {
   const [decision, setDecision] = useState<DecisionKey | null>(null);
   const [toast, setToast] = useState<string | null>(null);
   const [draftPreset, setDraftPreset] = useState<Partial<ReviewRequest> | null>(null);
+  // 결과 설명 챗의 "이번 심사" 컨텍스트용 workspace (run_id는 state.result에서).
+  const [chatWorkspace, setChatWorkspace] = useState<string>(WORKSPACE_ID);
 
   const handleSubmit = useCallback(
     async (payload: ReviewRequest, options?: { stayOnNew?: boolean }): Promise<boolean> => {
+      setChatWorkspace(payload.workspace_id || WORKSPACE_ID);
       setMeta({
         title: payload.title,
         channelLabel: CHANNELS.find((item) => item.value === payload.channel)?.label ?? payload.channel,
@@ -87,6 +91,7 @@ export default function Page() {
   const handleOpenRun = useCallback(
     async (run: RunSummary) => {
       const output = await fetchRun(run.id);
+      setChatWorkspace(run.workspace_id || WORKSPACE_ID);
       loadSample(output, run.content_text);
       setMeta({
         title: run.title,
@@ -367,6 +372,8 @@ export default function Page() {
         </div>
       </main>
       {toast && <Toast message={toast} onDone={() => setToast(null)} />}
+      {/* 심사 결과 설명 챗 (읽기 전용) — additive, 기존 흐름 무변화 */}
+      <CopilotPanel runId={result?.review_run_id ?? ""} workspaceId={chatWorkspace} />
     </div>
   );
 }

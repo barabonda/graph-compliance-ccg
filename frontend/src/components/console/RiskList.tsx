@@ -1,7 +1,7 @@
 "use client";
 
 import { principleColor, REVIEW_LAYER } from "@/lib/labels";
-import { buildIssueCards, planItemsForAnchor, type HighlightTone, type IssueCardModel } from "@/lib/selectors";
+import { buildIssueCards, planItemsForAnchor, translationForQuote, type HighlightTone, type IssueCardModel } from "@/lib/selectors";
 import type { ReviewOutput } from "@/lib/types";
 import { Icon } from "../Icon";
 import { EmptyState, Tag } from "../ui";
@@ -72,6 +72,8 @@ function IssueCard({
   const principles = card.anchorId
     ? [...new Set(planItemsForAnchor(result, card.anchorId).map((item) => item.principle).filter(Boolean))]
     : [];
+  // 인용 문장의 참고 번역(비-KR 심사에서만 존재). 표시 전용.
+  const quoteTranslation = translationForQuote(result, card.quote);
   return (
     <button
       type="button"
@@ -114,6 +116,23 @@ function IssueCard({
       >
         “{card.quote}”
       </div>
+      {/* 인용 문장의 참고 번역 — 심사 근거는 원문 기준 */}
+      {quoteTranslation && (
+        <div className="mt-1 space-y-0.5 text-[11px] leading-relaxed text-ink-3">
+          {quoteTranslation.en && (
+            <div className="flex gap-1.5">
+              <span className="mt-0.5 shrink-0 rounded bg-surface-2 px-1 font-mono text-[8.5px] font-bold text-ink-4">EN</span>
+              <span>{quoteTranslation.en}</span>
+            </div>
+          )}
+          {quoteTranslation.ko && (
+            <div className="flex gap-1.5 break-keep">
+              <span className="mt-0.5 shrink-0 rounded bg-surface-2 px-1 font-mono text-[8.5px] font-bold text-ink-4">KO</span>
+              <span>{quoteTranslation.ko}</span>
+            </div>
+          )}
+        </div>
+      )}
       {/* 위반 유형 + 요건 요약 */}
       <div className="mt-1 flex items-baseline gap-2 text-[12.5px] text-ink-2">
         <span>{card.label}</span>
