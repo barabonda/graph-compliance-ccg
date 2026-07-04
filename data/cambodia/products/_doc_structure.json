@@ -1,0 +1,4647 @@
+{
+  "PPCBank Fixed Deposit::ppcbank_fixed_deposit.md": {
+    "product": "PPCBank Fixed Deposit",
+    "text_file": "ppcbank_fixed_deposit.md",
+    "document_id": "product_document_a16d8e005fe18bde",
+    "sections": [
+      {
+        "type": "overview",
+        "title": "Introduction",
+        "order": 0,
+        "chunks": [
+          "Looking for an easy way to grow your money? We have the answer.",
+          "Personal Banking Deposit Fixed Deposit Account"
+        ],
+        "rates": [],
+        "conditions": [],
+        "eligibility": [],
+        "fees": []
+      },
+      {
+        "type": "promotion",
+        "title": "Royal Celebration Promotion",
+        "order": 1,
+        "chunks": [
+          "To celebrate the auspicious occasion of the Birthday Ceremony of His Majesty Preah Bat Samdech Preah Boromneath Norodom Sihamoni, King of the Kingdom of Cambodia, PPCBank is pleased to launch the “Royal Celebration” promotion. Customers can enjoy a special interest rate of up to 5.14% p.a. when opening a USD Fixed Deposit account via PPCBank Mobile App or smartBiz.",
+          "Promotion Period:",
+          "May 1 – May 15, 2026",
+          "View Promotion Details"
+        ],
+        "rates": [],
+        "conditions": [],
+        "eligibility": [],
+        "fees": []
+      },
+      {
+        "type": "overview",
+        "title": "Earn interest on the money you deposit",
+        "order": 2,
+        "chunks": [
+          "Earn interest on the money you deposit.",
+          "If you have savings that you don’t plan to use anytime soon, a fixed deposit account will allow your money to grow with a specific interest rate depending. The longer you commit your money to being in the account, the higher the interest rate will be.",
+          "Open a fixed deposit account at PPCBank today, it’s easy. Make your money work for you and let it grow."
+        ],
+        "rates": [],
+        "conditions": [],
+        "eligibility": [],
+        "fees": []
+      },
+      {
+        "type": "rate_table",
+        "title": "Fixed Deposit With Interest Payment At Maturity",
+        "order": 3,
+        "chunks": [],
+        "rates": [
+          {
+            "term_months": 3,
+            "currency": "USD",
+            "channel": "standard",
+            "payment": "at_maturity",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "",
+            "rate_pa": 2.5
+          },
+          {
+            "term_months": 3,
+            "currency": "KHR",
+            "channel": "standard",
+            "payment": "at_maturity",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "",
+            "rate_pa": 3.0
+          },
+          {
+            "term_months": 3,
+            "currency": "USD",
+            "channel": "digital",
+            "payment": "at_maturity",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "",
+            "rate_pa": 2.5
+          },
+          {
+            "term_months": 3,
+            "currency": "KHR",
+            "channel": "digital",
+            "payment": "at_maturity",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "",
+            "rate_pa": 3.0
+          },
+          {
+            "term_months": 6,
+            "currency": "USD",
+            "channel": "standard",
+            "payment": "at_maturity",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "",
+            "rate_pa": 3.45
+          },
+          {
+            "term_months": 6,
+            "currency": "KHR",
+            "channel": "standard",
+            "payment": "at_maturity",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "",
+            "rate_pa": 3.95
+          },
+          {
+            "term_months": 6,
+            "currency": "USD",
+            "channel": "digital",
+            "payment": "at_maturity",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "",
+            "rate_pa": 3.65
+          },
+          {
+            "term_months": 6,
+            "currency": "KHR",
+            "channel": "digital",
+            "payment": "at_maturity",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "",
+            "rate_pa": 4.15
+          },
+          {
+            "term_months": 12,
+            "currency": "USD",
+            "channel": "standard",
+            "payment": "at_maturity",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "",
+            "rate_pa": 4.2
+          },
+          {
+            "term_months": 12,
+            "currency": "KHR",
+            "channel": "standard",
+            "payment": "at_maturity",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "",
+            "rate_pa": 4.7
+          },
+          {
+            "term_months": 12,
+            "currency": "USD",
+            "channel": "digital",
+            "payment": "at_maturity",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "",
+            "rate_pa": 4.4
+          },
+          {
+            "term_months": 12,
+            "currency": "KHR",
+            "channel": "digital",
+            "payment": "at_maturity",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "",
+            "rate_pa": 4.9
+          },
+          {
+            "term_months": 18,
+            "currency": "USD",
+            "channel": "standard",
+            "payment": "at_maturity",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "",
+            "rate_pa": 4.3
+          },
+          {
+            "term_months": 18,
+            "currency": "KHR",
+            "channel": "standard",
+            "payment": "at_maturity",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "",
+            "rate_pa": 4.8
+          },
+          {
+            "term_months": 18,
+            "currency": "USD",
+            "channel": "digital",
+            "payment": "at_maturity",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "",
+            "rate_pa": 4.5
+          },
+          {
+            "term_months": 18,
+            "currency": "KHR",
+            "channel": "digital",
+            "payment": "at_maturity",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "",
+            "rate_pa": 5.0
+          },
+          {
+            "term_months": 24,
+            "currency": "USD",
+            "channel": "standard",
+            "payment": "at_maturity",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "",
+            "rate_pa": 4.4
+          },
+          {
+            "term_months": 24,
+            "currency": "KHR",
+            "channel": "standard",
+            "payment": "at_maturity",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "",
+            "rate_pa": 4.9
+          },
+          {
+            "term_months": 24,
+            "currency": "USD",
+            "channel": "digital",
+            "payment": "at_maturity",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "",
+            "rate_pa": 4.6
+          },
+          {
+            "term_months": 24,
+            "currency": "KHR",
+            "channel": "digital",
+            "payment": "at_maturity",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "",
+            "rate_pa": 5.1
+          },
+          {
+            "term_months": 36,
+            "currency": "USD",
+            "channel": "standard",
+            "payment": "at_maturity",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "",
+            "rate_pa": 4.5
+          },
+          {
+            "term_months": 36,
+            "currency": "USD",
+            "channel": "digital",
+            "payment": "at_maturity",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "",
+            "rate_pa": 4.7
+          },
+          {
+            "term_months": 48,
+            "currency": "USD",
+            "channel": "standard",
+            "payment": "at_maturity",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "",
+            "rate_pa": 4.6
+          },
+          {
+            "term_months": 48,
+            "currency": "USD",
+            "channel": "digital",
+            "payment": "at_maturity",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "",
+            "rate_pa": 4.8
+          },
+          {
+            "term_months": 60,
+            "currency": "USD",
+            "channel": "standard",
+            "payment": "at_maturity",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "",
+            "rate_pa": 4.7
+          },
+          {
+            "term_months": 60,
+            "currency": "USD",
+            "channel": "digital",
+            "payment": "at_maturity",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "",
+            "rate_pa": 4.9
+          }
+        ],
+        "conditions": [],
+        "eligibility": [],
+        "fees": []
+      },
+      {
+        "type": "rate_table",
+        "title": "Fixed Deposit With Monthly Interest Payment",
+        "order": 4,
+        "chunks": [],
+        "rates": [
+          {
+            "term_months": 3,
+            "currency": "USD",
+            "channel": "standard",
+            "payment": "monthly",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "",
+            "rate_pa": 2.25
+          },
+          {
+            "term_months": 3,
+            "currency": "KHR",
+            "channel": "standard",
+            "payment": "monthly",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "",
+            "rate_pa": 2.75
+          },
+          {
+            "term_months": 3,
+            "currency": "USD",
+            "channel": "digital",
+            "payment": "monthly",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "",
+            "rate_pa": 2.25
+          },
+          {
+            "term_months": 3,
+            "currency": "KHR",
+            "channel": "digital",
+            "payment": "monthly",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "",
+            "rate_pa": 2.75
+          },
+          {
+            "term_months": 6,
+            "currency": "USD",
+            "channel": "standard",
+            "payment": "monthly",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "",
+            "rate_pa": 3.2
+          },
+          {
+            "term_months": 6,
+            "currency": "KHR",
+            "channel": "standard",
+            "payment": "monthly",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "",
+            "rate_pa": 3.75
+          },
+          {
+            "term_months": 6,
+            "currency": "USD",
+            "channel": "digital",
+            "payment": "monthly",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "",
+            "rate_pa": 3.4
+          },
+          {
+            "term_months": 6,
+            "currency": "KHR",
+            "channel": "digital",
+            "payment": "monthly",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "",
+            "rate_pa": 3.95
+          },
+          {
+            "term_months": 12,
+            "currency": "USD",
+            "channel": "standard",
+            "payment": "monthly",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "",
+            "rate_pa": 4.0
+          },
+          {
+            "term_months": 12,
+            "currency": "KHR",
+            "channel": "standard",
+            "payment": "monthly",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "",
+            "rate_pa": 4.4
+          },
+          {
+            "term_months": 12,
+            "currency": "USD",
+            "channel": "digital",
+            "payment": "monthly",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "",
+            "rate_pa": 4.2
+          },
+          {
+            "term_months": 12,
+            "currency": "KHR",
+            "channel": "digital",
+            "payment": "monthly",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "",
+            "rate_pa": 4.6
+          },
+          {
+            "term_months": 18,
+            "currency": "USD",
+            "channel": "standard",
+            "payment": "monthly",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "",
+            "rate_pa": 4.05
+          },
+          {
+            "term_months": 18,
+            "currency": "KHR",
+            "channel": "standard",
+            "payment": "monthly",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "",
+            "rate_pa": 4.55
+          },
+          {
+            "term_months": 18,
+            "currency": "USD",
+            "channel": "digital",
+            "payment": "monthly",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "",
+            "rate_pa": 4.25
+          },
+          {
+            "term_months": 18,
+            "currency": "KHR",
+            "channel": "digital",
+            "payment": "monthly",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "",
+            "rate_pa": 4.75
+          },
+          {
+            "term_months": 24,
+            "currency": "USD",
+            "channel": "standard",
+            "payment": "monthly",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "",
+            "rate_pa": 4.15
+          },
+          {
+            "term_months": 24,
+            "currency": "KHR",
+            "channel": "standard",
+            "payment": "monthly",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "",
+            "rate_pa": 4.7
+          },
+          {
+            "term_months": 24,
+            "currency": "USD",
+            "channel": "digital",
+            "payment": "monthly",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "",
+            "rate_pa": 4.35
+          },
+          {
+            "term_months": 24,
+            "currency": "KHR",
+            "channel": "digital",
+            "payment": "monthly",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "",
+            "rate_pa": 4.9
+          },
+          {
+            "term_months": 36,
+            "currency": "USD",
+            "channel": "standard",
+            "payment": "monthly",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "",
+            "rate_pa": 4.25
+          },
+          {
+            "term_months": 36,
+            "currency": "USD",
+            "channel": "digital",
+            "payment": "monthly",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "",
+            "rate_pa": 4.45
+          },
+          {
+            "term_months": 48,
+            "currency": "USD",
+            "channel": "standard",
+            "payment": "monthly",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "",
+            "rate_pa": 4.35
+          },
+          {
+            "term_months": 48,
+            "currency": "USD",
+            "channel": "digital",
+            "payment": "monthly",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "",
+            "rate_pa": 4.55
+          },
+          {
+            "term_months": 60,
+            "currency": "USD",
+            "channel": "standard",
+            "payment": "monthly",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "",
+            "rate_pa": 4.45
+          },
+          {
+            "term_months": 60,
+            "currency": "USD",
+            "channel": "digital",
+            "payment": "monthly",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "",
+            "rate_pa": 4.65
+          }
+        ],
+        "conditions": [],
+        "eligibility": [],
+        "fees": []
+      },
+      {
+        "type": "requirements",
+        "title": "Requirements",
+        "order": 5,
+        "chunks": [],
+        "rates": [],
+        "conditions": [],
+        "eligibility": [
+          {
+            "applicant": "Cambodian",
+            "document": "National ID Card or Valid Passport"
+          },
+          {
+            "applicant": "Foreigner",
+            "document": "Valid passport (Validity ≥ 90 days)"
+          },
+          {
+            "applicant": "Foreigner",
+            "document": "Employment certificate, contract or business certificate(s)"
+          },
+          {
+            "applicant": "Business Entity",
+            "document": "Certificate of Incorporation"
+          },
+          {
+            "applicant": "Business Entity",
+            "document": "Business license(s) (Validity ≥ 30 days)"
+          },
+          {
+            "applicant": "Business Entity",
+            "document": "Memorandum and Articles of Association"
+          },
+          {
+            "applicant": "Business Entity",
+            "document": "Patent tax certificate/Tax registration letter"
+          },
+          {
+            "applicant": "Business Entity",
+            "document": "Board of directors or Directors’ Resolution"
+          },
+          {
+            "applicant": "Business Entity",
+            "document": "National ID Card or passport of owner(s), shareholders or director(s), and authorized signatories"
+          },
+          {
+            "applicant": "NGOs / NPOs",
+            "document": "Memorandum of Understanding (MOU) or Authorization"
+          },
+          {
+            "applicant": "NGOs / NPOs",
+            "document": "Articles of Association and Organization"
+          },
+          {
+            "applicant": "NGOs / NPOs",
+            "document": "Tax registration letter"
+          },
+          {
+            "applicant": "NGOs / NPOs",
+            "document": "Board of Directors or Directors’ Resolution"
+          },
+          {
+            "applicant": "NGOs / NPOs",
+            "document": "National ID card or passport of founders, board of directors, or director(s) and authorized signatories"
+          }
+        ],
+        "fees": []
+      }
+    ]
+  },
+  "PPCBank Savings Account::ppcbank_saving_account.txt": {
+    "product": "PPCBank Savings Account",
+    "text_file": "ppcbank_saving_account.txt",
+    "document_id": "product_document_cf2cb30115bba89e",
+    "sections": [
+      {
+        "type": "overview",
+        "title": "Your Money Is Safe and Secure",
+        "order": 0,
+        "chunks": [
+          "We want you to be able to easily save your money!",
+          "PPCBank's savings account makes putting money aside simple. This account will maintain your money for whatever you might need it for next. When you open a savings account, you won't have to worry about annual or maintenance fees. You'll also receive a free passbook and will be able to make free transfers within PPCBank accounts."
+        ],
+        "rates": [],
+        "conditions": [],
+        "eligibility": [],
+        "fees": []
+      },
+      {
+        "type": "rate_table",
+        "title": "Saving Account (Minimum Opening Balance 0.00 USD)",
+        "order": 1,
+        "chunks": [
+          "Note: Interests will be credited to the account on a quarterly basis"
+        ],
+        "rates": [
+          {
+            "term_months": 0,
+            "currency": "USD",
+            "channel": "",
+            "payment": "",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "",
+            "rate_pa": 0.5
+          },
+          {
+            "term_months": 0,
+            "currency": "KHR",
+            "channel": "",
+            "payment": "",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "",
+            "rate_pa": 1.5
+          }
+        ],
+        "conditions": [],
+        "eligibility": [],
+        "fees": []
+      },
+      {
+        "type": "benefits",
+        "title": "Key Benefits",
+        "order": 2,
+        "chunks": [
+          "Maintain your money in a safe and secure location",
+          "Check your account balance through E-banking or by visiting any PPCBank branch",
+          "Add additional money to your account"
+        ],
+        "rates": [],
+        "conditions": [],
+        "eligibility": [],
+        "fees": []
+      },
+      {
+        "type": "requirements",
+        "title": "Requirements",
+        "order": 3,
+        "chunks": [],
+        "rates": [],
+        "conditions": [],
+        "eligibility": [
+          {
+            "applicant": "Cambodia",
+            "document": "National ID Card or Valid Passport"
+          },
+          {
+            "applicant": "Foreigner",
+            "document": "Valid passport (Validity ≥ 90 days)"
+          },
+          {
+            "applicant": "Foreigner",
+            "document": "Employment certificate, contract or business certificate(s)"
+          },
+          {
+            "applicant": "Business Entity",
+            "document": "Certificate of Incorporation"
+          },
+          {
+            "applicant": "Business Entity",
+            "document": "Business license(s) (Validity ≥ 30 days)"
+          },
+          {
+            "applicant": "Business Entity",
+            "document": "Memorandum and Articles of Association"
+          },
+          {
+            "applicant": "Business Entity",
+            "document": "Patent tax certificate/Tax registration letter"
+          },
+          {
+            "applicant": "Business Entity",
+            "document": "Board of directors or Directors' Resolution"
+          },
+          {
+            "applicant": "Business Entity",
+            "document": "National ID Card or passport of owner(s), shareholders or director(s), and authorized signatories"
+          },
+          {
+            "applicant": "NGOs / NPOs",
+            "document": "Memorandum of Understanding (MOU) or Authorization"
+          },
+          {
+            "applicant": "NGOs / NPOs",
+            "document": "Articles of Association and Organization"
+          },
+          {
+            "applicant": "NGOs / NPOs",
+            "document": "Tax registration letter"
+          },
+          {
+            "applicant": "NGOs / NPOs",
+            "document": "Board of Directors or Directors' Resolution"
+          },
+          {
+            "applicant": "NGOs / NPOs",
+            "document": "National ID card or passport of founders, board of directors, or director(s) and authorized signatories"
+          }
+        ],
+        "fees": []
+      },
+      {
+        "type": "other",
+        "title": "Important Information",
+        "order": 4,
+        "chunks": [
+          "Free charge of Visa debit card for the first year to all accounts",
+          "Daily limit for Visa debit card transactions is up to USD 3,000/day",
+          "USD 5/ KHR 20,000 minimum deposit (Personal) and USD 1,000/KHR 4,000,000 minimum deposit (Corporate)"
+        ],
+        "rates": [],
+        "conditions": [],
+        "eligibility": [],
+        "fees": []
+      }
+    ]
+  },
+  "PPCBank Current Account::ppcbank_current_account.txt": {
+    "product": "PPCBank Current Account",
+    "text_file": "ppcbank_current_account.txt",
+    "document_id": "product_document_a3fc88cd7f8f0b3d",
+    "sections": [
+      {
+        "type": "overview",
+        "title": "Current Account Overview",
+        "order": 0,
+        "chunks": [
+          "You can apply for checkbook linked with your current account to settle payment without coming to the bank or carrying cashes.",
+          "Do you need an account for your daily expenses?",
+          "Then a current account is for you!",
+          "A current account is an easy way to purchase your daily goods and services. It is an easy, convenient, and flexible way to manage your money and you will receive a monthly statement.",
+          "When you open a current account, you won’t have to worry about annual or maintenance fees. You’ll also receive a free passbook and will be able to make free transfers within PPCBank accounts."
+        ],
+        "rates": [],
+        "conditions": [],
+        "eligibility": [],
+        "fees": []
+      },
+      {
+        "type": "benefits",
+        "title": "What Can You Do With A Current Account?",
+        "order": 1,
+        "chunks": [
+          "Access your account with your debit card, E-banking or by visiting any PPCBank branch",
+          "Withdraw funds from your account given that the minimum ongoing balance is valid",
+          "Chequebook is only available with current account; with fee charge only USD 5 per chequebook"
+        ],
+        "rates": [],
+        "conditions": [],
+        "eligibility": [],
+        "fees": []
+      },
+      {
+        "type": "requirements",
+        "title": "Requirements",
+        "order": 2,
+        "chunks": [],
+        "rates": [],
+        "conditions": [],
+        "eligibility": [
+          {
+            "applicant": "Cambodian",
+            "document": "National ID Card or Valid Passport"
+          },
+          {
+            "applicant": "Foreigner",
+            "document": "Valid passport (Validity ≥ 90 days)"
+          },
+          {
+            "applicant": "Foreigner",
+            "document": "Employment certificate, contract or business certificate(s)"
+          },
+          {
+            "applicant": "Business Entity",
+            "document": "Certificate of Incorporation"
+          },
+          {
+            "applicant": "Business Entity",
+            "document": "Business license(s) (Validity ≥ 30 days)"
+          },
+          {
+            "applicant": "Business Entity",
+            "document": "Memorandum and Articles of Association"
+          },
+          {
+            "applicant": "Business Entity",
+            "document": "Patent tax certificate/Tax registration letter"
+          },
+          {
+            "applicant": "Business Entity",
+            "document": "Board of directors or Directors’ Resolution"
+          },
+          {
+            "applicant": "Business Entity",
+            "document": "National ID Card or passport of owner(s), shareholders or director(s), and authorized signatories"
+          },
+          {
+            "applicant": "NGOs / NPOs",
+            "document": "Memorandum of Understanding (MOU) or Authorization"
+          },
+          {
+            "applicant": "NGOs / NPOs",
+            "document": "Articles of Association and Organization"
+          },
+          {
+            "applicant": "NGOs / NPOs",
+            "document": "Tax registration letter"
+          },
+          {
+            "applicant": "NGOs / NPOs",
+            "document": "Board of Directors or Directors’ Resolution"
+          },
+          {
+            "applicant": "NGOs / NPOs",
+            "document": "National ID card or passport of founders, board of directors, or director(s) and authorized signatories"
+          }
+        ],
+        "fees": []
+      },
+      {
+        "type": "fees",
+        "title": "Important Information",
+        "order": 3,
+        "chunks": [],
+        "rates": [],
+        "conditions": [],
+        "eligibility": [],
+        "fees": [
+          {
+            "name": "Intra-bank transfer",
+            "value": "Free",
+            "condition": "at PPCBank’s Phnom penh branch network"
+          },
+          {
+            "name": "Inter-bank transfer in Cambodia",
+            "value": "USD 2",
+            "condition": "Amount transfer ≤ USD 2,000"
+          },
+          {
+            "name": "Inter-bank transfer in Cambodia",
+            "value": "0.10%",
+            "condition": "Amount transfer > USD 2,000"
+          },
+          {
+            "name": "Visa Debit daily transaction limit",
+            "value": "up to USD 5,000 per day",
+            "condition": "Daily limit"
+          },
+          {
+            "name": "Minimum deposit (Personal)",
+            "value": "USD 100",
+            "condition": "Personal"
+          },
+          {
+            "name": "Minimum deposit (Corporate)",
+            "value": "USD 500",
+            "condition": "Corporate"
+          },
+          {
+            "name": "Freeze amount (Personal)",
+            "value": "USD 50",
+            "condition": "Personal"
+          },
+          {
+            "name": "Freeze amount (Corporate)",
+            "value": "USD 100",
+            "condition": "Corporate"
+          },
+          {
+            "name": "Chequebook fee",
+            "value": "USD 5 per chequebook",
+            "condition": "Chequebook available with current account only"
+          }
+        ]
+      }
+    ]
+  },
+  "PPCBank Installment Deposit::ppcbank_installment_deposit_account.txt": {
+    "product": "PPCBank Installment Deposit",
+    "text_file": "ppcbank_installment_deposit_account.txt",
+    "document_id": "product_document_41a6e0560ace0293",
+    "sections": [
+      {
+        "type": "overview",
+        "title": "Installment Deposit Account",
+        "order": 0,
+        "chunks": [
+          "When you open your installment deposit account, you will get a free passbook and have no annual or maintenance fees.",
+          "An installment deposit account is a longer-term saving.",
+          "An installment deposit account is a longer-term saving. It is where you put a set amount of money or installment into the account daily or monthly for a set period of time and let it grow. Once the period is over, you withdraw the principal and interest together."
+        ],
+        "rates": [],
+        "conditions": [],
+        "eligibility": [],
+        "fees": []
+      },
+      {
+        "type": "rate_table",
+        "title": "Installment Deposit Account (Minimum Opening Balance: USD 10)",
+        "order": 1,
+        "chunks": [],
+        "rates": [
+          {
+            "term_months": 6,
+            "currency": "USD",
+            "channel": "",
+            "payment": "at_maturity",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "",
+            "rate_pa": 3.3
+          },
+          {
+            "term_months": 12,
+            "currency": "USD",
+            "channel": "",
+            "payment": "at_maturity",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "",
+            "rate_pa": 4.25
+          },
+          {
+            "term_months": 24,
+            "currency": "USD",
+            "channel": "",
+            "payment": "at_maturity",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "",
+            "rate_pa": 4.5
+          },
+          {
+            "term_months": 36,
+            "currency": "USD",
+            "channel": "",
+            "payment": "at_maturity",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "",
+            "rate_pa": 4.6
+          }
+        ],
+        "conditions": [],
+        "eligibility": [],
+        "fees": []
+      },
+      {
+        "type": "rate_table",
+        "title": "Premier Installment Deposit Account (Minimum Opening Balance USD 500)",
+        "order": 2,
+        "chunks": [],
+        "rates": [
+          {
+            "term_months": 6,
+            "currency": "USD",
+            "channel": "",
+            "payment": "at_maturity",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "",
+            "rate_pa": 3.5
+          },
+          {
+            "term_months": 12,
+            "currency": "USD",
+            "channel": "",
+            "payment": "at_maturity",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "",
+            "rate_pa": 4.4
+          },
+          {
+            "term_months": 24,
+            "currency": "USD",
+            "channel": "",
+            "payment": "at_maturity",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "",
+            "rate_pa": 4.65
+          },
+          {
+            "term_months": 36,
+            "currency": "USD",
+            "channel": "",
+            "payment": "at_maturity",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "",
+            "rate_pa": 4.75
+          }
+        ],
+        "conditions": [],
+        "eligibility": [],
+        "fees": []
+      },
+      {
+        "type": "requirements",
+        "title": "Requirements",
+        "order": 3,
+        "chunks": [],
+        "rates": [],
+        "conditions": [],
+        "eligibility": [
+          {
+            "applicant": "Cambodian",
+            "document": "National ID Card or Valid Passport"
+          },
+          {
+            "applicant": "Foreigner",
+            "document": "Valid passport (Validity ≥ 90 days)"
+          },
+          {
+            "applicant": "Foreigner",
+            "document": "Employment certificate, contract or business certificate(s)"
+          },
+          {
+            "applicant": "NGOs / NPOs",
+            "document": "Memorandum of Understanding (MOU) or Authorization"
+          },
+          {
+            "applicant": "NGOs / NPOs",
+            "document": "Article of Association and Organization"
+          },
+          {
+            "applicant": "NGOs / NPOs",
+            "document": "Tax registration letter"
+          },
+          {
+            "applicant": "NGOs / NPOs",
+            "document": "Board of Directors or Directors’ Resolution"
+          },
+          {
+            "applicant": "NGOs / NPOs",
+            "document": "Proof source of funds and assets National"
+          }
+        ],
+        "fees": []
+      }
+    ]
+  },
+  "PPCBank Junior Savings Account::ppcbank_junior_savings_account.txt": {
+    "product": "PPCBank Junior Savings Account",
+    "text_file": "ppcbank_junior_savings_account.txt",
+    "document_id": "product_document_8240205a30b28eaf",
+    "sections": [
+      {
+        "type": "overview",
+        "title": "Junior Savings Account",
+        "order": 0,
+        "chunks": [
+          "Best savings account for children",
+          "Personal BankingDeposit Junior Savings Account",
+          "Give your child a headstart towards a financially savvy future.",
+          "The PPCBank Junior Savings Account is a new savings initiative that enables Junior users to engage with online banking services, but with limited functions. The Junior users are managed by their Parent user through Mobile App."
+        ],
+        "rates": [],
+        "conditions": [],
+        "eligibility": [],
+        "fees": []
+      },
+      {
+        "type": "rate_table",
+        "title": "Interest Rate and Limits",
+        "order": 1,
+        "chunks": [],
+        "rates": [
+          {
+            "term_months": 0,
+            "currency": "USD",
+            "channel": "",
+            "payment": "",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "",
+            "rate_pa": 0.5
+          },
+          {
+            "term_months": 0,
+            "currency": "KHR",
+            "channel": "",
+            "payment": "",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "",
+            "rate_pa": 1.5
+          }
+        ],
+        "conditions": [
+          {
+            "category": "USD",
+            "field": "transaction_limit",
+            "value": "1,000"
+          },
+          {
+            "category": "KHR",
+            "field": "transaction_limit",
+            "value": "4,000,000"
+          },
+          {
+            "category": "USD",
+            "field": "daily_limit",
+            "value": "1,000"
+          },
+          {
+            "category": "KHR",
+            "field": "daily_limit",
+            "value": "4,000,000"
+          }
+        ],
+        "eligibility": [],
+        "fees": []
+      },
+      {
+        "type": "benefits",
+        "title": "Benefits",
+        "order": 2,
+        "chunks": [
+          "No initial deposit",
+          "Very competitive interest rates",
+          "Helps children manage their money and develop an early savings habit",
+          "Helps children experience banking services through PPCBank Mobile App"
+        ],
+        "rates": [],
+        "conditions": [],
+        "eligibility": [],
+        "fees": []
+      },
+      {
+        "type": "benefits",
+        "title": "Features",
+        "order": 3,
+        "chunks": [
+          "Parents monitor and control their child’s banking activities.",
+          "Parents can set spending limits and receive real-time notifications.",
+          "Parents can set an auto-deposit schedule for Junior."
+        ],
+        "rates": [],
+        "conditions": [],
+        "eligibility": [],
+        "fees": []
+      },
+      {
+        "type": "requirements",
+        "title": "Requirements",
+        "order": 4,
+        "chunks": [
+          "Click here to learn how to create a PPCBank Junior Savings Account."
+        ],
+        "rates": [],
+        "conditions": [],
+        "eligibility": [
+          {
+            "applicant": "Parent / Guardian",
+            "document": "Parent must be a PPCBank customer"
+          },
+          {
+            "applicant": "Parent / Guardian",
+            "document": "Be at least 18-years-old."
+          },
+          {
+            "applicant": "Parent / Guardian",
+            "document": "Valid ID Card, Passport and/or other documents that indicate a relationship between the parent/guardian and the child."
+          },
+          {
+            "applicant": "Junior / Child",
+            "document": "Aged under 17."
+          }
+        ],
+        "fees": []
+      },
+      {
+        "type": "conditions",
+        "title": "Conditions",
+        "order": 5,
+        "chunks": [],
+        "rates": [],
+        "conditions": [
+          {
+            "category": "Junior Savings Account",
+            "field": "opening_channel",
+            "value": "Mobile Banking only"
+          },
+          {
+            "category": "Junior Savings Account",
+            "field": "available_functions_for_junior",
+            "value": "Top-Up, Pay by QR, Receive by QR, Request Money from Parents"
+          },
+          {
+            "category": "Junior Savings Account",
+            "field": "interest_payment",
+            "value": "Upon account closure"
+          },
+          {
+            "category": "Junior Savings Account",
+            "field": "account_access_channels",
+            "value": "PPCBank Mobile App and other electronic channels"
+          },
+          {
+            "category": "Junior Savings Account",
+            "field": "access_to_close_deactivate_the_account",
+            "value": "Managed by parents only"
+          },
+          {
+            "category": "Junior Savings Account",
+            "field": "early_closure",
+            "value": "Free"
+          },
+          {
+            "category": "Junior Savings Account",
+            "field": "service_fees",
+            "value": "Free"
+          }
+        ],
+        "eligibility": [],
+        "fees": []
+      },
+      {
+        "type": "other",
+        "title": "Important information",
+        "order": 6,
+        "chunks": [
+          "Phone number must be new to create the account for Junior. Existing phone number already registered with PPCBank Mobile App is not allowed.",
+          "The Parent user is the only legal account owner, and has all rights to fully control and manage the Junior Savings Account.",
+          "Only one Junior Savings Account per Junior User ID can be used.",
+          "If the Junior opens their own account by e-KYC or visiting the branch, the linked Junior Savings Account will be auto-disconnected from their mobile banking app."
+        ],
+        "rates": [],
+        "conditions": [],
+        "eligibility": [],
+        "fees": []
+      }
+    ]
+  },
+  "PPCBank VIP Savings::ppcbank_vip_saving.txt": {
+    "product": "PPCBank VIP Savings",
+    "text_file": "ppcbank_vip_saving.txt",
+    "document_id": "product_document_9ae27bf884fd8e7c",
+    "sections": [
+      {
+        "type": "overview",
+        "title": "VIP Savings Account",
+        "order": 0,
+        "chunks": [
+          "Get the exclusive attention and the care you need and deserve.",
+          "If you are a more affluent customer, the VIP Savings Account is for you. It’s an easy, convenient, and flexible way to manage your money while it grows. We’ll make sure you receive special care and VIP service so that you leave PPCBank happy and satisfied."
+        ],
+        "rates": [],
+        "conditions": [],
+        "eligibility": [],
+        "fees": []
+      },
+      {
+        "type": "rate_table",
+        "title": "Interest Rates",
+        "order": 1,
+        "chunks": [
+          "Note: Interests will be credited to the account on a quarterly basis"
+        ],
+        "rates": [
+          {
+            "term_months": 0,
+            "currency": "USD",
+            "channel": "",
+            "payment": "",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "10,000 – 30,000",
+            "rate_pa": 1.5
+          },
+          {
+            "term_months": 0,
+            "currency": "USD",
+            "channel": "",
+            "payment": "",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "More than 30,000",
+            "rate_pa": 1.0
+          }
+        ],
+        "conditions": [],
+        "eligibility": [],
+        "fees": []
+      },
+      {
+        "type": "benefits",
+        "title": "Key Benefits",
+        "order": 2,
+        "chunks": [],
+        "rates": [],
+        "conditions": [],
+        "eligibility": [],
+        "fees": [
+          {
+            "name": "Maintenance account fee",
+            "value": "No maintenance account fee",
+            "condition": ""
+          },
+          {
+            "name": "Fee of closing account",
+            "value": "USD 10",
+            "condition": "Free of charge over deposit period 1 year"
+          },
+          {
+            "name": "Passbook replacement",
+            "value": "Free",
+            "condition": ""
+          },
+          {
+            "name": "Balance confirmation",
+            "value": "Free",
+            "condition": ""
+          },
+          {
+            "name": "Telegraphic Transfer Fee Rate (OTT)",
+            "value": "0.11%",
+            "condition": ""
+          },
+          {
+            "name": "Local Transfer",
+            "value": "USD 2 flat",
+            "condition": ""
+          },
+          {
+            "name": "Payroll service",
+            "value": "Free",
+            "condition": ""
+          },
+          {
+            "name": "Fee for Bank Cheque or NBC Cheque issuing",
+            "value": "USD 2 flat",
+            "condition": ""
+          }
+        ]
+      },
+      {
+        "type": "requirements",
+        "title": "Requirements",
+        "order": 3,
+        "chunks": [],
+        "rates": [],
+        "conditions": [],
+        "eligibility": [
+          {
+            "applicant": "Cambodian",
+            "document": "National ID Card or Valid Passport"
+          },
+          {
+            "applicant": "Foreigner",
+            "document": "Valid passport (Validity ≥ 90 days)"
+          },
+          {
+            "applicant": "Foreigner",
+            "document": "Employment certificate, contract or business certificate(s)"
+          }
+        ],
+        "fees": []
+      },
+      {
+        "type": "fees",
+        "title": "Important information",
+        "order": 4,
+        "chunks": [
+          "Outward Telegraphic Transfer (OTT) fee: amount of ≤ USD10,000 = USD10(swift fee) + USD15 (cable fee); amount of more than USD10,000 = 0.11%(swift fee) + USD15 (cable fee)",
+          "Inward Telegraphic Transfer (ITT) fee: USD10 or 0,07% (minimum)",
+          "Free of charge from intra-bank transfers for Phnom Penh Branches"
+        ],
+        "rates": [],
+        "conditions": [],
+        "eligibility": [],
+        "fees": [
+          {
+            "name": "Outward Telegraphic Transfer (OTT) fee",
+            "value": "USD10(swift fee) + USD15 (cable fee)",
+            "condition": "amount of ≤ USD10,000"
+          },
+          {
+            "name": "Outward Telegraphic Transfer (OTT) fee",
+            "value": "0.11%(swift fee) + USD15 (cable fee)",
+            "condition": "amount of more than USD10,000"
+          },
+          {
+            "name": "Inward Telegraphic Transfer (ITT) fee",
+            "value": "USD10 or 0,07% (minimum)",
+            "condition": ""
+          },
+          {
+            "name": "Intra-bank transfers",
+            "value": "Free of charge",
+            "condition": "for Phnom Penh Branches"
+          }
+        ]
+      }
+    ]
+  },
+  "PPCBank Piggy Bank::ppcbank_piggy_bank.txt": {
+    "product": "PPCBank Piggy Bank",
+    "text_file": "ppcbank_piggy_bank.txt",
+    "document_id": "product_document_54ba45d45adcce56",
+    "sections": [
+      {
+        "type": "overview",
+        "title": "Piggy Bank Account",
+        "order": 0,
+        "chunks": [
+          "Invest any amount with PPCBank to earn extra income.",
+          "Personal BankingDeposit Piggy Bank",
+          "Save anytime, anywhere",
+          "With the PPCBank Mobile App, you can save money daily or monthly, with the assurance of safety and a high interest rate of up to 6.30%."
+        ],
+        "rates": [],
+        "conditions": [],
+        "eligibility": [],
+        "fees": []
+      },
+      {
+        "type": "rate_table",
+        "title": "Interest Rate",
+        "order": 1,
+        "chunks": [],
+        "rates": [
+          {
+            "term_months": 1,
+            "currency": "USD",
+            "channel": "",
+            "payment": "",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "",
+            "rate_pa": 1.5
+          },
+          {
+            "term_months": 1,
+            "currency": "KHR",
+            "channel": "",
+            "payment": "",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "",
+            "rate_pa": 2.0
+          },
+          {
+            "term_months": 2,
+            "currency": "USD",
+            "channel": "",
+            "payment": "",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "",
+            "rate_pa": 1.8
+          },
+          {
+            "term_months": 2,
+            "currency": "KHR",
+            "channel": "",
+            "payment": "",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "",
+            "rate_pa": 2.5
+          },
+          {
+            "term_months": 3,
+            "currency": "USD",
+            "channel": "",
+            "payment": "",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "",
+            "rate_pa": 2.5
+          },
+          {
+            "term_months": 3,
+            "currency": "KHR",
+            "channel": "",
+            "payment": "",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "",
+            "rate_pa": 3.5
+          },
+          {
+            "term_months": 4,
+            "currency": "USD",
+            "channel": "",
+            "payment": "",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "",
+            "rate_pa": 2.7
+          },
+          {
+            "term_months": 4,
+            "currency": "KHR",
+            "channel": "",
+            "payment": "",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "",
+            "rate_pa": 4.0
+          },
+          {
+            "term_months": 5,
+            "currency": "USD",
+            "channel": "",
+            "payment": "",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "",
+            "rate_pa": 3.0
+          },
+          {
+            "term_months": 5,
+            "currency": "KHR",
+            "channel": "",
+            "payment": "",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "",
+            "rate_pa": 4.5
+          },
+          {
+            "term_months": 6,
+            "currency": "USD",
+            "channel": "",
+            "payment": "",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "",
+            "rate_pa": 4.0
+          },
+          {
+            "term_months": 6,
+            "currency": "KHR",
+            "channel": "",
+            "payment": "",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "",
+            "rate_pa": 5.5
+          },
+          {
+            "term_months": 7,
+            "currency": "USD",
+            "channel": "",
+            "payment": "",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "",
+            "rate_pa": 4.2
+          },
+          {
+            "term_months": 7,
+            "currency": "KHR",
+            "channel": "",
+            "payment": "",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "",
+            "rate_pa": 5.7
+          },
+          {
+            "term_months": 8,
+            "currency": "USD",
+            "channel": "",
+            "payment": "",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "",
+            "rate_pa": 4.5
+          },
+          {
+            "term_months": 8,
+            "currency": "KHR",
+            "channel": "",
+            "payment": "",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "",
+            "rate_pa": 5.8
+          },
+          {
+            "term_months": 9,
+            "currency": "USD",
+            "channel": "",
+            "payment": "",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "",
+            "rate_pa": 4.6
+          },
+          {
+            "term_months": 9,
+            "currency": "KHR",
+            "channel": "",
+            "payment": "",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "",
+            "rate_pa": 5.9
+          },
+          {
+            "term_months": 10,
+            "currency": "USD",
+            "channel": "",
+            "payment": "",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "",
+            "rate_pa": 5.0
+          },
+          {
+            "term_months": 10,
+            "currency": "KHR",
+            "channel": "",
+            "payment": "",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "",
+            "rate_pa": 6.0
+          },
+          {
+            "term_months": 11,
+            "currency": "USD",
+            "channel": "",
+            "payment": "",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "",
+            "rate_pa": 5.2
+          },
+          {
+            "term_months": 11,
+            "currency": "KHR",
+            "channel": "",
+            "payment": "",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "",
+            "rate_pa": 6.2
+          },
+          {
+            "term_months": 12,
+            "currency": "USD",
+            "channel": "",
+            "payment": "",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "",
+            "rate_pa": 5.3
+          },
+          {
+            "term_months": 12,
+            "currency": "KHR",
+            "channel": "",
+            "payment": "",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "",
+            "rate_pa": 6.3
+          }
+        ],
+        "conditions": [],
+        "eligibility": [],
+        "fees": []
+      },
+      {
+        "type": "conditions",
+        "title": "Conditions",
+        "order": 2,
+        "chunks": [],
+        "rates": [],
+        "conditions": [
+          {
+            "category": "Piggy Bank",
+            "field": "initial_deposit",
+            "value": "Not required"
+          },
+          {
+            "category": "Piggy Bank",
+            "field": "terms",
+            "value": "From 1 month to 12 months"
+          },
+          {
+            "category": "Piggy Bank",
+            "field": "currency",
+            "value": "USD and KHR"
+          },
+          {
+            "category": "Piggy Bank",
+            "field": "opening_channel",
+            "value": "Mobile Banking"
+          },
+          {
+            "category": "Piggy Bank",
+            "field": "maximum_deposit",
+            "value": "USD 5,000 or equivalent"
+          },
+          {
+            "category": "Piggy Bank",
+            "field": "maturity_option",
+            "value": "Self-closing at maturity"
+          },
+          {
+            "category": "Piggy Bank",
+            "field": "withholding_tax",
+            "value": "Resident 6% Non-resident 14%"
+          },
+          {
+            "category": "Piggy Bank",
+            "field": "account_opening",
+            "value": "Have a Demand Deposit Account (Current, Savings, or Fast Account) No additional documentation required A maximum of 3 accounts can be opened per CIF"
+          }
+        ],
+        "eligibility": [],
+        "fees": []
+      },
+      {
+        "type": "other",
+        "title": "Note",
+        "order": 3,
+        "chunks": [
+          "Note: Terms and conditions are subject to change at the Bank’s discretion, without prior notice to customers."
+        ],
+        "rates": [],
+        "conditions": [],
+        "eligibility": [],
+        "fees": []
+      }
+    ]
+  },
+  "PPCBank Buddy Bank::ppcbank_buddy_bank.txt": {
+    "product": "PPCBank Buddy Bank",
+    "text_file": "ppcbank_buddy_bank.txt",
+    "document_id": "product_document_31af3a39b337a51e",
+    "sections": [
+      {
+        "type": "overview",
+        "title": "Buddy Bank",
+        "order": 0,
+        "chunks": [
+          "Buddy Bank",
+          "Say Hello to Cambodia’s First Buddy-Friendly Account.",
+          "Cambodia’s first-ever shared savings account designed for families, friends, and teams to manage money together with full transparency and zero confusion.",
+          "Start your Buddy Bank nowSecure by PPCBank100% Consent-DrivenTransparent for EveryoneInvited and Approved Members Only"
+        ],
+        "rates": [],
+        "conditions": [],
+        "eligibility": [],
+        "fees": []
+      },
+      {
+        "type": "overview",
+        "title": "What is Buddy Bank?",
+        "order": 1,
+        "chunks": [
+          "A Shared Account Made for Real Life.",
+          "Buddy Bank lets groups pool money into one secure savings account inside PPCBank Mobile. From family dinners to group trips, monthly budgeting, or community activities, Buddy Bank makes shared money simple, safe, and stress-free.",
+          "Secure, Consent-driven, Transparency",
+          "Buddy Master: Creates the account and manages member activities",
+          "Buddy Members: Join, contribute, and request money take-out",
+          "Every action is transparent. Every member stays in control."
+        ],
+        "rates": [],
+        "conditions": [],
+        "eligibility": [],
+        "fees": []
+      },
+      {
+        "type": "benefits",
+        "title": "For Anyone Who Shares Money Together",
+        "order": 2,
+        "chunks": [
+          "For Anyone Who Shares Money Together.",
+          "Families – monthly budgeting, celebrations, groceries",
+          "Friend Groups – travel plans, reunions, events",
+          "Office Teams – surprise gifts, team bonding, shared lunches",
+          "Students – club events, group projects",
+          "Community & Charity Groups – pooled donations",
+          "If you’ve ever shared expenses… Buddy Bank makes it 10× easier."
+        ],
+        "rates": [],
+        "conditions": [],
+        "eligibility": [],
+        "fees": []
+      },
+      {
+        "type": "benefits",
+        "title": "Key Features",
+        "order": 3,
+        "chunks": [
+          "One owner, everyone shares. The Buddy Master owns the account. Members can see all activity at any time.",
+          "Full transparency in every transaction. No secrets, no confusion — all deposits, withdrawals, and requests are visible to the whole group.",
+          "Collecting group money has never been easier. Buddy Masters can send a Money Collection Request. Members just tap to contribute.",
+          "Perfect for any group purpose. Family dinners, friend trips, office team events, charity groups, school committees — Buddy Bank fits every scenario.",
+          "Split bills like a pro. Members can send a pay-back request to the Buddy Master for shared expenses.",
+          "Join or leave anytime. No paperwork. No hassle. Consent-based joining and leaving with a single tap."
+        ],
+        "rates": [],
+        "conditions": [],
+        "eligibility": [],
+        "fees": []
+      },
+      {
+        "type": "other",
+        "title": "Buddy Master vs Buddy Member",
+        "order": 4,
+        "chunks": [
+          "Clear roles. Clear responsibilities.",
+          "Action | Buddy Master | Buddy Member",
+          "Open Buddy Bank",
+          "Invite Members",
+          "Deposit Money",
+          "Approve Collection Requests",
+          "Approve Withdraw Requests",
+          "Make Transaction from Account",
+          "View Account & History",
+          "Close Account",
+          "Leave Buddy Bank"
+        ],
+        "rates": [],
+        "conditions": [],
+        "eligibility": [],
+        "fees": []
+      },
+      {
+        "type": "benefits",
+        "title": "Why Buddy Bank Is Safe",
+        "order": 5,
+        "chunks": [
+          "Engineered for trust, designed for groups.",
+          "Consent-Based Controls: Every action, like joining, contributing, or withdrawing, requires member approval.",
+          "Transparent Logs: Every activity is recorded and visible to all members.",
+          "Invited Members Only: Only invited members can join your buddy bank.",
+          "Powered by PPCBank Security: Built on our proven banking infrastructure to ensure safety at every step."
+        ],
+        "rates": [],
+        "conditions": [],
+        "eligibility": [],
+        "fees": []
+      },
+      {
+        "type": "apply",
+        "title": "How to Get Started",
+        "order": 6,
+        "chunks": [
+          "Open PPCBank Mobile App",
+          "Navigate to Buddy Bank",
+          "Create a group and invite members",
+          "Start managing shared money easily and securely"
+        ],
+        "rates": [],
+        "conditions": [],
+        "eligibility": [],
+        "fees": []
+      }
+    ]
+  },
+  "PPCBank Heng Heng Account::ppcbank_heng_heng_account.txt": {
+    "product": "PPCBank Heng Heng Account",
+    "text_file": "ppcbank_heng_heng_account.txt",
+    "document_id": "product_document_58fa8f53618fbad8",
+    "sections": [
+      {
+        "type": "overview",
+        "title": "Heng Heng Account Overview",
+        "order": 0,
+        "chunks": [
+          "Interest rates vary according to the amount in each tier.",
+          "Enjoy financial security and high interest rates",
+          "This account benefits you with more interest earned based on the outstanding balance in your account.",
+          "The interest rate is accrued daily and paid on a quarterly basis."
+        ],
+        "rates": [],
+        "conditions": [],
+        "eligibility": [],
+        "fees": []
+      },
+      {
+        "type": "benefits",
+        "title": "Product Features",
+        "order": 1,
+        "chunks": [
+          "Individual (Resident& Non-Resident) Initial opening balance: USD 1,000 / KHR 4,000,000 Ongoing balance:USD 500 / KHR 2,000,000",
+          "Corporate, Bank, MFI & OFI (Resident & Non-Resident) Initial opening balance: USD 5,000 / KHR 20,000,000 Ongoing balance: USD 500 / KHR 2,000,000"
+        ],
+        "rates": [],
+        "conditions": [],
+        "eligibility": [],
+        "fees": []
+      },
+      {
+        "type": "requirements",
+        "title": "Requirements",
+        "order": 2,
+        "chunks": [],
+        "rates": [],
+        "conditions": [],
+        "eligibility": [
+          {
+            "applicant": "Cambodia",
+            "document": "Be at least 18 years old"
+          },
+          {
+            "applicant": "Cambodia",
+            "document": "National ID Card / Passport / Family Book / Residence Book"
+          },
+          {
+            "applicant": "Foreigner",
+            "document": "Valid passport"
+          },
+          {
+            "applicant": "Foreigner",
+            "document": "Employment Certificate / Employment Contract / Business Registration"
+          }
+        ],
+        "fees": []
+      },
+      {
+        "type": "rate_table",
+        "title": "Daily Ending Balance Interest Rates",
+        "order": 3,
+        "chunks": [],
+        "rates": [
+          {
+            "term_months": 0,
+            "currency": "USD",
+            "channel": "",
+            "payment": "",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "< 100,000",
+            "rate_pa": 0.0
+          },
+          {
+            "term_months": 0,
+            "currency": "USD",
+            "channel": "",
+            "payment": "",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "≥ 100,000 – 250,000",
+            "rate_pa": 1.0
+          },
+          {
+            "term_months": 0,
+            "currency": "USD",
+            "channel": "",
+            "payment": "",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "≥ 250,000 – 2,000,000",
+            "rate_pa": 2.0
+          },
+          {
+            "term_months": 0,
+            "currency": "USD",
+            "channel": "",
+            "payment": "",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "> 2,000,000",
+            "rate_pa": 0.5
+          },
+          {
+            "term_months": 0,
+            "currency": "KHR",
+            "channel": "",
+            "payment": "",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "< 100 million",
+            "rate_pa": 0.0
+          },
+          {
+            "term_months": 0,
+            "currency": "KHR",
+            "channel": "",
+            "payment": "",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "≥ 100 million – 1,000 million",
+            "rate_pa": 2.0
+          },
+          {
+            "term_months": 0,
+            "currency": "KHR",
+            "channel": "",
+            "payment": "",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "≥ 1,000 million – 8,000 million",
+            "rate_pa": 3.0
+          },
+          {
+            "term_months": 0,
+            "currency": "KHR",
+            "channel": "",
+            "payment": "",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "> 800 million",
+            "rate_pa": 1.5
+          }
+        ],
+        "conditions": [],
+        "eligibility": [],
+        "fees": []
+      },
+      {
+        "type": "fees",
+        "title": "Service Fees",
+        "order": 4,
+        "chunks": [
+          "Note: Interests will be credited to the account on a quarterly basis"
+        ],
+        "rates": [],
+        "conditions": [],
+        "eligibility": [],
+        "fees": [
+          {
+            "name": "Cheque book",
+            "value": "Free",
+            "condition": ""
+          },
+          {
+            "name": "Bank statement",
+            "value": "Free",
+            "condition": ""
+          },
+          {
+            "name": "smartBiz",
+            "value": "Free",
+            "condition": ""
+          },
+          {
+            "name": "Early account closure",
+            "value": "USD50 or KHR 200,000",
+            "condition": "less than 6 months"
+          },
+          {
+            "name": "Dormant account",
+            "value": "USD50 or KHR 200,000",
+            "condition": ""
+          }
+        ]
+      }
+    ]
+  },
+  "PPCBank Songkhoem Installment Deposit::ppcbank_songkhoem_installment.txt": {
+    "product": "PPCBank Songkhoem Installment Deposit",
+    "text_file": "ppcbank_songkhoem_installment.txt",
+    "document_id": "product_document_6a975a38c0411197",
+    "sections": [
+      {
+        "type": "overview",
+        "title": "Songkhoem Installment Overview",
+        "order": 0,
+        "chunks": [
+          "Fulfill your financial plans effectively, accessible in both Cambodia and Korea.",
+          "Personal BankingDeposit SongKhoem Installment",
+          "High-interest savings with flexible terms",
+          "Start your Songkhoem Installment with PPCBank today and achieve your financial goals with attractive interest rates based on your savings period. You can easily open a Songkhoem Installment Account in KHR or USD through the PPCBank Mobile App."
+        ],
+        "rates": [],
+        "conditions": [],
+        "eligibility": [],
+        "fees": []
+      },
+      {
+        "type": "rate_table",
+        "title": "Interest Rates (USD - Minimum Balance USD 10)",
+        "order": 1,
+        "chunks": [],
+        "rates": [
+          {
+            "term_months": 15,
+            "currency": "USD",
+            "channel": "",
+            "payment": "",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "",
+            "rate_pa": 5.5
+          },
+          {
+            "term_months": 15,
+            "currency": "USD",
+            "channel": "",
+            "payment": "",
+            "rate_kind": "pre_maturity",
+            "holding_period": "6-11 months",
+            "amount_tier": "",
+            "rate_pa": 4.0
+          },
+          {
+            "term_months": 21,
+            "currency": "USD",
+            "channel": "",
+            "payment": "",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "",
+            "rate_pa": 5.6
+          },
+          {
+            "term_months": 21,
+            "currency": "USD",
+            "channel": "",
+            "payment": "",
+            "rate_kind": "pre_maturity",
+            "holding_period": "6-11 months",
+            "amount_tier": "",
+            "rate_pa": 4.0
+          },
+          {
+            "term_months": 21,
+            "currency": "USD",
+            "channel": "",
+            "payment": "",
+            "rate_kind": "pre_maturity",
+            "holding_period": "12-17 months",
+            "amount_tier": "",
+            "rate_pa": 4.5
+          },
+          {
+            "term_months": 30,
+            "currency": "USD",
+            "channel": "",
+            "payment": "",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "",
+            "rate_pa": 5.6
+          },
+          {
+            "term_months": 30,
+            "currency": "USD",
+            "channel": "",
+            "payment": "",
+            "rate_kind": "pre_maturity",
+            "holding_period": "6-11 months",
+            "amount_tier": "",
+            "rate_pa": 4.0
+          },
+          {
+            "term_months": 30,
+            "currency": "USD",
+            "channel": "",
+            "payment": "",
+            "rate_kind": "pre_maturity",
+            "holding_period": "12-17 months",
+            "amount_tier": "",
+            "rate_pa": 4.5
+          },
+          {
+            "term_months": 30,
+            "currency": "USD",
+            "channel": "",
+            "payment": "",
+            "rate_kind": "pre_maturity",
+            "holding_period": "18-23 months",
+            "amount_tier": "",
+            "rate_pa": 4.8
+          },
+          {
+            "term_months": 42,
+            "currency": "USD",
+            "channel": "",
+            "payment": "",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "",
+            "rate_pa": 5.6
+          },
+          {
+            "term_months": 42,
+            "currency": "USD",
+            "channel": "",
+            "payment": "",
+            "rate_kind": "pre_maturity",
+            "holding_period": "6-11 months",
+            "amount_tier": "",
+            "rate_pa": 4.0
+          },
+          {
+            "term_months": 42,
+            "currency": "USD",
+            "channel": "",
+            "payment": "",
+            "rate_kind": "pre_maturity",
+            "holding_period": "12-17 months",
+            "amount_tier": "",
+            "rate_pa": 4.5
+          },
+          {
+            "term_months": 42,
+            "currency": "USD",
+            "channel": "",
+            "payment": "",
+            "rate_kind": "pre_maturity",
+            "holding_period": "18-23 months",
+            "amount_tier": "",
+            "rate_pa": 4.8
+          },
+          {
+            "term_months": 42,
+            "currency": "USD",
+            "channel": "",
+            "payment": "",
+            "rate_kind": "pre_maturity",
+            "holding_period": "24-25 months",
+            "amount_tier": "",
+            "rate_pa": 5.0
+          },
+          {
+            "term_months": 54,
+            "currency": "USD",
+            "channel": "",
+            "payment": "",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "",
+            "rate_pa": 5.8
+          },
+          {
+            "term_months": 54,
+            "currency": "USD",
+            "channel": "",
+            "payment": "",
+            "rate_kind": "pre_maturity",
+            "holding_period": "6-11 months",
+            "amount_tier": "",
+            "rate_pa": 4.0
+          },
+          {
+            "term_months": 54,
+            "currency": "USD",
+            "channel": "",
+            "payment": "",
+            "rate_kind": "pre_maturity",
+            "holding_period": "12-17 months",
+            "amount_tier": "",
+            "rate_pa": 4.5
+          },
+          {
+            "term_months": 54,
+            "currency": "USD",
+            "channel": "",
+            "payment": "",
+            "rate_kind": "pre_maturity",
+            "holding_period": "18-23 months",
+            "amount_tier": "",
+            "rate_pa": 4.8
+          },
+          {
+            "term_months": 54,
+            "currency": "USD",
+            "channel": "",
+            "payment": "",
+            "rate_kind": "pre_maturity",
+            "holding_period": "24-25 months",
+            "amount_tier": "",
+            "rate_pa": 5.0
+          },
+          {
+            "term_months": 54,
+            "currency": "USD",
+            "channel": "",
+            "payment": "",
+            "rate_kind": "pre_maturity",
+            "holding_period": "36 months",
+            "amount_tier": "",
+            "rate_pa": 5.2
+          },
+          {
+            "term_months": 60,
+            "currency": "USD",
+            "channel": "",
+            "payment": "",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "",
+            "rate_pa": 5.8
+          },
+          {
+            "term_months": 60,
+            "currency": "USD",
+            "channel": "",
+            "payment": "",
+            "rate_kind": "pre_maturity",
+            "holding_period": "6-11 months",
+            "amount_tier": "",
+            "rate_pa": 4.0
+          },
+          {
+            "term_months": 60,
+            "currency": "USD",
+            "channel": "",
+            "payment": "",
+            "rate_kind": "pre_maturity",
+            "holding_period": "12-17 months",
+            "amount_tier": "",
+            "rate_pa": 4.5
+          },
+          {
+            "term_months": 60,
+            "currency": "USD",
+            "channel": "",
+            "payment": "",
+            "rate_kind": "pre_maturity",
+            "holding_period": "18-23 months",
+            "amount_tier": "",
+            "rate_pa": 4.8
+          },
+          {
+            "term_months": 60,
+            "currency": "USD",
+            "channel": "",
+            "payment": "",
+            "rate_kind": "pre_maturity",
+            "holding_period": "24-25 months",
+            "amount_tier": "",
+            "rate_pa": 5.0
+          },
+          {
+            "term_months": 60,
+            "currency": "USD",
+            "channel": "",
+            "payment": "",
+            "rate_kind": "pre_maturity",
+            "holding_period": "36 months",
+            "amount_tier": "",
+            "rate_pa": 5.2
+          }
+        ],
+        "conditions": [],
+        "eligibility": [],
+        "fees": []
+      },
+      {
+        "type": "rate_table",
+        "title": "Interest Rates (KHR - Minimum Balance KHR 40,000)",
+        "order": 2,
+        "chunks": [],
+        "rates": [
+          {
+            "term_months": 15,
+            "currency": "KHR",
+            "channel": "",
+            "payment": "",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "",
+            "rate_pa": 6.5
+          },
+          {
+            "term_months": 15,
+            "currency": "KHR",
+            "channel": "",
+            "payment": "",
+            "rate_kind": "pre_maturity",
+            "holding_period": "6-11 months",
+            "amount_tier": "",
+            "rate_pa": 4.5
+          },
+          {
+            "term_months": 21,
+            "currency": "KHR",
+            "channel": "",
+            "payment": "",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "",
+            "rate_pa": 6.5
+          },
+          {
+            "term_months": 21,
+            "currency": "KHR",
+            "channel": "",
+            "payment": "",
+            "rate_kind": "pre_maturity",
+            "holding_period": "6-11 months",
+            "amount_tier": "",
+            "rate_pa": 4.5
+          },
+          {
+            "term_months": 21,
+            "currency": "KHR",
+            "channel": "",
+            "payment": "",
+            "rate_kind": "pre_maturity",
+            "holding_period": "12-17 months",
+            "amount_tier": "",
+            "rate_pa": 5.0
+          },
+          {
+            "term_months": 30,
+            "currency": "KHR",
+            "channel": "",
+            "payment": "",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "",
+            "rate_pa": 6.6
+          },
+          {
+            "term_months": 30,
+            "currency": "KHR",
+            "channel": "",
+            "payment": "",
+            "rate_kind": "pre_maturity",
+            "holding_period": "6-11 months",
+            "amount_tier": "",
+            "rate_pa": 4.5
+          },
+          {
+            "term_months": 30,
+            "currency": "KHR",
+            "channel": "",
+            "payment": "",
+            "rate_kind": "pre_maturity",
+            "holding_period": "12-17 months",
+            "amount_tier": "",
+            "rate_pa": 5.0
+          },
+          {
+            "term_months": 30,
+            "currency": "KHR",
+            "channel": "",
+            "payment": "",
+            "rate_kind": "pre_maturity",
+            "holding_period": "18-23 months",
+            "amount_tier": "",
+            "rate_pa": 5.3
+          },
+          {
+            "term_months": 42,
+            "currency": "KHR",
+            "channel": "",
+            "payment": "",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "",
+            "rate_pa": 6.6
+          },
+          {
+            "term_months": 42,
+            "currency": "KHR",
+            "channel": "",
+            "payment": "",
+            "rate_kind": "pre_maturity",
+            "holding_period": "6-11 months",
+            "amount_tier": "",
+            "rate_pa": 4.5
+          },
+          {
+            "term_months": 42,
+            "currency": "KHR",
+            "channel": "",
+            "payment": "",
+            "rate_kind": "pre_maturity",
+            "holding_period": "12-17 months",
+            "amount_tier": "",
+            "rate_pa": 5.0
+          },
+          {
+            "term_months": 42,
+            "currency": "KHR",
+            "channel": "",
+            "payment": "",
+            "rate_kind": "pre_maturity",
+            "holding_period": "18-23 months",
+            "amount_tier": "",
+            "rate_pa": 5.3
+          },
+          {
+            "term_months": 42,
+            "currency": "KHR",
+            "channel": "",
+            "payment": "",
+            "rate_kind": "pre_maturity",
+            "holding_period": "24-25 months",
+            "amount_tier": "",
+            "rate_pa": 5.5
+          },
+          {
+            "term_months": 54,
+            "currency": "KHR",
+            "channel": "",
+            "payment": "",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "",
+            "rate_pa": 6.8
+          },
+          {
+            "term_months": 54,
+            "currency": "KHR",
+            "channel": "",
+            "payment": "",
+            "rate_kind": "pre_maturity",
+            "holding_period": "6-11 months",
+            "amount_tier": "",
+            "rate_pa": 4.5
+          },
+          {
+            "term_months": 54,
+            "currency": "KHR",
+            "channel": "",
+            "payment": "",
+            "rate_kind": "pre_maturity",
+            "holding_period": "12-17 months",
+            "amount_tier": "",
+            "rate_pa": 5.0
+          },
+          {
+            "term_months": 54,
+            "currency": "KHR",
+            "channel": "",
+            "payment": "",
+            "rate_kind": "pre_maturity",
+            "holding_period": "18-23 months",
+            "amount_tier": "",
+            "rate_pa": 5.3
+          },
+          {
+            "term_months": 54,
+            "currency": "KHR",
+            "channel": "",
+            "payment": "",
+            "rate_kind": "pre_maturity",
+            "holding_period": "24-25 months",
+            "amount_tier": "",
+            "rate_pa": 5.5
+          },
+          {
+            "term_months": 54,
+            "currency": "KHR",
+            "channel": "",
+            "payment": "",
+            "rate_kind": "pre_maturity",
+            "holding_period": "36 months",
+            "amount_tier": "",
+            "rate_pa": 5.7
+          },
+          {
+            "term_months": 60,
+            "currency": "KHR",
+            "channel": "",
+            "payment": "",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "",
+            "rate_pa": 6.8
+          },
+          {
+            "term_months": 60,
+            "currency": "KHR",
+            "channel": "",
+            "payment": "",
+            "rate_kind": "pre_maturity",
+            "holding_period": "6-11 months",
+            "amount_tier": "",
+            "rate_pa": 4.5
+          },
+          {
+            "term_months": 60,
+            "currency": "KHR",
+            "channel": "",
+            "payment": "",
+            "rate_kind": "pre_maturity",
+            "holding_period": "12-17 months",
+            "amount_tier": "",
+            "rate_pa": 5.0
+          },
+          {
+            "term_months": 60,
+            "currency": "KHR",
+            "channel": "",
+            "payment": "",
+            "rate_kind": "pre_maturity",
+            "holding_period": "18-23 months",
+            "amount_tier": "",
+            "rate_pa": 5.3
+          },
+          {
+            "term_months": 60,
+            "currency": "KHR",
+            "channel": "",
+            "payment": "",
+            "rate_kind": "pre_maturity",
+            "holding_period": "24-25 months",
+            "amount_tier": "",
+            "rate_pa": 5.5
+          },
+          {
+            "term_months": 60,
+            "currency": "KHR",
+            "channel": "",
+            "payment": "",
+            "rate_kind": "pre_maturity",
+            "holding_period": "36 months",
+            "amount_tier": "",
+            "rate_pa": 5.7
+          }
+        ],
+        "conditions": [],
+        "eligibility": [],
+        "fees": []
+      },
+      {
+        "type": "benefits",
+        "title": "Special Benefits",
+        "order": 3,
+        "chunks": [
+          "Customers with a Junior Savings Account and at least one transaction will receive an additional interest rate of 0.10%",
+          "Customers with a Demand Deposit Account holding a minimum balance of USD 100 will receive an additional interest rate of 0.10%",
+          "Customers who hold both a Junior Savings Account and a Demand Deposit Account will receive an additional combined interest rate of 0.20%"
+        ],
+        "rates": [],
+        "conditions": [],
+        "eligibility": [],
+        "fees": []
+      },
+      {
+        "type": "requirements",
+        "title": "Requirements",
+        "order": 4,
+        "chunks": [],
+        "rates": [],
+        "conditions": [],
+        "eligibility": [
+          {
+            "applicant": "Cambodian",
+            "document": "Have a Demand Deposit Account (Current, Savings, or Fast Account)"
+          },
+          {
+            "applicant": "Cambodian",
+            "document": "Have PPCBank Mobile App or smartBiz"
+          },
+          {
+            "applicant": "Cambodian",
+            "document": "No additional documents are required"
+          }
+        ],
+        "fees": []
+      }
+    ]
+  },
+  "PPCBank Car Loan::ppcbank_car_loan.md": {
+    "product": "PPCBank Car Loan",
+    "text_file": "ppcbank_car_loan.md",
+    "document_id": "product_document_a709b364941bd7b7",
+    "sections": [
+      {
+        "type": "overview",
+        "title": "Drive Your Dream Car Sooner with a PPCBank Auto Loan",
+        "order": 0,
+        "chunks": [
+          "Looking for a smarter way to finance your car?",
+          "Whether it’s brand new or gently used, PPCBank offers auto loans with low, competitive interest rates that help you get on the road faster. Enjoy a quick and easy approval process, flexible repayment options, and trusted support every step of the way. At PPCBank, we make car ownership simple, affordable, and stress-free."
+        ],
+        "rates": [],
+        "conditions": [],
+        "eligibility": [],
+        "fees": []
+      },
+      {
+        "type": "conditions",
+        "title": "Conditions",
+        "order": 1,
+        "chunks": [],
+        "rates": [],
+        "conditions": [
+          {
+            "category": "New Cars",
+            "field": "loan_amount",
+            "value": "Up to 300,000 USD for personal\nUp to 1,000,000 USD for companies"
+          },
+          {
+            "category": "New Cars",
+            "field": "interest_rate",
+            "value": "From 8.80% / Year"
+          },
+          {
+            "category": "New Cars",
+            "field": "loan_ratio",
+            "value": "Up to 80% of (Car Price)"
+          },
+          {
+            "category": "New Cars",
+            "field": "loan_term",
+            "value": "Up to 108 months"
+          },
+          {
+            "category": "Used Cars",
+            "field": "loan_amount",
+            "value": "Up to 300,000 USD for personal\nUp to 1,000,000 USD for companies"
+          },
+          {
+            "category": "Used Cars",
+            "field": "interest_rate",
+            "value": "From 10.90% / Year"
+          },
+          {
+            "category": "Used Cars",
+            "field": "loan_ratio",
+            "value": "Up to 70% of (Car Price)"
+          },
+          {
+            "category": "Used Cars",
+            "field": "loan_term",
+            "value": "Up to 84 months"
+          }
+        ],
+        "eligibility": [],
+        "fees": []
+      },
+      {
+        "type": "apply",
+        "title": "To Apply",
+        "order": 2,
+        "chunks": [
+          "1 You will need to have an employment ID, employment contract, bank statement, salary confirmation from your bank or payroll list",
+          "2 Be a resident with an address",
+          "3 Driver License"
+        ],
+        "rates": [],
+        "conditions": [],
+        "eligibility": [
+          {
+            "applicant": "To Apply",
+            "document": "You will need to have an employment ID, employment contract, bank statement, salary confirmation from your bank or payroll list"
+          },
+          {
+            "applicant": "To Apply",
+            "document": "Be a resident with an address"
+          },
+          {
+            "applicant": "To Apply",
+            "document": "Driver License"
+          }
+        ],
+        "fees": []
+      },
+      {
+        "type": "contact",
+        "title": "For more information",
+        "order": 3,
+        "chunks": [
+          "Please visit your nearest PPCBank branch, chat with us here, or call our hotlines 096 3 909 909 / 023 909 909 available 24/7 for you.",
+          "Apply Now"
+        ],
+        "rates": [],
+        "conditions": [],
+        "eligibility": [],
+        "fees": []
+      }
+    ]
+  },
+  "PPCBank Home Loan::ppcbank_home_loan.txt": {
+    "product": "PPCBank Home Loan",
+    "text_file": "ppcbank_home_loan.txt",
+    "document_id": "product_document_62be67a018f45772",
+    "sections": [
+      {
+        "type": "overview",
+        "title": "Home Loan Overview",
+        "order": 0,
+        "chunks": [
+          "From 6.99%/Year",
+          "Our loans offer a competitive interest rate and a fast approval process so that you will be able to enjoy your new home easily.",
+          "Make your goal of owning a home or a property easy.",
+          "Are you looking to buy a new home for your family or maybe as an investment?​",
+          "We can help finance it with our Home Loans. You can borrow up to 80% of the home value for up to a 25-year repayment term at a low and attractive interest rate."
+        ],
+        "rates": [],
+        "conditions": [],
+        "eligibility": [],
+        "fees": []
+      },
+      {
+        "type": "conditions",
+        "title": "Conditions",
+        "order": 1,
+        "chunks": [],
+        "rates": [],
+        "conditions": [
+          {
+            "category": "Home Loan",
+            "field": "loan_amount",
+            "value": "From USD 2,000 – 5,000,000"
+          },
+          {
+            "category": "Home Loan",
+            "field": "interest_rate",
+            "value": "From 6.99% per annum"
+          },
+          {
+            "category": "Home Loan",
+            "field": "loan_term",
+            "value": "Up to 300 months"
+          },
+          {
+            "category": "Home Loan",
+            "field": "loan_ratio",
+            "value": "Up to 80% of collateral value"
+          },
+          {
+            "category": "Home Loan",
+            "field": "collateral",
+            "value": "Purchased house (or substitute Property)"
+          }
+        ],
+        "eligibility": [],
+        "fees": []
+      },
+      {
+        "type": "apply",
+        "title": "To Apply",
+        "order": 2,
+        "chunks": [
+          "You will need to have a steady salary or sufficient income",
+          "Be a resident with an address",
+          "Demonstrate the ability to pay back PPCBank",
+          "* Interest Rate: based on loan term, and loan ratio. ** For buying a house from our partner Borey / Condo, the interest rate can be lower than the above interest rate."
+        ],
+        "rates": [],
+        "conditions": [],
+        "eligibility": [],
+        "fees": []
+      },
+      {
+        "type": "contact",
+        "title": "For more information",
+        "order": 3,
+        "chunks": [
+          "Please visit your nearest PPCBank branch, chat with us here or call our hotline 096 3 909 909 / 023 909 909 available 24/7 for you.",
+          "Apply Now"
+        ],
+        "rates": [],
+        "conditions": [],
+        "eligibility": [],
+        "fees": []
+      }
+    ]
+  },
+  "PPCBank Home Improvement Loan::ppcbank_home_improvement_loan.txt": {
+    "product": "PPCBank Home Improvement Loan",
+    "text_file": "ppcbank_home_improvement_loan.txt",
+    "document_id": "product_document_5f076cc0b46f2a07",
+    "sections": [
+      {
+        "type": "overview",
+        "title": "Home Improvement Loan",
+        "order": 0,
+        "chunks": [
+          "Larger loan amounts and a long-term repayment",
+          "Personal BankingLoan Home Improvement Loan",
+          "Bringing beauty and comfort into your home",
+          "PPCBank provides home improvement loans to customers who wish to renovate or beautify their residential construction.",
+          "You can get loans up to USD 200,000 with long-term and flexible repayment options."
+        ],
+        "rates": [],
+        "conditions": [],
+        "eligibility": [],
+        "fees": []
+      },
+      {
+        "type": "conditions",
+        "title": "Condition",
+        "order": 1,
+        "chunks": [],
+        "rates": [],
+        "conditions": [
+          {
+            "category": "Home Improvement Loan",
+            "field": "loan_amount",
+            "value": "Up to USD 200,000"
+          },
+          {
+            "category": "Home Improvement Loan",
+            "field": "interest_rate",
+            "value": "From 9.40% per annum"
+          },
+          {
+            "category": "Home Improvement Loan",
+            "field": "loan_term",
+            "value": "Up to 240 months"
+          },
+          {
+            "category": "Home Improvement Loan",
+            "field": "repayment_mode",
+            "value": "Amortization / Installment / Negotiable Principal"
+          },
+          {
+            "category": "Home Improvement Loan",
+            "field": "loan_ratio",
+            "value": "Up to 80% of collateral value"
+          },
+          {
+            "category": "Home Improvement Loan",
+            "field": "accept_title_deed",
+            "value": "Hard Title Deed"
+          }
+        ],
+        "eligibility": [],
+        "fees": []
+      },
+      {
+        "type": "rate_table",
+        "title": "Home Improvement Loan for Construction",
+        "order": 2,
+        "chunks": [],
+        "rates": [
+          {
+            "term_months": 60,
+            "currency": "USD",
+            "channel": "",
+            "payment": "",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "≤50%",
+            "rate_pa": 9.4
+          },
+          {
+            "term_months": 120,
+            "currency": "USD",
+            "channel": "",
+            "payment": "",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "≤50%",
+            "rate_pa": 10.0
+          },
+          {
+            "term_months": 180,
+            "currency": "USD",
+            "channel": "",
+            "payment": "",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "≤50%",
+            "rate_pa": 10.5
+          },
+          {
+            "term_months": 240,
+            "currency": "USD",
+            "channel": "",
+            "payment": "",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "≤50%",
+            "rate_pa": 11.0
+          },
+          {
+            "term_months": 60,
+            "currency": "USD",
+            "channel": "",
+            "payment": "",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "≤60%",
+            "rate_pa": 10.5
+          },
+          {
+            "term_months": 120,
+            "currency": "USD",
+            "channel": "",
+            "payment": "",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "≤60%",
+            "rate_pa": 11.0
+          },
+          {
+            "term_months": 180,
+            "currency": "USD",
+            "channel": "",
+            "payment": "",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "≤60%",
+            "rate_pa": 11.5
+          },
+          {
+            "term_months": 240,
+            "currency": "USD",
+            "channel": "",
+            "payment": "",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "≤60%",
+            "rate_pa": 12.0
+          },
+          {
+            "term_months": 60,
+            "currency": "USD",
+            "channel": "",
+            "payment": "",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "≤70%",
+            "rate_pa": 11.5
+          },
+          {
+            "term_months": 120,
+            "currency": "USD",
+            "channel": "",
+            "payment": "",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "≤70%",
+            "rate_pa": 12.0
+          },
+          {
+            "term_months": 180,
+            "currency": "USD",
+            "channel": "",
+            "payment": "",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "≤70%",
+            "rate_pa": 12.5
+          },
+          {
+            "term_months": 240,
+            "currency": "USD",
+            "channel": "",
+            "payment": "",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "≤70%",
+            "rate_pa": 13.0
+          }
+        ],
+        "conditions": [],
+        "eligibility": [],
+        "fees": []
+      },
+      {
+        "type": "rate_table",
+        "title": "Home Improvement Loan for Renovation",
+        "order": 3,
+        "chunks": [],
+        "rates": [
+          {
+            "term_months": 60,
+            "currency": "USD",
+            "channel": "",
+            "payment": "",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "≤50%",
+            "rate_pa": 10.0
+          },
+          {
+            "term_months": 120,
+            "currency": "USD",
+            "channel": "",
+            "payment": "",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "≤50%",
+            "rate_pa": 10.5
+          },
+          {
+            "term_months": 60,
+            "currency": "USD",
+            "channel": "",
+            "payment": "",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "≤60%",
+            "rate_pa": 11.0
+          },
+          {
+            "term_months": 120,
+            "currency": "USD",
+            "channel": "",
+            "payment": "",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "≤60%",
+            "rate_pa": 11.5
+          },
+          {
+            "term_months": 60,
+            "currency": "USD",
+            "channel": "",
+            "payment": "",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "≤70%",
+            "rate_pa": 12.0
+          },
+          {
+            "term_months": 120,
+            "currency": "USD",
+            "channel": "",
+            "payment": "",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "≤70%",
+            "rate_pa": 12.5
+          }
+        ],
+        "conditions": [],
+        "eligibility": [],
+        "fees": []
+      },
+      {
+        "type": "apply",
+        "title": "Apply Now",
+        "order": 4,
+        "chunks": [
+          "Apply Now via Online Application Below:"
+        ],
+        "rates": [],
+        "conditions": [],
+        "eligibility": [],
+        "fees": []
+      },
+      {
+        "type": "contact",
+        "title": "For more information",
+        "order": 5,
+        "chunks": [
+          "Please visit your nearest PPCBank branch, chat with us here or call our hotlines 096 3 909 909 / 023 909 909 available 24/7 for you.",
+          "Loan Calculator"
+        ],
+        "rates": [],
+        "conditions": [],
+        "eligibility": [],
+        "fees": []
+      }
+    ]
+  },
+  "PPCBank Car for Cash::ppcbank_car_for_cash.txt": {
+    "product": "PPCBank Car for Cash",
+    "text_file": "ppcbank_car_for_cash.txt",
+    "document_id": "product_document_0161dd61df85a222",
+    "sections": [
+      {
+        "type": "overview",
+        "title": "Car for Cash (Car Collateral Loan)",
+        "order": 0,
+        "chunks": [
+          "Use your vehicle identification card to apply for a loan to support your emergency financial needs. Borrow up to 50% of your vehicle’s value at a reasonable interest rate."
+        ],
+        "rates": [],
+        "conditions": [],
+        "eligibility": [],
+        "fees": []
+      },
+      {
+        "type": "conditions",
+        "title": "Loan Conditions",
+        "order": 1,
+        "chunks": [],
+        "rates": [],
+        "conditions": [
+          {
+            "category": "Tier 1",
+            "field": "interest_rate",
+            "value": "12.9%"
+          },
+          {
+            "category": "Tier 2",
+            "field": "interest_rate",
+            "value": "12.9%"
+          },
+          {
+            "category": "Tier 3",
+            "field": "interest_rate",
+            "value": "12.9%"
+          },
+          {
+            "category": "Tier 1",
+            "field": "brand",
+            "value": "Toyota, Lexus, Ford"
+          },
+          {
+            "category": "Tier 2",
+            "field": "brand",
+            "value": "Hyundai, Kia, Mazda, BYD, Chevrolet"
+          },
+          {
+            "category": "Tier 3",
+            "field": "brand",
+            "value": "Other Brands"
+          },
+          {
+            "category": "Tier 1",
+            "field": "loan_ratio",
+            "value": "50%"
+          },
+          {
+            "category": "Tier 2",
+            "field": "loan_ratio",
+            "value": "40%"
+          },
+          {
+            "category": "Tier 3",
+            "field": "loan_ratio",
+            "value": "30%"
+          },
+          {
+            "category": "Tier 1",
+            "field": "loan_term",
+            "value": "12 to 60 months"
+          },
+          {
+            "category": "Tier 2",
+            "field": "loan_term",
+            "value": "12 to 60 months"
+          },
+          {
+            "category": "Tier 3",
+            "field": "loan_term",
+            "value": "12 to 60 months"
+          }
+        ],
+        "eligibility": [],
+        "fees": []
+      },
+      {
+        "type": "requirements",
+        "title": "Eligibility",
+        "order": 2,
+        "chunks": [],
+        "rates": [],
+        "conditions": [],
+        "eligibility": [
+          {
+            "applicant": "Cambodian",
+            "document": "Cambodian citizenship"
+          },
+          {
+            "applicant": "Cambodian",
+            "document": "Valid income"
+          },
+          {
+            "applicant": "Cambodian",
+            "document": "Driving license"
+          },
+          {
+            "applicant": "Cambodian",
+            "document": "Car insurance"
+          },
+          {
+            "applicant": "Cambodian",
+            "document": "No existing car loan with other banks"
+          },
+          {
+            "applicant": "Cambodian",
+            "document": "Applicable for Phnom Penh area only"
+          }
+        ],
+        "fees": []
+      },
+      {
+        "type": "requirements",
+        "title": "Requirements",
+        "order": 3,
+        "chunks": [
+          "To apply, please bring the following documents:"
+        ],
+        "rates": [],
+        "conditions": [],
+        "eligibility": [
+          {
+            "applicant": "Cambodian",
+            "document": "National ID card or passport"
+          },
+          {
+            "applicant": "Cambodian",
+            "document": "Resident book, family book, or residential certificate"
+          },
+          {
+            "applicant": "Cambodian",
+            "document": "Letter of employment confirmation"
+          },
+          {
+            "applicant": "Cambodian",
+            "document": "Pay slip"
+          },
+          {
+            "applicant": "Cambodian",
+            "document": "Bank statement"
+          },
+          {
+            "applicant": "Cambodian",
+            "document": "Proof of income"
+          },
+          {
+            "applicant": "Cambodian",
+            "document": "Property rental contract and/or other relevant documents"
+          },
+          {
+            "applicant": "Cambodian",
+            "document": "GPS installation required"
+          }
+        ],
+        "fees": []
+      }
+    ]
+  },
+  "PPCBank Loan Against Deposit::ppcbank_loan_against_deposit.txt": {
+    "product": "PPCBank Loan Against Deposit",
+    "text_file": "ppcbank_loan_against_deposit.txt",
+    "document_id": "product_document_b47bf504159c299f",
+    "sections": [
+      {
+        "type": "overview",
+        "title": "Loan Against Deposit",
+        "order": 0,
+        "chunks": [
+          "PPCBank now offers a smart loan-against-deposit for those who need emergency cash. You can apply for a loan instantly on PPCBank Mobile App without losing any accrued interest. Loans can be approved for up to 95% of the deposit amount."
+        ],
+        "rates": [],
+        "conditions": [],
+        "eligibility": [],
+        "fees": []
+      },
+      {
+        "type": "benefits",
+        "title": "Key Benefits",
+        "order": 1,
+        "chunks": [
+          "No fees",
+          "Convenient loan application",
+          "No penalties for early loan repayment",
+          "3% interest per annum on deposit amount when opening account at a branch, and 2% p.a when opening account via PPCBank Mobile App",
+          "Loan terms based on the maturity date of Fixed Deposit",
+          "Loan amount of up to 95% of the deposit amount"
+        ],
+        "rates": [],
+        "conditions": [],
+        "eligibility": [],
+        "fees": []
+      },
+      {
+        "type": "requirements",
+        "title": "Requirements",
+        "order": 2,
+        "chunks": [],
+        "rates": [],
+        "conditions": [],
+        "eligibility": [
+          {
+            "applicant": "Personal",
+            "document": "National ID Card or Valid Passport"
+          },
+          {
+            "applicant": "Business",
+            "document": "Certificate of Registration"
+          },
+          {
+            "applicant": "Business",
+            "document": "Current Tax Patent/VAT Registration Certificate"
+          }
+        ],
+        "fees": []
+      },
+      {
+        "type": "apply",
+        "title": "How to get Loan Against Deposit?",
+        "order": 3,
+        "chunks": [
+          "Tap on “Login to My Account”",
+          "Tap on “LOAN AGAINT DEPOSIT”",
+          "Tap “GET LOAN NOW”",
+          "Tap “I AGREE”, to agree with Terms and Conditions",
+          "Fill out your credit reporting application form, then tap “CONFIRM”",
+          "Enter the loan amount, select repayment type, then tap “NEXT”",
+          "Confirm your information by tapping “YES”",
+          "Name your account, then “CONFIRM”",
+          "Enter your mobile login pass code or use biometric authentication to confirm your loan request"
+        ],
+        "rates": [],
+        "conditions": [],
+        "eligibility": [],
+        "fees": []
+      },
+      {
+        "type": "contact",
+        "title": "For more information",
+        "order": 4,
+        "chunks": [
+          "Please visit your nearest PPCBank branch, chat with us here or call our hotlines 096 3 909 909 / 023 909 909 available 24/7 for you."
+        ],
+        "rates": [],
+        "conditions": [],
+        "eligibility": [],
+        "fees": []
+      },
+      {
+        "type": "other",
+        "title": "Loan Calculator",
+        "order": 5,
+        "chunks": [
+          "Loan Calculator"
+        ],
+        "rates": [],
+        "conditions": [],
+        "eligibility": [],
+        "fees": []
+      }
+    ]
+  },
+  "PPCBank Songkhoem Loan::ppcbank_songkhoem_loan.txt": {
+    "product": "PPCBank Songkhoem Loan",
+    "text_file": "ppcbank_songkhoem_loan.txt",
+    "document_id": "product_document_900d6ac99c157728",
+    "sections": [
+      {
+        "type": "overview",
+        "title": "Songkhoem Loan Overview",
+        "order": 0,
+        "chunks": [
+          "Amount up to USD 25,000",
+          "A Songkhoem loan can help support your move to South Korea.",
+          "This loan provides the necessary funds for individuals preparing to work in South Korea who are facing financial concerns. You can receive a loan of up to $10,000 with reasonable interest rates and fast approval."
+        ],
+        "rates": [],
+        "conditions": [],
+        "eligibility": [],
+        "fees": []
+      },
+      {
+        "type": "conditions",
+        "title": "For Worker - Features",
+        "order": 1,
+        "chunks": [],
+        "rates": [],
+        "conditions": [
+          {
+            "category": "Worker",
+            "field": "loan_amount",
+            "value": "From USD 1,000 to USD 10,000"
+          },
+          {
+            "category": "Worker",
+            "field": "loan_term",
+            "value": "Up to 24 months"
+          },
+          {
+            "category": "Worker",
+            "field": "interest_rate",
+            "value": "12.00% p.a (Collateral)"
+          },
+          {
+            "category": "Worker",
+            "field": "interest_rate",
+            "value": "14.50% p.a (No Collateral)"
+          },
+          {
+            "category": "Worker",
+            "field": "grace_period",
+            "value": "6 months"
+          }
+        ],
+        "eligibility": [],
+        "fees": []
+      },
+      {
+        "type": "other",
+        "title": "For Worker - Repayment Schedule",
+        "order": 2,
+        "chunks": [
+          "Repayment",
+          "Loan Amount | Grace Period (6 months) | No Grace Period",
+          "12 months | 24 months | 12 months | 24 months",
+          "USD 1,000 | 172.54 | 60.98 | 88.84 | 47.07",
+          "USD 2,000 | 345.09 | 121.95 | 177.69 | 94.14",
+          "USD 3,000 | 517.64 | 182.93 | 266.53 | 141.21",
+          "USD 4,000 | 690.17 | 243.91 | 355.38 | 188.28",
+          "USD 5,000 | 862.72 | 304.89 | 444.22 | 235.34",
+          "USD 6,000 | 1,035.26 | 365.86 | 533.06 | 282.41",
+          "USD 7,000 | 1,207.80 | 426.84 | 621.91 | 329.48",
+          "USD 8,000 | 1,380.35 | 487.82 | 710.75 | 376.55",
+          "USD 9,000 | 1,552.89 | 548.80 | 799.60 | 423.62",
+          "USD 10,000 | 1,725.46 | 609.77 | 888.47 | 470.69"
+        ],
+        "rates": [],
+        "conditions": [],
+        "eligibility": [],
+        "fees": []
+      },
+      {
+        "type": "conditions",
+        "title": "For Students - Features",
+        "order": 3,
+        "chunks": [
+          "This loan provides financial support to students pursuing higher education or professional studies in South Korea. It offers up to $25,000 with reasonable interest rates and convenient loan conditions."
+        ],
+        "rates": [],
+        "conditions": [
+          {
+            "category": "Student",
+            "field": "loan_amount",
+            "value": "From USD 2,000 to USD 25,000"
+          },
+          {
+            "category": "Student",
+            "field": "loan_term",
+            "value": "Up to 36 months"
+          },
+          {
+            "category": "Student",
+            "field": "interest_rate",
+            "value": "From 14.50% p.a up"
+          },
+          {
+            "category": "Student",
+            "field": "grace_period",
+            "value": "6 months"
+          }
+        ],
+        "eligibility": [],
+        "fees": []
+      },
+      {
+        "type": "other",
+        "title": "For Students - Repayment Schedule",
+        "order": 4,
+        "chunks": [
+          "Repayment",
+          "Loan Amount | Grace Period (6 months) | No Grace Period",
+          "24 months | 36 months | 24 months | 36 months",
+          "USD 4,000 | 243.91 | 154.97 | 188.28 | 132.84",
+          "USD 5,000 | 304.89 | 193.72 | 235.34 | 166.05",
+          "USD 6,000 | 365.86 | 232.46 | 282.41 | 199.26",
+          "USD 7,000 | 426.84 | 271.20 | 329.48 | 232.47",
+          "USD 8,000 | 487.82 | 309.95 | 376.55 | 265.68",
+          "USD 9,000 | 548.80 | 348.69 | 423.62 | 298.89",
+          "USD 10,000 | 609.77 | 387.43 | 470.69 | 332.10",
+          "USD 15,000 | 914.66 | 581.15 | 706.03 | 498.14",
+          "USD 20,000 | 1,219.55 | 774.87 | 941.38 | 664.19",
+          "USD 25,000 | 1,524.44 | 968.58 | 1,176.72 | 830.24"
+        ],
+        "rates": [],
+        "conditions": [],
+        "eligibility": [],
+        "fees": []
+      },
+      {
+        "type": "requirements",
+        "title": "Requirements",
+        "order": 5,
+        "chunks": [],
+        "rates": [],
+        "conditions": [],
+        "eligibility": [
+          {
+            "applicant": "Cambodian",
+            "document": "Be at least 18-years-old"
+          },
+          {
+            "applicant": "Cambodian",
+            "document": "National ID Card or Valid Passport"
+          },
+          {
+            "applicant": "Cambodian",
+            "document": "Family Book"
+          },
+          {
+            "applicant": "Cambodian",
+            "document": "Birth Certificate"
+          },
+          {
+            "applicant": "Cambodian",
+            "document": "Employment Certificate / Admission Certificate"
+          },
+          {
+            "applicant": "Cambodian",
+            "document": "Health Certificate"
+          },
+          {
+            "applicant": "Cambodian",
+            "document": "Guarantor Required"
+          }
+        ],
+        "fees": []
+      },
+      {
+        "type": "benefits",
+        "title": "Key Benefits",
+        "order": 6,
+        "chunks": [
+          "Deposit money for monthly payments through Jeonbuk Bank of Korea (instant payment).",
+          "Jeonbuk Bank accounts can make payments via KHQR to all Bakong member banks in Cambodia.",
+          "No fees charged for money transfers from Jeonbuk Bank to PPCBank."
+        ],
+        "rates": [],
+        "conditions": [],
+        "eligibility": [],
+        "fees": []
+      },
+      {
+        "type": "contact",
+        "title": "For more information",
+        "order": 7,
+        "chunks": [
+          "Please visit your nearest PPCBank branch, chat with us here or call our hotline096 3 909 909/023 909 909available 24/7 for you.",
+          "Apply Now"
+        ],
+        "rates": [],
+        "conditions": [],
+        "eligibility": [],
+        "fees": []
+      }
+    ]
+  },
+  "PPCBank Annatean Rohas Loan::ppcbank_annatean_rohas.txt": {
+    "product": "PPCBank Annatean Rohas Loan",
+    "text_file": "ppcbank_annatean_rohas.txt",
+    "document_id": "product_document_1fba2be6549f037e",
+    "sections": [
+      {
+        "type": "overview",
+        "title": "Annatean Rohas (Quick Loan)",
+        "order": 0,
+        "chunks": [
+          "Annatean Rohas (Quick Loan)",
+          "For Employees who require urgent financial assistance",
+          "Personal BankingLoan Annatean Rohas (Quick Loan)",
+          "Employees can now apply for Annatean Rohas through the PPCBank Mobile App. Loans are offered for up to KHR 4,000,000 over 12 months, with competitive interest rates."
+        ],
+        "rates": [],
+        "conditions": [],
+        "eligibility": [],
+        "fees": []
+      },
+      {
+        "type": "conditions",
+        "title": "Product Features",
+        "order": 1,
+        "chunks": [],
+        "rates": [],
+        "conditions": [
+          {
+            "category": "Condition",
+            "field": "currency",
+            "value": "KHR"
+          },
+          {
+            "category": "Condition",
+            "field": "loan_amount",
+            "value": "KHR 1,200,000 to KHR 4,000,000"
+          },
+          {
+            "category": "Condition",
+            "field": "loan_term",
+            "value": "From 3 months to 12 months"
+          },
+          {
+            "category": "Condition",
+            "field": "how_to_apply",
+            "value": "By PPCBank Mobile App"
+          },
+          {
+            "category": "Condition",
+            "field": "repayment_mode",
+            "value": "Not Required"
+          }
+        ],
+        "eligibility": [],
+        "fees": []
+      },
+      {
+        "type": "requirements",
+        "title": "Requirements",
+        "order": 2,
+        "chunks": [],
+        "rates": [],
+        "conditions": [],
+        "eligibility": [
+          {
+            "applicant": "Employee",
+            "document": "National ID Card or Valid Passport"
+          },
+          {
+            "applicant": "Employee",
+            "document": "Family Book or Book of Residence"
+          },
+          {
+            "applicant": "Employee",
+            "document": "Have proof of income"
+          },
+          {
+            "applicant": "Employee",
+            "document": "Additional documents (Optional)"
+          }
+        ],
+        "fees": []
+      },
+      {
+        "type": "apply",
+        "title": "Download our Mobile Banking App now",
+        "order": 3,
+        "chunks": [
+          "Download our Mobile Banking App now",
+          "You can apply for a loan without visiting our branches."
+        ],
+        "rates": [],
+        "conditions": [],
+        "eligibility": [],
+        "fees": []
+      }
+    ]
+  },
+  "PPCBank Visa Credit Card::ppcbank_visa_credit_card.txt": {
+    "product": "PPCBank Visa Credit Card",
+    "text_file": "ppcbank_visa_credit_card.txt",
+    "document_id": "product_document_2840880b69004d5f",
+    "sections": [
+      {
+        "type": "overview",
+        "title": "Visa Credit Card Overview",
+        "order": 0,
+        "chunks": [
+          "Our Visa credit card is convenient because you can spend now and pay later.",
+          "PPCBank Visa Credit Card is an electronic card loaded with the latest technology. It makes transactions more flexible for your spending needs, enabling cash withdrawals worldwide from any ATM and payments via POS terminals.",
+          "You can access online payments easier and enjoy a wide range of benefits and discounts from our merchants and other promotions wherever Visa is accepted."
+        ],
+        "rates": [],
+        "conditions": [],
+        "eligibility": [],
+        "fees": []
+      },
+      {
+        "type": "benefits",
+        "title": "Key Benefits",
+        "order": 1,
+        "chunks": [
+          "Welcome cash back up to 5%",
+          "Get cash back rewards on all purchases cross currency (Oversea POS purchase Transaction).",
+          "Receive free instant notifications for every transaction anywhere in the world",
+          "Tap and pay in seconds",
+          "Can be used domestically and internationally wherever Visa is accepted",
+          "Easy to manage on PPCBank mobile app, including card activation, card block, transaction management and more",
+          "Enjoy discount offers and promotions worldwide"
+        ],
+        "rates": [],
+        "conditions": [],
+        "eligibility": [],
+        "fees": []
+      },
+      {
+        "type": "requirements",
+        "title": "Requirements",
+        "order": 2,
+        "chunks": [
+          "Note: * Term and condition apply"
+        ],
+        "rates": [],
+        "conditions": [],
+        "eligibility": [
+          {
+            "applicant": "Applicant",
+            "document": "Application must have a savings or current account with PPCBank"
+          },
+          {
+            "applicant": "Applicant",
+            "document": "Valid ID card or Passport"
+          }
+        ],
+        "fees": []
+      },
+      {
+        "type": "fees",
+        "title": "Standard Fees & Charges",
+        "order": 3,
+        "chunks": [],
+        "rates": [],
+        "conditions": [],
+        "eligibility": [],
+        "fees": [
+          {
+            "name": "Issuing Fee",
+            "value": "Free",
+            "condition": "Credit Classic & Credit Gold"
+          },
+          {
+            "name": "Annual Fee (Principal)",
+            "value": "USD 15",
+            "condition": "Credit Classic"
+          },
+          {
+            "name": "Annual Fee (Principal)",
+            "value": "USD 30",
+            "condition": "Credit Gold"
+          },
+          {
+            "name": "Annual Fee (Supplement)",
+            "value": "USD 10",
+            "condition": "Credit Classic"
+          },
+          {
+            "name": "Annual Fee (Supplement)",
+            "value": "USD 15",
+            "condition": "Credit Gold"
+          },
+          {
+            "name": "Card Replacement",
+            "value": "USD 10",
+            "condition": "Credit Classic & Credit Gold"
+          },
+          {
+            "name": "Purchase interest",
+            "value": "1.5% per month",
+            "condition": "Credit Classic & Credit Gold"
+          },
+          {
+            "name": "Cash Advance Interest",
+            "value": "1.7% per month",
+            "condition": "Credit Classic & Credit Gold"
+          },
+          {
+            "name": "Cash withdrawal at local bank ATMs",
+            "value": "Min USD 5 or 2% of amount withdraw",
+            "condition": "Credit Classic & Credit Gold"
+          },
+          {
+            "name": "Late Payment Fee",
+            "value": "Min USD 10 or 5% of Minimum Monthly Repayment",
+            "condition": "Credit Classic & Credit Gold"
+          },
+          {
+            "name": "Cash withdrawal at PPCBank ATMs",
+            "value": "Min USD 5 or 2% of amount withdraw per transaction",
+            "condition": "Credit Classic & Credit Gold"
+          },
+          {
+            "name": "Cash withdrawal at oversea bank ATMs",
+            "value": "Min USD 5 per transaction or 2% of amount withdrawn",
+            "condition": "Credit Classic & Credit Gold"
+          },
+          {
+            "name": "Balance inquiry, transaction decline on insufficient fund at other bank ATMs",
+            "value": "USD 0.50 per transaction",
+            "condition": "Credit Classic & Credit Gold"
+          }
+        ]
+      },
+      {
+        "type": "benefits",
+        "title": "Card Security",
+        "order": 4,
+        "chunks": [
+          "With PPCBank it is easy to make sure your card is secure. Please keep your card in a secure place. If you realize or suspect your card has been lost or stolen, please call our customer service hotline at 0963 909 909 / 023 909 909 or reach out through our live chat feature on the PPCBank Website.",
+          "After receiving the card:",
+          "Please sign the signature panel on the back of the card",
+          "You can active your new card on PPCBank Mobile App or ATM Machine",
+          "Keep your card in a secure place, if issue occurs will response by cardholder",
+          "PIN Usage",
+          "Please memorize your PIN, do not write it down",
+          "Do not let anyone use your card and do not disclose your PIN to anyone",
+          "Please change your original PIN to one of your choices on PPCBank Mobile app or at any PPCBank ATM.",
+          "Make sure your PIN is protected from being viewed when using an ATM",
+          "Please do not share card information, including full card number, expiry date, and security code (CVV Code) to anyone"
+        ],
+        "rates": [],
+        "conditions": [],
+        "eligibility": [],
+        "fees": []
+      },
+      {
+        "type": "apply",
+        "title": "Ready to have a PPCBank Visa Credit Card?",
+        "order": 5,
+        "chunks": [
+          "Visit any PPCBank branch with required documents",
+          "For more information contact 0963 909 909 / 023 909 909"
+        ],
+        "rates": [],
+        "conditions": [],
+        "eligibility": [],
+        "fees": []
+      }
+    ]
+  },
+  "PPCBank Visa Debit Card::ppcbank_visa_debit_card.txt": {
+    "product": "PPCBank Visa Debit Card",
+    "text_file": "ppcbank_visa_debit_card.txt",
+    "document_id": "product_document_b20725923240449b",
+    "sections": [
+      {
+        "type": "overview",
+        "title": "Visa Debit Card Overview",
+        "order": 0,
+        "chunks": [
+          "PPCBank Visa debit card is an electronic card loaded with the latest technology.",
+          "Offers greater ways to manage your account balance!",
+          "Our Visa Debit Card allows you to use your account balance to make transactions. It keeps your money safe, whether you purchase online or offline. You will have better control over your finances and never go over your available funds. You can make cash withdrawals from ATMs worldwide and receive numerous discounts from our corporate partners.",
+          "Additionally, our card is protected with an additional layer of security (3-D Secure) with an OTP to confirm your identity in order to prevent fraud and unauthorized card usage."
+        ],
+        "rates": [],
+        "conditions": [],
+        "eligibility": [],
+        "fees": []
+      },
+      {
+        "type": "benefits",
+        "title": "Benefits",
+        "order": 1,
+        "chunks": [
+          "Get cash back rewards on all purchases cross currency (Oversea POS purchase Transaction).",
+          "Receive free instant notifications for every transaction anywhere in the world",
+          "Tap and pay in seconds",
+          "Can be used domestically and internationally wherever Visa is accepted",
+          "Easy to manage on PPCBank Mobile App, including card activation, card block, adjust purchase/withdrawal limits, transaction management and more",
+          "Enjoy discount offers and promotions worldwide"
+        ],
+        "rates": [],
+        "conditions": [],
+        "eligibility": [],
+        "fees": []
+      },
+      {
+        "type": "apply",
+        "title": "How to Apply?",
+        "order": 2,
+        "chunks": [
+          "Visit the nearest branch",
+          "Fill in card application form"
+        ],
+        "rates": [],
+        "conditions": [],
+        "eligibility": [],
+        "fees": []
+      },
+      {
+        "type": "fees",
+        "title": "Standard Fees & Charges",
+        "order": 3,
+        "chunks": [
+          "Note: * Term and condition apply"
+        ],
+        "rates": [],
+        "conditions": [],
+        "eligibility": [],
+        "fees": [
+          {
+            "name": "Issuing fee",
+            "value": "USD 5",
+            "condition": ""
+          },
+          {
+            "name": "Annual Fee",
+            "value": "Free",
+            "condition": ""
+          },
+          {
+            "name": "Card replacement",
+            "value": "USD 5",
+            "condition": ""
+          },
+          {
+            "name": "Cash withdrawal at PPCBank ATMs",
+            "value": "Free",
+            "condition": ""
+          },
+          {
+            "name": "Cash withdrawal with other bank ATMs (Domestic)",
+            "value": "USD 4 per transaction",
+            "condition": "Domestic"
+          },
+          {
+            "name": "Cash withdrawal with other bank ATMs (Overseas)",
+            "value": "Min USD 5 per transaction or 2% of amount withdrawn",
+            "condition": "Overseas"
+          },
+          {
+            "name": "Balance inquiry, transaction decline on insufficient fund at other bank ATMs",
+            "value": "USD 0.50 per transaction",
+            "condition": ""
+          }
+        ]
+      },
+      {
+        "type": "other",
+        "title": "Card Security",
+        "order": 4,
+        "chunks": [
+          "With PPCBank it is easy to make sure your card is secure.",
+          "Please keep your card in a secure place. If you realize or suspect your card has been lost or stolen, please call our customer service hotline at 0963 909 909 / 023 909 909 or reach out through our live chat feature on the PPCBank Website.",
+          "After receiving the card:",
+          "Please sign the signature panel on the back of the card",
+          "You can active your new card on PPCBank Mobile App or ATM Machine",
+          "Keep your card in a secure place, if issue occurs will response by cardholder"
+        ],
+        "rates": [],
+        "conditions": [],
+        "eligibility": [],
+        "fees": []
+      },
+      {
+        "type": "other",
+        "title": "PIN Usage",
+        "order": 5,
+        "chunks": [
+          "Please memorize your PIN, do not write it down",
+          "Do not let anyone use your card and do not disclose your PIN to anyone",
+          "Please change your original PIN to one of your choices on PPCBank Mobile app or at any PPCBank ATM.",
+          "Make sure your PIN is protected from being viewed when using an ATM",
+          "Please do not share card information, including full card number, expiry date, and security code (CVV Code) to anyone"
+        ],
+        "rates": [],
+        "conditions": [],
+        "eligibility": [],
+        "fees": []
+      },
+      {
+        "type": "other",
+        "title": "How to Activate Card?",
+        "order": 6,
+        "chunks": [
+          "Customer could activate card on PPCBank mobile app, PPCBank ATM."
+        ],
+        "rates": [],
+        "conditions": [],
+        "eligibility": [],
+        "fees": []
+      }
+    ]
+  },
+  "PPCBank CSS Card::ppcbank_css_card.txt": {
+    "product": "PPCBank CSS Card",
+    "text_file": "ppcbank_css_card.txt",
+    "document_id": "product_document_f5b9dbaed6699741",
+    "sections": [
+      {
+        "type": "overview",
+        "title": "What is CSS (Cambodian Shared Switch)?",
+        "order": 0,
+        "chunks": [
+          "CSS is a local card scheme, under the authority of the National Bank of Cambodia (NBC). CSS cardholders can make transactions at domestic ATMs and POS in KHR and/or USD for a minimum fee nationwide."
+        ],
+        "rates": [],
+        "conditions": [],
+        "eligibility": [],
+        "fees": []
+      },
+      {
+        "type": "benefits",
+        "title": "WHY PPCBANK CSS CARD ?",
+        "order": 1,
+        "chunks": [
+          "Low fee charge & Nationwide acceptance",
+          "Free notifications for each transaction",
+          "Enjoy discounts from PPCBank partners",
+          "Up to $3,000 for cash withdrawals and fund transfers."
+        ],
+        "rates": [],
+        "conditions": [],
+        "eligibility": [],
+        "fees": []
+      },
+      {
+        "type": "requirements",
+        "title": "REQUIREMENTS",
+        "order": 2,
+        "chunks": [],
+        "rates": [],
+        "conditions": [],
+        "eligibility": [
+          {
+            "applicant": "Cambodian",
+            "document": "Application must have a savings or current account with PPCBank"
+          },
+          {
+            "applicant": "Cambodian",
+            "document": "Valid ID card or Passport"
+          }
+        ],
+        "fees": []
+      },
+      {
+        "type": "fees",
+        "title": "STANDARD FEES & CHARGES",
+        "order": 3,
+        "chunks": [],
+        "rates": [],
+        "conditions": [],
+        "eligibility": [],
+        "fees": [
+          {
+            "name": "Issuing Fee",
+            "value": "USD 3",
+            "condition": ""
+          },
+          {
+            "name": "Cash Withdrawal at PPCBank ATM",
+            "value": "Free",
+            "condition": ""
+          },
+          {
+            "name": "Cash Withdrawal at other bank ATMs",
+            "value": "Depending on CSS member banks (max. KHR 1,800)",
+            "condition": "*Valid until the end of 2026"
+          },
+          {
+            "name": "Balance inquiry at PPCBank ATMs",
+            "value": "Free",
+            "condition": ""
+          },
+          {
+            "name": "Card Replacement",
+            "value": "USD 3",
+            "condition": ""
+          }
+        ]
+      },
+      {
+        "type": "apply",
+        "title": "Ready to have a PPCBank CSS Card?",
+        "order": 4,
+        "chunks": [
+          "Visit any PPCBank branch with required documents"
+        ],
+        "rates": [],
+        "conditions": [],
+        "eligibility": [],
+        "fees": []
+      },
+      {
+        "type": "contact",
+        "title": "Contact",
+        "order": 5,
+        "chunks": [
+          "For more information contact 0963 909 909 / 023 909 909"
+        ],
+        "rates": [],
+        "conditions": [],
+        "eligibility": [],
+        "fees": []
+      }
+    ]
+  },
+  "PPCBank Fixed Deposit::ppcbank_rate_revision.md": {
+    "product": "PPCBank Fixed Deposit",
+    "text_file": "ppcbank_rate_revision.md",
+    "document_id": "product_document_018478e7a518aafe",
+    "sections": [
+      {
+        "type": "overview",
+        "title": "Announcement on Revision of Interest Rates",
+        "order": 0,
+        "chunks": [
+          "PPCBank is pleased to inform our valued customers and the public that the interest rates for Fixed Deposit and Installment Deposit accounts will be revised, effective from April 1, 2026 onward.",
+          "The details of the new interest rates are as follows:"
+        ],
+        "rates": [],
+        "conditions": [],
+        "eligibility": [],
+        "fees": []
+      },
+      {
+        "type": "rate_table",
+        "title": "Fixed Deposits",
+        "order": 1,
+        "chunks": [],
+        "rates": [
+          {
+            "term_months": 3,
+            "currency": "USD",
+            "channel": "",
+            "payment": "at_maturity",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "",
+            "rate_pa": 2.5
+          },
+          {
+            "term_months": 3,
+            "currency": "KHR",
+            "channel": "",
+            "payment": "at_maturity",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "",
+            "rate_pa": 3.0
+          },
+          {
+            "term_months": 3,
+            "currency": "USD",
+            "channel": "",
+            "payment": "monthly",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "",
+            "rate_pa": 2.25
+          },
+          {
+            "term_months": 3,
+            "currency": "KHR",
+            "channel": "",
+            "payment": "monthly",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "",
+            "rate_pa": 2.75
+          },
+          {
+            "term_months": 6,
+            "currency": "USD",
+            "channel": "",
+            "payment": "at_maturity",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "",
+            "rate_pa": 3.45
+          },
+          {
+            "term_months": 6,
+            "currency": "KHR",
+            "channel": "",
+            "payment": "at_maturity",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "",
+            "rate_pa": 3.95
+          },
+          {
+            "term_months": 6,
+            "currency": "USD",
+            "channel": "",
+            "payment": "monthly",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "",
+            "rate_pa": 3.2
+          },
+          {
+            "term_months": 6,
+            "currency": "KHR",
+            "channel": "",
+            "payment": "monthly",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "",
+            "rate_pa": 3.75
+          },
+          {
+            "term_months": 12,
+            "currency": "USD",
+            "channel": "",
+            "payment": "at_maturity",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "",
+            "rate_pa": 4.2
+          },
+          {
+            "term_months": 12,
+            "currency": "KHR",
+            "channel": "",
+            "payment": "at_maturity",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "",
+            "rate_pa": 4.7
+          },
+          {
+            "term_months": 12,
+            "currency": "USD",
+            "channel": "",
+            "payment": "monthly",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "",
+            "rate_pa": 4.0
+          },
+          {
+            "term_months": 12,
+            "currency": "KHR",
+            "channel": "",
+            "payment": "monthly",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "",
+            "rate_pa": 4.4
+          },
+          {
+            "term_months": 18,
+            "currency": "USD",
+            "channel": "",
+            "payment": "at_maturity",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "",
+            "rate_pa": 4.3
+          },
+          {
+            "term_months": 18,
+            "currency": "KHR",
+            "channel": "",
+            "payment": "at_maturity",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "",
+            "rate_pa": 4.8
+          },
+          {
+            "term_months": 18,
+            "currency": "USD",
+            "channel": "",
+            "payment": "monthly",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "",
+            "rate_pa": 4.05
+          },
+          {
+            "term_months": 18,
+            "currency": "KHR",
+            "channel": "",
+            "payment": "monthly",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "",
+            "rate_pa": 4.55
+          },
+          {
+            "term_months": 24,
+            "currency": "USD",
+            "channel": "",
+            "payment": "at_maturity",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "",
+            "rate_pa": 4.4
+          },
+          {
+            "term_months": 24,
+            "currency": "KHR",
+            "channel": "",
+            "payment": "at_maturity",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "",
+            "rate_pa": 4.9
+          },
+          {
+            "term_months": 24,
+            "currency": "USD",
+            "channel": "",
+            "payment": "monthly",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "",
+            "rate_pa": 4.15
+          },
+          {
+            "term_months": 24,
+            "currency": "KHR",
+            "channel": "",
+            "payment": "monthly",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "",
+            "rate_pa": 4.7
+          },
+          {
+            "term_months": 36,
+            "currency": "USD",
+            "channel": "",
+            "payment": "at_maturity",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "",
+            "rate_pa": 4.5
+          },
+          {
+            "term_months": 36,
+            "currency": "USD",
+            "channel": "",
+            "payment": "monthly",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "",
+            "rate_pa": 4.25
+          },
+          {
+            "term_months": 48,
+            "currency": "USD",
+            "channel": "",
+            "payment": "at_maturity",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "",
+            "rate_pa": 4.6
+          },
+          {
+            "term_months": 48,
+            "currency": "USD",
+            "channel": "",
+            "payment": "monthly",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "",
+            "rate_pa": 4.35
+          },
+          {
+            "term_months": 60,
+            "currency": "USD",
+            "channel": "",
+            "payment": "at_maturity",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "",
+            "rate_pa": 4.7
+          },
+          {
+            "term_months": 60,
+            "currency": "USD",
+            "channel": "",
+            "payment": "monthly",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "",
+            "rate_pa": 4.45
+          }
+        ],
+        "conditions": [],
+        "eligibility": [],
+        "fees": []
+      },
+      {
+        "type": "rate_table",
+        "title": "Installment Deposit Account (Minimum Opening Balance: USD 10)",
+        "order": 2,
+        "chunks": [
+          "Installment Deposit Account (Minimum Opening Balance: USD 10)"
+        ],
+        "rates": [
+          {
+            "term_months": 6,
+            "currency": "USD",
+            "channel": "standard",
+            "payment": "",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "",
+            "rate_pa": 3.3
+          },
+          {
+            "term_months": 12,
+            "currency": "USD",
+            "channel": "standard",
+            "payment": "",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "",
+            "rate_pa": 4.25
+          },
+          {
+            "term_months": 24,
+            "currency": "USD",
+            "channel": "standard",
+            "payment": "",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "",
+            "rate_pa": 4.5
+          },
+          {
+            "term_months": 36,
+            "currency": "USD",
+            "channel": "standard",
+            "payment": "",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "",
+            "rate_pa": 4.6
+          }
+        ],
+        "conditions": [],
+        "eligibility": [],
+        "fees": []
+      },
+      {
+        "type": "rate_table",
+        "title": "Premier Installment Deposit Account (Minimum Opening Balance: USD 500)",
+        "order": 3,
+        "chunks": [
+          "Premier Installment Deposit Account (Minimum Opening Balance: USD 500)"
+        ],
+        "rates": [
+          {
+            "term_months": 6,
+            "currency": "USD",
+            "channel": "standard",
+            "payment": "",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "",
+            "rate_pa": 3.5
+          },
+          {
+            "term_months": 12,
+            "currency": "USD",
+            "channel": "standard",
+            "payment": "",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "",
+            "rate_pa": 4.4
+          },
+          {
+            "term_months": 24,
+            "currency": "USD",
+            "channel": "standard",
+            "payment": "",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "",
+            "rate_pa": 4.65
+          },
+          {
+            "term_months": 36,
+            "currency": "USD",
+            "channel": "standard",
+            "payment": "",
+            "rate_kind": "standard",
+            "holding_period": "",
+            "amount_tier": "",
+            "rate_pa": 4.75
+          }
+        ],
+        "conditions": [],
+        "eligibility": [],
+        "fees": []
+      },
+      {
+        "type": "contact",
+        "title": "Terms and Contact",
+        "order": 4,
+        "chunks": [
+          "*Terms and conditions apply",
+          "For more information, please call 096 3 909 909 / 023 909 909"
+        ],
+        "rates": [],
+        "conditions": [],
+        "eligibility": [],
+        "fees": []
+      }
+    ]
+  }
+}
