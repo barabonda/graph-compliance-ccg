@@ -29,13 +29,32 @@ CELL_CLIP = 350
 _driver = None
 
 
+def _creds() -> tuple[str, str, str]:
+    """이 모듈의 조회 대상(WS)이 팀 Aura 라우팅 목록에 있으면 TEAM_NEO4J_* 사용.
+
+    2-DB 아키텍처(kunwoo 통합): KR 코퍼스 읽기는 팀 Aura, 기본 NEO4J_* 는
+    샌드박스(KH 그래프+심사 산출물). copilot_tools._creds 와 동일 규칙.
+    """
+    raw = os.environ.get("TEAM_NEO4J_WORKSPACES", "")
+    team = {token.strip() for token in raw.replace(",", " ").split() if token.strip()}
+    if WS in team:
+        uri = os.environ.get("TEAM_NEO4J_URI", "")
+        user = os.environ.get("TEAM_NEO4J_USER", "")
+        password = os.environ.get("TEAM_NEO4J_PASSWORD", "")
+        if uri and user and password:
+            return uri, user, password
+    return (
+        os.environ["NEO4J_URI"],
+        os.environ.get("NEO4J_USER") or os.environ["NEO4J_USERNAME"],
+        os.environ["NEO4J_PASSWORD"],
+    )
+
+
 def _get_driver():
     global _driver
     if _driver is None:
-        _driver = GraphDatabase.driver(
-            os.environ["NEO4J_URI"],
-            auth=(os.environ["NEO4J_USER"], os.environ["NEO4J_PASSWORD"]),
-        )
+        uri, user, password = _creds()
+        _driver = GraphDatabase.driver(uri, auth=(user, password))
     return _driver
 
 
