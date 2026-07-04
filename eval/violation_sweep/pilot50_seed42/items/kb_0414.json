@@ -1,0 +1,20 @@
+{
+  "review_id": "kb_0414",
+  "bank_key": "kb",
+  "bank_label": "국민은행",
+  "title": "[KB부동산X삼프로TV] 부동산 고민 삼프로가 풀어(PRO)드립니다!",
+  "review_text_chars": 1547,
+  "workspace_id": "graphcompliance_mvp_jb_20260530",
+  "status": "failed",
+  "error": "BadRequestError: Error code: 400 - {'error': {'message': 'Your input exceeds the context window of this model. Please adjust your input and try again.', 'type': 'invalid_request_error', 'param': 'input', 'code': 'context_length_exceeded'}}",
+  "duration_sec": 104.84171595900261,
+  "final_verdict": null,
+  "violations": [],
+  "violation_count": 0,
+  "disclosure_requirements": [],
+  "overall_impression": {},
+  "overall_impression_risk": false,
+  "article_aggregation": [],
+  "principle_aggregation": [],
+  "policy_evidence_chain_counts": {}
+}

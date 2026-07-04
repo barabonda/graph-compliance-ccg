@@ -1,0 +1,271 @@
+{
+  "review_id": "hana_0232",
+  "bank_key": "hana",
+  "bank_label": "하나은행",
+  "title": "신탁 신규해 봄",
+  "review_text_chars": 3056,
+  "workspace_id": "graphcompliance_mvp_jb_20260530",
+  "status": "completed",
+  "error": null,
+  "duration_sec": 151.28344229199865,
+  "final_verdict": "needs_review",
+  "routing": {
+    "ad_scope": "product_ad",
+    "preapproval_required_status": "required",
+    "review_phrase_required_before_publication": true,
+    "review_phrase_expected_in_input": false,
+    "review_phrase_input_status": "absent_expected"
+  },
+  "review_run_id": "review_run_aae4a7b9c647e0dd",
+  "violations": [
+    {
+      "cu_id": "cu_legal_clause_d17c14ff653d2849",
+      "verdict": "INSUFFICIENT",
+      "score": 0.45,
+      "principle": "광고규제",
+      "source_article": "표시ㆍ광고의 공정화에 관한 법률 제4조 ⑤",
+      "subject": "사업자등",
+      "legal_basis": "표시ㆍ광고의 공정화에 관한 법률 제4조 ⑤는 사업자등이 표시ㆍ광고를 하는 경우 공정거래위원회가 고시한 중요정보를 표시ㆍ광고하여야 함을 요구하며(표시ㆍ광고의 공정화에 관한 법률 제4조 ⑤ → 동조 제1항 중요정보 고시), 금지/요건 불성립 여부는 ‘중요정보(고시된 항목)’의 해당성과 광고 내 표기 여부에 따라 달라진다.",
+      "evidence_span": "신탁 신규해 봄 이벤트 기간 동안 하나원큐를 통해 신탁상품을 신규하시면 스벅기프티콘을 드려요!",
+      "why": "해당 광고문구는 ‘이벤트 기간 동안 하나원큐를 통해 신탁상품을 신규’하면 ‘스벅기프티콘을 드려요’라는 혜택 및 참여요건을 제시하고 있으나, 주어진 근거자료·판단대상 내에서 ‘공정거래위원회가 고시한 중요정보’가 무엇인지(예: 이벤트 경품의 지급조건/한도/추첨 방식 등 중 어떤 항목이 중요정보에 해당하는지)와 해당 중요정보가 이 문구 또는 인접 고지에서 충분히 포함되었는지 여부를 특정할 수 없어 중요정보 누락(또는 방법 불일치) 요건을 충족/불충족으로 단정하기 어렵다."
+    },
+    {
+      "cu_id": "cu_legal_clause_b6631e80cc3caad8",
+      "verdict": "INSUFFICIENT",
+      "score": 0.4,
+      "principle": "불공정영업행위 금지",
+      "source_article": "금융소비자 보호에 관한 감독규정 제14조 ②-4",
+      "subject": "광고·판매 행위자",
+      "legal_basis": "금융소비자 보호에 관한 감독규정 제14조 ②-4 및 그 위임근거는 휴대전화 문자메시지 또는 이에 준하는 전자적 의사표시 등을 특정한 전자적 고지수단 관련 요건을 정하고(감독규정 제14조 ②-4), 해당 요건 위반 여부는 실제 ‘고지 행위’와 ‘사용된 고지수단’이 광고 내용으로 뒷받침되는지에 따라 판단된다.",
+      "evidence_span": "모바일 상품권은 당첨자 발표일에 하나은행에 등록된 핸드폰 번호로 MMS 발생되며 재발급되지 않습니다.",
+      "why": "해당 문구는 ‘당첨자 발표일에 하나은행에 등록된 핸드폰 번호로 MMS 발생’ 및 ‘재발급되지 않습니다’라고 고지하고 있어, 고지수단이 MMS임은 주장되나(문구상 사실관계), 감독규정이 정하는 ‘전자적 고지’가 요구되는 구체적 맥락(어떤 유형의 고지의무에 해당하는지)과 그 전제(예: 실제로 MMS를 발송·고지하는지, 다른 고지수단이 필요한지 등)를 주어진 자료만으로 확정할 수 없다. 따라서 전자적 고지수단 요건 불충족을 단정하기에도, 완전 충족으로 보기에도 부족하다."
+    },
+    {
+      "cu_id": "cu_legal_article_47c9e994975df429",
+      "verdict": "INSUFFICIENT",
+      "score": 0.0,
+      "principle": "광고규제",
+      "source_article": "표시ㆍ광고의 공정화에 관한 법률 제4조",
+      "subject": "금융상품 광고 및 판매 준법 검토",
+      "legal_basis": "",
+      "evidence_span": "",
+      "why": "이 심의 항목은 자동 판단이 완료되지 않아 '근거 부족(추가 확인 필요)'으로 분류했습니다. 심사자가 직접 확인해 주세요."
+    },
+    {
+      "cu_id": "cu_legal_clause_5a9a77e0886826da",
+      "verdict": "INSUFFICIENT",
+      "score": 0.0,
+      "principle": "광고규제",
+      "source_article": "금융소비자 보호에 관한 법률 제22조 ⑤",
+      "subject": "광고·판매 행위자",
+      "legal_basis": "",
+      "evidence_span": "",
+      "why": "이 심의 항목은 자동 판단이 완료되지 않아 '근거 부족(추가 확인 필요)'으로 분류했습니다. 심사자가 직접 확인해 주세요."
+    },
+    {
+      "cu_id": "cu_legal_article_07219c9fc08939a2",
+      "verdict": "INSUFFICIENT",
+      "score": 0.0,
+      "principle": "광고규제",
+      "source_article": "표시ㆍ광고의 공정화에 관한 법률 시행령 제4조",
+      "subject": "금융상품 광고 및 판매 준법 검토",
+      "legal_basis": "",
+      "evidence_span": "",
+      "why": "이 심의 항목은 자동 판단이 완료되지 않아 '근거 부족(추가 확인 필요)'으로 분류했습니다. 심사자가 직접 확인해 주세요."
+    },
+    {
+      "cu_id": "cu_legal_clause_3c513cb5b8b57d42",
+      "verdict": "INSUFFICIENT",
+      "score": 0.0,
+      "principle": "부당권유행위 금지",
+      "source_article": "금융소비자 보호에 관한 법률 제21조 제21조",
+      "subject": "금융상품판매업자등",
+      "legal_basis": "",
+      "evidence_span": "",
+      "why": "이 심의 항목은 자동 판단이 완료되지 않아 '근거 부족(추가 확인 필요)'으로 분류했습니다. 심사자가 직접 확인해 주세요."
+    },
+    {
+      "cu_id": "cu_legal_article_76887cffdfe55bc4",
+      "verdict": "INSUFFICIENT",
+      "score": 0.0,
+      "principle": "설명의무",
+      "source_article": "금융소비자 보호에 관한 법률 시행령 제24조",
+      "subject": "금융상품 광고 및 판매 준법 검토",
+      "legal_basis": "",
+      "evidence_span": "",
+      "why": "이 심의 항목은 자동 판단이 완료되지 않아 '근거 부족(추가 확인 필요)'으로 분류했습니다. 심사자가 직접 확인해 주세요."
+    },
+    {
+      "cu_id": "cu_legal_article_8ab2bc39fe9257ec",
+      "verdict": "INSUFFICIENT",
+      "score": 0.0,
+      "principle": "광고규제",
+      "source_article": "표시ㆍ광고의 공정화에 관한 법률 제3조",
+      "subject": "금융상품 광고 및 판매 준법 검토",
+      "legal_basis": "",
+      "evidence_span": "",
+      "why": "이 심의 항목은 자동 판단이 완료되지 않아 '근거 부족(추가 확인 필요)'으로 분류했습니다. 심사자가 직접 확인해 주세요."
+    },
+    {
+      "cu_id": "cu_legal_article_07219c9fc08939a2",
+      "verdict": "INSUFFICIENT",
+      "score": 0.0,
+      "principle": "광고규제",
+      "source_article": "표시ㆍ광고의 공정화에 관한 법률 시행령 제4조",
+      "subject": "금융상품 광고 및 판매 준법 검토",
+      "legal_basis": "",
+      "evidence_span": "",
+      "why": "이 심의 항목은 자동 판단이 완료되지 않아 '근거 부족(추가 확인 필요)'으로 분류했습니다. 심사자가 직접 확인해 주세요."
+    },
+    {
+      "cu_id": "cu_legal_article_47c9e994975df429",
+      "verdict": "INSUFFICIENT",
+      "score": 0.0,
+      "principle": "광고규제",
+      "source_article": "표시ㆍ광고의 공정화에 관한 법률 제4조",
+      "subject": "금융상품 광고 및 판매 준법 검토",
+      "legal_basis": "",
+      "evidence_span": "",
+      "why": "이 심의 항목은 자동 판단이 완료되지 않아 '근거 부족(추가 확인 필요)'으로 분류했습니다. 심사자가 직접 확인해 주세요."
+    }
+  ],
+  "violation_count": 10,
+  "disclosure_requirements": [
+    {
+      "id": "disclosure_deposit_rate_basis",
+      "label": "금리 범위 및 산정방법",
+      "source": "은행 광고심의 기준 제16조/제17조",
+      "why": "최고금리, 우대금리, 적용기간, 산정방법을 소비자가 오인하지 않도록 함께 표시해야 합니다."
+    },
+    {
+      "id": "disclosure_deposit_preferential_conditions",
+      "label": "우대조건 및 적용기간",
+      "source": "은행 광고심의 기준 제18조",
+      "why": "특판, 이벤트, 제휴 혜택은 대상, 자격요건, 기간, 내용을 함께 안내해야 합니다."
+    },
+    {
+      "id": "disclosure_depositor_protection",
+      "label": "예금자보호 부보내용",
+      "source": "은행 광고심의 기준 제16조",
+      "why": "예금성 상품 광고는 예금자보호법 등에 따른 부보내용을 유지 고지로 관리해야 합니다."
+    },
+    {
+      "id": "disclosure_review_number",
+      "label": "심의필 번호 및 유효기간",
+      "source": "은행 광고심의 기준 제9조/제16조",
+      "why": "사전승인 또는 연합회 심의 결과를 소비자가 쉽게 인식할 수 있도록 표시해야 합니다."
+    },
+    {
+      "id": "disclosure_review_process",
+      "label": "준법감시인 사전승인 및 심의필 표시",
+      "source": "은행 광고심의 기준 제4조/제9조",
+      "why": "은행 광고는 내부통제기준에 따른 사전승인과 심의필 표시 여부를 운영 절차로 확인해야 합니다."
+    }
+  ],
+  "overall_impression": {
+    "track": "B",
+    "standard": "대법원 2017두60109 전체적·궁극적 인상 기준",
+    "verdict": "MEDIUM",
+    "misleading_risk_score": 0.68,
+    "why": "광고 전반은 경품 이벤트의 조건(기간, 채널, 신탁 신규, 1,000개 한정/추첨, 조기종료·개인정보 동의, 연락처 요건, MMS 재발급 불가)과 신탁상품의 위험(예금자보호 미해당, 원금 일부/전액 손실 가능, 수수료/환율/과세 등)을 함께 고지하고 있어 ‘사실 자체의 직접적 모순’은 확인되지 않습니다. 다만 headline의 경품 유인 문구에 비해 제한·리스크 고지가 상대적으로 낮은 위계(footnote 및 본문 분산)로 제시되어, 소비자가 ‘경품 수령이 비교적 확실’ 또는 ‘신탁이 안전’하다고 전체 인상을 과대평가할 여지가 있어 오인위험은 중간으로 판단합니다."
+  },
+  "overall_impression_risk": true,
+  "article_aggregation": [
+    {
+      "key": "표시ㆍ광고의 공정화에 관한 법률 제4조 ⑤",
+      "article": "표시ㆍ광고의 공정화에 관한 법률 제4조 ⑤",
+      "principles": [
+        "광고규제"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.45,
+      "cu_count": 1,
+      "issue_count": 1,
+      "cu_titles": [
+        "중요정보 누락에 따른 소비자 오인·피해 위험"
+      ],
+      "anchor_spans": [
+        "신탁 신규해 봄 이벤트 기간 동안 하나원큐를 통해 신탁상품을 신규하시면 스벅기프티콘을 드려요!"
+      ]
+    },
+    {
+      "key": "표시ㆍ광고의 공정화에 관한 법률 제4조",
+      "article": "표시ㆍ광고의 공정화에 관한 법률 제4조",
+      "principles": [
+        "광고규제"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.0,
+      "cu_count": 1,
+      "issue_count": 1,
+      "cu_titles": [
+        "중요정보 누락(또는 방법 불일치) 리스크"
+      ],
+      "anchor_spans": [
+        "신탁 신규해 봄 이벤트 기간 동안 하나원큐를 통해 신탁상품을 신규하시면 스벅기프티콘을 드려요!"
+      ]
+    },
+    {
+      "key": "금융소비자 보호에 관한 법률 제22조 ⑤",
+      "article": "금융소비자 보호에 관한 법률 제22조 ⑤",
+      "principles": [
+        "광고규제"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.0,
+      "cu_count": 1,
+      "issue_count": 1,
+      "cu_titles": [
+        "금융상품등 광고 표시·광고사항의 법정 기준 미준수"
+      ],
+      "anchor_spans": [
+        "신탁 신규해 봄 이벤트 기간 동안 하나원큐를 통해 신탁상품을 신규하시면 스벅기프티콘을 드려요!"
+      ]
+    },
+    {
+      "key": "표시ㆍ광고의 공정화에 관한 법률 시행령 제4조",
+      "article": "표시ㆍ광고의 공정화에 관한 법률 시행령 제4조",
+      "principles": [
+        "광고규제"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.0,
+      "cu_count": 1,
+      "issue_count": 1,
+      "cu_titles": [
+        "광고 실증의 객관성·독립성 결여"
+      ],
+      "anchor_spans": [
+        "신탁 신규해 봄 이벤트 기간 동안 하나원큐를 통해 신탁상품을 신규하시면 스벅기프티콘을 드려요!"
+      ]
+    }
+  ],
+  "principle_aggregation": [
+    {
+      "key": "광고규제",
+      "article": "표시ㆍ광고의 공정화에 관한 법률 제4조 ⑤",
+      "principles": [
+        "광고규제"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.45,
+      "cu_count": 4,
+      "issue_count": 4,
+      "cu_titles": [
+        "광고 실증의 객관성·독립성 결여",
+        "금융상품등 광고 표시·광고사항의 법정 기준 미준수",
+        "중요정보 누락(또는 방법 불일치) 리스크",
+        "중요정보 누락에 따른 소비자 오인·피해 위험"
+      ],
+      "anchor_spans": [
+        "신탁 신규해 봄 이벤트 기간 동안 하나원큐를 통해 신탁상품을 신규하시면 스벅기프티콘을 드려요!"
+      ]
+    }
+  ],
+  "policy_evidence_chain_counts": {
+    "legal_basis_chains": 11,
+    "disclosure_chains": 11,
+    "exception_chains": 11,
+    "chain_diagnostics": 11
+  }
+}

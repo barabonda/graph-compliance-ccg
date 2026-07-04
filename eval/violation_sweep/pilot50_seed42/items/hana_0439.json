@@ -1,0 +1,401 @@
+{
+  "review_id": "hana_0439",
+  "bank_key": "hana",
+  "bank_label": "하나은행",
+  "title": "1만 하나머니 받고 하나로 일임하자~ 일임형ISA 신규 가입 이벤트",
+  "review_text_chars": 1678,
+  "workspace_id": "graphcompliance_mvp_jb_20260530",
+  "status": "completed",
+  "error": null,
+  "duration_sec": 164.5695869170013,
+  "final_verdict": "needs_review",
+  "routing": {
+    "ad_scope": "product_ad",
+    "preapproval_required_status": "required",
+    "review_phrase_required_before_publication": true,
+    "review_phrase_expected_in_input": false,
+    "review_phrase_input_status": "absent_expected"
+  },
+  "review_run_id": "review_run_bce5d1c2761fed63",
+  "violations": [
+    {
+      "cu_id": "cu_legal_clause_d17c14ff653d2849",
+      "verdict": "INSUFFICIENT",
+      "score": 0.56,
+      "principle": "광고규제",
+      "source_article": "표시ㆍ광고의 공정화에 관한 법률 제4조 ⑤",
+      "subject": "사업자등",
+      "legal_basis": "표시ㆍ광고의 공정화에 관한 법률 제4조 ⑤는 ‘표시ㆍ광고 행위를 하는 경우’ 사업자등이 공정거래위원회가 고시한 중요정보를 표시ㆍ광고에 포함해야 함을 요구한다(표시ㆍ광고의 공정화에 관한 법률 제4조 ⑤ → 공정위 고시 중요정보 → 표시ㆍ광고).",
+      "evidence_span": "지급조건 ① 10만원 이상 신규 & 10만원 이상 자동이체 (자동이체 기간 1년 이상 필수) 또는 ② 이벤트 종료시점 기준 잔액 100만원 이상",
+      "why": "광고 문구에 지급요건이 비교적 구체적으로 기재되어 ‘중요정보 누락’까지는 단정하기 어렵고, 고시된 중요정보 항목과의 정합성도 확인되지 않아 기준 미충족 여부를 판단할 증거가 부족하다."
+    },
+    {
+      "cu_id": "cu_legal_clause_78d8d6524aec36a0",
+      "verdict": "INSUFFICIENT",
+      "score": 0.45,
+      "principle": "부당권유행위 금지",
+      "source_article": "금융소비자 보호에 관한 감독규정 제15조 ②-3",
+      "subject": "광고·판매 행위자",
+      "legal_basis": "금융소비자 보호에 관한 감독규정 제15조는 부당권유행위 금지를 규율하며, 그 기준에서 ‘기초자산의 종류가 다른 장외파생상품’ 등 금융상품 유형 판단 요소가 포함된다(감독규정 제15조 → 영 제16조제1항제1호 등 → 감독규정/심의기준).",
+      "evidence_span": "비과세 및 저율분리과세되는 일임형ISA 가입(계좌이전포함)하고 1만 하나머니 받으세요~",
+      "why": "세제효과 단정 및 인정범위(계좌이전포함) 관련 오인 위험은 의심되나, 부당권유행위 금지의 특정 금지유형(또는 예외 포섭 요건)과의 대응 근거가 부족하여 해당 기준 위반을 단정할 수 없다."
+    },
+    {
+      "cu_id": "cu_legal_article_47c9e994975df429",
+      "verdict": "INSUFFICIENT",
+      "score": 0.52,
+      "principle": "광고규제",
+      "source_article": "표시ㆍ광고의 공정화에 관한 법률 제4조",
+      "subject": "금융상품 광고 및 판매 준법 검토",
+      "legal_basis": "표시ㆍ광고의 공정화에 관한 법률 제4조 ⑤는 사업자등이 표시·광고를 하는 경우 공정위가 고시한 중요정보를 표시·광고하여야 한다(표시ㆍ광고의 공정화에 관한 법률 제4조 ⑤ → 제4조 제1항 중요정보 고시 및 통합공고).",
+      "evidence_span": "지급시기 2024년 12월 20일 (하나머니 지급시까지 일임형ISA 계좌 유지)",
+      "why": "지급시기·유지조건을 명시하고 있어 ‘중요정보 누락’으로 단정하기는 어렵지만, 고시된 중요정보 범위와의 정확한 대비 자료가 없어 기준 미충족 여부를 판단하기에 부족하다."
+    },
+    {
+      "cu_id": "cu_legal_clause_d7ebaed2cc0013c9",
+      "verdict": "INSUFFICIENT",
+      "score": 0.0,
+      "principle": "부당권유행위 금지",
+      "source_article": "금융소비자 보호에 관한 감독규정 제15조 ③-1",
+      "subject": "광고·판매 행위자",
+      "legal_basis": "",
+      "evidence_span": "",
+      "why": "이 심의 항목은 자동 판단이 완료되지 않아 '근거 부족(추가 확인 필요)'으로 분류했습니다. 심사자가 직접 확인해 주세요."
+    },
+    {
+      "cu_id": "cu_legal_clause_d7ebaed2cc0013c9",
+      "verdict": "INSUFFICIENT",
+      "score": 0.0,
+      "principle": "부당권유행위 금지",
+      "source_article": "금융소비자 보호에 관한 감독규정 제15조 ③-1",
+      "subject": "광고·판매 행위자",
+      "legal_basis": "",
+      "evidence_span": "",
+      "why": "이 심의 항목은 자동 판단이 완료되지 않아 '근거 부족(추가 확인 필요)'으로 분류했습니다. 심사자가 직접 확인해 주세요."
+    },
+    {
+      "cu_id": "cu_legal_article_1f5237d19fdfa401",
+      "verdict": "INSUFFICIENT",
+      "score": 0.0,
+      "principle": "부당권유행위 금지",
+      "source_article": "금융소비자 보호에 관한 감독규정 제15조",
+      "subject": "금융상품 광고 및 판매 준법 검토",
+      "legal_basis": "",
+      "evidence_span": "",
+      "why": "이 심의 항목은 자동 판단이 완료되지 않아 '근거 부족(추가 확인 필요)'으로 분류했습니다. 심사자가 직접 확인해 주세요."
+    },
+    {
+      "cu_id": "cu_legal_clause_47503c5fae4fbfd8",
+      "verdict": "INSUFFICIENT",
+      "score": 0.0,
+      "principle": "설명의무",
+      "source_article": "금융소비자 보호에 관한 감독규정 제14조 ②",
+      "subject": "금융상품판매업자등",
+      "legal_basis": "",
+      "evidence_span": "",
+      "why": "이 심의 항목은 자동 판단이 완료되지 않아 '근거 부족(추가 확인 필요)'으로 분류했습니다. 심사자가 직접 확인해 주세요."
+    },
+    {
+      "cu_id": "cu_legal_clause_3c513cb5b8b57d42",
+      "verdict": "INSUFFICIENT",
+      "score": 0.0,
+      "principle": "부당권유행위 금지",
+      "source_article": "금융소비자 보호에 관한 법률 제21조 제21조",
+      "subject": "금융상품판매업자등",
+      "legal_basis": "",
+      "evidence_span": "",
+      "why": "이 심의 항목은 자동 판단이 완료되지 않아 '근거 부족(추가 확인 필요)'으로 분류했습니다. 심사자가 직접 확인해 주세요."
+    },
+    {
+      "cu_id": "cu_legal_clause_5e42ad8b55bc652c",
+      "verdict": "INSUFFICIENT",
+      "score": 0.0,
+      "principle": "광고규제",
+      "source_article": "표시ㆍ광고의 공정화에 관한 법률 제3조 ①-4",
+      "subject": "광고·판매 행위자",
+      "legal_basis": "",
+      "evidence_span": "",
+      "why": "이 심의 항목은 자동 판단이 완료되지 않아 '근거 부족(추가 확인 필요)'으로 분류했습니다. 심사자가 직접 확인해 주세요."
+    },
+    {
+      "cu_id": "cu_legal_article_4f7a78b1a2092e62",
+      "verdict": "INSUFFICIENT",
+      "score": 0.0,
+      "principle": "부당권유행위 금지",
+      "source_article": "금융소비자 보호에 관한 법률 시행령 제16조",
+      "subject": "금융상품 광고 및 판매 준법 검토",
+      "legal_basis": "",
+      "evidence_span": "",
+      "why": "이 심의 항목은 자동 판단이 완료되지 않아 '근거 부족(추가 확인 필요)'으로 분류했습니다. 심사자가 직접 확인해 주세요."
+    },
+    {
+      "cu_id": "cu_legal_clause_5e42ad8b55bc652c",
+      "verdict": "INSUFFICIENT",
+      "score": 0.0,
+      "principle": "광고규제",
+      "source_article": "표시ㆍ광고의 공정화에 관한 법률 제3조 ①-4",
+      "subject": "광고·판매 행위자",
+      "legal_basis": "",
+      "evidence_span": "",
+      "why": "이 심의 항목은 자동 판단이 완료되지 않아 '근거 부족(추가 확인 필요)'으로 분류했습니다. 심사자가 직접 확인해 주세요."
+    },
+    {
+      "cu_id": "cu_legal_article_4f7a78b1a2092e62",
+      "verdict": "INSUFFICIENT",
+      "score": 0.0,
+      "principle": "부당권유행위 금지",
+      "source_article": "금융소비자 보호에 관한 법률 시행령 제16조",
+      "subject": "금융상품 광고 및 판매 준법 검토",
+      "legal_basis": "",
+      "evidence_span": "",
+      "why": "이 심의 항목은 자동 판단이 완료되지 않아 '근거 부족(추가 확인 필요)'으로 분류했습니다. 심사자가 직접 확인해 주세요."
+    }
+  ],
+  "violation_count": 12,
+  "disclosure_requirements": [
+    {
+      "id": "disclosure_investment_loss_risk",
+      "label": "원금손실 가능성 및 투자위험",
+      "source": "금융상품 표시·광고 심사지침/금소법 광고규제",
+      "why": "투자성 상품은 수익 가능성과 손실 가능성을 균형 있게 표시해야 합니다."
+    },
+    {
+      "id": "disclosure_past_performance_no_guarantee",
+      "label": "과거성과 미래수익 보장 아님",
+      "source": "은행 광고심의 기준 제16조",
+      "why": "과거 수익률이나 조기상환 실적이 미래 수익을 보장하지 않음을 고지해야 합니다."
+    },
+    {
+      "id": "disclosure_fees",
+      "label": "수수료 등 부대비용",
+      "source": "은행 광고심의 기준 제16조",
+      "why": "투자자가 부담하는 비용과 제한 조건을 함께 표시해야 합니다."
+    },
+    {
+      "id": "disclosure_review_process",
+      "label": "준법감시인 사전승인 및 심의필 표시",
+      "source": "은행 광고심의 기준 제4조/제9조",
+      "why": "은행 광고는 내부통제기준에 따른 사전승인과 심의필 표시 여부를 운영 절차로 확인해야 합니다."
+    }
+  ],
+  "overall_impression": {
+    "track": "B",
+    "standard": "대법원 2017두60109 전체적·궁극적 인상 기준",
+    "verdict": "MEDIUM",
+    "misleading_risk_score": 0.68,
+    "why": "복잡 위반 관점에서, ‘일임형 ISA 가입 시 1만 하나머니(절세/비과세 뉘앙스 포함)’라는 혜택·가치 인상이 전면(헤드/바디)에서 강하게 먼저 형성되고, 이후 지급을 좌우하는 유보(이벤트 참여기간·참여대상, 지급조건(신규/자동이체 또는 잔액), 6백만 소진 조기종료, 지급시까지 계좌 유지, 12/16까지 하나머니 회원가입)가 여러 조각으로 흩어져 제시됩니다. 이로 인해 소비자가 ‘조건이 복잡하지 않게/대부분 충족하면 바로 받는 보상’으로 해석할 오인 여지가 있어 MEDIUM 수준의 오인위험으로 판단했습니다. 다만 ‘조기종료·지급조건·회원가입 마감일·계좌유지’ 등 핵심 유보는 문구로 존재하여 완전한 고지-역전(강한 위반)까지는 보이지 않습니다. 또한 투자 원금손실·수수료 등 위험/비용 고지는 제공된 텍스트에서 확인되지 않아 전체 톤 대비 간극이 커질 수 있으나, 본 판단은 발췌문 기준 ‘복잡 위반’ 중심 위험도입니다."
+  },
+  "overall_impression_risk": true,
+  "article_aggregation": [
+    {
+      "key": "금융소비자 보호에 관한 감독규정 제15조 ②-3",
+      "article": "금융소비자 보호에 관한 감독규정 제15조 ②-3",
+      "principles": [
+        "부당권유행위 금지"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.45,
+      "cu_count": 1,
+      "issue_count": 1,
+      "cu_titles": [
+        "투자자문/투자일임 관련 부당권유 적용범주"
+      ],
+      "anchor_spans": [
+        "비과세 및 저율분리과세되는 일임형ISA 가입(계좌이전포함)하고 1만 하나머니 받으세요~",
+        "일임형 ISA와 함께라면 1만 하나머니 받고 든든해!"
+      ]
+    },
+    {
+      "key": "표시ㆍ광고의 공정화에 관한 법률 제3조 ①-4",
+      "article": "표시ㆍ광고의 공정화에 관한 법률 제3조 ①-4",
+      "principles": [
+        "광고규제"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.05,
+      "cu_count": 1,
+      "issue_count": 2,
+      "cu_titles": [
+        "비방적인 표시·광고로 인한 소비자 오인 및 거래질서 저해"
+      ],
+      "anchor_spans": [
+        "비과세 및 저율분리과세되는 일임형ISA 가입(계좌이전포함)하고 1만 하나머니 받으세요~",
+        "일임형 ISA와 함께라면 1만 하나머니 받고 든든해!",
+        "참여혜택 1만 하나머니 (6백만 하나머니 소진시 조기종료)"
+      ]
+    },
+    {
+      "key": "금융소비자 보호에 관한 감독규정 제15조 ③-1",
+      "article": "금융소비자 보호에 관한 감독규정 제15조 ③-1",
+      "principles": [
+        "부당권유행위 금지"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.0,
+      "cu_count": 1,
+      "issue_count": 2,
+      "cu_titles": [
+        "권유 유형 분류 오류(기초자산 종류 상이 장외파생상품)로 인한 부당권유 위험"
+      ],
+      "anchor_spans": [
+        "비과세 및 저율분리과세되는 일임형ISA 가입(계좌이전포함)하고 1만 하나머니 받으세요~",
+        "일임형 ISA와 함께라면 1만 하나머니 받고 든든해!"
+      ]
+    },
+    {
+      "key": "금융소비자 보호에 관한 감독규정 제15조",
+      "article": "금융소비자 보호에 관한 감독규정 제15조",
+      "principles": [
+        "부당권유행위 금지"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.0,
+      "cu_count": 1,
+      "issue_count": 1,
+      "cu_titles": [
+        "부당권유행위 금지 관련 고시사항 미안내로 인한 위반 가능성"
+      ],
+      "anchor_spans": [
+        "비과세 및 저율분리과세되는 일임형ISA 가입(계좌이전포함)하고 1만 하나머니 받으세요~"
+      ]
+    },
+    {
+      "key": "금융소비자 보호에 관한 감독규정 제14조 ②",
+      "article": "금융소비자 보호에 관한 감독규정 제14조 ②",
+      "principles": [
+        "설명의무"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.0,
+      "cu_count": 1,
+      "issue_count": 1,
+      "cu_titles": [
+        "연계·제휴서비스 축소·변경 고지 누락 또는 기간/방법 미준수"
+      ],
+      "anchor_spans": [
+        "참여혜택 1만 하나머니 (6백만 하나머니 소진시 조기종료)"
+      ]
+    },
+    {
+      "key": "금융소비자 보호에 관한 법률 제21조 제21조",
+      "article": "금융소비자 보호에 관한 법률 제21조 제21조",
+      "principles": [
+        "부당권유행위 금지"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.0,
+      "cu_count": 1,
+      "issue_count": 1,
+      "cu_titles": [
+        "비교·우월 표현에 대한 객관 근거 필요"
+      ],
+      "anchor_spans": [
+        "참여혜택 1만 하나머니 (6백만 하나머니 소진시 조기종료)"
+      ]
+    },
+    {
+      "key": "금융소비자 보호에 관한 법률 시행령 제16조",
+      "article": "금융소비자 보호에 관한 법률 시행령 제16조",
+      "principles": [
+        "부당권유행위 금지"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.0,
+      "cu_count": 1,
+      "issue_count": 2,
+      "cu_titles": [
+        "대통령령상 예외요건 미충족 또는 포섭되는 금지행위 수행 가능성"
+      ],
+      "anchor_spans": [
+        "비과세 및 저율분리과세되는 일임형ISA 가입(계좌이전포함)하고 1만 하나머니 받으세요~",
+        "일임형 ISA와 함께라면 1만 하나머니 받고 든든해!"
+      ]
+    },
+    {
+      "key": "금융소비자 보호에 관한 감독규정 제13조",
+      "article": "금융소비자 보호에 관한 감독규정 제13조",
+      "principles": [
+        "설명의무"
+      ],
+      "effective_verdict": "NOT_APPLICABLE",
+      "max_score": 0.08,
+      "cu_count": 1,
+      "issue_count": 0,
+      "cu_titles": [
+        "설명서 핵심 고지 누락 또는 형식·배치 미준수 위험"
+      ],
+      "anchor_spans": [
+        "시장 상황에 따라 알아서 자산관리!"
+      ]
+    }
+  ],
+  "principle_aggregation": [
+    {
+      "key": "부당권유행위 금지",
+      "article": "금융소비자 보호에 관한 감독규정 제15조 ②-3",
+      "principles": [
+        "부당권유행위 금지"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.45,
+      "cu_count": 5,
+      "issue_count": 7,
+      "cu_titles": [
+        "권유 유형 분류 오류(기초자산 종류 상이 장외파생상품)로 인한 부당권유 위험",
+        "대통령령상 예외요건 미충족 또는 포섭되는 금지행위 수행 가능성",
+        "부당권유행위 금지 관련 고시사항 미안내로 인한 위반 가능성",
+        "비교·우월 표현에 대한 객관 근거 필요",
+        "투자자문/투자일임 관련 부당권유 적용범주"
+      ],
+      "anchor_spans": [
+        "비과세 및 저율분리과세되는 일임형ISA 가입(계좌이전포함)하고 1만 하나머니 받으세요~",
+        "일임형 ISA와 함께라면 1만 하나머니 받고 든든해!",
+        "참여혜택 1만 하나머니 (6백만 하나머니 소진시 조기종료)"
+      ]
+    },
+    {
+      "key": "설명의무",
+      "article": "금융소비자 보호에 관한 감독규정 제13조",
+      "principles": [
+        "설명의무"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.08,
+      "cu_count": 2,
+      "issue_count": 1,
+      "cu_titles": [
+        "설명서 핵심 고지 누락 또는 형식·배치 미준수 위험",
+        "연계·제휴서비스 축소·변경 고지 누락 또는 기간/방법 미준수"
+      ],
+      "anchor_spans": [
+        "시장 상황에 따라 알아서 자산관리!",
+        "참여혜택 1만 하나머니 (6백만 하나머니 소진시 조기종료)"
+      ]
+    },
+    {
+      "key": "광고규제",
+      "article": "표시ㆍ광고의 공정화에 관한 법률 제3조 ①-4",
+      "principles": [
+        "광고규제"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.05,
+      "cu_count": 1,
+      "issue_count": 2,
+      "cu_titles": [
+        "비방적인 표시·광고로 인한 소비자 오인 및 거래질서 저해"
+      ],
+      "anchor_spans": [
+        "비과세 및 저율분리과세되는 일임형ISA 가입(계좌이전포함)하고 1만 하나머니 받으세요~",
+        "일임형 ISA와 함께라면 1만 하나머니 받고 든든해!",
+        "참여혜택 1만 하나머니 (6백만 하나머니 소진시 조기종료)"
+      ]
+    }
+  ],
+  "policy_evidence_chain_counts": {
+    "legal_basis_chains": 17,
+    "disclosure_chains": 17,
+    "exception_chains": 17,
+    "chain_diagnostics": 18
+  }
+}

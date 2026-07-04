@@ -1,0 +1,20 @@
+{
+  "review_id": "kb_0042",
+  "bank_key": "kb",
+  "bank_label": "국민은행",
+  "title": "KB스타 건강적금으로 저축도 건강도 케어하세요!",
+  "review_text_chars": 17414,
+  "workspace_id": "graphcompliance_mvp_jb_20260530",
+  "status": "failed",
+  "error": "BadRequestError: Error code: 400 - {'error': {'message': 'Your input exceeds the context window of this model. Please adjust your input and try again.', 'type': 'invalid_request_error', 'param': 'input', 'code': 'context_length_exceeded'}}",
+  "duration_sec": 580.8981575409998,
+  "final_verdict": null,
+  "violations": [],
+  "violation_count": 0,
+  "disclosure_requirements": [],
+  "overall_impression": {},
+  "overall_impression_risk": false,
+  "article_aggregation": [],
+  "principle_aggregation": [],
+  "policy_evidence_chain_counts": {}
+}

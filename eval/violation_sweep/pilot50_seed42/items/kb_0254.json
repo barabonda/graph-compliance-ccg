@@ -1,0 +1,229 @@
+{
+  "review_id": "kb_0254",
+  "bank_key": "kb",
+  "bank_label": "국민은행",
+  "title": "6번 결제하면 2,000P! KB스타뱅킹 KB Pay 추(秋)향저격 혜택",
+  "review_text_chars": 16573,
+  "workspace_id": "graphcompliance_mvp_jb_20260530",
+  "status": "completed",
+  "error": null,
+  "duration_sec": 227.03403075000097,
+  "final_verdict": "needs_review",
+  "routing": {
+    "ad_scope": "product_ad",
+    "preapproval_required_status": "required",
+    "review_phrase_required_before_publication": true,
+    "review_phrase_expected_in_input": false,
+    "review_phrase_input_status": "absent_expected"
+  },
+  "review_run_id": "review_run_faff23887a1fadc2",
+  "violations": [
+    {
+      "cu_id": "cu_legal_clause_47503c5fae4fbfd8",
+      "verdict": "INSUFFICIENT",
+      "score": 0.42,
+      "principle": "설명의무",
+      "source_article": "금융소비자 보호에 관한 감독규정 제14조 ②",
+      "subject": "금융상품판매업자등",
+      "legal_basis": "금융소비자 보호에 관한 감독규정 제14조 제②항은 연계·제휴서비스 축소·변경 사실을 ‘6개월 전부터 매월 2개 이상의 방법’(불가피 사유면 즉시)으로 고지해야 함을 요구한다(금융소비자보호 감독규정 제14조 ②, 시행령 위임: 영 제15조 제3항 제1호).",
+      "evidence_span": "6번 결제하면 2,000P!",
+      "why": "해당 광고 문구(“6번 결제하면 2,000P!”)는 결제 횟수 충족 시 포인트 제공이라는 ‘혜택’만을 직접적으로 표시하고 있을 뿐, 연계·제휴서비스를 ‘축소·변경’하는 사실이 존재한다는 점이나 그에 대한 고지(시기/방법)가 누락되었다는 점을 광고 사실만으로 확인할 수 없다. 따라서 ‘축소·변경 고지’ 요건에 대한 적용 판단을 할 근거가 부족하다."
+    },
+    {
+      "cu_id": "cu_legal_clause_82df3eebcaea76e7",
+      "verdict": "INSUFFICIENT",
+      "score": 0.3,
+      "principle": "불공정영업행위 금지",
+      "source_article": "금융소비자 보호에 관한 감독규정 제14조 ②-2",
+      "subject": "광고·판매 행위자",
+      "legal_basis": "금융소비자 보호에 관한 감독규정 제14조 제②항 제2호는 연계·제휴서비스 축소·변경 사실 고지 수단 중 ‘우편 또는 전자우편’을 포함하여, 축소·변경 사실을 6개월 전부터 매월 2개 이상 방법으로 고지해야 함을 전제로 한다(감독규정 제14조 ②-2, 영 제15조 제3항 제1호 위임).",
+      "evidence_span": "※ 미션달성 및 응모 이후 KB Pay 탈회, 결제 취소 등으로 경품 지급조건 미충족 시 경품 지급 대상에서 제외",
+      "why": "“※ 미션달성 및 응모 이후 KB Pay 탈회, 결제 취소 등으로 경품 지급조건 미충족 시 경품 지급 대상에서 제외”는 경품 지급조건의 예외/제한(사후 조건) 고지로 보이나, 연계·제휴서비스의 ‘축소·변경’ 고지로서 ‘우편 또는 전자우편’ 요건을 충족/미충족했는지(또는 해당 고지수단이 이 항목에서 문제되는지)를 판단할 수 있는 사실이 제공되지 않는다. 따라서 고지수단(우편/전자우편) 요건 적용 여부를 확정하기 어렵다."
+    },
+    {
+      "cu_id": "cu_legal_article_76887cffdfe55bc4",
+      "verdict": "INSUFFICIENT",
+      "score": 0.4,
+      "principle": "설명의무",
+      "source_article": "금융소비자 보호에 관한 법률 시행령 제24조",
+      "subject": "금융상품 광고 및 판매 준법 검토",
+      "legal_basis": "금융소비자 보호에 관한 법률 시행령 제24조는 금융상품판매대리·중개업자가 소비자에게 ‘대통령령으로 정하는 사항’의 고지 및 표지 게시·증표 제시 기준을 충족해야 함을 정한다(금융소비자 보호에 관한 법률 시행령 제24조).",
+      "evidence_span": "참여방법 | 미션 확인하기 클릭 후 스탬프 미션 확인하기",
+      "why": "해당 문구(“참여방법 | 미션 확인하기 클릭 후 스탬프 미션 확인하기”)는 절차 안내(미션 확인 방법) 성격으로 보이나, 이 항목만으로 금융상품판매대리·중개업자가 ‘대통령령으로 정하는 사항’(급부를 받을 수 있는지 여부, 위탁계약의 명의·업무내용, 개인정보 보유·관리 주체 등) 및 표지·증표 의무를 고지/게시했는지 여부를 확인하기 어렵다. 따라서 설명의무(고지/표지·증표) 미흡을 단정할 만큼의 근거가 부족하다."
+    }
+  ],
+  "violation_count": 3,
+  "disclosure_requirements": [
+    {
+      "id": "disclosure_deposit_rate_basis",
+      "label": "금리 범위 및 산정방법",
+      "source": "은행 광고심의 기준 제16조/제17조",
+      "why": "최고금리, 우대금리, 적용기간, 산정방법을 소비자가 오인하지 않도록 함께 표시해야 합니다."
+    },
+    {
+      "id": "disclosure_deposit_preferential_conditions",
+      "label": "우대조건 및 적용기간",
+      "source": "은행 광고심의 기준 제18조",
+      "why": "특판, 이벤트, 제휴 혜택은 대상, 자격요건, 기간, 내용을 함께 안내해야 합니다."
+    },
+    {
+      "id": "disclosure_depositor_protection",
+      "label": "예금자보호 부보내용",
+      "source": "은행 광고심의 기준 제16조",
+      "why": "예금성 상품 광고는 예금자보호법 등에 따른 부보내용을 유지 고지로 관리해야 합니다."
+    },
+    {
+      "id": "disclosure_review_number",
+      "label": "심의필 번호 및 유효기간",
+      "source": "은행 광고심의 기준 제9조/제16조",
+      "why": "사전승인 또는 연합회 심의 결과를 소비자가 쉽게 인식할 수 있도록 표시해야 합니다."
+    },
+    {
+      "id": "disclosure_review_process",
+      "label": "준법감시인 사전승인 및 심의필 표시",
+      "source": "은행 광고심의 기준 제4조/제9조",
+      "why": "은행 광고는 내부통제기준에 따른 사전승인과 심의필 표시 여부를 운영 절차로 확인해야 합니다."
+    }
+  ],
+  "overall_impression": {
+    "track": "B",
+    "standard": "대법원 2017두60109 전체적·궁극적 인상 기준",
+    "verdict": "MEDIUM",
+    "misleading_risk_score": 0.68,
+    "why": "타이틀/본문에서 ‘6번 결제하면 2,000P’가 가장 강하게 제시되고, 기간/대상/미션(3,000원 이상 6회+스탬프+응모)도 있으나, 지급 성립을 좌우하는 사후 조건·제외 결제·승인취소·삼성페이 호환/앱 미설치 등 핵심 리스크 요소가 다수 footnote/유의사항에 분산되어 있다. 이로 인해 ‘헤드라인의 리워드 확정 인상’과 ‘실제 지급 가능성(복합 조건)’ 사이의 위계 비대칭 간극이 일부 발생하므로 오인위험은 MEDIUM으로 판단한다. 다만 금리·예금자보호 등 ‘금융상품 투자로 오인’ 유형의 강한 복잡 위반은 없고(이벤트형 포인트 지급), 모순 수치나 명백한 사실 대비(CONTRADICTED)는 확인되지 않아 위험은 HIGH까지 보긴 어렵다."
+  },
+  "overall_impression_risk": true,
+  "article_aggregation": [
+    {
+      "key": "금융소비자 보호에 관한 감독규정 제14조 ②",
+      "article": "금융소비자 보호에 관한 감독규정 제14조 ②",
+      "principles": [
+        "설명의무"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.42,
+      "cu_count": 1,
+      "issue_count": 1,
+      "cu_titles": [
+        "연계·제휴서비스 축소·변경 고지 누락 또는 기간/방법 미준수"
+      ],
+      "anchor_spans": [
+        "6번 결제하면 2,000P!"
+      ]
+    },
+    {
+      "key": "금융소비자 보호에 관한 법률 시행령 제24조",
+      "article": "금융소비자 보호에 관한 법률 시행령 제24조",
+      "principles": [
+        "설명의무"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.4,
+      "cu_count": 1,
+      "issue_count": 1,
+      "cu_titles": [
+        "금융상품판매대리·중개업자의 고지·표지·증표 요건 미충족"
+      ],
+      "anchor_spans": [
+        "참여방법 | 미션 확인하기 클릭 후 스탬프 미션 확인하기"
+      ]
+    },
+    {
+      "key": "금융소비자 보호에 관한 감독규정 제14조 ②-1",
+      "article": "금융소비자 보호에 관한 감독규정 제14조 ②-1",
+      "principles": [
+        "불공정영업행위 금지"
+      ],
+      "effective_verdict": "NOT_APPLICABLE",
+      "max_score": 0.0,
+      "cu_count": 1,
+      "issue_count": 0,
+      "cu_titles": [
+        "연계·제휴서비스등 축소·변경 고지 방법/시기 미충족 리스크"
+      ],
+      "anchor_spans": [
+        "6번 결제하면 2,000P!"
+      ]
+    },
+    {
+      "key": "금융소비자 보호에 관한 감독규정 제14조 ②-2",
+      "article": "금융소비자 보호에 관한 감독규정 제14조 ②-2",
+      "principles": [
+        "불공정영업행위 금지"
+      ],
+      "effective_verdict": "NOT_APPLICABLE",
+      "max_score": 0.0,
+      "cu_count": 1,
+      "issue_count": 0,
+      "cu_titles": [
+        "연계·제휴서비스 축소·변경 고지 방식(우편/전자우편) 요건"
+      ],
+      "anchor_spans": [
+        "6번 결제하면 2,000P!"
+      ]
+    },
+    {
+      "key": "금융소비자 보호에 관한 감독규정 제14조 ②-4",
+      "article": "금융소비자 보호에 관한 감독규정 제14조 ②-4",
+      "principles": [
+        "불공정영업행위 금지"
+      ],
+      "effective_verdict": "NOT_APPLICABLE",
+      "max_score": 0.0,
+      "cu_count": 1,
+      "issue_count": 0,
+      "cu_titles": [
+        "전자적 고지 수단 요건 미충족(문자메시지 등 방식 관련)"
+      ],
+      "anchor_spans": [
+        "6번 결제하면 2,000P!"
+      ]
+    }
+  ],
+  "principle_aggregation": [
+    {
+      "key": "설명의무",
+      "article": "금융소비자 보호에 관한 감독규정 제14조 ②",
+      "principles": [
+        "설명의무"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.42,
+      "cu_count": 2,
+      "issue_count": 2,
+      "cu_titles": [
+        "금융상품판매대리·중개업자의 고지·표지·증표 요건 미충족",
+        "연계·제휴서비스 축소·변경 고지 누락 또는 기간/방법 미준수"
+      ],
+      "anchor_spans": [
+        "6번 결제하면 2,000P!",
+        "참여방법 | 미션 확인하기 클릭 후 스탬프 미션 확인하기"
+      ]
+    },
+    {
+      "key": "불공정영업행위 금지",
+      "article": "금융소비자 보호에 관한 감독규정 제14조 ②-1",
+      "principles": [
+        "불공정영업행위 금지"
+      ],
+      "effective_verdict": "NOT_APPLICABLE",
+      "max_score": 0.0,
+      "cu_count": 3,
+      "issue_count": 0,
+      "cu_titles": [
+        "연계·제휴서비스 축소·변경 고지 방식(우편/전자우편) 요건",
+        "연계·제휴서비스등 축소·변경 고지 방법/시기 미충족 리스크",
+        "전자적 고지 수단 요건 미충족(문자메시지 등 방식 관련)"
+      ],
+      "anchor_spans": [
+        "6번 결제하면 2,000P!"
+      ]
+    }
+  ],
+  "policy_evidence_chain_counts": {
+    "legal_basis_chains": 8,
+    "disclosure_chains": 8,
+    "exception_chains": 8,
+    "chain_diagnostics": 8
+  }
+}

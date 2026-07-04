@@ -1,0 +1,344 @@
+{
+  "review_id": "jb_0280",
+  "bank_key": "jb",
+  "bank_label": "전북은행",
+  "title": "제13회 광주 비엔날레 입장권 할인 이벤트",
+  "review_text_chars": 2137,
+  "workspace_id": "graphcompliance_mvp_jb_20260530",
+  "status": "completed",
+  "error": null,
+  "duration_sec": 157.31761233400175,
+  "final_verdict": "needs_review",
+  "routing": {
+    "ad_scope": "product_ad",
+    "preapproval_required_status": "required",
+    "review_phrase_required_before_publication": true,
+    "review_phrase_expected_in_input": false,
+    "review_phrase_input_status": "absent_expected"
+  },
+  "review_run_id": "review_run_9af7a0b7df0aa534",
+  "violations": [
+    {
+      "cu_id": "cu_legal_clause_650899399a966b2e",
+      "verdict": "INSUFFICIENT",
+      "score": 0.45,
+      "principle": "광고규제",
+      "source_article": "금융소비자 보호에 관한 법률 제22조 ④-3",
+      "subject": "금융소비자 관련 행위",
+      "legal_basis": "금융소비자 보호에 관한 법률 제22조 ④-3은 예금성 상품 광고에서 ‘이자의 지급·부과 시기 및 부수적 혜택·비용’을 명확히 표시하지 아니하면 금융소비자가 오인하게 하는 행위를 금지한다(제22조 ④ 각 호 중 3. 예금성 상품 가목). 금융소비자 보호에 관한 법률 제22조 ④-3→금융소비자보호법 시행령(광고 방법·절차/금지행위로 세부 위임)→감독규정 및 금융광고 심의기준(세부 심사) . 다만, 본 항목은 ‘할인 이벤트(20% 즉시할인)’ 문구로, 이를 ‘예금성 상품의 이자율/부수적 혜택·비용’에 해당한다고 단정할 수 있는 상품유형 연결 사실이 부족하다.",
+      "evidence_span": "이벤트 내용 본 행사 기간 내 JB카드로 광주비엔날레 입장권 구매시 20% 즉시할인(*온라인 판매 포함)",
+      "why": "해당 문구는 할인 이벤트의 ‘즉시할인’과 ‘온라인 판매 포함’ 안내로 보이나, 이 문구가 금융소비자 보호에 관한 법률 제22조 ④-3의 ‘예금성 상품 광고’로 연결되는 상품유형·비용 구조(부수적 혜택·비용, 이자의 지급·부과 시기)가 이 항목의 사실관계에서 확인되지 않는다. 따라서 요건 충족 여부를 판단하기에 근거가 부족하다."
+    },
+    {
+      "cu_id": "cu_legal_article_30dce47c48d34de4",
+      "verdict": "INSUFFICIENT",
+      "score": 0.5,
+      "principle": "광고규제",
+      "source_article": "금융소비자 보호에 관한 법률 제22조",
+      "subject": "금융상품 광고 및 판매 준법 검토",
+      "legal_basis": "금융소비자 보호에 관한 법률 제22조 ③ 및 ④는 금융상품등 광고 시 ‘금융소비자가 내용 오해하지 않도록 명확·공정하게 전달’하고, 예금성/대출성 상품 등 유형별로 이자율·대출조건 등 핵심 정보를 명확히 표시하지 아니해 오인하게 하는 금지행위를 둔다(제22조 ②, ④). 금융소비자 보호에 관한 법률 제22조→금융소비자보호법 시행령(광고 방법·절차/금지행위 위임)→감독규정 및 금융광고 심의기준(세부). 다만 본 항목의 광고 사실은 ‘20% 즉시할인(온라인 판매 포함)’이며, 이를 금리/이자율/대출조건 등 법에서 상정하는 금융상품 ‘조건 표시’로 볼 수 있는 연결 정보가 부족하다.",
+      "evidence_span": "이벤트 내용 본 행사 기간 내 JB카드로 광주비엔날레 입장권 구매시 20% 즉시할인(*온라인 판매 포함)",
+      "why": "광고 문구는 할인 이벤트 조건을 포함하고 있으나, 이를 금융소비자 보호에 관한 법률 제22조에서 문제 삼는 ‘예금성/대출성 상품의 핵심 조건 표시’ 또는 ‘오인 유발 금지행위’로 연결되는 상품유형·표시대상 대응이 이 항목 범위에서 확인되지 않아, 위반 여부를 확정하기엔 근거가 부족하다."
+    },
+    {
+      "cu_id": "cu_legal_article_47c9e994975df429",
+      "verdict": "INSUFFICIENT",
+      "score": 0.35,
+      "principle": "광고규제",
+      "source_article": "표시ㆍ광고의 공정화에 관한 법률 제4조",
+      "subject": "금융상품 광고 및 판매 준법 검토",
+      "legal_basis": "표시ㆍ광고의 공정화에 관한 법률 제4조 ⑤는 공정거래위원회가 고시한 ‘중요정보’를 표시·광고 시 표시·광고하여야 한다고 규정한다. 표시ㆍ광고의 공정화에 관한 법률 제4조(중요정보의 고시 및 통합공고)→(고시된 중요정보 해당성 및 적용 필요성은 별도의 공정위 고시/통합공고 존재가 전제) . 본 항목은 인원 한정(본인 및 동반 1인) 문구로, 그것이 ‘중요정보’로 고시되어 표시 의무가 발생하는지에 대한 근거가 제공되지 않는다.",
+      "evidence_span": "※ 입장권 구매시 본인 및 동반 1인에 한하여 할인적용 됩니다.",
+      "why": "인원 제한 문구는 존재하나, 이 문구가 ‘중요정보’로서 공정거래위원회 고시 대상인지 여부가 제시되지 않아 위반 여부를 확정할 수 없다. 따라서 판단 근거가 부족하다."
+    },
+    {
+      "cu_id": "cu_legal_clause_dbee00e9c5f702f5",
+      "verdict": "INSUFFICIENT",
+      "score": 0.0,
+      "principle": "광고규제",
+      "source_article": "금융소비자 보호에 관한 법률 시행령 제20조 ④",
+      "subject": "광고·판매 행위자",
+      "legal_basis": "",
+      "evidence_span": "",
+      "why": "이 심의 항목은 자동 판단이 완료되지 않아 '근거 부족(추가 확인 필요)'으로 분류했습니다. 심사자가 직접 확인해 주세요."
+    },
+    {
+      "cu_id": "cu_legal_article_1f5237d19fdfa401",
+      "verdict": "INSUFFICIENT",
+      "score": 0.0,
+      "principle": "부당권유행위 금지",
+      "source_article": "금융소비자 보호에 관한 감독규정 제15조",
+      "subject": "금융상품 광고 및 판매 준법 검토",
+      "legal_basis": "",
+      "evidence_span": "",
+      "why": "이 심의 항목은 자동 판단이 완료되지 않아 '근거 부족(추가 확인 필요)'으로 분류했습니다. 심사자가 직접 확인해 주세요."
+    },
+    {
+      "cu_id": "cu_legal_clause_d17c14ff653d2849",
+      "verdict": "INSUFFICIENT",
+      "score": 0.0,
+      "principle": "광고규제",
+      "source_article": "표시ㆍ광고의 공정화에 관한 법률 제4조 ⑤",
+      "subject": "사업자등",
+      "legal_basis": "",
+      "evidence_span": "",
+      "why": "이 심의 항목은 자동 판단이 완료되지 않아 '근거 부족(추가 확인 필요)'으로 분류했습니다. 심사자가 직접 확인해 주세요."
+    },
+    {
+      "cu_id": "cu_legal_article_47c9e994975df429",
+      "verdict": "INSUFFICIENT",
+      "score": 0.0,
+      "principle": "광고규제",
+      "source_article": "표시ㆍ광고의 공정화에 관한 법률 제4조",
+      "subject": "금융상품 광고 및 판매 준법 검토",
+      "legal_basis": "",
+      "evidence_span": "",
+      "why": "이 심의 항목은 자동 판단이 완료되지 않아 '근거 부족(추가 확인 필요)'으로 분류했습니다. 심사자가 직접 확인해 주세요."
+    },
+    {
+      "cu_id": "cu_legal_clause_d5d6f71aa0d25024",
+      "verdict": "INSUFFICIENT",
+      "score": 0.0,
+      "principle": "광고규제",
+      "source_article": "금융소비자 보호에 관한 법률 시행령 제20조 ①",
+      "subject": "광고·판매 행위자",
+      "legal_basis": "",
+      "evidence_span": "",
+      "why": "이 심의 항목은 자동 판단이 완료되지 않아 '근거 부족(추가 확인 필요)'으로 분류했습니다. 심사자가 직접 확인해 주세요."
+    },
+    {
+      "cu_id": "cu_legal_clause_d955a0500eca83c0",
+      "verdict": "INSUFFICIENT",
+      "score": 0.0,
+      "principle": "설명의무",
+      "source_article": "금융소비자 보호에 관한 법률 시행령 제14조 ③",
+      "subject": "금융상품판매업자등",
+      "legal_basis": "",
+      "evidence_span": "",
+      "why": "이 심의 항목은 자동 판단이 완료되지 않아 '근거 부족(추가 확인 필요)'으로 분류했습니다. 심사자가 직접 확인해 주세요."
+    },
+    {
+      "cu_id": "cu_legal_clause_5a039f694e5583ac",
+      "verdict": "INSUFFICIENT",
+      "score": 0.0,
+      "principle": "광고규제",
+      "source_article": "표시ㆍ광고의 공정화에 관한 법률 제6조 ③-3",
+      "subject": "광고·판매 행위자",
+      "legal_basis": "",
+      "evidence_span": "",
+      "why": "이 심의 항목은 자동 판단이 완료되지 않아 '근거 부족(추가 확인 필요)'으로 분류했습니다. 심사자가 직접 확인해 주세요."
+    },
+    {
+      "cu_id": "cu_legal_clause_2573d6db444defca",
+      "verdict": "INSUFFICIENT",
+      "score": 0.0,
+      "principle": "부당권유행위 금지",
+      "source_article": "금융소비자 보호에 관한 감독규정 제15조 ①-4",
+      "subject": "광고·판매 행위자",
+      "legal_basis": "",
+      "evidence_span": "",
+      "why": "이 심의 항목은 자동 판단이 완료되지 않아 '근거 부족(추가 확인 필요)'으로 분류했습니다. 심사자가 직접 확인해 주세요."
+    },
+    {
+      "cu_id": "cu_legal_clause_0947815a243dbb0f",
+      "verdict": "INSUFFICIENT",
+      "score": 0.0,
+      "principle": "광고규제",
+      "source_article": "금융소비자 보호에 관한 법률 시행령 제20조 ④-2",
+      "subject": "광고·판매 행위자",
+      "legal_basis": "",
+      "evidence_span": "",
+      "why": "이 심의 항목은 자동 판단이 완료되지 않아 '근거 부족(추가 확인 필요)'으로 분류했습니다. 심사자가 직접 확인해 주세요."
+    },
+    {
+      "cu_id": "cu_legal_article_1f5237d19fdfa401",
+      "verdict": "INSUFFICIENT",
+      "score": 0.0,
+      "principle": "부당권유행위 금지",
+      "source_article": "금융소비자 보호에 관한 감독규정 제15조",
+      "subject": "금융상품 광고 및 판매 준법 검토",
+      "legal_basis": "",
+      "evidence_span": "",
+      "why": "이 심의 항목은 자동 판단이 완료되지 않아 '근거 부족(추가 확인 필요)'으로 분류했습니다. 심사자가 직접 확인해 주세요."
+    },
+    {
+      "cu_id": "cu_legal_clause_5a9a77e0886826da",
+      "verdict": "INSUFFICIENT",
+      "score": 0.0,
+      "principle": "광고규제",
+      "source_article": "금융소비자 보호에 관한 법률 제22조 ⑤",
+      "subject": "광고·판매 행위자",
+      "legal_basis": "",
+      "evidence_span": "",
+      "why": "이 심의 항목은 자동 판단이 완료되지 않아 '근거 부족(추가 확인 필요)'으로 분류했습니다. 심사자가 직접 확인해 주세요."
+    },
+    {
+      "cu_id": "cu_legal_clause_82df3eebcaea76e7",
+      "verdict": "INSUFFICIENT",
+      "score": 0.0,
+      "principle": "불공정영업행위 금지",
+      "source_article": "금융소비자 보호에 관한 감독규정 제14조 ②-2",
+      "subject": "광고·판매 행위자",
+      "legal_basis": "",
+      "evidence_span": "",
+      "why": "이 심의 항목은 자동 판단이 완료되지 않아 '근거 부족(추가 확인 필요)'으로 분류했습니다. 심사자가 직접 확인해 주세요."
+    }
+  ],
+  "violation_count": 15,
+  "disclosure_requirements": [
+    {
+      "id": "disclosure_deposit_rate_basis",
+      "label": "금리 범위 및 산정방법",
+      "source": "은행 광고심의 기준 제16조/제17조",
+      "why": "최고금리, 우대금리, 적용기간, 산정방법을 소비자가 오인하지 않도록 함께 표시해야 합니다."
+    },
+    {
+      "id": "disclosure_deposit_preferential_conditions",
+      "label": "우대조건 및 적용기간",
+      "source": "은행 광고심의 기준 제18조",
+      "why": "특판, 이벤트, 제휴 혜택은 대상, 자격요건, 기간, 내용을 함께 안내해야 합니다."
+    },
+    {
+      "id": "disclosure_depositor_protection",
+      "label": "예금자보호 부보내용",
+      "source": "은행 광고심의 기준 제16조",
+      "why": "예금성 상품 광고는 예금자보호법 등에 따른 부보내용을 유지 고지로 관리해야 합니다."
+    },
+    {
+      "id": "disclosure_review_number",
+      "label": "심의필 번호 및 유효기간",
+      "source": "은행 광고심의 기준 제9조/제16조",
+      "why": "사전승인 또는 연합회 심의 결과를 소비자가 쉽게 인식할 수 있도록 표시해야 합니다."
+    },
+    {
+      "id": "disclosure_review_process",
+      "label": "준법감시인 사전승인 및 심의필 표시",
+      "source": "은행 광고심의 기준 제4조/제9조",
+      "why": "은행 광고는 내부통제기준에 따른 사전승인과 심의필 표시 여부를 운영 절차로 확인해야 합니다."
+    }
+  ],
+  "overall_impression": {
+    "track": "B",
+    "standard": "대법원 2017두60109 전체적·궁극적 인상 기준",
+    "verdict": "LOW",
+    "misleading_risk_score": 0.35,
+    "why": "Track B의 핵심인 ‘조각난 조항들을 종합했을 때 혜택(20% 즉시할인)과 실체(적용 범위/제외/채널 제한) 사이 간극’이 큰지 판단했을 때, 본문에 1) 이벤트기간, 2) 대상카드 범위 및 제외(SSG계열카드, 선불카드 제외), 3) 할인 적용 인원 제한(본인+동반 1인), 4) 온라인 예매처(티켓링크) 등이 모두 함께 존재합니다. 따라서 혜택을 받을 수 있는 ‘조건’이 누락되어 안전한 전제처럼 오인될 정도의 복잡 위반 간극은 크지 않습니다. 금융 불이익 고지는 존재하지만, 할인혜택 자체를 부정하거나 할인과 직접 모순되는 구조의 주장으로 연결되진 않아 오인위험을 낮게 평가합니다."
+  },
+  "overall_impression_risk": false,
+  "article_aggregation": [
+    {
+      "key": "금융소비자 보호에 관한 법률 제22조",
+      "article": "금융소비자 보호에 관한 법률 제22조",
+      "principles": [
+        "광고규제"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.5,
+      "cu_count": 1,
+      "issue_count": 1,
+      "cu_titles": [
+        "금융상품등 광고 준수사항(필수 고지/금지행위) 누락·오인 가능성"
+      ],
+      "anchor_spans": [
+        "이벤트 내용 본 행사 기간 내 JB카드로 광주비엔날레 입장권 구매시 20% 즉시할인(*온라인 판매 포함)"
+      ]
+    },
+    {
+      "key": "금융소비자 보호에 관한 법률 제22조 ④-3",
+      "article": "금융소비자 보호에 관한 법률 제22조 ④-3",
+      "principles": [
+        "광고규제"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.45,
+      "cu_count": 1,
+      "issue_count": 1,
+      "cu_titles": [
+        "예금성 상품 광고의 이자율·비용·성과 기간 표시 오인 유발"
+      ],
+      "anchor_spans": [
+        "이벤트 내용 본 행사 기간 내 JB카드로 광주비엔날레 입장권 구매시 20% 즉시할인(*온라인 판매 포함)"
+      ]
+    },
+    {
+      "key": "금융소비자 보호에 관한 법률 시행령 제20조 ④",
+      "article": "금융소비자 보호에 관한 법률 시행령 제20조 ④",
+      "principles": [
+        "광고규제"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.0,
+      "cu_count": 1,
+      "issue_count": 1,
+      "cu_titles": [
+        "수익률/운용실적의 선별 표시(좋은 기간만 표시)"
+      ],
+      "anchor_spans": [
+        "이벤트 내용 본 행사 기간 내 JB카드로 광주비엔날레 입장권 구매시 20% 즉시할인(*온라인 판매 포함)"
+      ]
+    },
+    {
+      "key": "금융소비자 보호에 관한 법률 시행령 제20조 ①",
+      "article": "금융소비자 보호에 관한 법률 시행령 제20조 ①",
+      "principles": [
+        "광고규제"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.0,
+      "cu_count": 1,
+      "issue_count": 1,
+      "cu_titles": [
+        "수익·환급 관련 오인 유발 광고(부당표현) 위험"
+      ],
+      "anchor_spans": [
+        "이벤트 내용 본 행사 기간 내 JB카드로 광주비엔날레 입장권 구매시 20% 즉시할인(*온라인 판매 포함)"
+      ]
+    },
+    {
+      "key": "금융소비자 보호에 관한 법률 시행령 제20조 ④-2",
+      "article": "금융소비자 보호에 관한 법률 시행령 제20조 ④-2",
+      "principles": [
+        "광고규제"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.0,
+      "cu_count": 1,
+      "issue_count": 1,
+      "cu_titles": [
+        "수익률·운용실적 좋은 기간만 표시"
+      ],
+      "anchor_spans": [
+        "이벤트 내용 본 행사 기간 내 JB카드로 광주비엔날레 입장권 구매시 20% 즉시할인(*온라인 판매 포함)"
+      ]
+    }
+  ],
+  "principle_aggregation": [
+    {
+      "key": "광고규제",
+      "article": "금융소비자 보호에 관한 법률 제22조 ④-3",
+      "principles": [
+        "광고규제"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.5,
+      "cu_count": 5,
+      "issue_count": 5,
+      "cu_titles": [
+        "금융상품등 광고 준수사항(필수 고지/금지행위) 누락·오인 가능성",
+        "수익·환급 관련 오인 유발 광고(부당표현) 위험",
+        "수익률/운용실적의 선별 표시(좋은 기간만 표시)",
+        "수익률·운용실적 좋은 기간만 표시",
+        "예금성 상품 광고의 이자율·비용·성과 기간 표시 오인 유발"
+      ],
+      "anchor_spans": [
+        "이벤트 내용 본 행사 기간 내 JB카드로 광주비엔날레 입장권 구매시 20% 즉시할인(*온라인 판매 포함)"
+      ]
+    }
+  ],
+  "policy_evidence_chain_counts": {
+    "legal_basis_chains": 18,
+    "disclosure_chains": 18,
+    "exception_chains": 18,
+    "chain_diagnostics": 18
+  }
+}

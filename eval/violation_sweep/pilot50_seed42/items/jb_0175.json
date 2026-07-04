@@ -1,0 +1,214 @@
+{
+  "review_id": "jb_0175",
+  "bank_key": "jb",
+  "bank_label": "전북은행",
+  "title": "JB 글로벌 수출입 통장 출시 기념 JB 글로벌 CC 이벤트",
+  "review_text_chars": 3111,
+  "workspace_id": "graphcompliance_mvp_jb_20260530",
+  "status": "completed",
+  "error": null,
+  "duration_sec": 181.84607870800392,
+  "final_verdict": "reject",
+  "routing": {
+    "ad_scope": "product_ad",
+    "preapproval_required_status": "required",
+    "review_phrase_required_before_publication": true,
+    "review_phrase_expected_in_input": false,
+    "review_phrase_input_status": "absent_expected"
+  },
+  "review_run_id": "review_run_5a75f0e372ab2fb8",
+  "violations": [
+    {
+      "cu_id": "cu_legal_clause_3176bac8e26af642",
+      "verdict": "NON_COMPLIANT",
+      "score": 0.82,
+      "principle": "광고규제",
+      "source_article": "금융소비자 보호에 관한 법률 시행령 제20조 ①-3",
+      "subject": "광고·판매 행위자",
+      "legal_basis": "금융소비자 보호에 관한 법률 시행령 제20조 ①-3은 비교대상 및 기준을 분명하게 밝히지 않거나 객관적인 근거 없이 다른 금융상품등과 비교하는 행위를 금지하며(‘법 제22조제4항제1호마목’의 위임), 광고·판매 행위자가 이를 위반하는 경우를 제한한다; 근거조문(위임사슬): 금융소비자 보호에 관한 법률 시행령 제20조 ①-3(대통령령으로 정하는 행위=비교대상 및 기준 미명확/객관적 근거 부재) 및 금융소비자 보호에 관한 법률 제22조 준수 취지. 함께 제시된 은행 광고심의 기준(‘및 은행 광고심의 기준 제17조’) 중 부당한 비교광고 금지 취지도 병기된다.",
+      "evidence_span": "통장 잔액에 따라 최대 $32",
+      "why": "‘통장 잔액에 따라 최대 $32’(해당 문장)에서 비교대상 및 기준을 분명하게 밝히지 않아, 비교대상·기준 미명확/객관적 근거 부재에 해당할 우려가 있는 금지유형(금융소비자 보호에 관한 법률 시행령 제20조 ①-3)이 성립한다. 또한 해당 문장에 대한 사실관계로 ‘잔액 조건(구간/기준)이 구체적으로 미제시’된 점이 확인되어 비교대상·기준을 객관적으로 특정하기 어렵다. (따라서 이 심의항목 요건은 적합하지 않다.)"
+    },
+    {
+      "cu_id": "cu_legal_clause_47503c5fae4fbfd8",
+      "verdict": "INSUFFICIENT",
+      "score": 0.38,
+      "principle": "설명의무",
+      "source_article": "금융소비자 보호에 관한 감독규정 제14조 ②",
+      "subject": "금융상품판매업자등",
+      "legal_basis": "금융소비자 보호에 관한 감독규정 제14조 ②는 ‘연계·제휴서비스 등을 축소·변경한다는 사실’을 6개월 전부터 매월 2개 이상의 방법으로 고지하거나 불가피한 사유가 있으면 즉시 고지하도록 하는 설명의무를 정한다(위임사슬: 감독규정 제14조 ②→영 제15조제3항제1호 등).",
+      "evidence_span": "캐시백 기간 내 계좌 신규 후 해당 월의 평균 잔액이 미화 1만불 이상인 경우 $2 캐시백 지급!",
+      "why": "심의기준이 요구하는 ‘연계·제휴서비스 축소·변경’ 및 그에 대한 ‘고지(시점/방법)’ 사실이 광고 문구 사실로 확인되지 않아 요건 적용은 가능하나 결론을 내릴 만큼의 사실관계가 부족하다. (따라서 적합하지 않다고 단정할 수 없고, 근거 부족으로 판단한다.)"
+    },
+    {
+      "cu_id": "cu_legal_clause_47503c5fae4fbfd8",
+      "verdict": "INSUFFICIENT",
+      "score": 0.32,
+      "principle": "설명의무",
+      "source_article": "금융소비자 보호에 관한 감독규정 제14조 ②",
+      "subject": "금융상품판매업자등",
+      "legal_basis": "금융소비자 보호에 관한 감독규정 제14조 ②는 ‘연계·제휴서비스 등을 축소·변경’하는 경우 6개월 전부터 매월 2개 이상의 방법으로 고지하거나 불가피한 사유가 있으면 즉시 고지하도록 설명의무를 정한다(위임사슬: 감독규정 제14조 ②→영 제15조제3항제1호 등).",
+      "evidence_span": "계좌 신규 후 6개월간 평균 잔액에 따라 캐시백 추가 지급!",
+      "why": "심의기준이 요구하는 ‘연계·제휴서비스 축소·변경’ 및 ‘고지 여부(방법/시점)’에 관한 사실이 광고 사실로 충분히 확인되지 않아, 위반 여부를 확정하기 어렵다. 따라서 해당 기준에 대해서는 근거 부족으로 판단한다."
+    }
+  ],
+  "violation_count": 3,
+  "disclosure_requirements": [
+    {
+      "id": "disclosure_deposit_rate_basis",
+      "label": "금리 범위 및 산정방법",
+      "source": "은행 광고심의 기준 제16조/제17조",
+      "why": "최고금리, 우대금리, 적용기간, 산정방법을 소비자가 오인하지 않도록 함께 표시해야 합니다."
+    },
+    {
+      "id": "disclosure_deposit_preferential_conditions",
+      "label": "우대조건 및 적용기간",
+      "source": "은행 광고심의 기준 제18조",
+      "why": "특판, 이벤트, 제휴 혜택은 대상, 자격요건, 기간, 내용을 함께 안내해야 합니다."
+    },
+    {
+      "id": "disclosure_depositor_protection",
+      "label": "예금자보호 부보내용",
+      "source": "은행 광고심의 기준 제16조",
+      "why": "예금성 상품 광고는 예금자보호법 등에 따른 부보내용을 유지 고지로 관리해야 합니다."
+    },
+    {
+      "id": "disclosure_review_number",
+      "label": "심의필 번호 및 유효기간",
+      "source": "은행 광고심의 기준 제9조/제16조",
+      "why": "사전승인 또는 연합회 심의 결과를 소비자가 쉽게 인식할 수 있도록 표시해야 합니다."
+    },
+    {
+      "id": "disclosure_review_process",
+      "label": "준법감시인 사전승인 및 심의필 표시",
+      "source": "은행 광고심의 기준 제4조/제9조",
+      "why": "은행 광고는 내부통제기준에 따른 사전승인과 심의필 표시 여부를 운영 절차로 확인해야 합니다."
+    }
+  ],
+  "overall_impression": {
+    "track": "B",
+    "standard": "대법원 2017두60109 전체적·궁극적 인상 기준",
+    "verdict": "MEDIUM",
+    "misleading_risk_score": 0.68,
+    "why": "혜택 중심 문구(‘최대 $32’, 월/6개월 평균 잔액에 따른 $2/$20/$30)가 상위에 배치되어 큰 금액 인상을 만들고, 실제로는 여러 조건(월별 평균 잔액 충족, 6개월 평균 잔액 구간, 총 1회 지급 구조, 지급월 7개월째 15일 등)이 분산·결합되어 있어 ‘조건을 충족하면(어떻게 충족해야 최대가 되는지까지) 확실히 받는다’는 전체 인상과 실체 사이에 간극이 생길 수 있다. 다만, 행사기간/대상/평균 잔액 요건/총 1회 지급 예정/이벤트 변경·중단 가능 및 환율 관련 손실 가능 등 필수 완화 정보가 존재하므로 오인 위험은 ‘높음’까지는 아니며 ‘중간(MEDIUM)’으로 평가한다."
+  },
+  "overall_impression_risk": true,
+  "article_aggregation": [
+    {
+      "key": "금융소비자 보호에 관한 법률 시행령 제20조 ①-3",
+      "article": "금융소비자 보호에 관한 법률 시행령 제20조 ①-3",
+      "principles": [
+        "광고규제"
+      ],
+      "effective_verdict": "NON_COMPLIANT",
+      "max_score": 0.82,
+      "cu_count": 1,
+      "issue_count": 1,
+      "cu_titles": [
+        "비교대상·기준 미명확 또는 객관적 근거 부재"
+      ],
+      "anchor_spans": [
+        "계좌 신규 후 6개월간 평균 잔액에 따라 캐시백 추가 지급!",
+        "캐시백 기간 내 계좌 신규 후 해당 월의 평균 잔액이 미화 1만불 이상인 경우 $2 캐시백 지급!",
+        "통장 잔액에 따라 최대 $32"
+      ]
+    },
+    {
+      "key": "금융소비자 보호에 관한 감독규정 제14조 ②",
+      "article": "금융소비자 보호에 관한 감독규정 제14조 ②",
+      "principles": [
+        "설명의무"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.38,
+      "cu_count": 1,
+      "issue_count": 2,
+      "cu_titles": [
+        "연계·제휴서비스 축소·변경 고지 누락 또는 기간/방법 미준수"
+      ],
+      "anchor_spans": [
+        "계좌 신규 후 6개월간 평균 잔액에 따라 캐시백 추가 지급!",
+        "캐시백 기간 내 계좌 신규 후 해당 월의 평균 잔액이 미화 1만불 이상인 경우 $2 캐시백 지급!"
+      ]
+    },
+    {
+      "key": "금융소비자 보호에 관한 감독규정 제14조 ⑥-7",
+      "article": "금융소비자 보호에 관한 감독규정 제14조 ⑥-7",
+      "principles": [
+        "불공정영업행위 금지"
+      ],
+      "effective_verdict": "NOT_APPLICABLE",
+      "max_score": 0.1,
+      "cu_count": 1,
+      "issue_count": 0,
+      "cu_titles": [
+        "정당한 사유 없는 예치금 반환 거부"
+      ],
+      "anchor_spans": [
+        "통장 잔액에 따라 최대 $32"
+      ]
+    }
+  ],
+  "principle_aggregation": [
+    {
+      "key": "광고규제",
+      "article": "금융소비자 보호에 관한 법률 시행령 제20조 ①-3",
+      "principles": [
+        "광고규제"
+      ],
+      "effective_verdict": "NON_COMPLIANT",
+      "max_score": 0.82,
+      "cu_count": 1,
+      "issue_count": 1,
+      "cu_titles": [
+        "비교대상·기준 미명확 또는 객관적 근거 부재"
+      ],
+      "anchor_spans": [
+        "계좌 신규 후 6개월간 평균 잔액에 따라 캐시백 추가 지급!",
+        "캐시백 기간 내 계좌 신규 후 해당 월의 평균 잔액이 미화 1만불 이상인 경우 $2 캐시백 지급!",
+        "통장 잔액에 따라 최대 $32"
+      ]
+    },
+    {
+      "key": "설명의무",
+      "article": "금융소비자 보호에 관한 감독규정 제14조 ②",
+      "principles": [
+        "설명의무"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.38,
+      "cu_count": 1,
+      "issue_count": 2,
+      "cu_titles": [
+        "연계·제휴서비스 축소·변경 고지 누락 또는 기간/방법 미준수"
+      ],
+      "anchor_spans": [
+        "계좌 신규 후 6개월간 평균 잔액에 따라 캐시백 추가 지급!",
+        "캐시백 기간 내 계좌 신규 후 해당 월의 평균 잔액이 미화 1만불 이상인 경우 $2 캐시백 지급!"
+      ]
+    },
+    {
+      "key": "불공정영업행위 금지",
+      "article": "금융소비자 보호에 관한 감독규정 제14조 ⑥-7",
+      "principles": [
+        "불공정영업행위 금지"
+      ],
+      "effective_verdict": "NOT_APPLICABLE",
+      "max_score": 0.1,
+      "cu_count": 1,
+      "issue_count": 0,
+      "cu_titles": [
+        "정당한 사유 없는 예치금 반환 거부"
+      ],
+      "anchor_spans": [
+        "통장 잔액에 따라 최대 $32"
+      ]
+    }
+  ],
+  "policy_evidence_chain_counts": {
+    "legal_basis_chains": 6,
+    "disclosure_chains": 6,
+    "exception_chains": 6,
+    "chain_diagnostics": 6
+  }
+}

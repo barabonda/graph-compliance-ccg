@@ -1,0 +1,267 @@
+{
+  "review_id": "jb_0040",
+  "bank_key": "jb",
+  "bank_label": "전북은행",
+  "title": "JB카드 문화공연 할인 이벤트 - 환상씨네 사탕가게, 남사친 여사친",
+  "review_text_chars": 4400,
+  "workspace_id": "graphcompliance_mvp_jb_20260530",
+  "status": "completed",
+  "error": null,
+  "duration_sec": 161.6780196250038,
+  "final_verdict": "needs_review",
+  "routing": {
+    "ad_scope": "product_ad",
+    "preapproval_required_status": "required",
+    "review_phrase_required_before_publication": true,
+    "review_phrase_expected_in_input": false,
+    "review_phrase_input_status": "absent_expected"
+  },
+  "review_run_id": "review_run_71eb74197aa8dfa0",
+  "violations": [
+    {
+      "cu_id": "cu_legal_article_1f5237d19fdfa401",
+      "verdict": "INSUFFICIENT",
+      "score": 0.55,
+      "principle": "부당권유행위 금지",
+      "source_article": "금융소비자 보호에 관한 감독규정 제15조",
+      "subject": "금융상품 광고 및 판매 준법 검토",
+      "legal_basis": "금융소비자 보호에 관한 감독규정 제15조는 ‘금융위원회가 정하여 고시하는 사항’(예: 실시간 방문·전화 권유임을 알리는 사실, 방문판매자 등의 성명·소속 등)을 사전에 안내하지 않는 등의 무분별한 권유를 제한하는 취지이고(시행령 위임), 이를 위반한 ‘부당권유’가 금지된다. (근거: 금융소비자 보호에 관한 감독규정 제15조 제1항~제5항 및 법률→시행령→감독규정(제15조)→고시 체계)",
+      "evidence_span": "J B카드로 입장권 예매 시 즉시할인 대상카드 모든 JB카드(선불카드 제외)",
+      "why": "해당 광고 문구는 ‘JB카드로 입장권 예매 시 즉시할인’, ‘모든 JB카드(선불카드 제외)’처럼 할인 대상/예외 범위를 표시하나, 감독규정 제15조가 전형적으로 규율하는 ‘실시간 방문·전화 등 권유에 필요한 사전정보(방문·전화 목적임, 방문판매자 성명·소속, 권유 시간·장소 등) 미안내’에 해당하는 사실이 광고 문구에서 확인되지 않는다. 따라서 해당 심의기준(부당권유행위 금지: 고시사항 미안내/포섭 여부)을 광고 사실관계에 직접 적용하기에 정보가 부족하다."
+    },
+    {
+      "cu_id": "cu_legal_article_4f7a78b1a2092e62",
+      "verdict": "INSUFFICIENT",
+      "score": 0.45,
+      "principle": "부당권유행위 금지",
+      "source_article": "금융소비자 보호에 관한 법률 시행령 제16조",
+      "subject": "금융상품 광고 및 판매 준법 검토",
+      "legal_basis": "금융소비자 보호에 관한 법률 시행령 제16조는 ‘부당권유행위 금지’의 포섭/예외와 관련하여, 대통령령으로 정하는 행위(예: 계약 체결권유 전 고시사항을 미리 안내하지 않는 권유 등)를 구체화하여 금지 취지를 실현한다. (근거: 금융소비자 보호에 관한 법률 시행령 제16조 제1항~제3항 및 법률→시행령→감독규정 체계 인용)",
+      "evidence_span": "J B카드로 입장권 예매 시 즉시할인 대상카드 모든 JB카드(선불카드 제외)",
+      "why": "이 항목에서 요구하는 판단 요소(비교 대상 제시, 우위·최상급 표현)가 광고 문구 사실관계에 의해 채워지지 않는다. 또한 해당 광고는 비교 광고로 단정하기 어려우므로, 시행령 제16조의 ‘부당권유행위 금지’ 포섭/예외 판단에 필요한 사정(권유 형태 및 고시사항 안내 관련 사실 등)도 함께 확인되지 않아 결론을 내리기 어렵다. 따라서 관련성은 있으나 위반 판단을 위한 구체 사실이 부족하다."
+    },
+    {
+      "cu_id": "cu_legal_clause_5a9a77e0886826da",
+      "verdict": "INSUFFICIENT",
+      "score": 0.5,
+      "principle": "광고규제",
+      "source_article": "금융소비자 보호에 관한 법률 제22조 ⑤",
+      "subject": "광고·판매 행위자",
+      "legal_basis": "금융소비자 보호에 관한 법률 제22조 제2항은 금융상품판매업자등이 광고할 때 금융소비자가 금융상품의 내용을 오해하지 아니하도록 명확하고 공정하게 전달해야 한다고 규정하고, 제5항은 금융상품등에 관한 광고에 ‘표시ㆍ광고의 공정화에 관한 법률’ 제4조제1항 표시ㆍ광고사항이 있는 경우 그 법에 따라야 함을 정한다. (근거: 금융소비자 보호에 관한 법률 제22조 제2항, 제5항 및 법률→시행령→감독규정→심의기준 위임 구조 인용)",
+      "evidence_span": "예매처 인터파크 티켓",
+      "why": "예매처를 ‘인터파크 티켓’으로 특정하는 것은 오해 방지 취지에는 부합할 여지가 있으나, ‘표시·광고의 공정화에 관한 법률’ 제4조제1항이 요구하는 구체 표시·광고사항이 이 광고에 무엇인지, 그 기준 준수 여부에 관한 사실이 제시되지 않았다. 따라서 적합/부적합을 확정하기 어려워 기준 충족 여부는 부족하다."
+    },
+    {
+      "cu_id": "cu_legal_clause_5e42ad8b55bc652c",
+      "verdict": "INSUFFICIENT",
+      "score": 0.4,
+      "principle": "광고규제",
+      "source_article": "표시ㆍ광고의 공정화에 관한 법률 제3조 ①-4",
+      "subject": "광고·판매 행위자",
+      "legal_basis": "표시ㆍ광고의 공정화에 관한 법률 제3조 제1항은 소비자를 속이거나 잘못 알게 할 우려가 있는 표시·광고로 공정한 거래질서를 해칠 우려가 있는 행위(거짓·과장, 기만, 부당 비교, 비방)를 금지한다. (근거: 표시ㆍ광고의 공정화에 관한 법률 제3조 제1항 제1호~제4호, 대통령령으로 구체화)",
+      "evidence_span": "전 좌석 | 35,000원 | 17,500원 | 남사친 여사친",
+      "why": "해당 표현(‘전 좌석 | 35,000원 | 17,500원 | 남사친 여사친’)은 할인/비교가격을 제시하는 문구로 보이지만, 금지유형 중 ‘비방적인 표시·광고’에 해당하는지(특정 대상에 대한 비방 취지, 부정적 평가로 헐뜯는 내용 등)는 광고 사실로 확인되지 않는다. 따라서 해당 심의유형에 직접 적용하기 위한 구체 사정이 부족하다."
+    },
+    {
+      "cu_id": "cu_legal_clause_5e42ad8b55bc652c",
+      "verdict": "INSUFFICIENT",
+      "score": 0.45,
+      "principle": "광고규제",
+      "source_article": "표시ㆍ광고의 공정화에 관한 법률 제3조 ①-4",
+      "subject": "광고·판매 행위자",
+      "legal_basis": "표시ㆍ광고의 공정화에 관한 법률 제3조 제1항은 소비자를 속이거나 잘못 알게 할 우려가 있는 표시·광고로 공정한 거래질서를 해칠 우려가 있는 행위(거짓·과장, 기만, 부당 비교, 비방)를 금지한다. (근거: 표시ㆍ광고의 공정화에 관한 법률 제3조 제1항 제1호~제4호)",
+      "evidence_span": "전 좌석 40,000원 → JB카드 이용 시 19,000원",
+      "why": "해당 표현은 정상가 대비 할인된 이용가를 제시하며 ‘(JB카드 이용 시)’라는 조건 표시가 함께 있는 것으로 제공되어, 비방적인 표시로 볼 만한 요소(특정 대상을 헐뜯는 내용)가 확인되지 않는다. 따라서 ‘비방적인 표시·광고’ 심의기준에 대한 직접 위반 여부는 사실이 부족하다. / 근거 정합성 경고: evidence_span이 이 anchor의 격리된 증거창 밖이라 위반을 이 anchor에 귀속할 수 없습니다. (Evidence grounding warning: evidence_span was outside this anchor's isolated evidence window.)"
+    },
+    {
+      "cu_id": "cu_legal_clause_10b53bd2cf638c2c",
+      "verdict": "INSUFFICIENT",
+      "score": 0.5,
+      "principle": "광고규제",
+      "source_article": "금융소비자 보호에 관한 법률 시행령 제20조 ①-5",
+      "subject": "금융소비자 관련 행위",
+      "legal_basis": "금융소비자 보호에 관한 법률 시행령 제20조 제1항 제5호는 광고 시 계약 체결 여부 또는 금융소비자의 권리·의무에 중대한 영향을 미치는 사항을 사실과 다르게 알리거나 분명하지 않게 표현하는 행위를 금지한다. (근거: 금융소비자 보호에 관한 법률 시행령 제20조 제1항 제5호)",
+      "evidence_span": "타 이벤트 및 기타할인과 중복 적용 불가",
+      "why": "‘타 이벤트 및 기타할인과 중복 적용불가’는 할인 적용 범위를 제한하는 사실을 명확히 전달하는 취지로 보이며, 계약 체결 여부나 권리·의무에 관한 중대한 사실을 사실과 다르게 알리거나 불명확하게 표현한 정황이 확인되지 않는다. 따라서 해당 금지유형에 부합하지 않으므로 적합하다. / 근거 정합성 경고: evidence_span이 이 anchor의 격리된 증거창 밖이라 위반을 이 anchor에 귀속할 수 없습니다. (Evidence grounding warning: evidence_span was outside this anchor's isolated evidence window.)"
+    },
+    {
+      "cu_id": "cu_legal_article_8ab2bc39fe9257ec",
+      "verdict": "INSUFFICIENT",
+      "score": 0.0,
+      "principle": "광고규제",
+      "source_article": "표시ㆍ광고의 공정화에 관한 법률 제3조",
+      "subject": "금융상품 광고 및 판매 준법 검토",
+      "legal_basis": "",
+      "evidence_span": "",
+      "why": "이 심의 항목은 자동 판단이 완료되지 않아 '근거 부족(추가 확인 필요)'으로 분류했습니다. 심사자가 직접 확인해 주세요."
+    },
+    {
+      "cu_id": "cu_legal_clause_235079b5ebfdcc78",
+      "verdict": "INSUFFICIENT",
+      "score": 0.0,
+      "principle": "부당권유행위 금지",
+      "source_article": "금융소비자 보호에 관한 감독규정 제15조 ⑤-10",
+      "subject": "광고·판매 행위자",
+      "legal_basis": "",
+      "evidence_span": "",
+      "why": "이 심의 항목은 자동 판단이 완료되지 않아 '근거 부족(추가 확인 필요)'으로 분류했습니다. 심사자가 직접 확인해 주세요."
+    }
+  ],
+  "violation_count": 8,
+  "disclosure_requirements": [
+    {
+      "id": "disclosure_deposit_rate_basis",
+      "label": "금리 범위 및 산정방법",
+      "source": "은행 광고심의 기준 제16조/제17조",
+      "why": "최고금리, 우대금리, 적용기간, 산정방법을 소비자가 오인하지 않도록 함께 표시해야 합니다."
+    },
+    {
+      "id": "disclosure_deposit_preferential_conditions",
+      "label": "우대조건 및 적용기간",
+      "source": "은행 광고심의 기준 제18조",
+      "why": "특판, 이벤트, 제휴 혜택은 대상, 자격요건, 기간, 내용을 함께 안내해야 합니다."
+    },
+    {
+      "id": "disclosure_depositor_protection",
+      "label": "예금자보호 부보내용",
+      "source": "은행 광고심의 기준 제16조",
+      "why": "예금성 상품 광고는 예금자보호법 등에 따른 부보내용을 유지 고지로 관리해야 합니다."
+    },
+    {
+      "id": "disclosure_review_number",
+      "label": "심의필 번호 및 유효기간",
+      "source": "은행 광고심의 기준 제9조/제16조",
+      "why": "사전승인 또는 연합회 심의 결과를 소비자가 쉽게 인식할 수 있도록 표시해야 합니다."
+    },
+    {
+      "id": "disclosure_review_process",
+      "label": "준법감시인 사전승인 및 심의필 표시",
+      "source": "은행 광고심의 기준 제4조/제9조",
+      "why": "은행 광고는 내부통제기준에 따른 사전승인과 심의필 표시 여부를 운영 절차로 확인해야 합니다."
+    }
+  ],
+  "overall_impression": {
+    "track": "B",
+    "standard": "대법원 2017두60109 전체적·궁극적 인상 기준",
+    "verdict": "MEDIUM",
+    "misleading_risk_score": 0.68,
+    "why": "혜택/가격(예매 시 즉시할인, 전 좌석 이용가 등)은 상대적으로 높은 위계에서 강조되는 반면, ‘혜택 제공 시점에 일시정지·탈회·연체 시 제외될 수 있음’ 같은 실현 조건 고지가 footnote로 낮게 배치되어 전체 인상에서 조건부성·변동성을 과소인식할 오인 위험이 존재합니다. 다만 제공된 할인 문구들 자체는 ‘선불카드 제외’, ‘중복 적용불가’, ‘일정 변경 가능’ 등 주요 유보를 함께 포함하고, 혜택 배제 사유도 명시되어 있어(완화 관계) 완전히 오도된다고 보기보다는 오인 가능성이 ‘중간’ 수준으로 판단됩니다. 수치 모순(광고 주장 vs 문서 사실)이나 확정성과 변동성의 직접적인 충돌은 제시되지 않았습니다."
+  },
+  "overall_impression_risk": true,
+  "article_aggregation": [
+    {
+      "key": "금융소비자 보호에 관한 감독규정 제15조",
+      "article": "금융소비자 보호에 관한 감독규정 제15조",
+      "principles": [
+        "부당권유행위 금지"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.55,
+      "cu_count": 1,
+      "issue_count": 1,
+      "cu_titles": [
+        "부당권유행위 금지 관련 고시사항 미안내로 인한 위반 가능성"
+      ],
+      "anchor_spans": [
+        "J B카드로 입장권 예매 시 즉시할인 대상카드 모든 JB카드(선불카드 제외)"
+      ]
+    },
+    {
+      "key": "금융소비자 보호에 관한 법률 시행령 제16조",
+      "article": "금융소비자 보호에 관한 법률 시행령 제16조",
+      "principles": [
+        "부당권유행위 금지"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.45,
+      "cu_count": 1,
+      "issue_count": 1,
+      "cu_titles": [
+        "대통령령상 예외요건 미충족 또는 포섭되는 금지행위 수행 가능성"
+      ],
+      "anchor_spans": [
+        "J B카드로 입장권 예매 시 즉시할인 대상카드 모든 JB카드(선불카드 제외)"
+      ]
+    },
+    {
+      "key": "표시ㆍ광고의 공정화에 관한 법률 제3조 ①-4",
+      "article": "표시ㆍ광고의 공정화에 관한 법률 제3조 ①-4",
+      "principles": [
+        "광고규제"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.45,
+      "cu_count": 1,
+      "issue_count": 2,
+      "cu_titles": [
+        "비방적인 표시·광고로 인한 소비자 오인 및 거래질서 저해"
+      ],
+      "anchor_spans": [
+        "전 좌석 40,000원 → JB카드 이용 시 19,000원",
+        "전 좌석 | 35,000원 | 17,500원 | 남사친 여사친"
+      ]
+    },
+    {
+      "key": "금융소비자 보호에 관한 감독규정 제15조 ⑤-10",
+      "article": "금융소비자 보호에 관한 감독규정 제15조 ⑤-10",
+      "principles": [
+        "부당권유행위 금지"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.0,
+      "cu_count": 1,
+      "issue_count": 1,
+      "cu_titles": [
+        "실시간 방문·전화 권유 정보 고지·진정성 결여"
+      ],
+      "anchor_spans": [
+        "J B카드로 입장권 예매 시 즉시할인 대상카드 모든 JB카드(선불카드 제외)"
+      ]
+    }
+  ],
+  "principle_aggregation": [
+    {
+      "key": "부당권유행위 금지",
+      "article": "금융소비자 보호에 관한 감독규정 제15조",
+      "principles": [
+        "부당권유행위 금지"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.55,
+      "cu_count": 3,
+      "issue_count": 3,
+      "cu_titles": [
+        "대통령령상 예외요건 미충족 또는 포섭되는 금지행위 수행 가능성",
+        "부당권유행위 금지 관련 고시사항 미안내로 인한 위반 가능성",
+        "실시간 방문·전화 권유 정보 고지·진정성 결여"
+      ],
+      "anchor_spans": [
+        "J B카드로 입장권 예매 시 즉시할인 대상카드 모든 JB카드(선불카드 제외)"
+      ]
+    },
+    {
+      "key": "광고규제",
+      "article": "표시ㆍ광고의 공정화에 관한 법률 제3조 ①-4",
+      "principles": [
+        "광고규제"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.45,
+      "cu_count": 1,
+      "issue_count": 2,
+      "cu_titles": [
+        "비방적인 표시·광고로 인한 소비자 오인 및 거래질서 저해"
+      ],
+      "anchor_spans": [
+        "전 좌석 40,000원 → JB카드 이용 시 19,000원",
+        "전 좌석 | 35,000원 | 17,500원 | 남사친 여사친"
+      ]
+    }
+  ],
+  "policy_evidence_chain_counts": {
+    "legal_basis_chains": 9,
+    "disclosure_chains": 9,
+    "exception_chains": 9,
+    "chain_diagnostics": 9
+  }
+}

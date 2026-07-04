@@ -1,0 +1,416 @@
+{
+  "review_id": "woori_0233",
+  "bank_key": "woori",
+  "bank_label": "우리은행",
+  "title": "우리은행 펜트하우스, TWO CHAIRS 멤버되자!",
+  "review_text_chars": 1872,
+  "workspace_id": "graphcompliance_mvp_jb_20260530",
+  "status": "completed",
+  "error": null,
+  "duration_sec": 230.98298904099647,
+  "final_verdict": "needs_review",
+  "routing": {
+    "ad_scope": "product_ad",
+    "preapproval_required_status": "required",
+    "review_phrase_required_before_publication": true,
+    "review_phrase_expected_in_input": false,
+    "review_phrase_input_status": "absent_expected"
+  },
+  "review_run_id": "review_run_a6c31a5e0fa41056",
+  "violations": [
+    {
+      "cu_id": "cu_legal_article_47c9e994975df429",
+      "verdict": "INSUFFICIENT",
+      "score": 0.45,
+      "principle": "광고규제",
+      "source_article": "표시ㆍ광고의 공정화에 관한 법률 제4조",
+      "subject": "금융상품 광고 및 판매 준법 검토",
+      "legal_basis": "표시ㆍ광고의 공정화에 관한 법률 제4조제5항은 사업자가 표시ㆍ광고 행위를 하는 경우 공정거래위원회가 고시한 ‘중요정보’를 표시ㆍ광고하여야 함을 요구한다(‘표시ㆍ광고의 공정화에 관한 법률 제4조 → 시행령(위임) → 감독규정/심의기준’의 체계). 특히 ‘사업자가 표시·광고에 포함해야 하는 중요정보’와 ‘표시·광고 방법’은 공정위 고시에 의해 특정되므로(“중요정보의 고시 및 통합공고”), 단일 문구의 사실만으로 누락/불일치를 확정하기 어렵다.",
+      "evidence_span": "... 30,000 Gift Welcome ... 프라이빗 뱅킹 브랜드로서 고객님께 토탈 자산관리 서비스를 제공합니다.",
+      "why": "해당 문구는 ‘30,000 Gift Welcome’ 및 ‘토탈 자산관리 서비스 제공’을 소개하는 표현으로 보이나, 공정위 고시로 특정되는 ‘중요정보’가 무엇인지(어떤 항목/방법을 표시했어야 하는지) 이 문장만으로 특정되지 않아 중요정보 누락/방법 불일치가 성립한다고 단정하기 어렵다. 따라서 위반 판단은 근거 부족에 해당한다. / 근거 정합성 경고: evidence_span이 이 anchor의 격리된 증거창 밖이라 위반을 이 anchor에 귀속할 수 없습니다. (Evidence grounding warning: evidence_span was outside this anchor's isolated evidence window.)"
+    },
+    {
+      "cu_id": "cu_legal_clause_d17c14ff653d2849",
+      "verdict": "INSUFFICIENT",
+      "score": 0.4,
+      "principle": "광고규제",
+      "source_article": "표시ㆍ광고의 공정화에 관한 법률 제4조 ⑤",
+      "subject": "사업자등",
+      "legal_basis": "금융소비자 보호에 관한 법률 제22조제⑤항은 금융상품등에 관한 광고를 할 때 ‘표시ㆍ광고의 공정화에 관한 법률 제4조제1항에 따른 표시ㆍ광고사항’이 있는 경우 그 표시ㆍ광고사항에 관해 같은 법에서 정하는 바를 따라야 한다(“금융소비자 보호에 관한 법률 제22조 → 표시ㆍ광고의 공정화에 관한 법률 제4조 → 공정위 고시(중요정보 및 통합공고) → 감독규정/심의기준”).",
+      "evidence_span": "... 30,000 Gift Welcome ... 프라이빗 뱅킹 브랜드로서 고객님께 토탈 자산관리 서비스를 제공합니다.",
+      "why": "해당 문구는 ‘토탈 자산관리 서비스 제공’ 및 ‘30,000 Gift Welcome’ 소개로 보이지만, 여기서 말하는 ‘표시ㆍ광고의 공정화에 관한 법률 제4조제1항에 따른 표시ㆍ광고사항’이 구체적으로 무엇이며, 이 광고가 그 표시ㆍ광고사항을 표시했는지(미표시/불일치) 여부가 문장 단독으로 확인되지 않는다. 따라서 법정 표시ㆍ광고사항 미준수 위반을 확정하기 어렵다. / 근거 정합성 경고: evidence_span이 이 anchor의 격리된 증거창 밖이라 위반을 이 anchor에 귀속할 수 없습니다. (Evidence grounding warning: evidence_span was outside this anchor's isolated evidence window.)"
+    },
+    {
+      "cu_id": "cu_legal_article_30dce47c48d34de4",
+      "verdict": "INSUFFICIENT",
+      "score": 0.45,
+      "principle": "광고규제",
+      "source_article": "금융소비자 보호에 관한 법률 제22조",
+      "subject": "금융상품 광고 및 판매 준법 검토",
+      "legal_basis": "금융소비자 보호에 관한 법률 제22조제②항은 금융상품등에 관한 광고에서 금융소비자가 금융상품의 내용을 오해하지 않도록 명확하고 공정하게 전달해야 하며, 제22조제⑤항은 공정화법상 표시ㆍ광고사항이 있으면 같은 법을 따르도록 연결된다(‘금융소비자 보호에 관한 법률 제22조 → 시행령/감독규정/금융광고 심의기준(위임체계)’).",
+      "evidence_span": "... 30,000 Gift Welcome ... 프라이빗 뱅킹 브랜드로서 고객님께 토탈 자산관리 서비스를 제공합니다.",
+      "why": "해당 문구는 ‘토탈 자산관리 서비스’를 제시하나, 금융상품의 내용 오인과 직접 대응되는 필수 고지(예: 상품유형별 필수 기재)나 구체적 금지행위(보장범위 누락, 특정 오인 유발 등) 해당 여부가 이 문장만으로 특정되지 않는다. 또한 문장 자체가 조건부로 한정(‘고객님께’)되는 부분이 있어 오인을 곧바로 ‘확정 위반’으로 보기 어렵다. / 근거 정합성 경고: evidence_span이 이 anchor의 격리된 증거창 밖이라 위반을 이 anchor에 귀속할 수 없습니다. (Evidence grounding warning: evidence_span was outside this anchor's isolated evidence window.)"
+    },
+    {
+      "cu_id": "cu_legal_article_1f5237d19fdfa401",
+      "verdict": "INSUFFICIENT",
+      "score": 0.4,
+      "principle": "부당권유행위 금지",
+      "source_article": "금융소비자 보호에 관한 감독규정 제15조",
+      "subject": "금융상품 광고 및 판매 준법 검토",
+      "legal_basis": "표시ㆍ광고의 공정화에 관한 법률 제4조제⑤항은 사업자가 표시ㆍ광고 행위를 하는 경우 공정위가 고시한 ‘중요정보’를 표시ㆍ광고하여야 함을 요구한다(‘표시ㆍ광고의 공정화에 관한 법률 제4조 → 중요정보의 고시 및 통합공고’).",
+      "evidence_span": "VIP 우리은행의 펜트하우스 TWO CHAIRS 멤버로 모십니다!",
+      "why": "‘VIP…멤버로 모십니다’는 모집·초대 문구로 보이나, 공정위 고시상 ‘중요정보’가 무엇인지(어떤 항목을 이 문구에서 표시했어야 하는지) 이 단일 문장으로 특정하기 어려워 누락/방법 불일치를 확정하기 어렵다."
+    },
+    {
+      "cu_id": "cu_legal_article_47c9e994975df429",
+      "verdict": "INSUFFICIENT",
+      "score": 0.35,
+      "principle": "광고규제",
+      "source_article": "표시ㆍ광고의 공정화에 관한 법률 제4조",
+      "subject": "금융상품 광고 및 판매 준법 검토",
+      "legal_basis": "표시ㆍ광고의 공정화에 관한 법률 제4조제⑤항은 사업자가 표시ㆍ광고 행위를 하는 경우 공정위가 고시한 ‘중요정보’를 표시ㆍ광고하여야 한다(‘표시ㆍ광고의 공정화에 관한 법률 제4조 → 중요정보의 고시 및 통합공고’).",
+      "evidence_span": "격조 높은공간, 프라이빗 뱅킹 추첨 30,000",
+      "why": "‘격조 높은공간, 프라이빗 뱅킹 추첨 30,000’은 경품/추첨 표현이지만, 공정위 고시상 ‘중요정보’가 무엇(예: 추첨 기준, 지급 조건, 불이익 등)이며 이 문장 또는 인접 유의사항에서 어떤 방식으로 표시되었는지가 단독으로 특정되지 않아 미준수 확정을 내리기 어렵다."
+    },
+    {
+      "cu_id": "cu_legal_article_b3552364de7994d8",
+      "verdict": "INSUFFICIENT",
+      "score": 0.35,
+      "principle": "광고규제",
+      "source_article": "금융소비자 보호에 관한 법률 시행령 제25조",
+      "subject": "금융상품 광고 및 판매 준법 검토",
+      "legal_basis": "금융소비자 보호에 관한 법률 시행령 제25조(금융상품자문업자의 영업행위준칙 등)는 특정한 경우의 면제/금지 사유를 구체적으로 규정한다(‘금융소비자 보호에 관한 법률 시행령 제25조 → 세부 준수요건/금지행위’).",
+      "evidence_span": "참여대상 | 2021년 4월 말 기준 금융수신* 잔액 1억원 미만 고객",
+      "why": "‘참여대상 | 2021년 4월 말 기준 금융수신* 잔액 1억원 미만 고객’은 이벤트 자격요건의 한정 표현으로 보이나, 이 단일 문장으로는 금융상품자문업자의 영업행위준칙에서 문제되는 ‘금지행위/면제 요건’에 해당한다고 단정할 수 없다. 따라서 해당 법정 구성요건에 대한 적용 확정이 어려워 판단은 근거 부족이다."
+    },
+    {
+      "cu_id": "cu_legal_article_47c9e994975df429",
+      "verdict": "INSUFFICIENT",
+      "score": 0.5,
+      "principle": "광고규제",
+      "source_article": "표시ㆍ광고의 공정화에 관한 법률 제4조",
+      "subject": "금융상품 광고 및 판매 준법 검토",
+      "legal_basis": "표시ㆍ광고의 공정화에 관한 법률 제4조제⑤항은 사업자가 공정위 고시 ‘중요정보’를 표시ㆍ광고하여야 한다(‘표시ㆍ광고의 공정화에 관한 법률 제4조 → 중요정보의 고시 및 통합공고’). 다만, 이 문구는 유의사항 내 조건을 특정하는 고지로 기능한다.",
+      "evidence_span": "아래 유의사항 내 마케팅 동의 필수 (경품/참여 조건(동의) 위험)",
+      "why": "‘* 아래 유의사항 내 마케팅 동의 필수’는 조건을 유의사항 범위에서 명시하고 있어, 동의 여부에 따른 경품/참여 배제 가능성을 숨기는 방식으로 보기 어렵다. 또한 인접 완화 고지(유의사항 내 불이익 구체화)가 존재하는 것으로 전제되어, 이 문장 단독으로 중요정보 누락을 확정하기 어렵다. / 근거 정합성 경고: evidence_span이 이 anchor의 격리된 증거창 밖이라 위반을 이 anchor에 귀속할 수 없습니다. (Evidence grounding warning: evidence_span was outside this anchor's isolated evidence window.)"
+    },
+    {
+      "cu_id": "cu_legal_clause_5a9a77e0886826da",
+      "verdict": "INSUFFICIENT",
+      "score": 0.5,
+      "principle": "광고규제",
+      "source_article": "금융소비자 보호에 관한 법률 제22조 ⑤",
+      "subject": "광고·판매 행위자",
+      "legal_basis": "금융소비자 보호에 관한 법률 제22조제⑤항은 금융상품등 광고에서 공정화법상 표시·광고사항이 있으면 같은 법에서 정하는 바에 따른다(‘금융소비자 보호에 관한 법률 제22조 → 공정화법 제4조’). 또한 공정화법상 중요정보 누락이 문제될 수 있으나, 이 문구는 경품 지급 배제라는 불이익을 조건으로 명확히 밝히는 고지 기능을 한다.",
+      "evidence_span": "마케팅 미동의 또는 SMS수취 거절 시 경품 지급 대상에서 제외 (경품 미지급/대상 제외)",
+      "why": "‘마케팅 미동의 및 SMS수취 거절시 경품 지급 대상에서 제외됩니다.’는 경품 관련 불이익을 조건 형태로 직접 고지하고 있어, 소비자가 경품 취득 가능성을 오해하도록 만들었다고 보기 어렵다. 따라서 이 문장 단독으로 부당한 표시·광고로 판단하기 어렵다. / 근거 정합성 경고: evidence_span이 이 anchor의 격리된 증거창 밖이라 위반을 이 anchor에 귀속할 수 없습니다. (Evidence grounding warning: evidence_span was outside this anchor's isolated evidence window.)"
+    },
+    {
+      "cu_id": "cu_legal_article_07219c9fc08939a2",
+      "verdict": "INSUFFICIENT",
+      "score": 0.4,
+      "principle": "광고규제",
+      "source_article": "표시ㆍ광고의 공정화에 관한 법률 시행령 제4조",
+      "subject": "금융상품 광고 및 판매 준법 검토",
+      "legal_basis": "표시ㆍ광고의 공정화에 관한 법률 시행령 제4조는 사업자가 표시·광고 중 ‘사실과 관련한 사항’을 실증하기 위해 시험/조사를 수행하는 경우 객관성·타당성 및 독립성 요건을 요구한다(‘표시ㆍ광고의 공정화에 관한 법률 시행령 제4조 → 실증 요건’). 다만 해당 문구가 ‘실증 주장’으로 평가되는지부터 사실관계 확인이 필요하다.",
+      "evidence_span": "경품은 ... 우리은행 사정으로 변경될 수 있습니다. (경품 변경 기대 불일치 위험)",
+      "why": "‘경품은 이해를 돕기 위한 이미지이며, 우리은행 사정으로 변경될 수 있습니다.’는 변경 가능성과 이미지 성격을 고지하는 취지로 보이며, 문구 자체만으로 ‘실증(實證)’을 전제한 객관성·독립성 위반을 구성한다고 보기 어렵다. 따라서 관련 법정요건 적용에 필요한 ‘실증 주장’ 성격이 확정되지 않아 근거 부족이다. / 근거 정합성 경고: evidence_span이 이 anchor의 격리된 증거창 밖이라 위반을 이 anchor에 귀속할 수 없습니다. (Evidence grounding warning: evidence_span was outside this anchor's isolated evidence window.)"
+    },
+    {
+      "cu_id": "cu_legal_article_47c9e994975df429",
+      "verdict": "INSUFFICIENT",
+      "score": 0.4,
+      "principle": "광고규제",
+      "source_article": "표시ㆍ광고의 공정화에 관한 법률 제4조",
+      "subject": "금융상품 광고 및 판매 준법 검토",
+      "legal_basis": "표시ㆍ광고의 공정화에 관한 법률 제4조제⑤항은 공정위 고시 ‘중요정보’를 표시·광고하여야 함을 요구한다(‘표시ㆍ광고의 공정화에 관한 법률 제4조 → 중요정보의 고시 및 통합공고’). 다만 특정 불이익(연락처 오류 시 취소)만으로 중요정보 누락을 확정하려면, 고시된 중요정보 항목과의 대응관계가 필요하다.",
+      "evidence_span": "연락처가 부정확한 경우 당첨이 취소될 수 있습니다. (연락처 오류에 따른 당첨 취소)",
+      "why": "‘연락처가 부정확한 경우 당첨이 취소될 수 있습니다.’는 당첨 취소 가능성이라는 조건을 고지하는 문장으로 보이나, 공정위 고시상 ‘중요정보’의 특정 항목이 무엇인지와 이 문장에서 그 항목이 누락·불일치했는지 여부를 확정하기 어렵다. 따라서 근거 부족이다. / 근거 정합성 경고: evidence_span이 이 anchor의 격리된 증거창 밖이라 위반을 이 anchor에 귀속할 수 없습니다. (Evidence grounding warning: evidence_span was outside this anchor's isolated evidence window.)"
+    },
+    {
+      "cu_id": "cu_legal_article_47c9e994975df429",
+      "verdict": "INSUFFICIENT",
+      "score": 0.5,
+      "principle": "광고규제",
+      "source_article": "표시ㆍ광고의 공정화에 관한 법률 제4조",
+      "subject": "금융상품 광고 및 판매 준법 검토",
+      "legal_basis": "표시ㆍ광고의 공정화에 관한 법률 제4조제⑤항은 중요정보 표시 의무를 요구한다(‘표시ㆍ광고의 공정화에 관한 법률 제4조 → 중요정보의 고시 및 통합공고’). 다만, 해당 문구는 변경/조기종료 가능성을 조건화하여 고지하고 문의처를 제공한다.",
+      "evidence_span": "이벤트는 은행 사정상 사전 고지없이 변경 및 조기 종료될 수 있음 (이벤트 불확실성)",
+      "why": "‘이벤트는 은행 사정상 사전 고지없이 변경 및 조기 종료될 수 있으며…문의’는 변경/종료 가능성을 ‘될 수 있으며’와 같이 비확정적으로 고지하고, 구체적인 문의 경로도 함께 제시한다. 따라서 단일 문장만으로 중요정보 누락이나 기만적 단정을 단정하기 어렵고 적합하다. / 근거 정합성 경고: evidence_span이 이 anchor의 격리된 증거창 밖이라 위반을 이 anchor에 귀속할 수 없습니다. (Evidence grounding warning: evidence_span was outside this anchor's isolated evidence window.)"
+    },
+    {
+      "cu_id": "cu_legal_clause_5a9a77e0886826da",
+      "verdict": "INSUFFICIENT",
+      "score": 0.0,
+      "principle": "광고규제",
+      "source_article": "금융소비자 보호에 관한 법률 제22조 ⑤",
+      "subject": "광고·판매 행위자",
+      "legal_basis": "",
+      "evidence_span": "",
+      "why": "이 심의 항목은 자동 판단이 완료되지 않아 '근거 부족(추가 확인 필요)'으로 분류했습니다. 심사자가 직접 확인해 주세요."
+    },
+    {
+      "cu_id": "cu_legal_clause_684b9e664f42d8ae",
+      "verdict": "INSUFFICIENT",
+      "score": 0.0,
+      "principle": "부당권유행위 금지",
+      "source_article": "금융소비자 보호에 관한 감독규정 제15조 ①-3",
+      "subject": "광고·판매 행위자",
+      "legal_basis": "",
+      "evidence_span": "",
+      "why": "이 심의 항목은 자동 판단이 완료되지 않아 '근거 부족(추가 확인 필요)'으로 분류했습니다. 심사자가 직접 확인해 주세요."
+    },
+    {
+      "cu_id": "cu_legal_clause_d17c14ff653d2849",
+      "verdict": "INSUFFICIENT",
+      "score": 0.0,
+      "principle": "광고규제",
+      "source_article": "표시ㆍ광고의 공정화에 관한 법률 제4조 ⑤",
+      "subject": "사업자등",
+      "legal_basis": "",
+      "evidence_span": "",
+      "why": "이 심의 항목은 자동 판단이 완료되지 않아 '근거 부족(추가 확인 필요)'으로 분류했습니다. 심사자가 직접 확인해 주세요."
+    },
+    {
+      "cu_id": "cu_legal_clause_d17c14ff653d2849",
+      "verdict": "INSUFFICIENT",
+      "score": 0.0,
+      "principle": "광고규제",
+      "source_article": "표시ㆍ광고의 공정화에 관한 법률 제4조 ⑤",
+      "subject": "사업자등",
+      "legal_basis": "",
+      "evidence_span": "",
+      "why": "이 심의 항목은 자동 판단이 완료되지 않아 '근거 부족(추가 확인 필요)'으로 분류했습니다. 심사자가 직접 확인해 주세요."
+    },
+    {
+      "cu_id": "cu_legal_clause_3176bac8e26af642",
+      "verdict": "INSUFFICIENT",
+      "score": 0.0,
+      "principle": "광고규제",
+      "source_article": "금융소비자 보호에 관한 법률 시행령 제20조 ①-3",
+      "subject": "광고·판매 행위자",
+      "legal_basis": "",
+      "evidence_span": "",
+      "why": "이 심의 항목은 자동 판단이 완료되지 않아 '근거 부족(추가 확인 필요)'으로 분류했습니다. 심사자가 직접 확인해 주세요."
+    },
+    {
+      "cu_id": "cu_legal_clause_c29c61cb86e9af05",
+      "verdict": "INSUFFICIENT",
+      "score": 0.0,
+      "principle": "설명의무",
+      "source_article": "금융소비자 보호에 관한 법률 제19조 ②",
+      "subject": "금융상품판매업자등",
+      "legal_basis": "",
+      "evidence_span": "",
+      "why": "이 심의 항목은 자동 판단이 완료되지 않아 '근거 부족(추가 확인 필요)'으로 분류했습니다. 심사자가 직접 확인해 주세요."
+    },
+    {
+      "cu_id": "cu_legal_article_1f5237d19fdfa401",
+      "verdict": "INSUFFICIENT",
+      "score": 0.0,
+      "principle": "부당권유행위 금지",
+      "source_article": "금융소비자 보호에 관한 감독규정 제15조",
+      "subject": "금융상품 광고 및 판매 준법 검토",
+      "legal_basis": "",
+      "evidence_span": "",
+      "why": "이 심의 항목은 자동 판단이 완료되지 않아 '근거 부족(추가 확인 필요)'으로 분류했습니다. 심사자가 직접 확인해 주세요."
+    }
+  ],
+  "violation_count": 18,
+  "disclosure_requirements": [
+    {
+      "id": "disclosure_deposit_rate_basis",
+      "label": "금리 범위 및 산정방법",
+      "source": "은행 광고심의 기준 제16조/제17조",
+      "why": "최고금리, 우대금리, 적용기간, 산정방법을 소비자가 오인하지 않도록 함께 표시해야 합니다."
+    },
+    {
+      "id": "disclosure_deposit_preferential_conditions",
+      "label": "우대조건 및 적용기간",
+      "source": "은행 광고심의 기준 제18조",
+      "why": "특판, 이벤트, 제휴 혜택은 대상, 자격요건, 기간, 내용을 함께 안내해야 합니다."
+    },
+    {
+      "id": "disclosure_depositor_protection",
+      "label": "예금자보호 부보내용",
+      "source": "은행 광고심의 기준 제16조",
+      "why": "예금성 상품 광고는 예금자보호법 등에 따른 부보내용을 유지 고지로 관리해야 합니다."
+    },
+    {
+      "id": "disclosure_review_number",
+      "label": "심의필 번호 및 유효기간",
+      "source": "은행 광고심의 기준 제9조/제16조",
+      "why": "사전승인 또는 연합회 심의 결과를 소비자가 쉽게 인식할 수 있도록 표시해야 합니다."
+    },
+    {
+      "id": "disclosure_review_process",
+      "label": "준법감시인 사전승인 및 심의필 표시",
+      "source": "은행 광고심의 기준 제4조/제9조",
+      "why": "은행 광고는 내부통제기준에 따른 사전승인과 심의필 표시 여부를 운영 절차로 확인해야 합니다."
+    }
+  ],
+  "overall_impression": {
+    "track": "B",
+    "standard": "대법원 2017두60109 전체적·궁극적 인상 기준",
+    "verdict": "MEDIUM",
+    "misleading_risk_score": 0.68,
+    "why": "전체적·궁극적 인상 관점에서 ‘VIP TWO CHAIRS 멤버십/프라이빗 뱅킹 가치’로 유도하는 혜택 메시지가 전면에 있고, 실제 경품 수령(및 대상 해당)에는 금융수신 잔액 기준, 상품 가입·유지, 응모기준 제외항목, 마케팅 동의 및 SMS 수취 등 여러 조건이 필요함이 주로 유의사항/footnote에 분산되어 체감상 위계 간 간극이 발생한다. 다만 ‘마케팅 동의 필수’와 ‘미동의 시 경품 제외’, ‘상품 유지(당첨자 발표일까지)’ 등 주요 제약은 문장 자체로는 명시되어 있어, 완전 오인이라기보다 ‘조건 까다로움/수령 가능성’ 인상이 즉시 전달되지 않는 수준의 오인위험(MEDIUM)으로 판단된다."
+  },
+  "overall_impression_risk": true,
+  "article_aggregation": [
+    {
+      "key": "표시ㆍ광고의 공정화에 관한 법률 제4조",
+      "article": "표시ㆍ광고의 공정화에 관한 법률 제4조",
+      "principles": [
+        "광고규제"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.45,
+      "cu_count": 1,
+      "issue_count": 2,
+      "cu_titles": [
+        "중요정보 누락(또는 방법 불일치) 리스크"
+      ],
+      "anchor_spans": [
+        "... 30,000 Gift Welcome ... 프라이빗 뱅킹 브랜드로서 고객님께 토탈 자산관리 서비스를 제공합니다.",
+        "격조 높은공간, 프라이빗 뱅킹 추첨 30,000"
+      ]
+    },
+    {
+      "key": "금융소비자 보호에 관한 법률 제22조",
+      "article": "금융소비자 보호에 관한 법률 제22조",
+      "principles": [
+        "광고규제"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.45,
+      "cu_count": 1,
+      "issue_count": 1,
+      "cu_titles": [
+        "금융상품등 광고 준수사항(필수 고지/금지행위) 누락·오인 가능성"
+      ],
+      "anchor_spans": [
+        "... 30,000 Gift Welcome ... 프라이빗 뱅킹 브랜드로서 고객님께 토탈 자산관리 서비스를 제공합니다."
+      ]
+    },
+    {
+      "key": "표시ㆍ광고의 공정화에 관한 법률 제4조 ⑤",
+      "article": "표시ㆍ광고의 공정화에 관한 법률 제4조 ⑤",
+      "principles": [
+        "광고규제"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.4,
+      "cu_count": 1,
+      "issue_count": 2,
+      "cu_titles": [
+        "중요정보 누락에 따른 소비자 오인·피해 위험"
+      ],
+      "anchor_spans": [
+        "... 30,000 Gift Welcome ... 프라이빗 뱅킹 브랜드로서 고객님께 토탈 자산관리 서비스를 제공합니다.",
+        "T W o 자산관리 전문가와 1:1 맞춤형 재무컨설팅"
+      ]
+    },
+    {
+      "key": "금융소비자 보호에 관한 법률 제22조 ⑤",
+      "article": "금융소비자 보호에 관한 법률 제22조 ⑤",
+      "principles": [
+        "광고규제"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.0,
+      "cu_count": 1,
+      "issue_count": 1,
+      "cu_titles": [
+        "금융상품등 광고 표시·광고사항의 법정 기준 미준수"
+      ],
+      "anchor_spans": [
+        "... 30,000 Gift Welcome ... 프라이빗 뱅킹 브랜드로서 고객님께 토탈 자산관리 서비스를 제공합니다."
+      ]
+    },
+    {
+      "key": "금융소비자 보호에 관한 법률 시행령 제20조 ①-3",
+      "article": "금융소비자 보호에 관한 법률 시행령 제20조 ①-3",
+      "principles": [
+        "광고규제"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.0,
+      "cu_count": 1,
+      "issue_count": 1,
+      "cu_titles": [
+        "비교대상·기준 미명확 또는 객관적 근거 부재"
+      ],
+      "anchor_spans": [
+        "격조 높은공간, 프라이빗 뱅킹 추첨 30,000 (추첨 경품의 형태/조건 불명확 위험)"
+      ]
+    },
+    {
+      "key": "금융소비자 보호에 관한 감독규정 제15조",
+      "article": "금융소비자 보호에 관한 감독규정 제15조",
+      "principles": [
+        "부당권유행위 금지"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.0,
+      "cu_count": 1,
+      "issue_count": 1,
+      "cu_titles": [
+        "부당권유행위 금지 관련 고시사항 미안내로 인한 위반 가능성"
+      ],
+      "anchor_spans": [
+        "준법감시인-2655 심의필 (유효기간 : 2021.06.30)"
+      ]
+    }
+  ],
+  "principle_aggregation": [
+    {
+      "key": "광고규제",
+      "article": "표시ㆍ광고의 공정화에 관한 법률 제4조",
+      "principles": [
+        "광고규제"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.45,
+      "cu_count": 5,
+      "issue_count": 7,
+      "cu_titles": [
+        "금융상품등 광고 준수사항(필수 고지/금지행위) 누락·오인 가능성",
+        "금융상품등 광고 표시·광고사항의 법정 기준 미준수",
+        "비교대상·기준 미명확 또는 객관적 근거 부재",
+        "중요정보 누락(또는 방법 불일치) 리스크",
+        "중요정보 누락에 따른 소비자 오인·피해 위험"
+      ],
+      "anchor_spans": [
+        "... 30,000 Gift Welcome ... 프라이빗 뱅킹 브랜드로서 고객님께 토탈 자산관리 서비스를 제공합니다.",
+        "T W o 자산관리 전문가와 1:1 맞춤형 재무컨설팅",
+        "격조 높은공간, 프라이빗 뱅킹 추첨 30,000",
+        "격조 높은공간, 프라이빗 뱅킹 추첨 30,000 (추첨 경품의 형태/조건 불명확 위험)"
+      ]
+    },
+    {
+      "key": "부당권유행위 금지",
+      "article": "금융소비자 보호에 관한 감독규정 제15조",
+      "principles": [
+        "부당권유행위 금지"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.0,
+      "cu_count": 1,
+      "issue_count": 1,
+      "cu_titles": [
+        "부당권유행위 금지 관련 고시사항 미안내로 인한 위반 가능성"
+      ],
+      "anchor_spans": [
+        "준법감시인-2655 심의필 (유효기간 : 2021.06.30)"
+      ]
+    }
+  ],
+  "policy_evidence_chain_counts": {
+    "legal_basis_chains": 20,
+    "disclosure_chains": 20,
+    "exception_chains": 20,
+    "chain_diagnostics": 20
+  }
+}

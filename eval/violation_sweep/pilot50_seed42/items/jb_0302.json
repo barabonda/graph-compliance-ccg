@@ -1,0 +1,427 @@
+{
+  "review_id": "jb_0302",
+  "bank_key": "jb",
+  "bank_label": "전북은행",
+  "title": "내 자산 모두 모여라!",
+  "review_text_chars": 1187,
+  "workspace_id": "graphcompliance_mvp_jb_20260530",
+  "status": "completed",
+  "error": null,
+  "duration_sec": 185.71725620899815,
+  "final_verdict": "needs_review",
+  "routing": {
+    "ad_scope": "product_ad",
+    "preapproval_required_status": "required",
+    "review_phrase_required_before_publication": true,
+    "review_phrase_expected_in_input": false,
+    "review_phrase_input_status": "absent_expected"
+  },
+  "review_run_id": "review_run_842755c0a763e167",
+  "violations": [
+    {
+      "cu_id": "cu_legal_clause_5a9a77e0886826da",
+      "verdict": "INSUFFICIENT",
+      "score": 0.45,
+      "principle": "광고규제",
+      "source_article": "금융소비자 보호에 관한 법률 제22조 ⑤",
+      "subject": "광고·판매 행위자",
+      "legal_basis": "금융소비자 보호에 관한 법률 제22조 ⑤는 금융상품등에 관한 광고에서 「표시ㆍ광고의 공정화에 관한 법률」 제4조제1항에 따른 표시ㆍ광고사항이 있는 경우에는 그 법에서 정하는 바에 따라야 한다고 요구한다(‘필수 표시ㆍ광고사항이 있는 경우’ 준수 필요).",
+      "evidence_span": "내 자산 연결하면 현금 2천원 지급!",
+      "why": "해당 문구(‘내 자산 연결하면 현금 2천원 지급!’)는 금전 지급을 전면에 내세우는 광고성 표현으로 보이지만, 이 광고에 ‘표시ㆍ광고의 공정화에 관한 법률’ 제4조제1항에서 정한 ‘표시ㆍ광고사항(중요정보 등)’이 실제로 존재하는지, 그리고 그 고시된 사항을 어떤 내용으로 채워야 하는지가 자료로 특정되지 않아 법정 표시ㆍ광고사항 준수 위반 여부를 판단하기 어렵다. 따라서 이 심사기준(⑤)에 따른 ‘준수 미흡’은 확인 불가하여 부적합 단정이 아닌 판단 보류에 해당한다."
+    },
+    {
+      "cu_id": "cu_legal_clause_d17c14ff653d2849",
+      "verdict": "INSUFFICIENT",
+      "score": 0.4,
+      "principle": "광고규제",
+      "source_article": "표시ㆍ광고의 공정화에 관한 법률 제4조 ⑤",
+      "subject": "사업자등",
+      "legal_basis": "표시ㆍ광고의 공정화에 관한 법률 제4조 ⑤는 사업자가 표시ㆍ광고 행위를 하는 경우에는 공정위가 고시한 ‘중요정보’를 표시ㆍ광고에 포함해야 한다고 요구한다(중요정보 미포함이면 문제).",
+      "evidence_span": "‘자산연결 이벤트편’으로 자산 연결 시 2천원 지급 재강조",
+      "why": "‘자산연결 이벤트편’으로 2천원 지급을 재강조하는 문구가 존재하나, 공정위가 고시한 ‘중요정보’가 이 광고의 상품/거래(이벤트)에 대해 무엇인지(중요정보 해당성) 및 해당 고시된 정보가 표시ㆍ광고에 실제 포함되었는지가 자료로 특정되지 않았다. 중요정보 미포함이 확인되지 않으므로, 공정화법 제4조 ⑤의 ‘미표시’ 위반 여부는 단정할 수 없다."
+    },
+    {
+      "cu_id": "cu_legal_clause_d17c14ff653d2849",
+      "verdict": "INSUFFICIENT",
+      "score": 0.45,
+      "principle": "광고규제",
+      "source_article": "표시ㆍ광고의 공정화에 관한 법률 제4조 ⑤",
+      "subject": "사업자등",
+      "legal_basis": "표시ㆍ광고의 공정화에 관한 법률 제4조 ⑤는 사업자가 표시ㆍ광고 행위를 하는 경우 공정위가 고시한 ‘중요정보’를 표시ㆍ광고에 포함해야 한다고 요구한다.",
+      "evidence_span": "내 자산 연결하면 현금 2천원 지급!",
+      "why": "‘내 자산 연결하면 현금 2천원 지급!’ 문구 자체가 혜택을 표시하고 있더라도, 해당 광고에 대해 공정위가 고시한 ‘중요정보’가 무엇인지(중요정보 해당성) 및 광고물에 그 정보가 포함되었는지 여부가 확인되지 않는다. 따라서 중요정보 미포함을 전제로 한 위반 판단은 어렵다."
+    },
+    {
+      "cu_id": "cu_legal_clause_5a9a77e0886826da",
+      "verdict": "INSUFFICIENT",
+      "score": 0.35,
+      "principle": "광고규제",
+      "source_article": "금융소비자 보호에 관한 법률 제22조 ⑤",
+      "subject": "광고·판매 행위자",
+      "legal_basis": "금융소비자 보호에 관한 법률 제22조 ⑤는 금융상품등에 관한 광고에서 「표시ㆍ광고의 공정화에 관한 법률」 제4조제1항에 따른 표시ㆍ광고사항이 있는 경우에는 그 법에서 정하는 바에 따라야 한다고 요구한다.",
+      "evidence_span": "‘자산연결 이벤트편’으로 자산 연결 시 2천원 지급 재강조",
+      "why": "‘자산연결 이벤트편’으로 2천원 지급을 재강조하는 표현이 있으나, 해당 광고에서 ‘표시ㆍ광고의 공정화에 관한 법률’ 제4조제1항의 표시ㆍ광고사항이 존재하는지와 그 표시ㆍ광고사항(중요정보)이 무엇인지가 특정되지 않았다. 따라서 제22조 ⑤의 준수 위반(또는 미흡) 여부를 판정할 자료가 부족하다. / 근거 정합성 경고: evidence_span이 이 anchor의 격리된 증거창 밖이라 위반을 이 anchor에 귀속할 수 없습니다. (Evidence grounding warning: evidence_span was outside this anchor's isolated evidence window.)"
+    },
+    {
+      "cu_id": "cu_legal_clause_10b53bd2cf638c2c",
+      "verdict": "INSUFFICIENT",
+      "score": 0.5,
+      "principle": "광고규제",
+      "source_article": "금융소비자 보호에 관한 법률 시행령 제20조 ①-5",
+      "subject": "금융소비자 관련 행위",
+      "legal_basis": "금융소비자 보호에 관한 법률 시행령 제20조 ①-5는 계약 체결 여부나 금융소비자의 권리ㆍ의무에 중대한 영향을 미치는 사항을 사실과 다르게 알리거나 분명하지 않게 표현하는 행위를 금지한다.",
+      "evidence_span": "즉시 지급(시점 확정) 약속으로 인한 오인/기대 불일치 위험",
+      "why": "‘쏙뱅크에서는 자산연결하면 즉시 2천원이 지급돼요.’에서 ‘즉시’는 시간적 확정 뉘앙스를 줄 수 있으나, 해당 문구가 ‘계약 체결 여부 또는 권리·의무에 중대한 영향을 미치는 사항’을 사실과 다르게 또는 분명하지 않게 표현하는지(또는 실제 지급시점/기준이 무엇인지)까지는 자료가 제시되지 않았다. 따라서 시행령 제20조 ①-5 위반을 단정하기에는 사실관계가 부족하다. / 근거 정합성 경고: evidence_span이 이 anchor의 격리된 증거창 밖이라 위반을 이 anchor에 귀속할 수 없습니다. (Evidence grounding warning: evidence_span was outside this anchor's isolated evidence window.)"
+    },
+    {
+      "cu_id": "cu_legal_article_30dce47c48d34de4",
+      "verdict": "INSUFFICIENT",
+      "score": 0.45,
+      "principle": "광고규제",
+      "source_article": "금융소비자 보호에 관한 법률 제22조",
+      "subject": "금융상품 광고 및 판매 준법 검토",
+      "legal_basis": "금융소비자 보호에 관한 법률 제22조 ②는 금융상품등에 관한 광고를 할 때 금융소비자가 금융상품의 내용을 오해하지 않도록 명확하고 공정하게 전달해야 한다고 요구한다(또한 같은 조 제③·④에서 특정 필수기재 및 금지행위를 둠).",
+      "evidence_span": "선착순 5,000명에게 2,000원 제공",
+      "why": "‘선착순 5,000명에게 2,000원 제공’은 혜택 수령대상이 선착순으로 한정된다는 점을 제시하고 있어 ‘누구나/무조건’ 오인 가능성은 낮아질 수 있다. 다만, 이 문구가 제22조 체계에서 문제 삼는 ‘필수 고지사항(상품설명서·약관 읽기 권유 등 포함)’이나 ‘금지되는 오인 유발(보장/투자/대출 등 특정 상품유형별 금지행위)’에 해당하는지 판단할 만큼 광고 전체 구성과 약관·설명서 연계 사실, 그리고 실제 적용조건(초과자 미지급 등)의 고지 방식이 제시되지 않았다. 따라서 이 심의기준에 따른 위반/미흡을 단정하기 어렵고 자료 부족에 해당한다."
+    },
+    {
+      "cu_id": "cu_legal_article_b1f9c13b24c1b213",
+      "verdict": "INSUFFICIENT",
+      "score": 0.4,
+      "principle": "설명의무",
+      "source_article": "금융소비자 보호에 관한 감독규정 제13조",
+      "subject": "금융상품 광고 및 판매 준법 검토",
+      "legal_basis": "금융소비자 보호에 관한 감독규정 제13조는 설명서 작성 시 일반금융소비자가 알 수 있도록 혜택 및 필요한 조건 등 중요한 내용을 명확히 작성하고, 특히 일반금융소비자의 선택에 중요한 영향을 줄 수 있는 사항을 요약·배치하도록 요구한다.",
+      "evidence_span": "선착순 5,000명 제한으로 인한 혜택 미수령 위험",
+      "why": "‘선착순 5,000명 제한으로 인한 혜택 미수령 위험’과 같이 제한조건의 존재는 확인되나, 설명서(또는 설명서에 준하는 고지자료)가 실제로 작성·제공되었는지, 그리고 그 설명서에 혜택·조건 및 제한에 따른 불이익이 규정 취지에 맞게 충분히 기재·배치되었는지는 광고 문구 단독으로 확인되지 않는다. 따라서 설명서 의무 불충족을 단정하기에는 자료가 부족하다."
+    },
+    {
+      "cu_id": "cu_legal_clause_27b3769e4608c3bc",
+      "verdict": "INSUFFICIENT",
+      "score": 0.35,
+      "principle": "광고규제",
+      "source_article": "금융소비자 보호에 관한 감독규정 제19조 ②-8",
+      "subject": "광고·판매 행위자",
+      "legal_basis": "금융소비자 보호에 관한 감독규정 제19조 ②-8은 금융위원회가 정하여 고시하는 ‘광고 시 금지행위’ 중 ‘투자금의 한도 및 적립방법’ 등 중요 고시사항을 광고에 적정하게 반영해야 한다는 취지의 규율체계와 연결된다(다만 구체 고시 항목은 ‘금융위원회가 정하여 고시하는 사항’으로 특정됨).",
+      "evidence_span": "선착순 5,000명에게 2,000원 제공",
+      "why": "‘선착순 5,000명’ 한정은 존재하나, 이 사건이 감독규정 체계에서 말하는 ‘투자금의 한도 및 적립방법’에 해당하는 고지사항으로서, 해당 광고가 무엇을 대상으로 한도/적립방법을 요구받는지(‘투자금’ 해당성 등) 및 그 구체 고시내용이 누락되었는지가 확인되지 않는다. 비교적 제한조건 고지는 보여도, 제19조 ②-8에서 문제 삼는 특정 고지사항의 누락 여부는 자료 부족으로 판단을 보류한다. / 근거 정합성 경고: evidence_span이 이 anchor의 격리된 증거창 밖이라 위반을 이 anchor에 귀속할 수 없습니다. (Evidence grounding warning: evidence_span was outside this anchor's isolated evidence window.)"
+    },
+    {
+      "cu_id": "cu_legal_clause_f9ab50499bdadeb6",
+      "verdict": "INSUFFICIENT",
+      "score": 0.3,
+      "principle": "광고규제",
+      "source_article": "금융소비자 보호에 관한 감독규정 제19조 ②-10",
+      "subject": "광고·판매 행위자",
+      "legal_basis": "금융소비자 보호에 관한 감독규정 제19조 ②-10(광고의 특성상 필요한 표제·부제)은 광고 매체의 특성상 필요한 표제·부제가 포함되어야 한다는 취지의 규정과 연결된다.",
+      "evidence_span": "★필수★ 이벤트 응모하기",
+      "why": "‘★필수★ 이벤트 응모하기’는 응모가 요구된다는 조건 표현(표제·부제 역할을 할 수는 있음)은 확인되나, 이 규정이 요구하는 ‘광고의 특성상 필요한 표제·부제’가 구체적으로 무엇인지, 그리고 해당 광고에서 필요한 다른 표제·부제가 실제로 누락/불충분한지 여부가 확인되지 않는다. 또한 이 문구만으로 표제·부제 미충족을 단정할 근거가 부족하다."
+    },
+    {
+      "cu_id": "cu_legal_clause_a09899c52aa808d9",
+      "verdict": "INSUFFICIENT",
+      "score": 0.0,
+      "principle": "광고규제",
+      "source_article": "표시ㆍ광고의 공정화에 관한 법률 제3조 ②",
+      "subject": "광고·판매 행위자",
+      "legal_basis": "",
+      "evidence_span": "",
+      "why": "이 심의 항목은 자동 판단이 완료되지 않아 '근거 부족(추가 확인 필요)'으로 분류했습니다. 심사자가 직접 확인해 주세요."
+    },
+    {
+      "cu_id": "cu_legal_article_30dce47c48d34de4",
+      "verdict": "INSUFFICIENT",
+      "score": 0.0,
+      "principle": "광고규제",
+      "source_article": "금융소비자 보호에 관한 법률 제22조",
+      "subject": "금융상품 광고 및 판매 준법 검토",
+      "legal_basis": "",
+      "evidence_span": "",
+      "why": "이 심의 항목은 자동 판단이 완료되지 않아 '근거 부족(추가 확인 필요)'으로 분류했습니다. 심사자가 직접 확인해 주세요."
+    },
+    {
+      "cu_id": "cu_legal_article_76887cffdfe55bc4",
+      "verdict": "INSUFFICIENT",
+      "score": 0.0,
+      "principle": "설명의무",
+      "source_article": "금융소비자 보호에 관한 법률 시행령 제24조",
+      "subject": "금융상품 광고 및 판매 준법 검토",
+      "legal_basis": "",
+      "evidence_span": "",
+      "why": "이 심의 항목은 자동 판단이 완료되지 않아 '근거 부족(추가 확인 필요)'으로 분류했습니다. 심사자가 직접 확인해 주세요."
+    },
+    {
+      "cu_id": "cu_legal_clause_43c089208a68c59d",
+      "verdict": "INSUFFICIENT",
+      "score": 0.0,
+      "principle": "부당권유행위 금지",
+      "source_article": "금융소비자 보호에 관한 법률 제21조 제21조-6",
+      "subject": "금융소비자 관련 행위",
+      "legal_basis": "",
+      "evidence_span": "",
+      "why": "이 심의 항목은 자동 판단이 완료되지 않아 '근거 부족(추가 확인 필요)'으로 분류했습니다. 심사자가 직접 확인해 주세요."
+    },
+    {
+      "cu_id": "cu_legal_article_76887cffdfe55bc4",
+      "verdict": "INSUFFICIENT",
+      "score": 0.0,
+      "principle": "설명의무",
+      "source_article": "금융소비자 보호에 관한 법률 시행령 제24조",
+      "subject": "금융상품 광고 및 판매 준법 검토",
+      "legal_basis": "",
+      "evidence_span": "",
+      "why": "이 심의 항목은 자동 판단이 완료되지 않아 '근거 부족(추가 확인 필요)'으로 분류했습니다. 심사자가 직접 확인해 주세요."
+    },
+    {
+      "cu_id": "cu_legal_article_76887cffdfe55bc4",
+      "verdict": "INSUFFICIENT",
+      "score": 0.0,
+      "principle": "설명의무",
+      "source_article": "금융소비자 보호에 관한 법률 시행령 제24조",
+      "subject": "금융상품 광고 및 판매 준법 검토",
+      "legal_basis": "",
+      "evidence_span": "",
+      "why": "이 심의 항목은 자동 판단이 완료되지 않아 '근거 부족(추가 확인 필요)'으로 분류했습니다. 심사자가 직접 확인해 주세요."
+    },
+    {
+      "cu_id": "cu_legal_article_76887cffdfe55bc4",
+      "verdict": "INSUFFICIENT",
+      "score": 0.0,
+      "principle": "설명의무",
+      "source_article": "금융소비자 보호에 관한 법률 시행령 제24조",
+      "subject": "금융상품 광고 및 판매 준법 검토",
+      "legal_basis": "",
+      "evidence_span": "",
+      "why": "이 심의 항목은 자동 판단이 완료되지 않아 '근거 부족(추가 확인 필요)'으로 분류했습니다. 심사자가 직접 확인해 주세요."
+    }
+  ],
+  "violation_count": 16,
+  "disclosure_requirements": [
+    {
+      "id": "disclosure_review_process",
+      "label": "준법감시인 사전승인 및 심의필 표시",
+      "source": "은행 광고심의 기준 제4조/제9조",
+      "why": "은행 광고는 내부통제기준에 따른 사전승인과 심의필 표시 여부를 운영 절차로 확인해야 합니다."
+    }
+  ],
+  "overall_impression": {
+    "track": "B",
+    "standard": "대법원 2017두60109 전체적·궁극적 인상 기준",
+    "verdict": "MEDIUM",
+    "misleading_risk_score": 0.68,
+    "why": "광고는 ‘자산 연결 시 현금 2천원 지급’, ‘즉시 지급’ 등 혜택을 상단에서 강하게 전면 배치하고, ‘이벤트 기간/선착순/★필수 응모/STEP2’ 같은 조건은 상대적으로 낮은 위계로 분산되어 있어, 소비자가 ‘자산연결만 하면 바로 지급’으로 받아들이는 전체 인상 간극이 존재한다. 다만 ‘원금손실/예금자보호 등 금융상품 리스크’나 수치의 모순·문서상 사실과의 직접 충돌은 제시된 문안/청구요약 내에서 확인되지 않으므로 오인 위험은 ‘LOW’보다는 높지만 ‘HIGH’까지는 단정하기 어렵다. 전체적으로 프로모션 지급을 기대하게 하는 전형적 구조(헤드라인-조건 분산)로 인해 MEDIUM 오인위험으로 판단한다."
+  },
+  "overall_impression_risk": true,
+  "article_aggregation": [
+    {
+      "key": "금융소비자 보호에 관한 법률 시행령 제20조 ①-5",
+      "article": "금융소비자 보호에 관한 법률 시행령 제20조 ①-5",
+      "principles": [
+        "광고규제"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.5,
+      "cu_count": 1,
+      "issue_count": 1,
+      "cu_titles": [
+        "계약/권리의무 중대 사항의 사실불일치 또는 불명확 표현"
+      ],
+      "anchor_spans": [
+        "즉시 지급(시점 확정) 약속으로 인한 오인/기대 불일치 위험"
+      ]
+    },
+    {
+      "key": "금융소비자 보호에 관한 법률 제22조 ⑤",
+      "article": "금융소비자 보호에 관한 법률 제22조 ⑤",
+      "principles": [
+        "광고규제"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.45,
+      "cu_count": 1,
+      "issue_count": 2,
+      "cu_titles": [
+        "금융상품등 광고 표시·광고사항의 법정 기준 미준수"
+      ],
+      "anchor_spans": [
+        "‘자산연결 이벤트편’으로 자산 연결 시 2천원 지급 재강조",
+        "내 자산 연결하면 현금 2천원 지급!"
+      ]
+    },
+    {
+      "key": "표시ㆍ광고의 공정화에 관한 법률 제4조 ⑤",
+      "article": "표시ㆍ광고의 공정화에 관한 법률 제4조 ⑤",
+      "principles": [
+        "광고규제"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.45,
+      "cu_count": 1,
+      "issue_count": 2,
+      "cu_titles": [
+        "중요정보 누락에 따른 소비자 오인·피해 위험"
+      ],
+      "anchor_spans": [
+        "‘자산연결 이벤트편’으로 자산 연결 시 2천원 지급 재강조",
+        "내 자산 연결하면 현금 2천원 지급!"
+      ]
+    },
+    {
+      "key": "표시ㆍ광고의 공정화에 관한 법률 제3조 ②",
+      "article": "표시ㆍ광고의 공정화에 관한 법률 제3조 ②",
+      "principles": [
+        "광고규제"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.0,
+      "cu_count": 1,
+      "issue_count": 1,
+      "cu_titles": [
+        "비교·우월 표현에 대한 객관 근거 필요"
+      ],
+      "anchor_spans": [
+        "‘자산연결 이벤트편’으로 2천원 지급 재강조 (오인/기대 과장 위험)"
+      ]
+    },
+    {
+      "key": "금융소비자 보호에 관한 법률 제21조 제21조-6",
+      "article": "금융소비자 보호에 관한 법률 제21조 제21조-6",
+      "principles": [
+        "부당권유행위 금지"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.0,
+      "cu_count": 1,
+      "issue_count": 1,
+      "cu_titles": [
+        "요청 없는 투자성 상품 실시간 권유 또는 거부 무시 권유"
+      ],
+      "anchor_spans": [
+        "쏙뱅크에서는 자산연결하면 즉시 2천원이 지급돼요."
+      ]
+    },
+    {
+      "key": "금융소비자 보호에 관한 법률 시행령 제24조",
+      "article": "금융소비자 보호에 관한 법률 시행령 제24조",
+      "principles": [
+        "설명의무"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.0,
+      "cu_count": 1,
+      "issue_count": 3,
+      "cu_titles": [
+        "금융상품판매대리·중개업자의 고지·표지·증표 요건 미충족"
+      ],
+      "anchor_spans": [
+        "아래 버튼 누르고 응모 완료하기",
+        "응모 미완료로 인한 혜택 미수령 위험",
+        "응모 절차 미이행으로 인한 혜택 미수령 위험"
+      ]
+    },
+    {
+      "key": "금융소비자 보호에 관한 법률 시행령 제20조 ①-3",
+      "article": "금융소비자 보호에 관한 법률 시행령 제20조 ①-3",
+      "principles": [
+        "광고규제"
+      ],
+      "effective_verdict": "NOT_APPLICABLE",
+      "max_score": 0.0,
+      "cu_count": 1,
+      "issue_count": 0,
+      "cu_titles": [
+        "비교대상·기준 미명확 또는 객관적 근거 부재"
+      ],
+      "anchor_spans": [
+        "‘자산연결 이벤트편’으로 2천원 지급 재강조 (오인/기대 과장 위험)"
+      ]
+    },
+    {
+      "key": "금융소비자 보호에 관한 감독규정 제15조",
+      "article": "금융소비자 보호에 관한 감독규정 제15조",
+      "principles": [
+        "부당권유행위 금지"
+      ],
+      "effective_verdict": "NOT_APPLICABLE",
+      "max_score": 0.0,
+      "cu_count": 1,
+      "issue_count": 0,
+      "cu_titles": [
+        "부당권유행위 금지 관련 고시사항 미안내로 인한 위반 가능성"
+      ],
+      "anchor_spans": [
+        "STEP 1: 이벤트 응모하기"
+      ]
+    }
+  ],
+  "principle_aggregation": [
+    {
+      "key": "광고규제",
+      "article": "금융소비자 보호에 관한 법률 제22조 ⑤",
+      "principles": [
+        "광고규제"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.5,
+      "cu_count": 5,
+      "issue_count": 6,
+      "cu_titles": [
+        "계약/권리의무 중대 사항의 사실불일치 또는 불명확 표현",
+        "금융상품등 광고 표시·광고사항의 법정 기준 미준수",
+        "비교·우월 표현에 대한 객관 근거 필요",
+        "비교대상·기준 미명확 또는 객관적 근거 부재",
+        "중요정보 누락에 따른 소비자 오인·피해 위험"
+      ],
+      "anchor_spans": [
+        "‘자산연결 이벤트편’으로 2천원 지급 재강조 (오인/기대 과장 위험)",
+        "‘자산연결 이벤트편’으로 자산 연결 시 2천원 지급 재강조",
+        "내 자산 연결하면 현금 2천원 지급!",
+        "즉시 지급(시점 확정) 약속으로 인한 오인/기대 불일치 위험"
+      ]
+    },
+    {
+      "key": "부당권유행위 금지",
+      "article": "금융소비자 보호에 관한 감독규정 제15조",
+      "principles": [
+        "부당권유행위 금지"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.0,
+      "cu_count": 2,
+      "issue_count": 1,
+      "cu_titles": [
+        "부당권유행위 금지 관련 고시사항 미안내로 인한 위반 가능성",
+        "요청 없는 투자성 상품 실시간 권유 또는 거부 무시 권유"
+      ],
+      "anchor_spans": [
+        "STEP 1: 이벤트 응모하기",
+        "쏙뱅크에서는 자산연결하면 즉시 2천원이 지급돼요."
+      ]
+    },
+    {
+      "key": "설명의무",
+      "article": "금융소비자 보호에 관한 법률 시행령 제24조",
+      "principles": [
+        "설명의무"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.0,
+      "cu_count": 1,
+      "issue_count": 3,
+      "cu_titles": [
+        "금융상품판매대리·중개업자의 고지·표지·증표 요건 미충족"
+      ],
+      "anchor_spans": [
+        "아래 버튼 누르고 응모 완료하기",
+        "응모 미완료로 인한 혜택 미수령 위험",
+        "응모 절차 미이행으로 인한 혜택 미수령 위험"
+      ]
+    }
+  ],
+  "policy_evidence_chain_counts": {
+    "legal_basis_chains": 20,
+    "disclosure_chains": 20,
+    "exception_chains": 20,
+    "chain_diagnostics": 20
+  }
+}

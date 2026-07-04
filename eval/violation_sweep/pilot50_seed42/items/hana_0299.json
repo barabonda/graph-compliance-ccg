@@ -1,0 +1,388 @@
+{
+  "review_id": "hana_0299",
+  "bank_key": "hana",
+  "bank_label": "하나은행",
+  "title": "해외송금, 하나 EZ로 꽃길 걸어요~",
+  "review_text_chars": 2316,
+  "workspace_id": "graphcompliance_mvp_jb_20260530",
+  "status": "completed",
+  "error": null,
+  "duration_sec": 193.09729812500154,
+  "final_verdict": "needs_review",
+  "routing": {
+    "ad_scope": "product_ad",
+    "preapproval_required_status": "required",
+    "review_phrase_required_before_publication": true,
+    "review_phrase_expected_in_input": false,
+    "review_phrase_input_status": "absent_expected"
+  },
+  "review_run_id": "review_run_1e38a3599c87f3b5",
+  "violations": [
+    {
+      "cu_id": "cu_legal_clause_b00016b1cabe1c51",
+      "verdict": "INSUFFICIENT",
+      "score": 0.45,
+      "principle": "광고규제",
+      "source_article": "금융소비자 보호에 관한 법률 제22조 ③-2",
+      "subject": "금융상품판매업자등",
+      "legal_basis": "금융소비자 보호에 관한 법률 제22조 제③항(및 같은 조 제②항)에서는 금융상품판매업자등의 금융상품등 광고 시 금융소비자가 금융상품 내용을 오해하지 않도록 명확·공정하게 전달하고(제22조 제②항), 광고에 금융상품판매업자등의 명칭 및 금융상품의 내용이 포함되어야 함(제22조 제③항)을 요구한다. (금융소비자 보호에 관한 법률 제22조 제③-2에 근거한 광고규제 심의 맥락: 법률→시행령→감독규정 및 금융광고 심의기준 위임)",
+      "evidence_span": "HANA EZ로 해외송금 쉽게 해볼까요?",
+      "why": "해당 문구는 ‘해외송금을 쉽게’라는 효익 권유 표현으로서, 법이 요구하는 ‘금융상품판매업자등의 명칭’ 또는 ‘금융상품의 내용’이 광고에 포함되었는지 여부를 직접 판단할 수 있는 정보(또는 누락 정황)가 제공되지 않는다. 따라서 해당 준수요건(명칭·금융상품 내용 포함 여부) 위반이나 미흡을 확정하기에는 근거가 부족하다."
+    },
+    {
+      "cu_id": "cu_legal_clause_5e42ad8b55bc652c",
+      "verdict": "INSUFFICIENT",
+      "score": 0.4,
+      "principle": "광고규제",
+      "source_article": "표시ㆍ광고의 공정화에 관한 법률 제3조 ①-4",
+      "subject": "광고·판매 행위자",
+      "legal_basis": "표시ㆍ광고의 공정화에 관한 법률 제3조 제①항은 소비자를 속이거나 잘못 알게 할 우려가 있는 부당한 표시·광고(거짓·과장, 기만, 부당비교, 비방)를 금지한다. (법률→대통령령→감독규정 및 심의기준 위임)",
+      "evidence_span": "#해외송금전용앱 #완전쉽지 #완전빠르지 #완전저렴하지",
+      "why": "문구는 ‘완전’ 등 최상급/강조 표현을 포함하나, 그것이 ‘비방적인 표시·광고’에 해당하는지(비방성의 구체 요소) 또는 거짓·과장·기만 등으로 확정할 수 있는 정량 근거/비교대상/근거자료가 이 항목의 제공 사실만으로는 부족하다. 따라서 ‘비방적인 표시·광고’ 유형 위반으로 단정하기는 어렵다."
+    },
+    {
+      "cu_id": "cu_legal_clause_d955a0500eca83c0",
+      "verdict": "INSUFFICIENT",
+      "score": 0.45,
+      "principle": "설명의무",
+      "source_article": "금융소비자 보호에 관한 법률 시행령 제14조 ③",
+      "subject": "금융상품판매업자등",
+      "legal_basis": "금융소비자 보호에 관한 법률 시행령 제14조 제③항은 금융상품판매업자등이 법 제19조 제①항에 따른 설명을 하기 전에 일반금융소비자에게 설명서를 일정 방식으로 제공해야 함을 규정한다. (법률→시행령→감독규정 및 금융광고 심의기준 위임)",
+      "evidence_span": "앱 신규가입만 해도 빽다방 앗!메리카노",
+      "why": "‘앱 신규가입만 해도 빽다방 앗!메리카노’는 경품 제공 조건을 암시하는 문구로 보이지만, 이 항목만으로는 실제로 법 제19조상 ‘설명(계약 체결 권유·설명 요청)’ 단계가 존재하는지, 그 단계에서 ‘설명서 제공’이 이루어지지 않았다는 점을 확인할 근거가 없다. 따라서 설명서 제공 누락으로 위반을 확정하기에는 사실이 부족하다."
+    },
+    {
+      "cu_id": "cu_legal_clause_c2107e538cafab8e",
+      "verdict": "INSUFFICIENT",
+      "score": 0.35,
+      "principle": "불공정영업행위 금지",
+      "source_article": "금융소비자 보호에 관한 감독규정 제14조 ⑥-7",
+      "subject": "금융소비자 관련 행위",
+      "legal_basis": "금융소비자 보호에 관한 감독규정 제14조 제⑥-7은 금융소비자가 예치한 금액을 돌려받으려 하는 경우 그 금액을 정당한 사유 없이 지급하지 않는 행위를 금지 유형으로 규정한다. (불공정영업행위 유형 관련)",
+      "evidence_span": "Hana EZ 해외송금 보내면 무려 5천 하나머니",
+      "why": "해당 문구는 ‘무려 5천 하나머니’라는 경품 제공 규모를 말하지만, 금액의 ‘예치’ 및 그 ‘반환(지급거부)’ 사실, 그리고 ‘정당한 사유 부재’가 이 항목에서 확인되지 않는다. 따라서 예치금 반환 거부 유형 위반으로 단정하기 어렵고, 근거가 부족하다."
+    },
+    {
+      "cu_id": "cu_legal_article_47c9e994975df429",
+      "verdict": "INSUFFICIENT",
+      "score": 0.5,
+      "principle": "광고규제",
+      "source_article": "표시ㆍ광고의 공정화에 관한 법률 제4조",
+      "subject": "금융상품 광고 및 판매 준법 검토",
+      "legal_basis": "표시ㆍ광고의 공정화에 관한 법률 제4조는 공정위가 상품등의 성질에 비추어 소비자 보호 또는 공정한 거래질서 유지를 위해 필요하다고 인정하는 ‘중요정보’를 사업자가 표시·광고에 포함해야 하도록 고시할 수 있으며, 사업자는 그 고시된 중요정보를 표시·광고해야 한다. (법률→시행령→감독규정 및 심의기준 위임)",
+      "evidence_span": "혜택1: 빽다방 아메리카노 쿠폰 10,000명 도달 시 종료",
+      "why": "해당 문구는 ‘10,000명 도달 시 종료’라는 조기종료 조건을 제시하나, 이 항목만으로는 공정위가 고시한 ‘중요정보’ 중 무엇이 누락되었는지(또는 방법이 불일치하는지) 특정이 되지 않는다. 따라서 ‘중요정보 누락’ 위반으로 확정하기는 어렵다."
+    },
+    {
+      "cu_id": "cu_legal_clause_2dd9ac7e2afcbe92",
+      "verdict": "INSUFFICIENT",
+      "score": 0.4,
+      "principle": "설명의무",
+      "source_article": "금융소비자 보호에 관한 법률 제19조 ①-3",
+      "subject": "광고·판매 행위자",
+      "legal_basis": "금융소비자 보호에 관한 법률 제19조 제①항은 일반금융소비자에게 계약 체결을 권유하거나 설명 요청을 받는 경우 금융상품의 중요한 사항을 이해할 수 있도록 설명해야 함을 규정한다. 또한 중요한 사항에는 제46조에 따른 청약철회의 기한·행사방법·효과가 포함된다. (법률→시행령→감독규정 및 심의기준 위임)",
+      "evidence_span": "해외송금 관련 수수료 및 환율(Spread) 우대",
+      "why": "‘수취인 계좌없이’ 조건 하 정액(₩5,000)을 제시하는 것은 상품 관련 사실 단정 신호가 있으나, 이 항목에서 ‘청약철회 기한·행사방법·효과’ 등 제19조 제①항이 요구하는 설명 내용(또는 이를 설명서/고지로 갈음 가능한 제공 사실)이 제시되지 않아 ‘설명의무 누락’ 위반을 확정하기는 어렵다. 다만 보장/청약철회 관련 핵심 설명 관련 사실 부재가 있어 근거 부족으로 본다. / 근거 정합성 경고: evidence_span이 이 anchor의 격리된 증거창 밖이라 위반을 이 anchor에 귀속할 수 없습니다. (Evidence grounding warning: evidence_span was outside this anchor's isolated evidence window.)"
+    },
+    {
+      "cu_id": "cu_legal_clause_2dd9ac7e2afcbe92",
+      "verdict": "INSUFFICIENT",
+      "score": 0.4,
+      "principle": "설명의무",
+      "source_article": "금융소비자 보호에 관한 법률 제19조 ①-3",
+      "subject": "광고·판매 행위자",
+      "legal_basis": "금융소비자 보호에 관한 법률 제19조 제①항은 일반금융소비자에게 계약 체결을 권유하거나 설명 요청을 받은 경우 중요한 사항을 이해할 수 있도록 설명해야 하며, 중요한 사항에는 제46조에 따른 청약철회의 기한·행사방법·효과가 포함된다. (법률→시행령→감독규정 및 심의기준 위임)",
+      "evidence_span": "무조건 $3.99 Just 송금 수수료",
+      "why": "해당 문구는 ‘무조건’ 및 ‘Just 송금’ 조건으로 수수료 적용을 사실처럼 제시하나, 이 항목에서 청약철회 관련 설명 제공 여부(또는 설명서/고지로 갈음 가능한 제공 사실)가 확인되지 않는다. 따라서 ‘설명의무 누락’ 위반으로 확정하기에는 근거가 부족하다. / 근거 정합성 경고: evidence_span이 이 anchor의 격리된 증거창 밖이라 위반을 이 anchor에 귀속할 수 없습니다. (Evidence grounding warning: evidence_span was outside this anchor's isolated evidence window.)"
+    },
+    {
+      "cu_id": "cu_legal_article_4728545fb0f61592",
+      "verdict": "INSUFFICIENT",
+      "score": 0.45,
+      "principle": "설명의무",
+      "source_article": "금융소비자 보호에 관한 법률 시행령 제14조",
+      "subject": "금융상품 광고 및 판매 준법 검토",
+      "legal_basis": "금융소비자 보호에 관한 법률 시행령 제14조 제③항 및 관련 규정은 설명(제19조 제①항)에 앞서 일반금융소비자에게 설명서를 일정 방식으로 제공해야 함을 규정한다. (법률→시행령→감독규정 및 심의기준 위임)",
+      "evidence_span": "USD, JPY, EUR 환율(Spread) 50% 지정코드 01, 02, 99",
+      "why": "해당 항목은 우대 조건을 ‘통화·지정코드’로 제한해 제시하고 있으나, 이 항목만으로는 ‘설명(계약 체결 권유/설명 요청)’이 실제로 이뤄지는지 및 설명서 제공·서명(또는 예외 적용)이 있었는지 여부가 확인되지 않는다. 따라서 설명서 필수 기재·서명·제공방식 누락 위반을 확정하기 어렵다."
+    },
+    {
+      "cu_id": "cu_legal_article_47c9e994975df429",
+      "verdict": "INSUFFICIENT",
+      "score": 0.45,
+      "principle": "광고규제",
+      "source_article": "표시ㆍ광고의 공정화에 관한 법률 제4조",
+      "subject": "금융상품 광고 및 판매 준법 검토",
+      "legal_basis": "표시ㆍ광고의 공정화에 관한 법률 제4조는 공정위가 고시한 ‘중요정보’를 사업자가 표시·광고에 포함해야 함을 규정한다. (법률→시행령→감독규정 및 심의기준 위임)",
+      "evidence_span": "● 본 이벤트는 당행 사정으로 조기종료 또는 변경될 수 있습니다. (기 조건 충족손님 제외)",
+      "why": "해당 문구는 ‘당행 사정으로 조기종료 또는 변경될 수 있습니다’ 및 ‘기 조건 충족손님 제외’로 불확실성/예외를 고지하고 있어, 누락 관점의 위반을 단정할 수 있는 것은 아니다. 다만 ‘중요정보’로 고시된 항목이 무엇인지, 그리고 그 고시된 내용이 해당 문구로 충분히 표시됐는지(방법·위계 포함) 확인할 정보가 부족해 미흡 여부를 확정하기 어렵다."
+    },
+    {
+      "cu_id": "cu_legal_article_47c9e994975df429",
+      "verdict": "INSUFFICIENT",
+      "score": 0.5,
+      "principle": "광고규제",
+      "source_article": "표시ㆍ광고의 공정화에 관한 법률 제4조",
+      "subject": "금융상품 광고 및 판매 준법 검토",
+      "legal_basis": "표시ㆍ광고의 공정화에 관한 법률 제4조는 사업자가 공정위가 고시한 중요정보를 표시·광고에 포함해야 함을 규정한다. (법률→시행령→감독규정 및 심의기준 위임)",
+      "evidence_span": "● 당첨발표는 2021.07.15 당행 홈페이지에 게시하며, 하나멤버스 정상 회원에 한해 제공됩니다. (탈회 및 휴면 회원은 지급불가)",
+      "why": "해당 문구는 당첨발표 시점/채널 및 ‘정상 회원에 한해 제공’과 ‘탈회 및 휴면 회원은 지급불가’를 구체적으로 적시하여 지급요건을 제한하는 고지로 보인다. 그러나 이 항목만으로 공정위가 고시한 ‘중요정보’ 중 무엇이 누락 또는 방법 불일치인지 특정되지 않아 중요정보 누락 위반을 확정하기 어렵다. 다만 오인 완화 취지의 조건 고지가 포함되어 있어 단정적 위반으로는 보기 어렵고, 근거 부족 판정이다. / 근거 정합성 경고: evidence_span이 이 anchor의 격리된 증거창 밖이라 위반을 이 anchor에 귀속할 수 없습니다. (Evidence grounding warning: evidence_span was outside this anchor's isolated evidence window.)"
+    },
+    {
+      "cu_id": "cu_legal_clause_5e42ad8b55bc652c",
+      "verdict": "INSUFFICIENT",
+      "score": 0.0,
+      "principle": "광고규제",
+      "source_article": "표시ㆍ광고의 공정화에 관한 법률 제3조 ①-4",
+      "subject": "광고·판매 행위자",
+      "legal_basis": "",
+      "evidence_span": "",
+      "why": "이 심의 항목은 자동 판단이 완료되지 않아 '근거 부족(추가 확인 필요)'으로 분류했습니다. 심사자가 직접 확인해 주세요."
+    },
+    {
+      "cu_id": "cu_legal_article_47c9e994975df429",
+      "verdict": "INSUFFICIENT",
+      "score": 0.0,
+      "principle": "광고규제",
+      "source_article": "표시ㆍ광고의 공정화에 관한 법률 제4조",
+      "subject": "금융상품 광고 및 판매 준법 검토",
+      "legal_basis": "",
+      "evidence_span": "",
+      "why": "이 심의 항목은 자동 판단이 완료되지 않아 '근거 부족(추가 확인 필요)'으로 분류했습니다. 심사자가 직접 확인해 주세요."
+    },
+    {
+      "cu_id": "cu_legal_clause_2dd9ac7e2afcbe92",
+      "verdict": "INSUFFICIENT",
+      "score": 0.0,
+      "principle": "설명의무",
+      "source_article": "금융소비자 보호에 관한 법률 제19조 ①-3",
+      "subject": "광고·판매 행위자",
+      "legal_basis": "",
+      "evidence_span": "",
+      "why": "이 심의 항목은 자동 판단이 완료되지 않아 '근거 부족(추가 확인 필요)'으로 분류했습니다. 심사자가 직접 확인해 주세요."
+    }
+  ],
+  "violation_count": 13,
+  "disclosure_requirements": [
+    {
+      "id": "disclosure_review_process",
+      "label": "준법감시인 사전승인 및 심의필 표시",
+      "source": "은행 광고심의 기준 제4조/제9조",
+      "why": "은행 광고는 내부통제기준에 따른 사전승인과 심의필 표시 여부를 운영 절차로 확인해야 합니다."
+    }
+  ],
+  "overall_impression": {
+    "track": "B",
+    "standard": "대법원 2017두60109 전체적·궁극적 인상 기준",
+    "verdict": "MEDIUM",
+    "misleading_risk_score": 0.68,
+    "why": "전체적으로는 이벤트 조건과 우대 적용의 제한(기간, 신규/첫 이용 최초 기준, 조기종료 가능성, 하나멤버스 정상회원, Just 송금/지정코드/통화 범위)이 존재하고, ‘혜택①② 중복’ 등도 제한을 명시해 사후 완화는 어느 정도 이루어집니다. 다만 ‘쉽게/완전…저렴’ 같은 강한 효익 및 경품·우대 표현이 본문에서 먼저 강하게 제시되고, 핵심 제약의 상당 부분이 푸터/하단에 있어 ‘조건이 덜 까다롭고 이득이 더 광범위하게 주어진다’는 궁극적 인상(안전한 고이득)과 상품의 실제 적용범위 사이에 간극이 생길 수 있습니다. 법 위반 수준의 단정까지는 어렵지만, 복잡 위반(위계 비대칭 기반 오인) 관점의 오인위험은 중간으로 판단합니다."
+  },
+  "overall_impression_risk": true,
+  "article_aggregation": [
+    {
+      "key": "표시ㆍ광고의 공정화에 관한 법률 제4조",
+      "article": "표시ㆍ광고의 공정화에 관한 법률 제4조",
+      "principles": [
+        "광고규제"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.5,
+      "cu_count": 1,
+      "issue_count": 1,
+      "cu_titles": [
+        "중요정보 누락(또는 방법 불일치) 리스크"
+      ],
+      "anchor_spans": [
+        "혜택1: 빽다방 아메리카노 쿠폰 10,000명 도달 시 종료"
+      ]
+    },
+    {
+      "key": "금융소비자 보호에 관한 법률 제22조 ③-2",
+      "article": "금융소비자 보호에 관한 법률 제22조 ③-2",
+      "principles": [
+        "광고규제"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.45,
+      "cu_count": 1,
+      "issue_count": 1,
+      "cu_titles": [
+        "광고 포함정보 누락으로 인한 오인 위험"
+      ],
+      "anchor_spans": [
+        "HANA EZ로 해외송금 쉽게 해볼까요?"
+      ]
+    },
+    {
+      "key": "금융소비자 보호에 관한 법률 시행령 제14조 ③",
+      "article": "금융소비자 보호에 관한 법률 시행령 제14조 ③",
+      "principles": [
+        "설명의무"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.45,
+      "cu_count": 1,
+      "issue_count": 1,
+      "cu_titles": [
+        "설명 전 설명서 제공 누락 또는 제공 방식 불충족"
+      ],
+      "anchor_spans": [
+        "앱 신규가입만 해도 빽다방 앗!메리카노"
+      ]
+    },
+    {
+      "key": "표시ㆍ광고의 공정화에 관한 법률 제3조 ①-4",
+      "article": "표시ㆍ광고의 공정화에 관한 법률 제3조 ①-4",
+      "principles": [
+        "광고규제"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.4,
+      "cu_count": 1,
+      "issue_count": 1,
+      "cu_titles": [
+        "비방적인 표시·광고로 인한 소비자 오인 및 거래질서 저해"
+      ],
+      "anchor_spans": [
+        "#해외송금전용앱 #완전쉽지 #완전빠르지 #완전저렴하지"
+      ]
+    },
+    {
+      "key": "금융소비자 보호에 관한 감독규정 제14조 ⑥-7",
+      "article": "금융소비자 보호에 관한 감독규정 제14조 ⑥-7",
+      "principles": [
+        "불공정영업행위 금지"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.35,
+      "cu_count": 1,
+      "issue_count": 1,
+      "cu_titles": [
+        "정당한 사유 없는 예치금 반환 거부"
+      ],
+      "anchor_spans": [
+        "Hana EZ 해외송금 보내면 무려 5천 하나머니"
+      ]
+    },
+    {
+      "key": "금융소비자 보호에 관한 법률 제19조 ①-3",
+      "article": "금융소비자 보호에 관한 법률 제19조 ①-3",
+      "principles": [
+        "설명의무"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.0,
+      "cu_count": 1,
+      "issue_count": 1,
+      "cu_titles": [
+        "설명의무(핵심사항·청약철회) 누락"
+      ],
+      "anchor_spans": [
+        "송금 시 환율(Spread)우대 50%"
+      ]
+    },
+    {
+      "key": "금융소비자 보호에 관한 법률 제22조 ⑤",
+      "article": "금융소비자 보호에 관한 법률 제22조 ⑤",
+      "principles": [
+        "광고규제"
+      ],
+      "effective_verdict": "NOT_APPLICABLE",
+      "max_score": 0.0,
+      "cu_count": 1,
+      "issue_count": 0,
+      "cu_titles": [
+        "금융상품등 광고 표시·광고사항의 법정 기준 미준수"
+      ],
+      "anchor_spans": [
+        "HANA EZ로 해외송금 쉽게 해볼까요?"
+      ]
+    },
+    {
+      "key": "금융소비자 보호에 관한 법률 시행령 제24조",
+      "article": "금융소비자 보호에 관한 법률 시행령 제24조",
+      "principles": [
+        "설명의무"
+      ],
+      "effective_verdict": "NOT_APPLICABLE",
+      "max_score": 0.0,
+      "cu_count": 1,
+      "issue_count": 0,
+      "cu_titles": [
+        "금융상품판매대리·중개업자의 고지·표지·증표 요건 미충족"
+      ],
+      "anchor_spans": [
+        "HANA EZ로 해외송금 쉽게 해볼까요?"
+      ]
+    }
+  ],
+  "principle_aggregation": [
+    {
+      "key": "광고규제",
+      "article": "금융소비자 보호에 관한 법률 제22조 ③-2",
+      "principles": [
+        "광고규제"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.5,
+      "cu_count": 4,
+      "issue_count": 3,
+      "cu_titles": [
+        "광고 포함정보 누락으로 인한 오인 위험",
+        "금융상품등 광고 표시·광고사항의 법정 기준 미준수",
+        "비방적인 표시·광고로 인한 소비자 오인 및 거래질서 저해",
+        "중요정보 누락(또는 방법 불일치) 리스크"
+      ],
+      "anchor_spans": [
+        "#해외송금전용앱 #완전쉽지 #완전빠르지 #완전저렴하지",
+        "HANA EZ로 해외송금 쉽게 해볼까요?",
+        "혜택1: 빽다방 아메리카노 쿠폰 10,000명 도달 시 종료"
+      ]
+    },
+    {
+      "key": "설명의무",
+      "article": "금융소비자 보호에 관한 법률 시행령 제24조",
+      "principles": [
+        "설명의무"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.45,
+      "cu_count": 3,
+      "issue_count": 2,
+      "cu_titles": [
+        "금융상품판매대리·중개업자의 고지·표지·증표 요건 미충족",
+        "설명 전 설명서 제공 누락 또는 제공 방식 불충족",
+        "설명의무(핵심사항·청약철회) 누락"
+      ],
+      "anchor_spans": [
+        "HANA EZ로 해외송금 쉽게 해볼까요?",
+        "송금 시 환율(Spread)우대 50%",
+        "앱 신규가입만 해도 빽다방 앗!메리카노"
+      ]
+    },
+    {
+      "key": "불공정영업행위 금지",
+      "article": "금융소비자 보호에 관한 감독규정 제14조 ⑥-7",
+      "principles": [
+        "불공정영업행위 금지"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.35,
+      "cu_count": 1,
+      "issue_count": 1,
+      "cu_titles": [
+        "정당한 사유 없는 예치금 반환 거부"
+      ],
+      "anchor_spans": [
+        "Hana EZ 해외송금 보내면 무려 5천 하나머니"
+      ]
+    }
+  ],
+  "policy_evidence_chain_counts": {
+    "legal_basis_chains": 15,
+    "disclosure_chains": 15,
+    "exception_chains": 15,
+    "chain_diagnostics": 16
+  }
+}

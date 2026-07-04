@@ -1,0 +1,243 @@
+{
+  "review_id": "jb_0030",
+  "bank_key": "jb",
+  "bank_label": "전북은행",
+  "title": "2025년 하반기 JB카드 무이자 할부 이벤트",
+  "review_text_chars": 2643,
+  "workspace_id": "graphcompliance_mvp_jb_20260530",
+  "status": "completed",
+  "error": null,
+  "duration_sec": 210.52882020800462,
+  "final_verdict": "needs_review",
+  "routing": {
+    "ad_scope": "product_ad",
+    "preapproval_required_status": "required",
+    "review_phrase_required_before_publication": true,
+    "review_phrase_expected_in_input": false,
+    "review_phrase_input_status": "absent_expected"
+  },
+  "review_run_id": "review_run_d3bd35fa2e4dfb3c",
+  "violations": [
+    {
+      "cu_id": "cu_legal_clause_b00016b1cabe1c51",
+      "verdict": "INSUFFICIENT",
+      "score": 0.46,
+      "principle": "광고규제",
+      "source_article": "금융소비자 보호에 관한 법률 제22조 ③-2",
+      "subject": "금융상품판매업자등",
+      "legal_basis": "금융소비자 보호에 관한 법률 제22조 제③항 제2호는 금융상품판매업자등이 금융상품등에 관한 광고를 할 때 광고에 금융상품판매업자등의 명칭 및 금융상품의 내용이 포함되어야 함을 요구한다(‘금융소비자 보호에 관한 법률 시행령 광고 방법·절차/금지행위’ 및 ‘금융소비자보호 감독규정 및 금융광고 심의기준’으로 세부 표시기준 위임).",
+      "evidence_span": "2025년 하반기 JB카드 무이자 할부 이벤트",
+      "why": "해당 광고 문구는 ‘2025년 하반기 JB카드 무이자 할부 이벤트’라는 프로모션 주제를 제시하나, 법에서 요구하는 ‘금융상품판매업자등의 명칭’ 및 ‘금융상품의 내용’이 이 문구 단독으로 포함되었다고 볼 수 있는 구체 표시가 evidence_window/facts에 특정되지 않아 관련 요건(광고 포함정보 누락 판단)을 충족 여부로 결론 내리기 어렵다. 따라서 적합성 판단에는 필요한 포함정보(명칭/금융상품 내용)의 제시 여부가 추가로 확인되어야 하므로, 적합하지 않다고 단정할 근거도 부족하여 심사결론은 ‘해당 없음’이 아니라 ‘근거 부족’에 해당한다."
+    },
+    {
+      "cu_id": "cu_legal_article_47c9e994975df429",
+      "verdict": "INSUFFICIENT",
+      "score": 0.55,
+      "principle": "광고규제",
+      "source_article": "표시ㆍ광고의 공정화에 관한 법률 제4조",
+      "subject": "금융상품 광고 및 판매 준법 검토",
+      "legal_basis": "표시·광고의 공정화에 관한 법률 제4조 제1항 및 제5항은 공정거래위원회가 고시한 ‘중요정보’와 표시·광고의 방법을 사업자가 표시·광고에 포함하여야 함을 요구한다(금융상품 광고/방법 관련 세부는 다른 법령에서 정한 경우가 제외될 수 있음).",
+      "evidence_span": "이벤트기간 : 2025.07.01 ~ 2025.12.31",
+      "why": "해당 문구는 ‘이벤트기간 : 2025.07.01 ~ 2025.12.31’로 혜택 적용기간을 한정하여 고지하는 것으로 보이나, 표시·광고의 공정화에 관한 법률 제4조에서 요구하는 ‘공정위 고시된 중요정보’의 해당성(구체적으로 이 문구가 그 고시된 중요정보인지)에 관한 근거가 evidence_window에 제시되지 않았다. 따라서 ‘중요정보 누락’ 위반으로 판단하기에는 적용 요건(고시된 중요정보 해당 여부) 확인이 부족하여, 단정적 위반 또는 적합을 가리기 어렵다."
+    },
+    {
+      "cu_id": "cu_legal_clause_0647d96420c425cd",
+      "verdict": "NON_COMPLIANT",
+      "score": 0.78,
+      "principle": "광고규제",
+      "source_article": "금융소비자 보호에 관한 법률 제22조 ④-4",
+      "subject": "금융소비자 관련 행위",
+      "legal_basis": "금융소비자 보호에 관한 법률 제22조 제④항 제4호는 대출성 상품 광고에서 대출이자율의 범위·산정방법, 지급·부과 시기 및 부수적 혜택·비용 등을 명확히 표시하지 아니하여 금융소비자가 오인하게 하는 행위를 금지한다(‘명확 표시’ 및 오인 방지 위반 유형).",
+      "evidence_span": "주요 11대 업종 4~12개월 부분 무이자할부",
+      "why": "이 anchor는 ‘전액 무이자’로 오인될 가능성을 줄이는 ‘부분 무이자(전액 아님)’ 및 업종/기간 제한을 포함하고 있으나, 동일 광고 문맥에서 기간별 고객부담(할부수수료)이 발생하는 구조가 존재함에도, 이 anchor 단독으로는 ‘비용(할부수수료 등)의 명확 표시’ 요건 충족 여부를 결론 내릴 정도로 구체 정보가 확인되지 않는다. 제공된 사실관계만으로는 명확 표시가 확보되었다고 보기는 어렵고, 특히 ‘부분’이라는 표현이 고객이 기대하는 무이자 효과와 경제적 비용 구조를 혼동시킬 여지가 있어 오인 방지 측면의 규제취지에 비추어 적합하지 않은 것으로 판단한다(표시·고지의 명확성 부족 관점)."
+    },
+    {
+      "cu_id": "cu_legal_clause_3176bac8e26af642",
+      "verdict": "INSUFFICIENT",
+      "score": 0.4,
+      "principle": "광고규제",
+      "source_article": "금융소비자 보호에 관한 법률 시행령 제20조 ①-3",
+      "subject": "광고·판매 행위자",
+      "legal_basis": "표시·광고의 공정화에 관한 법률 제3조 제1항은 소비자를 속이거나 잘못 알게 할 우려가 있는 표시·광고로 공정한 거래질서를 해칠 우려가 있는 행위를 금지한다(제3조 제②항은 구체 내용이 대통령령으로 정해진다는 위임).",
+      "evidence_span": "주요업종에서 JBヲ 로드 부담없이!",
+      "why": "해당 문구 ‘주요업종에서 JBヲ 로드 부담없이!’는 비용 부담이 없거나 완화된다는 취지로 읽힐 수 있으나, 이 항목은 ‘비교대상 및 기준’ 또는 ‘객관적 근거 제시’와 같은 구성요건 요소(해당 CU의 비교·우월/근거 판단)가 evidence_window에 특정되지 않아 부당비교/기만 등 구체 위반유형을 확정하기 어렵다. 또한 anchor 내에 업종 한정이 있어(‘주요업종에서’) 전면적·무조건적 보장으로 단정되지는 않으므로, 위반 확정은 어려워 근거 부족으로 판단한다."
+    },
+    {
+      "cu_id": "cu_legal_article_47c9e994975df429",
+      "verdict": "INSUFFICIENT",
+      "score": 0.52,
+      "principle": "광고규제",
+      "source_article": "표시ㆍ광고의 공정화에 관한 법률 제4조",
+      "subject": "금융상품 광고 및 판매 준법 검토",
+      "legal_basis": "표시·광고의 공정화에 관한 법률 제4조 제1항 및 제⑤항은 공정위가 고시한 중요정보와 표시·광고 방법을 사업자가 표시·광고에 포함해야 함을 요구한다.",
+      "evidence_span": "1. 주요 11대 업종 2~3개월 무이자 할부 (5만원 이상 이용 시)",
+      "why": "해당 문구는 업종 한정(주요 11대)과 기간(2~3개월), 최소 이용금액(5만원 이상) 조건을 함께 제시하여 소비자 오인 가능성을 줄이는 내용으로 보인다. 다만, 본 항목은 ‘공정위 고시된 중요정보’가 무엇인지, 그리고 이 문구가 그 고시된 중요정보에 해당하는지에 대한 확인 근거가 evidence_window에 제시되지 않았다. 그러므로 ‘중요정보 누락’ 위반을 인정하거나 적합을 확정하기에는 적용 요건 확인이 부족하여 근거 부족으로 판단한다."
+    },
+    {
+      "cu_id": "cu_legal_clause_f9ab50499bdadeb6",
+      "verdict": "INSUFFICIENT",
+      "score": 0.0,
+      "principle": "광고규제",
+      "source_article": "금융소비자 보호에 관한 감독규정 제19조 ②-10",
+      "subject": "광고·판매 행위자",
+      "legal_basis": "",
+      "evidence_span": "",
+      "why": "이 심의 항목은 자동 판단이 완료되지 않아 '근거 부족(추가 확인 필요)'으로 분류했습니다. 심사자가 직접 확인해 주세요."
+    },
+    {
+      "cu_id": "cu_legal_clause_a09899c52aa808d9",
+      "verdict": "INSUFFICIENT",
+      "score": 0.0,
+      "principle": "광고규제",
+      "source_article": "표시ㆍ광고의 공정화에 관한 법률 제3조 ②",
+      "subject": "광고·판매 행위자",
+      "legal_basis": "",
+      "evidence_span": "",
+      "why": "이 심의 항목은 자동 판단이 완료되지 않아 '근거 부족(추가 확인 필요)'으로 분류했습니다. 심사자가 직접 확인해 주세요."
+    },
+    {
+      "cu_id": "cu_legal_clause_2dd9ac7e2afcbe92",
+      "verdict": "INSUFFICIENT",
+      "score": 0.0,
+      "principle": "설명의무",
+      "source_article": "금융소비자 보호에 관한 법률 제19조 ①-3",
+      "subject": "광고·판매 행위자",
+      "legal_basis": "",
+      "evidence_span": "",
+      "why": "이 심의 항목은 자동 판단이 완료되지 않아 '근거 부족(추가 확인 필요)'으로 분류했습니다. 심사자가 직접 확인해 주세요."
+    },
+    {
+      "cu_id": "cu_legal_clause_10b53bd2cf638c2c",
+      "verdict": "INSUFFICIENT",
+      "score": 0.0,
+      "principle": "광고규제",
+      "source_article": "금융소비자 보호에 관한 법률 시행령 제20조 ①-5",
+      "subject": "금융소비자 관련 행위",
+      "legal_basis": "",
+      "evidence_span": "",
+      "why": "이 심의 항목은 자동 판단이 완료되지 않아 '근거 부족(추가 확인 필요)'으로 분류했습니다. 심사자가 직접 확인해 주세요."
+    }
+  ],
+  "violation_count": 9,
+  "disclosure_requirements": [
+    {
+      "id": "disclosure_loan_rate_range",
+      "label": "대출금리 범위 및 산출기준",
+      "source": "금융광고규제 가이드라인/은행 광고심의 기준 제16조",
+      "why": "대출상품의 핵심 거래조건인 이자율에 대해 오인하지 않도록 범위와 산출기준을 표시해야 합니다."
+    },
+    {
+      "id": "disclosure_loan_screening_conditions",
+      "label": "심사 조건 및 대출 가능 여부",
+      "source": "금융광고규제 가이드라인 관련 Q&A",
+      "why": "승인 가능성이나 조건을 단정하지 않고 내부 심사에 따라 달라질 수 있음을 안내해야 합니다."
+    },
+    {
+      "id": "disclosure_loan_fees",
+      "label": "수수료 등 부대비용",
+      "source": "은행 광고심의 기준 제16조",
+      "why": "수수료, 중도상환수수료 등 소비자 부담 비용을 누락하지 않도록 확인해야 합니다."
+    },
+    {
+      "id": "disclosure_review_number",
+      "label": "심의필 번호 및 유효기간",
+      "source": "은행 광고심의 기준 제9조/제16조",
+      "why": "사전승인 또는 연합회 심의 결과를 소비자가 쉽게 인식할 수 있도록 표시해야 합니다."
+    },
+    {
+      "id": "disclosure_review_process",
+      "label": "준법감시인 사전승인 및 심의필 표시",
+      "source": "은행 광고심의 기준 제4조/제9조",
+      "why": "은행 광고는 내부통제기준에 따른 사전승인과 심의필 표시 여부를 운영 절차로 확인해야 합니다."
+    }
+  ],
+  "overall_impression": {
+    "track": "B",
+    "standard": "대법원 2017두60109 전체적·궁극적 인상 기준",
+    "verdict": "MEDIUM",
+    "misleading_risk_score": 0.68,
+    "why": "광고는 ‘무이자(0%)’ 및 ‘부담없이’라는 혜택 메시지를 상단에서 강하게 전달하는 반면, 실제 소비자의 체감 결과를 좌우하는 제한(기간별 전액/부분, 회차별 고객부담, 세금 전환 시 혜택 제외, 포인트/실적 산정 제외, 연체 시 유이자 전환 등)은 상대적으로 낮은 위계(※ footnote/후단)로 분산되어 있다. 또한 장기 이용 시 비용이 생길 수 있는 구조와 세금 납부의 예외 조건이 있어 ‘안전한 고금리/무조건 무이자’처럼 느끼는 전체 인상과 실체 사이 간극이 발생할 수 있으나, 일부 핵심 제한은 명시되어 완전한 오인(높은 위험)까지는 아니라고 판단된다. 따라서 오인위험은 MEDIUM."
+  },
+  "overall_impression_risk": true,
+  "article_aggregation": [
+    {
+      "key": "표시ㆍ광고의 공정화에 관한 법률 제4조",
+      "article": "표시ㆍ광고의 공정화에 관한 법률 제4조",
+      "principles": [
+        "광고규제"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.52,
+      "cu_count": 1,
+      "issue_count": 1,
+      "cu_titles": [
+        "중요정보 누락(또는 방법 불일치) 리스크"
+      ],
+      "anchor_spans": [
+        "1. 주요 11대 업종 2~3개월 무이자 할부 (5만원 이상 이용 시)"
+      ]
+    },
+    {
+      "key": "금융소비자 보호에 관한 법률 시행령 제20조 ①-3",
+      "article": "금융소비자 보호에 관한 법률 시행령 제20조 ①-3",
+      "principles": [
+        "광고규제"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.4,
+      "cu_count": 1,
+      "issue_count": 1,
+      "cu_titles": [
+        "비교대상·기준 미명확 또는 객관적 근거 부재"
+      ],
+      "anchor_spans": [
+        "주요업종에서 JBヲ 로드 부담없이!"
+      ]
+    },
+    {
+      "key": "표시ㆍ광고의 공정화에 관한 법률 제3조 ②",
+      "article": "표시ㆍ광고의 공정화에 관한 법률 제3조 ②",
+      "principles": [
+        "광고규제"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.0,
+      "cu_count": 1,
+      "issue_count": 1,
+      "cu_titles": [
+        "비교·우월 표현에 대한 객관 근거 필요"
+      ],
+      "anchor_spans": [
+        "주요업종에서 JBヲ 로드 부담없이!"
+      ]
+    }
+  ],
+  "principle_aggregation": [
+    {
+      "key": "광고규제",
+      "article": "금융소비자 보호에 관한 법률 시행령 제20조 ①-3",
+      "principles": [
+        "광고규제"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.52,
+      "cu_count": 3,
+      "issue_count": 3,
+      "cu_titles": [
+        "비교·우월 표현에 대한 객관 근거 필요",
+        "비교대상·기준 미명확 또는 객관적 근거 부재",
+        "중요정보 누락(또는 방법 불일치) 리스크"
+      ],
+      "anchor_spans": [
+        "1. 주요 11대 업종 2~3개월 무이자 할부 (5만원 이상 이용 시)",
+        "주요업종에서 JBヲ 로드 부담없이!"
+      ]
+    }
+  ],
+  "policy_evidence_chain_counts": {
+    "legal_basis_chains": 10,
+    "disclosure_chains": 10,
+    "exception_chains": 10,
+    "chain_diagnostics": 10
+  }
+}

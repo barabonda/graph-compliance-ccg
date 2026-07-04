@@ -1,0 +1,20 @@
+{
+  "review_id": "hana_0354",
+  "bank_key": "hana",
+  "bank_label": "하나은행",
+  "title": "연 1% 연금생활비 대출 신규만 해도 커피쿠폰 제공! 연금생활비 대출 신규 이벤트",
+  "review_text_chars": 1513,
+  "workspace_id": "graphcompliance_mvp_jb_20260530",
+  "status": "failed",
+  "error": "BadRequestError: Error code: 400 - {'error': {'message': 'Your input exceeds the context window of this model. Please adjust your input and try again.', 'type': 'invalid_request_error', 'param': 'input', 'code': 'context_length_exceeded'}}",
+  "duration_sec": 93.11679137499596,
+  "final_verdict": null,
+  "violations": [],
+  "violation_count": 0,
+  "disclosure_requirements": [],
+  "overall_impression": {},
+  "overall_impression_risk": false,
+  "article_aggregation": [],
+  "principle_aggregation": [],
+  "policy_evidence_chain_counts": {}
+}

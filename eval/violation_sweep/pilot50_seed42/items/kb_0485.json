@@ -1,0 +1,435 @@
+{
+  "review_id": "kb_0485",
+  "bank_key": "kb",
+  "bank_label": "국민은행",
+  "title": "아끼다 돈되는 KB마이데이터 목표챌린지 이벤트",
+  "review_text_chars": 6536,
+  "workspace_id": "graphcompliance_mvp_jb_20260530",
+  "status": "completed",
+  "error": null,
+  "duration_sec": 251.94107854199683,
+  "final_verdict": "revise",
+  "routing": {
+    "ad_scope": "product_ad",
+    "preapproval_required_status": "required",
+    "review_phrase_required_before_publication": true,
+    "review_phrase_expected_in_input": false,
+    "review_phrase_input_status": "absent_expected"
+  },
+  "review_run_id": "review_run_83b3bd621cc7d38c",
+  "violations": [
+    {
+      "cu_id": "cu_legal_clause_6a5cb35f986da72a",
+      "verdict": "INSUFFICIENT",
+      "score": 0.45,
+      "principle": "광고규제",
+      "source_article": "표시ㆍ광고의 공정화에 관한 법률 제3조 ①",
+      "subject": "사업자등",
+      "legal_basis": "표시ㆍ광고의 공정화에 관한 법률 제3조 ①은 사업자등이 소비자를 속이거나 잘못 알게 할 우려가 있는 표시ㆍ광고로 공정한 거래질서를 해칠 우려가 있는 거짓ㆍ과장, 기만, 부당비교, 비방 유형의 표시ㆍ광고를 금지한다(표시ㆍ광고의 공정화에 관한 법률 제3조 ① 및 제3조 ① 각 호, 제3조 ②). 또한 이 기준은 같은 법 제3조 ①의 위임에 따라 대통령령 및 감독규정/심의기준에서 세부 판단이 정해진다(표시ㆍ광고의 공정화에 관한 법률 제3조 ① → 대통령령으로 구체화 → 감독규정 및 금융광고 심의기준).",
+      "evidence_span": "목표 달성하고, 경품도 받아가세요!",
+      "why": "요건 중 ‘비교 대상 제시’ 및 ‘우위·최상급 표현’이 충족되었다고 보기 어려워, 해당 심의기준의 적용요건(부당비교 성격)이 확인되지 않는다. 따라서 이 기준(거짓ㆍ과장/기만/부당비교/비방 중 ‘부당비교’에 대한 요건)에 비추어 부당한 비교로 단정할 수 없어 적합하지 않다."
+    },
+    {
+      "cu_id": "cu_legal_clause_d17c14ff653d2849",
+      "verdict": "INSUFFICIENT",
+      "score": 0.35,
+      "principle": "광고규제",
+      "source_article": "표시ㆍ광고의 공정화에 관한 법률 제4조 ⑤",
+      "subject": "사업자등",
+      "legal_basis": "표시ㆍ광고의 공정화에 관한 법률 제4조 ⑤는 사업자등이 표시ㆍ광고 행위를 하는 경우 공정거래위원회가 고시한 ‘중요정보’를 표시ㆍ광고에 포함해야 한다고 요구한다(표시ㆍ광고의 공정화에 관한 법률 제4조 ① 및 ⑤).",
+      "evidence_span": "...이벤트 응모 완료 및 ①, ② 모두 완료 시(순서무관) 선택 경품 및 아이패드 경품 추첨",
+      "why": "해당 문구는 이벤트 기간 및 ‘응모 완료 및 ①,② 모두 완료 시’ 경품 추첨대상이 된다는 조건을 제시하고 있어, 중요정보 ‘미포함’이 명백하다고 단정할 자료가 부족하다. 또한 ‘공정거래위원회가 고시한 중요정보’의 구체적 범위(어떤 정보가 누락되었는지)가 해당 항목에서 특정되지 않는다. / 근거 정합성 경고: evidence_span이 이 anchor의 격리된 증거창 밖이라 위반을 이 anchor에 귀속할 수 없습니다. (Evidence grounding warning: evidence_span was outside this anchor's isolated evidence window.)"
+    },
+    {
+      "cu_id": "cu_legal_clause_3176bac8e26af642",
+      "verdict": "NON_COMPLIANT",
+      "score": 0.8,
+      "principle": "광고규제",
+      "source_article": "금융소비자 보호에 관한 법률 시행령 제20조 ①-3",
+      "subject": "광고·판매 행위자",
+      "legal_basis": "금융소비자 보호에 관한 법률 시행령 제20조 ①-3은 광고에서 비교대상 및 기준을 분명하게 밝히지 않거나 객관적 근거 없이 다른 금융상품과 비교하는 행위를 금지한다(금융소비자 보호에 관한 법률 제22조 ④ 및 제22조 ⑤ 위임 구조: 시행령 제20조 ①-3).",
+      "evidence_span": "외식비 줄이기 잠깐! 두배이상! 더 쓰고 있어요. 소비를 줄여보세요 · 목표기간 1개월 · 도전자 11529명",
+      "why": "‘두배이상’과 같은 비교 규모 표현이 존재하나, 비교 대상/기준이 문구상 명확히 드러나지 않아 비교기준을 객관적으로 제시한 것으로 보기 어렵다. 그 결과 비교표시 관련 금지요건에 해당할 소지가 있어 부적합하다."
+    },
+    {
+      "cu_id": "cu_legal_article_f8241f122edc6be9",
+      "verdict": "INSUFFICIENT",
+      "score": 0.4,
+      "principle": "광고규제",
+      "source_article": "표시ㆍ광고의 공정화에 관한 법률 시행령 제3조",
+      "subject": "금융상품 광고 및 판매 준법 검토",
+      "legal_basis": "금융소비자 보호에 관한 법률 제22조 ⑤는 금융상품등에 관한 광고를 할 때 ‘표시·광고의 공정화에 관한 법률’ 제4조 1항에 따른 표시·광고사항이 있는 경우 그 법에서 정하는 바에 따라야 한다.",
+      "evidence_span": "목표 달성하고, 경품도 받아가세요!",
+      "why": "해당 문구는 경품 수령 기대를 표현하고 있으나, ‘표시·광고의 공정화에 관한 법률’ 제4조 1항의 표시·광고사항(공정위 고시 중요정보)에 해당하는 구체 항목이 무엇인지 및 그 누락 여부가 해당 항목에서 확인되지 않는다. 따라서 제22조 ⑤ 위반(또는 미준수)을 단정할 자료가 부족하다."
+    },
+    {
+      "cu_id": "cu_legal_clause_3176bac8e26af642",
+      "verdict": "INSUFFICIENT",
+      "score": 0.45,
+      "principle": "광고규제",
+      "source_article": "금융소비자 보호에 관한 법률 시행령 제20조 ①-3",
+      "subject": "광고·판매 행위자",
+      "legal_basis": "금융소비자 보호에 관한 법률 시행령 제20조 ①-3은 광고에서 비교대상 및 기준을 분명하게 밝히지 않거나 객관적 근거 없이 다른 금융상품등과 비교하는 행위를 금지한다(금융소비자 보호에 관한 법률 제22조 ④ 위임).",
+      "evidence_span": "결제할때마다 지정 금액만큼 저축",
+      "why": "비교 광고 유형에서 요구되는 ‘다른 금융상품과의 비교’가 확인되지 않아, 시행령 제20조 ①-3 적용요건이 성립하지 않는다. (적립액 적용 범위 불명확 이슈가 있을 수 있으나, 이 항목의 비교 광고 요건 기준으로는 판단할 근거가 부족하다.)"
+    },
+    {
+      "cu_id": "cu_legal_clause_3176bac8e26af642",
+      "verdict": "INSUFFICIENT",
+      "score": 0.4,
+      "principle": "광고규제",
+      "source_article": "금융소비자 보호에 관한 법률 시행령 제20조 ①-3",
+      "subject": "광고·판매 행위자",
+      "legal_basis": "표시ㆍ광고의 공정화에 관한 법률 시행령 제4조는 사업자등이 표시·광고 중 사실과 관련한 사항을 실증하기 위해 시험·조사를 하는 경우 객관적·타당한 방법 및 독립성을 요구한다(표시ㆍ광고의 공정화에 관한 법률 제5조 관련 위임: 시행령 제4조).",
+      "evidence_span": "귀여운 캐릭터와 함께 결제할 때마다 지정한 금액만큼 자동으로 저축해보세요!",
+      "why": "해당 문구는 ‘자동으로 저축’ 취지의 안내로 보이며, 실증(시험·조사) 주장이나 실증자료 제출·절차가 문구상 확인되지 않아 실증 요건 위반을 판단할 수 있는 전제가 부족하다."
+    },
+    {
+      "cu_id": "cu_legal_article_07219c9fc08939a2",
+      "verdict": "INSUFFICIENT",
+      "score": 0.35,
+      "principle": "광고규제",
+      "source_article": "표시ㆍ광고의 공정화에 관한 법률 시행령 제4조",
+      "subject": "금융상품 광고 및 판매 준법 검토",
+      "legal_basis": "표시ㆍ광고의 공정화에 관한 법률 제3조 ①은 사업자등이 소비자를 속이거나 잘못 알게 할 우려가 있는 표시·광고 행위로 공정한 거래질서를 해칠 우려가 있는 거짓·과장·기만·부당비교·비방 유형을 금지한다(표시ㆍ광고의 공정화에 관한 법률 제3조 ①).",
+      "evidence_span": "나의 지출내역을 바탕으로 소비목표 달성을 도와주는 나만의 챌린지",
+      "why": "해당 문구(‘나의 지출내역을 바탕으로… 도와주는 나만의 챌린지’)는 효용을 설명하는 수준으로 보이며, ‘비방적인 표시·광고’로 분류할 수 있을 만큼 경쟁사/불리한 사실을 특정하여 깎아내리는 요소가 해당 사실에서 확인되지 않는다. 따라서 해당 유형 적용을 단정하기 어렵다."
+    },
+    {
+      "cu_id": "cu_legal_article_07219c9fc08939a2",
+      "verdict": "INSUFFICIENT",
+      "score": 0.0,
+      "principle": "광고규제",
+      "source_article": "표시ㆍ광고의 공정화에 관한 법률 시행령 제4조",
+      "subject": "금융상품 광고 및 판매 준법 검토",
+      "legal_basis": "",
+      "evidence_span": "",
+      "why": "이 심의 항목은 자동 판단이 완료되지 않아 '근거 부족(추가 확인 필요)'으로 분류했습니다. 심사자가 직접 확인해 주세요."
+    },
+    {
+      "cu_id": "cu_legal_clause_5e42ad8b55bc652c",
+      "verdict": "INSUFFICIENT",
+      "score": 0.0,
+      "principle": "광고규제",
+      "source_article": "표시ㆍ광고의 공정화에 관한 법률 제3조 ①-4",
+      "subject": "광고·판매 행위자",
+      "legal_basis": "",
+      "evidence_span": "",
+      "why": "이 심의 항목은 자동 판단이 완료되지 않아 '근거 부족(추가 확인 필요)'으로 분류했습니다. 심사자가 직접 확인해 주세요."
+    },
+    {
+      "cu_id": "cu_legal_clause_8c784bc07ef7f842",
+      "verdict": "INSUFFICIENT",
+      "score": 0.0,
+      "principle": "불공정영업행위 금지",
+      "source_article": "금융소비자 보호에 관한 감독규정 제14조 ⑥-11",
+      "subject": "광고·판매 행위자",
+      "legal_basis": "",
+      "evidence_span": "",
+      "why": "이 심의 항목은 자동 판단이 완료되지 않아 '근거 부족(추가 확인 필요)'으로 분류했습니다. 심사자가 직접 확인해 주세요."
+    },
+    {
+      "cu_id": "cu_legal_clause_5e42ad8b55bc652c",
+      "verdict": "INSUFFICIENT",
+      "score": 0.0,
+      "principle": "광고규제",
+      "source_article": "표시ㆍ광고의 공정화에 관한 법률 제3조 ①-4",
+      "subject": "광고·판매 행위자",
+      "legal_basis": "",
+      "evidence_span": "",
+      "why": "이 심의 항목은 자동 판단이 완료되지 않아 '근거 부족(추가 확인 필요)'으로 분류했습니다. 심사자가 직접 확인해 주세요."
+    },
+    {
+      "cu_id": "cu_legal_article_07219c9fc08939a2",
+      "verdict": "INSUFFICIENT",
+      "score": 0.0,
+      "principle": "광고규제",
+      "source_article": "표시ㆍ광고의 공정화에 관한 법률 시행령 제4조",
+      "subject": "금융상품 광고 및 판매 준법 검토",
+      "legal_basis": "",
+      "evidence_span": "",
+      "why": "이 심의 항목은 자동 판단이 완료되지 않아 '근거 부족(추가 확인 필요)'으로 분류했습니다. 심사자가 직접 확인해 주세요."
+    },
+    {
+      "cu_id": "cu_legal_clause_b3820a00676ecf94",
+      "verdict": "INSUFFICIENT",
+      "score": 0.0,
+      "principle": "광고규제",
+      "source_article": "표시ㆍ광고의 공정화에 관한 법률 제3조 ①-3",
+      "subject": "광고·판매 행위자",
+      "legal_basis": "",
+      "evidence_span": "",
+      "why": "이 심의 항목은 자동 판단이 완료되지 않아 '근거 부족(추가 확인 필요)'으로 분류했습니다. 심사자가 직접 확인해 주세요."
+    },
+    {
+      "cu_id": "cu_legal_clause_5e42ad8b55bc652c",
+      "verdict": "INSUFFICIENT",
+      "score": 0.0,
+      "principle": "광고규제",
+      "source_article": "표시ㆍ광고의 공정화에 관한 법률 제3조 ①-4",
+      "subject": "광고·판매 행위자",
+      "legal_basis": "",
+      "evidence_span": "",
+      "why": "이 심의 항목은 자동 판단이 완료되지 않아 '근거 부족(추가 확인 필요)'으로 분류했습니다. 심사자가 직접 확인해 주세요."
+    }
+  ],
+  "violation_count": 14,
+  "disclosure_requirements": [
+    {
+      "id": "disclosure_deposit_rate_basis",
+      "label": "금리 범위 및 산정방법",
+      "source": "은행 광고심의 기준 제16조/제17조",
+      "why": "최고금리, 우대금리, 적용기간, 산정방법을 소비자가 오인하지 않도록 함께 표시해야 합니다."
+    },
+    {
+      "id": "disclosure_deposit_preferential_conditions",
+      "label": "우대조건 및 적용기간",
+      "source": "은행 광고심의 기준 제18조",
+      "why": "특판, 이벤트, 제휴 혜택은 대상, 자격요건, 기간, 내용을 함께 안내해야 합니다."
+    },
+    {
+      "id": "disclosure_depositor_protection",
+      "label": "예금자보호 부보내용",
+      "source": "은행 광고심의 기준 제16조",
+      "why": "예금성 상품 광고는 예금자보호법 등에 따른 부보내용을 유지 고지로 관리해야 합니다."
+    },
+    {
+      "id": "disclosure_review_number",
+      "label": "심의필 번호 및 유효기간",
+      "source": "은행 광고심의 기준 제9조/제16조",
+      "why": "사전승인 또는 연합회 심의 결과를 소비자가 쉽게 인식할 수 있도록 표시해야 합니다."
+    },
+    {
+      "id": "disclosure_review_process",
+      "label": "준법감시인 사전승인 및 심의필 표시",
+      "source": "은행 광고심의 기준 제4조/제9조",
+      "why": "은행 광고는 내부통제기준에 따른 사전승인과 심의필 표시 여부를 운영 절차로 확인해야 합니다."
+    }
+  ],
+  "overall_impression": {
+    "track": "B",
+    "standard": "대법원 2017두60109 전체적·궁극적 인상 기준",
+    "verdict": "MEDIUM",
+    "misleading_risk_score": 0.68,
+    "why": "본 광고는 ‘목표 달성·자동저축→경품 추첨’이라는 혜택 프레임이 전면에 놓여 있고, 자동저축 기능 이용에 필요한 핵심 요건(마이데이터 약관/개인정보 동의/전송요구권 행사 등)이 footnote로 처리되어 위계 비대칭에 따른 조건 과소인식 가능성이 있다. 또한 ‘자동저축(결제할 때마다/지정 금액만큼)’ 표현은 강하지만, 실제 운영상 저축 불가 사유(연결 계좌 잔액 부족, 법적 조치 등)가 뒤쪽에 있어 소비자가 기대하는 ‘무조건적 누적 저축’과 실체 간 간극이 생길 수 있다. 다만 예금자보호 한도, 추첨/조건 및 제외 사유 등 주요 리스크 고지들도 다수 존재하여 사실관계 직접 모순(contradiction) 수준의 위법 오인은 낮고, 전체적 오인위험은 중간(MEDIUM)으로 판단된다."
+  },
+  "overall_impression_risk": true,
+  "article_aggregation": [
+    {
+      "key": "금융소비자 보호에 관한 법률 시행령 제20조 ①-3",
+      "article": "금융소비자 보호에 관한 법률 시행령 제20조 ①-3",
+      "principles": [
+        "광고규제"
+      ],
+      "effective_verdict": "NON_COMPLIANT",
+      "max_score": 0.8,
+      "cu_count": 1,
+      "issue_count": 3,
+      "cu_titles": [
+        "비교대상·기준 미명확 또는 객관적 근거 부재"
+      ],
+      "anchor_spans": [
+        "결제할때마다 지정 금액만큼 저축",
+        "귀여운 캐릭터와 함께 결제할 때마다 지정한 금액만큼 자동으로 저축해보세요!",
+        "두배이상! 더 쓰고 있어요. 소비를 줄여보세요"
+      ]
+    },
+    {
+      "key": "표시ㆍ광고의 공정화에 관한 법률 제3조 ①",
+      "article": "표시ㆍ광고의 공정화에 관한 법률 제3조 ①",
+      "principles": [
+        "광고규제"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.45,
+      "cu_count": 1,
+      "issue_count": 1,
+      "cu_titles": [
+        "비교·우월 표현에 대한 객관 근거 필요"
+      ],
+      "anchor_spans": [
+        "목표 달성하고, 경품도 받아가세요!"
+      ]
+    },
+    {
+      "key": "표시ㆍ광고의 공정화에 관한 법률 시행령 제3조",
+      "article": "표시ㆍ광고의 공정화에 관한 법률 시행령 제3조",
+      "principles": [
+        "광고규제"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.4,
+      "cu_count": 1,
+      "issue_count": 1,
+      "cu_titles": [
+        "부당하게 비교하는 표시·광고 리스크"
+      ],
+      "anchor_spans": [
+        "목표 달성하고, 경품도 받아가세요!"
+      ]
+    },
+    {
+      "key": "표시ㆍ광고의 공정화에 관한 법률 제4조 ⑤",
+      "article": "표시ㆍ광고의 공정화에 관한 법률 제4조 ⑤",
+      "principles": [
+        "광고규제"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.35,
+      "cu_count": 1,
+      "issue_count": 1,
+      "cu_titles": [
+        "중요정보 누락에 따른 소비자 오인·피해 위험"
+      ],
+      "anchor_spans": [
+        "...이벤트 응모 완료 및 ①, ② 모두 완료 시(순서무관) 선택 경품 및 아이패드 경품 추첨",
+        "목표 달성하고, 경품도 받아가세요!"
+      ]
+    },
+    {
+      "key": "표시ㆍ광고의 공정화에 관한 법률 시행령 제4조",
+      "article": "표시ㆍ광고의 공정화에 관한 법률 시행령 제4조",
+      "principles": [
+        "광고규제"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.35,
+      "cu_count": 1,
+      "issue_count": 3,
+      "cu_titles": [
+        "광고 실증의 객관성·독립성 결여"
+      ],
+      "anchor_spans": [
+        "귀여운 캐릭터와 함께 결제할 때마다 지정한 금액만큼 자동으로 저축해보세요!",
+        "나의 지출내역을 바탕으로 소비목표 달성을 도와주는 나만의 챌린지",
+        "아낀만큼 지출데이터를 분석하여 딱 맞는 소비줄이기 챌린지 도전!"
+      ]
+    },
+    {
+      "key": "표시ㆍ광고의 공정화에 관한 법률 제3조 ①-3",
+      "article": "표시ㆍ광고의 공정화에 관한 법률 제3조 ①-3",
+      "principles": [
+        "광고규제"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.1,
+      "cu_count": 1,
+      "issue_count": 1,
+      "cu_titles": [
+        "부당 비교 표시·광고 후보"
+      ],
+      "anchor_spans": [
+        "...이벤트 응모 완료 및 ①, ② 모두 완료 시(순서무관) 선택 경품 및 아이패드 경품 추첨",
+        "나의 지출내역을 바탕으로 소비목표 달성을 도와주는 나만의 챌린지"
+      ]
+    },
+    {
+      "key": "표시ㆍ광고의 공정화에 관한 법률 제3조 ①-4",
+      "article": "표시ㆍ광고의 공정화에 관한 법률 제3조 ①-4",
+      "principles": [
+        "광고규제"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.1,
+      "cu_count": 1,
+      "issue_count": 2,
+      "cu_titles": [
+        "비방적인 표시·광고로 인한 소비자 오인 및 거래질서 저해"
+      ],
+      "anchor_spans": [
+        "결제할때마다 지정 금액만큼 저축",
+        "나의 지출내역을 바탕으로 소비목표 달성을 도와주는 나만의 챌린지",
+        "목표 달성하고, 경품도 받아가세요!"
+      ]
+    },
+    {
+      "key": "금융소비자 보호에 관한 감독규정 제14조 ⑥-11",
+      "article": "금융소비자 보호에 관한 감독규정 제14조 ⑥-11",
+      "principles": [
+        "불공정영업행위 금지"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.0,
+      "cu_count": 1,
+      "issue_count": 1,
+      "cu_titles": [
+        "비교·우월 표현에 대한 객관 근거 필요"
+      ],
+      "anchor_spans": [
+        "아낀만큼 지출데이터를 분석하여 딱 맞는 소비줄이기 챌린지 도전!"
+      ]
+    },
+    {
+      "key": "금융소비자 보호에 관한 법률 제22조 ⑤",
+      "article": "금융소비자 보호에 관한 법률 제22조 ⑤",
+      "principles": [
+        "광고규제"
+      ],
+      "effective_verdict": "NOT_APPLICABLE",
+      "max_score": 0.1,
+      "cu_count": 1,
+      "issue_count": 0,
+      "cu_titles": [
+        "금융상품등 광고 표시·광고사항의 법정 기준 미준수"
+      ],
+      "anchor_spans": [
+        "목표 달성하고, 경품도 받아가세요!"
+      ]
+    }
+  ],
+  "principle_aggregation": [
+    {
+      "key": "광고규제",
+      "article": "표시ㆍ광고의 공정화에 관한 법률 제3조 ①",
+      "principles": [
+        "광고규제"
+      ],
+      "effective_verdict": "NON_COMPLIANT",
+      "max_score": 0.8,
+      "cu_count": 8,
+      "issue_count": 12,
+      "cu_titles": [
+        "광고 실증의 객관성·독립성 결여",
+        "금융상품등 광고 표시·광고사항의 법정 기준 미준수",
+        "부당 비교 표시·광고 후보",
+        "부당하게 비교하는 표시·광고 리스크",
+        "비교·우월 표현에 대한 객관 근거 필요",
+        "비교대상·기준 미명확 또는 객관적 근거 부재",
+        "비방적인 표시·광고로 인한 소비자 오인 및 거래질서 저해",
+        "중요정보 누락에 따른 소비자 오인·피해 위험"
+      ],
+      "anchor_spans": [
+        "...이벤트 응모 완료 및 ①, ② 모두 완료 시(순서무관) 선택 경품 및 아이패드 경품 추첨",
+        "결제할때마다 지정 금액만큼 저축",
+        "귀여운 캐릭터와 함께 결제할 때마다 지정한 금액만큼 자동으로 저축해보세요!",
+        "나의 지출내역을 바탕으로 소비목표 달성을 도와주는 나만의 챌린지",
+        "두배이상! 더 쓰고 있어요. 소비를 줄여보세요",
+        "목표 달성하고, 경품도 받아가세요!",
+        "아낀만큼 지출데이터를 분석하여 딱 맞는 소비줄이기 챌린지 도전!"
+      ]
+    },
+    {
+      "key": "불공정영업행위 금지",
+      "article": "금융소비자 보호에 관한 감독규정 제14조 ⑥-11",
+      "principles": [
+        "불공정영업행위 금지"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.0,
+      "cu_count": 1,
+      "issue_count": 1,
+      "cu_titles": [
+        "비교·우월 표현에 대한 객관 근거 필요"
+      ],
+      "anchor_spans": [
+        "아낀만큼 지출데이터를 분석하여 딱 맞는 소비줄이기 챌린지 도전!"
+      ]
+    }
+  ],
+  "policy_evidence_chain_counts": {
+    "legal_basis_chains": 19,
+    "disclosure_chains": 19,
+    "exception_chains": 19,
+    "chain_diagnostics": 19
+  }
+}

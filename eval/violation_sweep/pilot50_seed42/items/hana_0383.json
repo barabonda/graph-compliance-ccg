@@ -1,0 +1,220 @@
+{
+  "review_id": "hana_0383",
+  "bank_key": "hana",
+  "bank_label": "하나은행",
+  "title": "HERO체크카드 쓰면 기부도 되고, 선물도 받고! 임영웅 [HERO 체크카드] 이벤트",
+  "review_text_chars": 7164,
+  "workspace_id": "graphcompliance_mvp_jb_20260530",
+  "status": "completed",
+  "error": null,
+  "duration_sec": 170.48236937500042,
+  "final_verdict": "needs_review",
+  "routing": {
+    "ad_scope": "product_ad",
+    "preapproval_required_status": "required",
+    "review_phrase_required_before_publication": true,
+    "review_phrase_expected_in_input": false,
+    "review_phrase_input_status": "absent_expected"
+  },
+  "review_run_id": "review_run_81a39ce6dd1f92e9",
+  "violations": [
+    {
+      "cu_id": "cu_legal_article_47c9e994975df429",
+      "verdict": "INSUFFICIENT",
+      "score": 0.4,
+      "principle": "광고규제",
+      "source_article": "표시ㆍ광고의 공정화에 관한 법률 제4조",
+      "subject": "금융상품 광고 및 판매 준법 검토",
+      "legal_basis": "표시ㆍ광고의 공정화에 관한 법률 제4조는 소비자 보호 또는 공정한 거래질서 유지를 위해 공정위가 고시한 ‘중요정보’를 사업자가 표시ㆍ광고에 포함해 표시·광고 방법대로 고지하도록 요구한다(표시ㆍ광고의 공정화에 관한 법률→동조).",
+      "evidence_span": "HERO체크카드 쓰면 기부도 되고, 선물도 받고! 임영웅 [HERO 체크카드] 이벤트",
+      "why": "해당 심의 항목은 ‘중요정보의 고시·통합공고’의 누락/방법 불일치 여부를 따지는데, 본 광고 사실만으로는 공정위 고시된 특정 중요정보(무엇을, 어떤 방법으로)의 누락 또는 방법 불일치가 발생했다고 특정할 수 없습니다. 따라서 위반을 단정하기보다는 근거 부족으로 판단합니다."
+    },
+    {
+      "cu_id": "cu_legal_clause_5e42ad8b55bc652c",
+      "verdict": "INSUFFICIENT",
+      "score": 0.45,
+      "principle": "광고규제",
+      "source_article": "표시ㆍ광고의 공정화에 관한 법률 제3조 ①-4",
+      "subject": "광고·판매 행위자",
+      "legal_basis": "표시ㆍ광고의 공정화에 관한 법률 제3조 제1항은 사업자가 소비자를 속이거나 잘못 알게 할 우려가 있는 표시·광고로서 공정한 거래질서를 해칠 우려가 있는 ‘비방적인 표시·광고(등)’를 하거나 하게 해서는 안 됨을 금지한다(표시ㆍ광고의 공정화에 관한 법률→동조).",
+      "evidence_span": "HERO체크카드 쓰면 기부도 되고, 선물도 받고! 임영웅 [HERO 체크카드] 이벤트",
+      "why": "해당 문구는 ‘카드 사용 시 기부·선물’의 이벤트 효익을 강조하지만, 본 항목에서 요구하는 ‘비방적인 표시·광고’ 유형이 될 정도의 허위·기만·비방 등 구체 요소가 광고 문구 단독만으로 특정되지 않습니다. 따라서 법 위반(부당한 표시·광고 유형 해당)을 단정하기에는 사실이 부족하여 근거 부족으로 판단합니다."
+    },
+    {
+      "cu_id": "cu_legal_clause_c28d9e3de2fa57c6",
+      "verdict": "INSUFFICIENT",
+      "score": 0.55,
+      "principle": "광고규제",
+      "source_article": "금융소비자 보호에 관한 법률 제22조 ①-4",
+      "subject": "광고·판매 행위자",
+      "legal_basis": "금융소비자 보호에 관한 법률 제22조 제2항은 금융상품판매업자등이 금융상품등에 관한 광고를 하는 경우 금융소비자가 금융상품 내용을 오해하지 않도록 명확하고 공정하게 전달해야 함을 요구한다(금융소비자 보호에 관한 법률→동조, 시행령·감독규정은 세부 기준 위임).",
+      "evidence_span": "HERO체크카드 쓰면 기부도 되고, 선물도 받고! 임영웅 [HERO 체크카드] 이벤트",
+      "why": "금융상품 내용 오해 방지(명확·공정 전달) 위반을 판단하려면, 해당 문구가 금융상품 유형별로 어떤 권리·의무/지급이 ‘무제한·확정’처럼 오인되게 하는지와 이에 대응하는 필수 고지 누락 여부가 함께 확인돼야 합니다. 이 anchor span(‘기부도 되고, 선물도 받고’ 이벤트 소개)만으로는 확정성/보장 오인 또는 금지행위 해당요소를 특정하기 어려워 근거 부족으로 판단합니다. (다만 실제로 ‘100%’ 등의 강한 표현이 존재하고, 조건이 분리·불충분하다면 별도 항목에서 위반 판단이 가능할 여지는 있습니다.)"
+    },
+    {
+      "cu_id": "cu_legal_article_30dce47c48d34de4",
+      "verdict": "INSUFFICIENT",
+      "score": 0.95,
+      "principle": "광고규제",
+      "source_article": "금융소비자 보호에 관한 법률 제22조",
+      "subject": "금융상품 광고 및 판매 준법 검토",
+      "legal_basis": "금융소비자 보호에 관한 법률 제22조 제4항은 금융상품등에 관한 광고에서 금융소비자를 오인하게 할 우려가 있는 ‘손실보전 또는 이익보장으로 오인’, ‘보장(예: 보장성의 제한 없이 보장) 오인’ 등 금지행위를 하고, 금융상품의 내용을 오해하지 않게 해야 함을 전제로 한다(금융소비자 보호에 관한 법률→제22조, 시행령은 광고 시 금지행위를 구체화하여 위임).",
+      "evidence_span": "100% 당첨",
+      "why": "‘100% 당첨’은 당첨이 100%로 확정되는 것처럼 오인하게 하여, 금융소비자가 오해하지 않도록 해야 하는 광고 준수사항 취지에 반합니다. 따라서 해당 광고 문구는 금지되는 확정적·오인 유발 표현으로 판단되어 위반으로 분류합니다. (또한 별도 관련 문장으로 ‘1원 이상 결제 시 100% 지급’ 등 조건이 존재하더라도, 이 항목 anchor가 헤드라인에서 확정적으로 제시되어 오인 가능성이 유지됩니다.) / 예외 검토 필요: closure evidence only provides the general legal prohibition framework in Article 22, including (i) the duty to clearly and fairly convey information so consumers do not misunderstand (제22조②) and (ii) specific items prohibiting misleading expressions that make consumers perceive unrestricted guarantees, or loss/benefit guarantees (제22조④). However, it does not provide any closure-specific clarification about the concrete ad text context (e.g., whether ‘100% 당첨’ is immediately/clearly qualified with conditions such that misunderstanding risk is removed), nor does it reference any exception, disclosure, or decision chain that would reverse the already-identified ‘단정적·오인 유발’ nature of the headline phrase. Therefore the violation is not overturned; at most it could be re-reviewed for strength/treatment depending on undisclosed banner/modal qualification details."
+    },
+    {
+      "cu_id": "cu_legal_article_78b842b24e59a9c8",
+      "verdict": "INSUFFICIENT",
+      "score": 0.6,
+      "principle": "적정성원칙",
+      "source_article": "금융소비자 보호에 관한 법률 시행령 제12조",
+      "subject": "금융상품 광고 및 판매 준법 검토",
+      "legal_basis": "금융소비자 보호에 관한 법률 시행령 제12조(적정성원칙)는 적정성 판단에서 ‘적정하지 않다’고 알리는 경우 그 사실 고지 방식과 함께 적정성 판단 결과·이유 서류 및 설명서를 제공해야 함을 규정한다(금융소비자 보호에 관한 법률 시행령→동조).",
+      "evidence_span": "참여혜택 ②: 1원 이상 결제 시 100% 지급",
+      "why": "본 항목의 법적 기준은 적정성원칙 관련 ‘적정하지 않다’ 고지 시 서류·설명서 제공 의무인데, 해당 anchor는 그 적정성원칙 고지 구조에 해당한다고 보기 어렵습니다. 따라서 기준 조문과 직접 대응되는 위반요건 충족 여부를 판단하기 어려워 근거 부족으로 분류합니다. (다만 ‘100%’ 확정적 표현 자체의 위반 여부는 다른 심의항목에서 판단하는 것이 더 적절합니다.)"
+    },
+    {
+      "cu_id": "cu_legal_article_47c9e994975df429",
+      "verdict": "INSUFFICIENT",
+      "score": 0.35,
+      "principle": "광고규제",
+      "source_article": "표시ㆍ광고의 공정화에 관한 법률 제4조",
+      "subject": "금융상품 광고 및 판매 준법 검토",
+      "legal_basis": "표시ㆍ광고의 공정화에 관한 법률 제4조는 공정위가 고시한 ‘중요정보’ 및 표시·광고 방법에 따라 사업자가 중요정보를 표시·광고해야 함을 요구한다(표시ㆍ광고의 공정화에 관한 법률→제4조; ‘중요정보’는 고시로 특정).",
+      "evidence_span": "참여 혜택 이벤트 응모 후 5만원 이상 결제 시 추첨 증정",
+      "why": "해당 anchor(‘응모 후 5만원 이상 결제 시 추첨 증정’)는 지급 방식이 ‘추첨’임을 조건과 함께 나타내고 있으나, 이 심의항목은 ‘중요정보’가 무엇인지(공정위 고시 항목)와 그 누락/방법 불일치가 있는지를 특정해야 합니다. 제공된 사실만으로는 고시된 중요정보의 누락 또는 표시·광고 방법 불일치가 발생했다고 보기 어려워 근거 부족으로 판단합니다."
+    }
+  ],
+  "violation_count": 6,
+  "disclosure_requirements": [
+    {
+      "id": "disclosure_investment_loss_risk",
+      "label": "원금손실 가능성 및 투자위험",
+      "source": "금융상품 표시·광고 심사지침/금소법 광고규제",
+      "why": "투자성 상품은 수익 가능성과 손실 가능성을 균형 있게 표시해야 합니다."
+    },
+    {
+      "id": "disclosure_past_performance_no_guarantee",
+      "label": "과거성과 미래수익 보장 아님",
+      "source": "은행 광고심의 기준 제16조",
+      "why": "과거 수익률이나 조기상환 실적이 미래 수익을 보장하지 않음을 고지해야 합니다."
+    },
+    {
+      "id": "disclosure_fees",
+      "label": "수수료 등 부대비용",
+      "source": "은행 광고심의 기준 제16조",
+      "why": "투자자가 부담하는 비용과 제한 조건을 함께 표시해야 합니다."
+    },
+    {
+      "id": "disclosure_review_process",
+      "label": "준법감시인 사전승인 및 심의필 표시",
+      "source": "은행 광고심의 기준 제4조/제9조",
+      "why": "은행 광고는 내부통제기준에 따른 사전승인과 심의필 표시 여부를 운영 절차로 확인해야 합니다."
+    }
+  ],
+  "overall_impression": {
+    "track": "B",
+    "standard": "대법원 2017두60109 전체적·궁극적 인상 기준",
+    "verdict": "MEDIUM",
+    "misleading_risk_score": 0.68,
+    "why": "본 광고는 투자손실 등 ‘금융위험’ 오인이라기보다, 이벤트 혜택의 확정성(‘100% 당첨’)과 실제 조건(‘1원 이상 결제 시 100% 지급’, 대상/참여기간/응모·결제 방식 등)을 문장 위계상 분산해 제시한다는 점에서 ‘전체적으로는 거의 확실’하다는 인상을 만들 수 있다. 다만 ‘1원 이상 결제 시 100% 지급’, 참여기간, 대상 제한 등이 본문에 존재하고, ‘추첨’ 경품은 ‘추첨’으로 구분되어 있어 완전한 오인(전면적 위반 수준)은 아니며 오인위험은 중간(MEDIUM)으로 판단된다."
+  },
+  "overall_impression_risk": true,
+  "article_aggregation": [
+    {
+      "key": "금융소비자 보호에 관한 법률 제22조",
+      "article": "금융소비자 보호에 관한 법률 제22조",
+      "principles": [
+        "광고규제"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.95,
+      "cu_count": 1,
+      "issue_count": 1,
+      "cu_titles": [
+        "금융상품등 광고 준수사항(필수 고지/금지행위) 누락·오인 가능성"
+      ],
+      "anchor_spans": [
+        "100% 당첨"
+      ]
+    },
+    {
+      "key": "금융소비자 보호에 관한 법률 시행령 제12조",
+      "article": "금융소비자 보호에 관한 법률 시행령 제12조",
+      "principles": [
+        "적정성원칙"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.6,
+      "cu_count": 1,
+      "issue_count": 1,
+      "cu_titles": [
+        "적정하지 않음 고지 및 자료 제공 누락 리스크"
+      ],
+      "anchor_spans": [
+        "1원 이상 결제 시 100% 지급"
+      ]
+    },
+    {
+      "key": "표시ㆍ광고의 공정화에 관한 법률 제4조",
+      "article": "표시ㆍ광고의 공정화에 관한 법률 제4조",
+      "principles": [
+        "광고규제"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.35,
+      "cu_count": 1,
+      "issue_count": 1,
+      "cu_titles": [
+        "중요정보 누락(또는 방법 불일치) 리스크"
+      ],
+      "anchor_spans": [
+        "응모 후 5만원 이상 결제 시 추첨 증정"
+      ]
+    }
+  ],
+  "principle_aggregation": [
+    {
+      "key": "광고규제",
+      "article": "금융소비자 보호에 관한 법률 제22조",
+      "principles": [
+        "광고규제"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.95,
+      "cu_count": 2,
+      "issue_count": 2,
+      "cu_titles": [
+        "금융상품등 광고 준수사항(필수 고지/금지행위) 누락·오인 가능성",
+        "중요정보 누락(또는 방법 불일치) 리스크"
+      ],
+      "anchor_spans": [
+        "100% 당첨",
+        "응모 후 5만원 이상 결제 시 추첨 증정"
+      ]
+    },
+    {
+      "key": "적정성원칙",
+      "article": "금융소비자 보호에 관한 법률 시행령 제12조",
+      "principles": [
+        "적정성원칙"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.6,
+      "cu_count": 1,
+      "issue_count": 1,
+      "cu_titles": [
+        "적정하지 않음 고지 및 자료 제공 누락 리스크"
+      ],
+      "anchor_spans": [
+        "1원 이상 결제 시 100% 지급"
+      ]
+    }
+  ],
+  "policy_evidence_chain_counts": {
+    "legal_basis_chains": 8,
+    "disclosure_chains": 8,
+    "exception_chains": 8,
+    "chain_diagnostics": 8
+  }
+}

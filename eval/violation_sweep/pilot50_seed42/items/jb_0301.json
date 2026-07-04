@@ -1,0 +1,354 @@
+{
+  "review_id": "jb_0301",
+  "bank_key": "jb",
+  "bank_label": "전북은행",
+  "title": "JB 1・2・3 정기예금 우대금리 이벤트",
+  "review_text_chars": 2104,
+  "workspace_id": "graphcompliance_mvp_jb_20260530",
+  "status": "completed",
+  "error": null,
+  "duration_sec": 168.15963925000688,
+  "final_verdict": "needs_review",
+  "routing": {
+    "ad_scope": "product_ad",
+    "preapproval_required_status": "required",
+    "review_phrase_required_before_publication": true,
+    "review_phrase_expected_in_input": false,
+    "review_phrase_input_status": "absent_expected"
+  },
+  "review_run_id": "review_run_ad75718899db1999",
+  "violations": [
+    {
+      "cu_id": "cu_legal_article_30dce47c48d34de4",
+      "verdict": "INSUFFICIENT",
+      "score": 0.55,
+      "principle": "광고규제",
+      "source_article": "금융소비자 보호에 관한 법률 제22조",
+      "subject": "금융상품 광고 및 판매 준법 검토",
+      "legal_basis": "금융소비자 보호에 관한 법률 제22조 제4항 제1호마목 및 제4항(광고 시 금지행위)·제22조 제2항은 금융상품 광고가 금융소비자가 금융상품 내용을 오해하지 않도록 명확·공정하게 전달되어야 하고, 특히 대출/예금 등 상품유형별 주요 사항을 불명확하게 하거나 오인하게 할 소지가 있는 금지행위를 하지 말 것을 요구한다. (근거: 금융소비자 보호에 관한 법률 제22조 제2항, 제4항 제1호마목. 위임사슬: 법률 제22조 → 시행령(광고 방법·절차/금지행위 등으로 위임) → 감독규정 및 금융광고 심의기준)",
+      "evidence_span": "2026.05.28 ~ 2026.12.31 기간에 제공되는 ‘금리 혜택’ 이벤트",
+      "why": "‘금리 혜택’이 특정 기간(2026.05.28~2026.12.31)에 제공된다는 내용 자체는 표시로서 존재하나, 이 심의요건이 요구하는 핵심(상품유형별 금지행위/오인 유발의 구체적 형태, 확정적·단정적 보장 표현, 과거실적·미래수익 암시 등)이 anchor 문구만으로는 명확히 입증되지 않는다. 따라서 조문 요건 충족 또는 위반 성립을 단정하기 어려워 요건 불충족이 아니라 판단 근거 부족에 해당한다."
+    },
+    {
+      "cu_id": "cu_legal_clause_10b53bd2cf638c2c",
+      "verdict": "INSUFFICIENT",
+      "score": 0.4,
+      "principle": "광고규제",
+      "source_article": "금융소비자 보호에 관한 법률 시행령 제20조 ①-5",
+      "subject": "금융소비자 관련 행위",
+      "legal_basis": "금융소비자 보호에 관한 법률 시행령 제20조 제①항 제5호는 광고에서 ‘계약 체결 여부나 금융소비자의 권리·의무에 중대한 영향을 미치는 사항’을 사실과 다르게 알리거나 분명하지 않게 표현하는 행위를 금지한다. (위임사슬: 법률 제22조 제4항 제1호마목 → 시행령 제20조(금지행위) → 감독규정/금융광고 심의기준)",
+      "evidence_span": "기간 한정 프로모션에 따른 조건/적용기간 불일치 위험",
+      "why": "문구는 기간 한정(2026.05.28~2026.12.31)을 명시하고 있어 ‘사실과 다르게’ 또는 ‘중대 사항을 분명하지 않게’ 표현했다고 단정하기 어렵다. 다만 기간 외 적용 여부가 제한될 수 있다는 취지의 우려가 존재하더라도, 본 anchor만으로 권리·의무에 중대한 불명확 표현의 구성요건이 충족되었다고 보기 어려워 근거 부족에 해당한다. / 근거 정합성 경고: evidence_span이 이 anchor의 격리된 증거창 밖이라 위반을 이 anchor에 귀속할 수 없습니다. (Evidence grounding warning: evidence_span was outside this anchor's isolated evidence window.)"
+    },
+    {
+      "cu_id": "cu_legal_article_b3552364de7994d8",
+      "verdict": "INSUFFICIENT",
+      "score": 0.45,
+      "principle": "광고규제",
+      "source_article": "금융소비자 보호에 관한 법률 시행령 제25조",
+      "subject": "금융상품 광고 및 판매 준법 검토",
+      "legal_basis": "금융소비자 보호에 관한 법률 시행령 제16조(적용되는 경우) 또는 금소법 제22조 제4항 관련 광고금지 일반원칙에 따라, 예금성 상품에서 ‘이자율’ 등은 금융소비자가 오인하지 않도록 이자율의 범위·산정방법 등 주요 정보가 명확히 표시되어야 한다(위임사슬: 법률 제22조 → 시행령/감독규정/금융광고 심의기준). 다만 해당 anchor는 자문업 제한 요건(CU 항목 설정)과 직접 연결되지 않아 본 판단은 문구만으로는 위반구성요건 확정이 어렵다.",
+      "evidence_span": "예금 첫거래 최고 연 3.70%",
+      "why": "‘첫거래 최고 연 3.70%’는 핵심 수치·대상을 제시하나, 이 항목에서 요구하는 불명확성/오인 유발 구성요건을 anchor 문구만으로 확정하기 어렵고, 문맥 완화(다른 문장들에서 기준일/세전 또는 재예치 조건이 연결될 가능성)가 존재하므로 위반 성립을 단정하기보다 근거 부족에 해당한다."
+    },
+    {
+      "cu_id": "cu_legal_clause_d5d6f71aa0d25024",
+      "verdict": "INSUFFICIENT",
+      "score": 0.5,
+      "principle": "광고규제",
+      "source_article": "금융소비자 보호에 관한 법률 시행령 제20조 ①",
+      "subject": "광고·판매 행위자",
+      "legal_basis": "금융소비자 보호에 관한 법률 시행령 제20조 제①항 제5호(계약 체결 여부 또는 권리·의무에 중대한 영향을 미치는 사항을 사실과 다르게 알리거나 분명하지 않게 표현하는 행위) 및 같은 조 제①항의 금지행위 유형은, 광고가 이자율·수익 관련 핵심을 오인하게 만들거나 불확실 사항을 단정적으로 제시하는 경우를 금지한다. (위임사슬: 법률 제22조 제4항 → 시행령 제20조 → 감독규정/금융광고 심의기준)",
+      "evidence_span": "우대금리 적용 시점/재예치 조건에 따른 산정 불명확 위험",
+      "why": "우대금리 적용 시점/재예치 연동이 있어 금리 산식이 불명확할 수 있다는 우려는 있으나, 이 anchor만으로 금지행위 구성요건(사실과 다르게 또는 분명하지 않게 표현하여 오인 유발)을 충족했다고 단정하기 어렵다. 따라서 위반 성립 대신 근거 부족으로 판단한다. / 근거 정합성 경고: evidence_span이 이 anchor의 격리된 증거창 밖이라 위반을 이 anchor에 귀속할 수 없습니다. (Evidence grounding warning: evidence_span was outside this anchor's isolated evidence window.)"
+    },
+    {
+      "cu_id": "cu_legal_clause_2bee8ef4f9ace609",
+      "verdict": "INSUFFICIENT",
+      "score": 0.45,
+      "principle": "광고규제",
+      "source_article": "금융소비자 보호에 관한 법률 제22조 ①-6",
+      "subject": "광고·판매 행위자",
+      "legal_basis": "금융소비자 보호에 관한 법률 제22조 제2항은 금융상품판매업자등이 금융상품등에 관한 광고를 하는 경우 금융소비자가 오해하지 않도록 명확하고 공정하게 전달해야 한다. 또한 같은 법 제22조 제4항은 예금성 상품 등에서 오인하게 하는 표현을 금지한다. (위임사슬: 법률 제22조 → 시행령/감독규정/금융광고 심의기준)",
+      "evidence_span": "고금리/수익률 과장 가능성",
+      "why": "‘이벤트 우대금리 최고 연 0.60%’는 우대금리의 상한을 제시한 것으로 보이나, 거짓·과장 또는 금지되는 오인 유발의 구성요건을 anchor만으로 확정하기 어렵다. 따라서 위반 단정보다는 근거 부족으로 본다. / 근거 정합성 경고: evidence_span이 이 anchor의 격리된 증거창 밖이라 위반을 이 anchor에 귀속할 수 없습니다. (Evidence grounding warning: evidence_span was outside this anchor's isolated evidence window.)"
+    },
+    {
+      "cu_id": "cu_legal_clause_10b53bd2cf638c2c",
+      "verdict": "INSUFFICIENT",
+      "score": 0.0,
+      "principle": "광고규제",
+      "source_article": "금융소비자 보호에 관한 법률 시행령 제20조 ①-5",
+      "subject": "금융소비자 관련 행위",
+      "legal_basis": "",
+      "evidence_span": "",
+      "why": "이 심의 항목은 자동 판단이 완료되지 않아 '근거 부족(추가 확인 필요)'으로 분류했습니다. 심사자가 직접 확인해 주세요."
+    }
+  ],
+  "violation_count": 6,
+  "disclosure_requirements": [
+    {
+      "id": "disclosure_deposit_rate_basis",
+      "label": "금리 범위 및 산정방법",
+      "source": "은행 광고심의 기준 제16조/제17조",
+      "why": "최고금리, 우대금리, 적용기간, 산정방법을 소비자가 오인하지 않도록 함께 표시해야 합니다."
+    },
+    {
+      "id": "disclosure_deposit_preferential_conditions",
+      "label": "우대조건 및 적용기간",
+      "source": "은행 광고심의 기준 제18조",
+      "why": "특판, 이벤트, 제휴 혜택은 대상, 자격요건, 기간, 내용을 함께 안내해야 합니다."
+    },
+    {
+      "id": "disclosure_depositor_protection",
+      "label": "예금자보호 부보내용",
+      "source": "은행 광고심의 기준 제16조",
+      "why": "예금성 상품 광고는 예금자보호법 등에 따른 부보내용을 유지 고지로 관리해야 합니다."
+    },
+    {
+      "id": "disclosure_review_number",
+      "label": "심의필 번호 및 유효기간",
+      "source": "은행 광고심의 기준 제9조/제16조",
+      "why": "사전승인 또는 연합회 심의 결과를 소비자가 쉽게 인식할 수 있도록 표시해야 합니다."
+    },
+    {
+      "id": "disclosure_review_process",
+      "label": "준법감시인 사전승인 및 심의필 표시",
+      "source": "은행 광고심의 기준 제4조/제9조",
+      "why": "은행 광고는 내부통제기준에 따른 사전승인과 심의필 표시 여부를 운영 절차로 확인해야 합니다."
+    }
+  ],
+  "overall_impression": {
+    "track": "B",
+    "standard": "대법원 2017두60109 전체적·궁극적 인상 기준",
+    "verdict": "MEDIUM",
+    "misleading_risk_score": 0.68,
+    "why": "전체적으로 ‘최고 연 3.70%’라는 강한 혜택(상단/높은 위계)이 제시되지만, 그 뒤를 받치는 ‘기본금리 기준일·세전’ 및 ‘우대금리의 재예치 시점 연동(1년후/2년후/3년후, 재예치시점기본금리)’ 정보가 혜택 문구 대비 덜 두드러진 위계로 나타나 ‘조건 까다롭고 시점에 따라 달라질 수 있는 구조’를 충분히 즉시 인지시키기 어렵다. 문구 자체에 명백한 수치 모순(CONTRADICTED)은 확인되지 않지만, 혜택-조건 간 정보 비대칭으로 인한 오인 위험이 중간 수준(MEDIUM)으로 판단된다."
+  },
+  "overall_impression_risk": true,
+  "article_aggregation": [
+    {
+      "key": "금융소비자 보호에 관한 법률 제22조",
+      "article": "금융소비자 보호에 관한 법률 제22조",
+      "principles": [
+        "광고규제"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.55,
+      "cu_count": 1,
+      "issue_count": 1,
+      "cu_titles": [
+        "금융상품등 광고 준수사항(필수 고지/금지행위) 누락·오인 가능성"
+      ],
+      "anchor_spans": [
+        "2026.05.28 ~ 2026.12.31 기간에 제공되는 ‘금리 혜택’ 이벤트"
+      ]
+    },
+    {
+      "key": "금융소비자 보호에 관한 법률 시행령 제25조",
+      "article": "금융소비자 보호에 관한 법률 시행령 제25조",
+      "principles": [
+        "광고규제"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.45,
+      "cu_count": 1,
+      "issue_count": 1,
+      "cu_titles": [
+        "자문 고지/면제요건 또는 금지행위 해당 여부 오판 위험"
+      ],
+      "anchor_spans": [
+        "예금 첫거래 최고 연 3.70%"
+      ]
+    },
+    {
+      "key": "금융소비자 보호에 관한 법률 제22조 ①-6",
+      "article": "금융소비자 보호에 관한 법률 제22조 ①-6",
+      "principles": [
+        "광고규제"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.45,
+      "cu_count": 1,
+      "issue_count": 1,
+      "cu_titles": [
+        "금융상품등 광고 준수사항 위반(주체·내용·금지행위)"
+      ],
+      "anchor_spans": [
+        "고금리/수익률 과장 가능성"
+      ]
+    },
+    {
+      "key": "금융소비자 보호에 관한 법률 시행령 제20조 ①-5",
+      "article": "금융소비자 보호에 관한 법률 시행령 제20조 ①-5",
+      "principles": [
+        "광고규제"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.4,
+      "cu_count": 1,
+      "issue_count": 1,
+      "cu_titles": [
+        "계약/권리의무 중대 사항의 사실불일치 또는 불명확 표현"
+      ],
+      "anchor_spans": [
+        "기간 한정 프로모션에 따른 조건/적용기간 불일치 위험"
+      ]
+    },
+    {
+      "key": "금융소비자 보호에 관한 감독규정 제14조 ②",
+      "article": "금융소비자 보호에 관한 감독규정 제14조 ②",
+      "principles": [
+        "설명의무"
+      ],
+      "effective_verdict": "NOT_APPLICABLE",
+      "max_score": 0.2,
+      "cu_count": 1,
+      "issue_count": 0,
+      "cu_titles": [
+        "연계·제휴서비스 축소·변경 고지 누락 또는 기간/방법 미준수"
+      ],
+      "anchor_spans": [
+        "2026.05.28 ~ 2026.12.31 기간에 제공되는 ‘금리 혜택’ 이벤트"
+      ]
+    },
+    {
+      "key": "금융소비자 보호에 관한 법률 시행령 제22조",
+      "article": "금융소비자 보호에 관한 법률 시행령 제22조",
+      "principles": [
+        "설명의무"
+      ],
+      "effective_verdict": "NOT_APPLICABLE",
+      "max_score": 0.2,
+      "cu_count": 1,
+      "issue_count": 0,
+      "cu_titles": [
+        "계약서류 제공 누락 또는 제공방식/절차 요건 불충족 위험"
+      ],
+      "anchor_spans": [
+        "2026.05.28 ~ 2026.12.31 기간에 제공되는 ‘금리 혜택’ 이벤트"
+      ]
+    },
+    {
+      "key": "금융소비자 보호에 관한 법률 시행령 제12조",
+      "article": "금융소비자 보호에 관한 법률 시행령 제12조",
+      "principles": [
+        "적정성원칙"
+      ],
+      "effective_verdict": "NOT_APPLICABLE",
+      "max_score": 0.15,
+      "cu_count": 1,
+      "issue_count": 0,
+      "cu_titles": [
+        "적정하지 않음 고지 및 자료 제공 누락 리스크"
+      ],
+      "anchor_spans": [
+        "2026.05.28 ~ 2026.12.31 기간에 제공되는 ‘금리 혜택’ 이벤트"
+      ]
+    },
+    {
+      "key": "금융소비자 보호에 관한 법률 시행령 제13조 ③",
+      "article": "금융소비자 보호에 관한 법률 시행령 제13조 ③",
+      "principles": [
+        "설명의무"
+      ],
+      "effective_verdict": "NOT_APPLICABLE",
+      "max_score": 0.15,
+      "cu_count": 1,
+      "issue_count": 0,
+      "cu_titles": [
+        "위험등급 고려사항 미반영(후보)"
+      ],
+      "anchor_spans": [
+        "최고금리 수치의 적용범위/산정기준 불명확 위험"
+      ]
+    },
+    {
+      "key": "금융소비자 보호에 관한 법률 시행령 제12조 ④",
+      "article": "금융소비자 보호에 관한 법률 시행령 제12조 ④",
+      "principles": [
+        "적정성원칙"
+      ],
+      "effective_verdict": "NOT_APPLICABLE",
+      "max_score": 0.1,
+      "cu_count": 1,
+      "issue_count": 0,
+      "cu_titles": [
+        "부적정 알림 및 함께 제공되는 서류(적정성 판단결과·이유 서류, 설명서) 누락 후보"
+      ],
+      "anchor_spans": [
+        "이벤트 우대금리 최고 연 0.60%"
+      ]
+    }
+  ],
+  "principle_aggregation": [
+    {
+      "key": "광고규제",
+      "article": "금융소비자 보호에 관한 법률 제22조",
+      "principles": [
+        "광고규제"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.55,
+      "cu_count": 4,
+      "issue_count": 4,
+      "cu_titles": [
+        "계약/권리의무 중대 사항의 사실불일치 또는 불명확 표현",
+        "금융상품등 광고 준수사항 위반(주체·내용·금지행위)",
+        "금융상품등 광고 준수사항(필수 고지/금지행위) 누락·오인 가능성",
+        "자문 고지/면제요건 또는 금지행위 해당 여부 오판 위험"
+      ],
+      "anchor_spans": [
+        "2026.05.28 ~ 2026.12.31 기간에 제공되는 ‘금리 혜택’ 이벤트",
+        "고금리/수익률 과장 가능성",
+        "기간 한정 프로모션에 따른 조건/적용기간 불일치 위험",
+        "예금 첫거래 최고 연 3.70%"
+      ]
+    },
+    {
+      "key": "설명의무",
+      "article": "금융소비자 보호에 관한 감독규정 제14조 ②",
+      "principles": [
+        "설명의무"
+      ],
+      "effective_verdict": "NOT_APPLICABLE",
+      "max_score": 0.2,
+      "cu_count": 3,
+      "issue_count": 0,
+      "cu_titles": [
+        "계약서류 제공 누락 또는 제공방식/절차 요건 불충족 위험",
+        "연계·제휴서비스 축소·변경 고지 누락 또는 기간/방법 미준수",
+        "위험등급 고려사항 미반영(후보)"
+      ],
+      "anchor_spans": [
+        "2026.05.28 ~ 2026.12.31 기간에 제공되는 ‘금리 혜택’ 이벤트",
+        "최고금리 수치의 적용범위/산정기준 불명확 위험"
+      ]
+    },
+    {
+      "key": "적정성원칙",
+      "article": "금융소비자 보호에 관한 법률 시행령 제12조",
+      "principles": [
+        "적정성원칙"
+      ],
+      "effective_verdict": "NOT_APPLICABLE",
+      "max_score": 0.15,
+      "cu_count": 2,
+      "issue_count": 0,
+      "cu_titles": [
+        "부적정 알림 및 함께 제공되는 서류(적정성 판단결과·이유 서류, 설명서) 누락 후보",
+        "적정하지 않음 고지 및 자료 제공 누락 리스크"
+      ],
+      "anchor_spans": [
+        "2026.05.28 ~ 2026.12.31 기간에 제공되는 ‘금리 혜택’ 이벤트",
+        "이벤트 우대금리 최고 연 0.60%"
+      ]
+    }
+  ],
+  "policy_evidence_chain_counts": {
+    "legal_basis_chains": 13,
+    "disclosure_chains": 13,
+    "exception_chains": 13,
+    "chain_diagnostics": 13
+  }
+}

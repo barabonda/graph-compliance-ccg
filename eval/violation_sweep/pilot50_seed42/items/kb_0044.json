@@ -1,0 +1,306 @@
+{
+  "review_id": "kb_0044",
+  "bank_key": "kb",
+  "bank_label": "국민은행",
+  "title": "DC형 퇴직연금 이벤트 가입자이전·신규(조건 충족 시)",
+  "review_text_chars": 2891,
+  "workspace_id": "graphcompliance_mvp_jb_20260530",
+  "status": "completed",
+  "error": null,
+  "duration_sec": 406.1183704159994,
+  "final_verdict": "needs_review",
+  "routing": {
+    "ad_scope": "product_ad",
+    "preapproval_required_status": "required",
+    "review_phrase_required_before_publication": true,
+    "review_phrase_expected_in_input": false,
+    "review_phrase_input_status": "absent_expected"
+  },
+  "review_run_id": "review_run_549bcea0bbd8be7d",
+  "violations": [
+    {
+      "cu_id": "cu_legal_article_47c9e994975df429",
+      "verdict": "INSUFFICIENT",
+      "score": 0.42,
+      "principle": "광고규제",
+      "source_article": "표시ㆍ광고의 공정화에 관한 법률 제4조",
+      "subject": "금융상품 광고 및 판매 준법 검토",
+      "legal_basis": "표시ㆍ광고의 공정화에 관한 법률 제4조제1항 및 제5항은 소비자에게 위해(危害) 발생 우려 등 ‘중요정보’가 고시되는 경우 사업자가 이를 표시ㆍ광고에 포함해야 한다는 취지이므로, 해당 중요정보의 고지·표시가 누락되었는지 여부가 문제 된다(표시ㆍ광고의 공정화에 관한 법률 제4조제1항: 공정위가 중요정보를 고시할 수 있고, 사업자는 고시된 중요정보를 표시ㆍ광고하여야 함).",
+      "evidence_span": "이벤트 내용: DC형 퇴직연금 1가입자이전(계약이전, 실물이전) 또는 신규 가입 하면 금액별 경품 전원 제공(자동응모)",
+      "why": "해당 문구는 ‘가입자이전 또는 신규 가입 시 금액별 경품 전원 제공(자동응모)’로서 경품 제공 범위 표현이 있으나, 이 심의기준(중요정보)에서 특정되는 ‘고시된 중요정보’의 구체 항목이 문구 span 자체에 명확히 나타나지 않습니다. 또한 같은 페이지의 완화 고지(정상계좌/입금 마감 등)가 별도 문장으로 존재하더라도, 이 항목은 ‘중요정보 누락’을 구성하는 필수 고시 내용이 무엇인지(또는 해당 span에서 누락되었는지)를 확인할 추가 자료가 부족합니다. 따라서 규정상 ‘누락’의 위반까지 단정하기보다 ‘적합 여부 판단 불가/근거 부족’으로 봅니다. / 근거 정합성 경고: evidence_span이 이 anchor의 격리된 증거창 밖이라 위반을 이 anchor에 귀속할 수 없습니다. (Evidence grounding warning: evidence_span was outside this anchor's isolated evidence window.)"
+    },
+    {
+      "cu_id": "cu_legal_clause_5a9a77e0886826da",
+      "verdict": "INSUFFICIENT",
+      "score": 0.4,
+      "principle": "광고규제",
+      "source_article": "금융소비자 보호에 관한 법률 제22조 ⑤",
+      "subject": "광고·판매 행위자",
+      "legal_basis": "금융소비자 보호에 관한 법률 제22조제⑤항은 금융상품등에 관한 광고를 할 때 ‘표시ㆍ광고의 공정화에 관한 법률’ 제4조제1항에 따른 표시ㆍ광고사항이 있는 경우에는 그 법에서 정하는 바에 따라야 하므로, 해당 표시ㆍ광고사항(공정위가 고시하는 중요정보 등) 적용이전제에서 누락 또는 미준수가 있는지 여부가 문제 된다(금융소비자 보호에 관한 법률 제22조제⑤항 → ‘표시ㆍ광고의 공정화에 관한 법률 제4조제1항’ 연결).",
+      "evidence_span": "이벤트 내용: DC형 퇴직연금 1가입자이전(계약이전, 실물이전) 또는 신규 가입 하면 금액별 경품 전원 제공(자동응모)",
+      "why": "이 span(‘전원 제공(자동응모)’)만으로는 ‘표시ㆍ광고의 공정화에 관한 법률 제4조제1항에 따른 표시ㆍ광고사항’(즉 공정위가 고시한 중요정보의 어떤 항목)이 해당 광고에 존재하는지, 그리고 그 항목이 실제로 어느 부분에서 누락되었는지까지 특정하기 어렵습니다. 다만 ‘전원’ 표현은 오인 소지 리스크가 있을 수 있으나, 이 심의기준은 결국 공정위가 고시한 ‘표시ㆍ광고사항’의 구체 항목과 그 누락 여부가 확인되어야 위반으로 결론낼 수 있어 현재 자료로는 판단 근거가 부족합니다. / 근거 정합성 경고: evidence_span이 이 anchor의 격리된 증거창 밖이라 위반을 이 anchor에 귀속할 수 없습니다. (Evidence grounding warning: evidence_span was outside this anchor's isolated evidence window.)"
+    },
+    {
+      "cu_id": "cu_legal_article_76887cffdfe55bc4",
+      "verdict": "INSUFFICIENT",
+      "score": 0.42,
+      "principle": "설명의무",
+      "source_article": "금융소비자 보호에 관한 법률 시행령 제24조",
+      "subject": "금융상품 광고 및 판매 준법 검토",
+      "legal_basis": "금융소비자 보호에 관한 법률 제22조제③호 및 제②조는 금융상품등에 관한 광고에서 금융소비자가 오해하지 않도록 명확·공정하게 전달되어야 하고, 광고에 금융상품의 내용 등(법에서 정한 ‘포함’ 사항)이 있어야 하며, 제22조제⑤항은 공정위 고시 표시·광고사항이 있으면 그에 따라야 한다. 따라서 해당 광고에서 법정 ‘포함되어야 할 사항’이 실제로 충분히 포함됐는지(특히 ‘대상/요건’에 대한 오인 방지 고지)가 쟁점이다(금융소비자 보호에 관한 법률 제22조제②항·제③항, 제⑤항).",
+      "evidence_span": "이벤트 내용: DC형 퇴직연금 1가입자이전(계약이전, 실물이전) 또는 신규 가입 하면 금액별 경품 전원 제공(자동응모)",
+      "why": "해당 span은 경품 전원 제공 및 자동응모 방식이라는 혜택 표현 중심이며, 이 span에서 법정 ‘포함되어야 할 광고 내용’(예: 상품의 구체 내용/중요 조건/오인 방지 요건 등)이 충분히 특정되어 있지 않습니다. 다만 완화 고지(정상계좌/입금 마감 등)가 관련 문장으로 존재할 가능성이 있으나, 이 항목만으로는 ‘법정 포함사항이 이 span 또는 광고 전체에서 충분히 충족되었는지’ 단정할 수 없어 근거가 부족합니다. / 근거 정합성 경고: evidence_span이 이 anchor의 격리된 증거창 밖이라 위반을 이 anchor에 귀속할 수 없습니다. (Evidence grounding warning: evidence_span was outside this anchor's isolated evidence window.)"
+    },
+    {
+      "cu_id": "cu_legal_clause_47503c5fae4fbfd8",
+      "verdict": "INSUFFICIENT",
+      "score": 0.35,
+      "principle": "설명의무",
+      "source_article": "금융소비자 보호에 관한 감독규정 제14조 ②",
+      "subject": "금융상품판매업자등",
+      "legal_basis": "금융소비자 보호에 관한 감독규정 제14조제②항 및 그 위임에 따른 요건은 ‘연계·제휴서비스등을 축소·변경한다는 사실’을 6개월 전부터 매월 2개 이상의 방법으로 고지해야 하고, 불가피한 사유가 있으면 즉시 고지해야 한다는 취지이다(감독규정 제14조제②항).",
+      "evidence_span": "이벤트 기간 2025.7.1(화) ~ 2025.9.30(화)",
+      "why": "해당 span은 이벤트 기간(기간 제한)의 고지에 해당하며, ‘연계·제휴서비스등의 축소·변경’과 관련된 고지 의무를 특정하는 사실 및 고지 수단 요건이 확인되지 않아, 적용요건이 충족되었다고 보기 어렵습니다. 따라서 위반 여부를 판단하기에는 근거가 부족합니다."
+    },
+    {
+      "cu_id": "cu_legal_clause_5a9a77e0886826da",
+      "verdict": "INSUFFICIENT",
+      "score": 0.38,
+      "principle": "광고규제",
+      "source_article": "금융소비자 보호에 관한 법률 제22조 ⑤",
+      "subject": "광고·판매 행위자",
+      "legal_basis": "금융소비자 보호에 관한 법률 제22조제⑤항은 ‘표시·광고의 공정화에 관한 법률’ 제4조제1항에 따른 표시·광고사항이 있는 경우 그 법에서 정하는 바에 따라야 하고, 제22조제②항은 금융소비자가 금융상품의 내용을 오해하지 않도록 명확·공정하게 전달해야 한다. 다만 이 조항은 구체적으로 ‘표시·광고사항(중요정보)’의 존재 및 누락 여부를 확인해야 위반을 단정할 수 있다(금융소비자 보호에 관한 법률 제22조제②항 및 제⑤항).",
+      "evidence_span": "※ 경품 지급일 기준 정상계좌이면서 가입자이전(계약이전, 실물이전) 또는 신규 금액 유지 고객에게 1인 1회에 한하여 지급",
+      "why": "해당 span은 지급요건과 제한을 고지하여 오인 방지 기능이 있을 수 있으나, 해당 심의기준이 요구하는 ‘표시·광고사항(중요정보)’의 존재 및 그 기준 미준수 정황이 이 span만으로 확인되지 않습니다. 따라서 위반 여부를 확정하기 어렵고, 정보가 부족하므로 적합성 판단은 미흡(근거 부족)입니다."
+    },
+    {
+      "cu_id": "cu_legal_clause_b6631e80cc3caad8",
+      "verdict": "INSUFFICIENT",
+      "score": 0.5,
+      "principle": "불공정영업행위 금지",
+      "source_article": "금융소비자 보호에 관한 감독규정 제14조 ②-4",
+      "subject": "광고·판매 행위자",
+      "legal_basis": "금융소비자 보호에 관한 감독규정 제14조제②항은 연계·제휴서비스등 축소·변경 사실을 고지할 때 ‘휴대전화 문자메시지 또는 이에 준하는 전자적 의사표시’ 등 특정한 고지수단을 열거한다. 다만 이 조항은 ‘연계·제휴서비스등 축소·변경’에 관한 고지에 적용되며, 해당 문구가 그 사안인지 및 고지수단 요건이 충족되는지 확인되어야 한다(감독규정 제14조제②항).",
+      "evidence_span": "경품은 KB국민은행 혜택정보 안내 수신동의(문자포함)를 하셔야 지급 가능합니다.",
+      "why": "해당 문구는 경품 지급을 위한 수신동의 요건으로 보이고, 감독규정 제14조제②항이 전제하는 ‘연계·제휴서비스등 축소·변경’ 고지 사안으로 특정되지 않습니다. 따라서 전제 요건이 부족하여 위반 여부를 판단하기 어렵고, 근거 부족(적합 판단 불가)으로 봅니다."
+    },
+    {
+      "cu_id": "cu_legal_article_76887cffdfe55bc4",
+      "verdict": "INSUFFICIENT",
+      "score": 0.45,
+      "principle": "설명의무",
+      "source_article": "금융소비자 보호에 관한 법률 시행령 제24조",
+      "subject": "금융상품 광고 및 판매 준법 검토",
+      "legal_basis": "금융소비자 보호에 관한 법률 시행령 제24조는 금융상품판매대리·중개업자가 금융소비자에게 ‘대통령령으로 정하는 사항’을 미리 알리고, 표지 게시 및 증표 제시 기준을 충족해야 한다는 취지이다. 즉, 고지·표지·증표 요건 미준수(설명의무 위반) 판단을 위해서는 광고/안내에서 해당 고지 항목이 누락되었는지와 표지·증표 제공이 문제되는지 확인이 필요하다(시행령 제24조제①항·제②항).",
+      "evidence_span": "금융투자상품은 예금자보호법에 따라 보호되지 않습니다.",
+      "why": "해당 문구는 보호 범위 고지로 보이며, 시행령 제24조가 요구하는 ‘대통령령으로 정하는 사항’ 및 표지·증표 관련 누락 여부가 이 span만으로 확인되지 않습니다. 따라서 위반으로 단정할 수 없고 근거가 부족합니다."
+    },
+    {
+      "cu_id": "cu_legal_clause_47503c5fae4fbfd8",
+      "verdict": "INSUFFICIENT",
+      "score": 0.5,
+      "principle": "설명의무",
+      "source_article": "금융소비자 보호에 관한 감독규정 제14조 ②",
+      "subject": "금융상품판매업자등",
+      "legal_basis": "금융소비자 보호에 관한 감독규정 제14조제②항은 연계·제휴서비스등을 축소·변경한다는 사실을 6개월 전부터 매월 2개 이상의 방법으로 고지해야 하고, 불가피한 사유가 있으면 즉시 고지해야 한다는 취지이다. 즉 ‘연계·제휴서비스등 축소·변경’ 사실과 고지 의무 요건(기간/방법/즉시 고지 예외)이 충족되는지 확인되어야 한다(감독규정 제14조제②항).",
+      "evidence_span": "본 이벤트는 KB국민은행 또는 제휴 업체의 사정으로 변경 또는 중단될 수 있습니다(단, 기 조건 충족 고객 및 당첨고객 제외).",
+      "why": "해당 문구는 이벤트 변경/중단 가능성 및 경품 변경 가능성을 고지하는 것으로 보이나, 감독규정 제14조제②항이 요구하는 ‘연계·제휴서비스등 축소·변경’ 사실 및 그에 대한 기간/방법 고지 의무 준수 여부를 해당 span만으로 특정하기 어렵습니다. 따라서 판단 근거가 부족합니다. / 근거 정합성 경고: evidence_span이 이 anchor의 격리된 증거창 밖이라 위반을 이 anchor에 귀속할 수 없습니다. (Evidence grounding warning: evidence_span was outside this anchor's isolated evidence window.)"
+    },
+    {
+      "cu_id": "cu_legal_clause_b00016b1cabe1c51",
+      "verdict": "INSUFFICIENT",
+      "score": 0.0,
+      "principle": "광고규제",
+      "source_article": "금융소비자 보호에 관한 법률 제22조 ③-2",
+      "subject": "금융상품판매업자등",
+      "legal_basis": "",
+      "evidence_span": "",
+      "why": "이 심의 항목은 자동 판단이 완료되지 않아 '근거 부족(추가 확인 필요)'으로 분류했습니다. 심사자가 직접 확인해 주세요."
+    },
+    {
+      "cu_id": "cu_legal_article_8f5afb99d6f35697",
+      "verdict": "INSUFFICIENT",
+      "score": 0.0,
+      "principle": "설명의무",
+      "source_article": "금융소비자 보호에 관한 법률 제26조",
+      "subject": "금융상품 광고 및 판매 준법 검토",
+      "legal_basis": "",
+      "evidence_span": "",
+      "why": "이 심의 항목은 자동 판단이 완료되지 않아 '근거 부족(추가 확인 필요)'으로 분류했습니다. 심사자가 직접 확인해 주세요."
+    }
+  ],
+  "violation_count": 10,
+  "disclosure_requirements": [
+    {
+      "id": "disclosure_deposit_rate_basis",
+      "label": "금리 범위 및 산정방법",
+      "source": "은행 광고심의 기준 제16조/제17조",
+      "why": "최고금리, 우대금리, 적용기간, 산정방법을 소비자가 오인하지 않도록 함께 표시해야 합니다."
+    },
+    {
+      "id": "disclosure_deposit_preferential_conditions",
+      "label": "우대조건 및 적용기간",
+      "source": "은행 광고심의 기준 제18조",
+      "why": "특판, 이벤트, 제휴 혜택은 대상, 자격요건, 기간, 내용을 함께 안내해야 합니다."
+    },
+    {
+      "id": "disclosure_depositor_protection",
+      "label": "예금자보호 부보내용",
+      "source": "은행 광고심의 기준 제16조",
+      "why": "예금성 상품 광고는 예금자보호법 등에 따른 부보내용을 유지 고지로 관리해야 합니다."
+    },
+    {
+      "id": "disclosure_review_number",
+      "label": "심의필 번호 및 유효기간",
+      "source": "은행 광고심의 기준 제9조/제16조",
+      "why": "사전승인 또는 연합회 심의 결과를 소비자가 쉽게 인식할 수 있도록 표시해야 합니다."
+    },
+    {
+      "id": "disclosure_review_process",
+      "label": "준법감시인 사전승인 및 심의필 표시",
+      "source": "은행 광고심의 기준 제4조/제9조",
+      "why": "은행 광고는 내부통제기준에 따른 사전승인과 심의필 표시 여부를 운영 절차로 확인해야 합니다."
+    }
+  ],
+  "overall_impression": {
+    "track": "B",
+    "standard": "대법원 2017두60109 전체적·궁극적 인상 기준",
+    "verdict": "MEDIUM",
+    "misleading_risk_score": 0.58,
+    "why": "전체적·궁극적 인상 관점에서, ‘조건 충족 시 전원 제공(자동응모)’이라는 헤드라인/상단 혜택 프레이밍이 강하게 먼저 제시되고, 실제 탈락 조건(9/30 입금 마감, 지급일 정상계좌 유지, 이벤트 기간 내 가입/이전일 인정, 특별이익 제공한도 초과 시 당첨 제외, 수신동의·연락처 오류·거절 시 무효 등)이 footnote/후단에 다층적으로 흩어져 있어 소비자가 ‘얼마나/어떤 경우에’ 지급이 안 될 수 있는지를 같은 위계에서 즉시 체감하기 어렵다. 다만 문서상 조건 자체는 대체로 존재하고(명시적 고지), 투자원금 손실·예금자보호 관련 고지들도 별도에서 정직하게 안내되고 있어 ‘사실의 정면 모순’보다는 ‘기대 대비 지급 불확실성의 위계 비대칭’이 오인 위험의 핵심이다. 그래서 오인위험은 HIGH까지는 아니고 MEDIUM으로 판단한다."
+  },
+  "overall_impression_risk": true,
+  "article_aggregation": [
+    {
+      "key": "표시ㆍ광고의 공정화에 관한 법률 제4조",
+      "article": "표시ㆍ광고의 공정화에 관한 법률 제4조",
+      "principles": [
+        "광고규제"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.42,
+      "cu_count": 1,
+      "issue_count": 1,
+      "cu_titles": [
+        "중요정보 누락(또는 방법 불일치) 리스크"
+      ],
+      "anchor_spans": [
+        "이벤트 내용: DC형 퇴직연금 1가입자이전(계약이전, 실물이전) 또는 신규 가입 하면 금액별 경품 전원 제공(자동응모)"
+      ]
+    },
+    {
+      "key": "금융소비자 보호에 관한 법률 시행령 제24조",
+      "article": "금융소비자 보호에 관한 법률 시행령 제24조",
+      "principles": [
+        "설명의무"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.42,
+      "cu_count": 1,
+      "issue_count": 1,
+      "cu_titles": [
+        "금융상품판매대리·중개업자의 고지·표지·증표 요건 미충족"
+      ],
+      "anchor_spans": [
+        "이벤트 내용: DC형 퇴직연금 1가입자이전(계약이전, 실물이전) 또는 신규 가입 하면 금액별 경품 전원 제공(자동응모)"
+      ]
+    },
+    {
+      "key": "금융소비자 보호에 관한 법률 제22조 ⑤",
+      "article": "금융소비자 보호에 관한 법률 제22조 ⑤",
+      "principles": [
+        "광고규제"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.4,
+      "cu_count": 1,
+      "issue_count": 1,
+      "cu_titles": [
+        "금융상품등 광고 표시·광고사항의 법정 기준 미준수"
+      ],
+      "anchor_spans": [
+        "이벤트 내용: DC형 퇴직연금 1가입자이전(계약이전, 실물이전) 또는 신규 가입 하면 금액별 경품 전원 제공(자동응모)"
+      ]
+    },
+    {
+      "key": "금융소비자 보호에 관한 법률 제22조 ③-2",
+      "article": "금융소비자 보호에 관한 법률 제22조 ③-2",
+      "principles": [
+        "광고규제"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.0,
+      "cu_count": 1,
+      "issue_count": 1,
+      "cu_titles": [
+        "광고 포함정보 누락으로 인한 오인 위험"
+      ],
+      "anchor_spans": [
+        "이벤트 내용: DC형 퇴직연금 1가입자이전(계약이전, 실물이전) 또는 신규 가입 하면 금액별 경품 전원 제공(자동응모)"
+      ]
+    },
+    {
+      "key": "표시ㆍ광고의 공정화에 관한 법률 시행령 제4조",
+      "article": "표시ㆍ광고의 공정화에 관한 법률 시행령 제4조",
+      "principles": [
+        "광고규제"
+      ],
+      "effective_verdict": "NOT_APPLICABLE",
+      "max_score": 0.0,
+      "cu_count": 1,
+      "issue_count": 0,
+      "cu_titles": [
+        "광고 실증의 객관성·독립성 결여"
+      ],
+      "anchor_spans": [
+        "신규 가입 이벤트 (조건충족시)"
+      ]
+    }
+  ],
+  "principle_aggregation": [
+    {
+      "key": "광고규제",
+      "article": "표시ㆍ광고의 공정화에 관한 법률 제4조",
+      "principles": [
+        "광고규제"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.42,
+      "cu_count": 4,
+      "issue_count": 3,
+      "cu_titles": [
+        "광고 실증의 객관성·독립성 결여",
+        "광고 포함정보 누락으로 인한 오인 위험",
+        "금융상품등 광고 표시·광고사항의 법정 기준 미준수",
+        "중요정보 누락(또는 방법 불일치) 리스크"
+      ],
+      "anchor_spans": [
+        "신규 가입 이벤트 (조건충족시)",
+        "이벤트 내용: DC형 퇴직연금 1가입자이전(계약이전, 실물이전) 또는 신규 가입 하면 금액별 경품 전원 제공(자동응모)"
+      ]
+    },
+    {
+      "key": "설명의무",
+      "article": "금융소비자 보호에 관한 법률 시행령 제24조",
+      "principles": [
+        "설명의무"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.42,
+      "cu_count": 1,
+      "issue_count": 1,
+      "cu_titles": [
+        "금융상품판매대리·중개업자의 고지·표지·증표 요건 미충족"
+      ],
+      "anchor_spans": [
+        "이벤트 내용: DC형 퇴직연금 1가입자이전(계약이전, 실물이전) 또는 신규 가입 하면 금액별 경품 전원 제공(자동응모)"
+      ]
+    }
+  ],
+  "policy_evidence_chain_counts": {
+    "legal_basis_chains": 13,
+    "disclosure_chains": 13,
+    "exception_chains": 13,
+    "chain_diagnostics": 13
+  }
+}

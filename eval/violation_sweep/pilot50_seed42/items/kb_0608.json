@@ -1,0 +1,257 @@
+{
+  "review_id": "kb_0608",
+  "bank_key": "kb",
+  "bank_label": "국민은행",
+  "title": "「KB마이데이터 보너스 이벤트」",
+  "review_text_chars": 2237,
+  "workspace_id": "graphcompliance_mvp_jb_20260530",
+  "status": "completed",
+  "error": null,
+  "duration_sec": 194.21832633300073,
+  "final_verdict": "reject",
+  "routing": {
+    "ad_scope": "product_ad",
+    "preapproval_required_status": "required",
+    "review_phrase_required_before_publication": true,
+    "review_phrase_expected_in_input": false,
+    "review_phrase_input_status": "absent_expected"
+  },
+  "review_run_id": "review_run_677564800b606238",
+  "violations": [
+    {
+      "cu_id": "cu_legal_clause_10b53bd2cf638c2c",
+      "verdict": "NON_COMPLIANT",
+      "score": 0.82,
+      "principle": "광고규제",
+      "source_article": "금융소비자 보호에 관한 법률 시행령 제20조 ①-5",
+      "subject": "금융소비자 관련 행위",
+      "legal_basis": "금융소비자 보호에 관한 법률 시행령 제20조 ①-5는 광고에서 ‘계약 체결 여부나 금융소비자의 권리ㆍ의무에 중대한 영향을 미치는 사항’을 사실과 다르게 알리거나 분명하지 않게 표현하는 행위를 금지한다. (법률→시행령→감독규정→심의기준 위임: 금융소비자보호 감독규정 및 금융광고 심의기준은 이를 세부적으로 정함)",
+      "evidence_span": "모두 참여하면? 2천 포인트리 100% 지급!",
+      "why": "해당 광고 문구는 ‘모두 참여하면? 2천 포인트리 100% 지급!’이라고 하여 지급을 전액(100%)으로 확정적으로 표시하고, ‘모두 참여’에 대한 참여범위/정의 및 지급 산정 기준이 문구 수준에서 충분히 분명하지 않아(핵심 중대사항이 불명확하게 표시) 소비자가 지급이 사실상 보장되는 것으로 오인할 우려가 있다. 특히 ‘100% 지급’의 확정성 표현은 시행령 제20조 ①-5의 ‘권리·의무에 중대한 영향’ 관련 금지 취지(사실과 다르게/분명하지 않게 표현 금지)에 저촉되는 유형으로 판단된다."
+    },
+    {
+      "cu_id": "cu_legal_article_30dce47c48d34de4",
+      "verdict": "INSUFFICIENT",
+      "score": 0.42,
+      "principle": "광고규제",
+      "source_article": "금융소비자 보호에 관한 법률 제22조",
+      "subject": "금융상품 광고 및 판매 준법 검토",
+      "legal_basis": "금융소비자 보호에 관한 법률 제22조 ②·③·④는 금융상품등 광고가 명확하고 공정하게 전달되어야 하고, 필요 포함사항 누락 또는 오인 유발 행위를 금지한다. (위임사슬: 법률→시행령→금융소비자보호 감독규정 및 금융광고 심의기준)",
+      "evidence_span": "모두 참여하면? 2천 포인트리 100% 지급!",
+      "why": "지급 ‘100%’로 인한 오인 가능성은 시사되나, 본 항목의 금지/포함사항 요건(보장성/투자성 등 상품군별 필수 반대고지 또는 제한조건 고지 항목)과 광고물 전체 구성(혜택-불이익 표시 위계) 및 상품유형 매칭이 본 제공 사실만으로 확정되지 않는다. 따라서 해당 항목 기준으로는 위반을 단정하기 어렵고 근거 부족에 해당한다."
+    },
+    {
+      "cu_id": "cu_legal_clause_10b53bd2cf638c2c",
+      "verdict": "INSUFFICIENT",
+      "score": 0.45,
+      "principle": "광고규제",
+      "source_article": "금융소비자 보호에 관한 법률 시행령 제20조 ①-5",
+      "subject": "금융소비자 관련 행위",
+      "legal_basis": "금융소비자 보호에 관한 법률 시행령 제20조 ①-5는 ‘계약 체결 여부나 금융소비자의 권리·의무에 중대한 영향을 미치는 사항’을 사실과 다르게 알리거나 분명하지 않게 표현하는 행위를 금지한다. (법률→시행령→감독규정→금융광고 심의기준 위임)",
+      "evidence_span": "2천 포인트리 100% 지급! (미지급/지급조건 불명확 위험)",
+      "why": "지급 조건/산정 기준의 구체성이 문구 수준에서 충분히 드러나지 않는 우려가 있으나, 시행령 제20조 ①-5의 ‘계약/권리의무에 중대한 영향’ 요건 및 ‘사실과 다르게/분명하지 않게’의 판단 기준을 본 항목 정보만으로 확정하기 어렵다. 따라서 이 기준에 따른 위반 단정은 곤란하다."
+    },
+    {
+      "cu_id": "cu_legal_clause_aff973888ca20684",
+      "verdict": "INSUFFICIENT",
+      "score": 0.38,
+      "principle": "부당권유행위 금지",
+      "source_article": "금융소비자 보호에 관한 감독규정 제15조 ⑤-7",
+      "subject": "금융상품판매업자등",
+      "legal_basis": "금융소비자 보호에 관한 감독규정 제15조 ⑤-7은 (요청받지 않은 상태에서) 유선·무선·화상통신·컴퓨터 등 정보통신기술을 활용한 비대면 방식으로 계약 체결을 권유하거나 금융상품판매업자가 대신 체결하는 행위를 금지하는 취지다. (법률→시행령→감독규정 및 세부 고시 위임)",
+      "evidence_span": "KB Pay 앱 또는 리브메이트 앱 가입 필요 ... 미가입 사유로 포인트리 수령 불가능 시 당첨 무효처리",
+      "why": "해당 문구는 이벤트 참여·수령을 위한 앱 가입 조건과 미가입 시 무효 처리 가능성을 설명하는 내용으로 보인다. 그러나 본 항목 기준(요청 없는 비대면 계약 권유/대신 체결)과 달리 ‘투자성 상품 계약 권유/대신 체결’ 및 ‘대면 권유 선행’ ‘요청 비존재’ 요건에 대한 사실이 본 제공 사실에서 확인되지 않아, 위반으로 단정하기 어렵고 기준 적용도 불충분하다. / 근거 정합성 경고: evidence_span이 이 anchor의 격리된 증거창 밖이라 위반을 이 anchor에 귀속할 수 없습니다. (Evidence grounding warning: evidence_span was outside this anchor's isolated evidence window.)"
+    },
+    {
+      "cu_id": "cu_legal_clause_d17c14ff653d2849",
+      "verdict": "INSUFFICIENT",
+      "score": 0.41,
+      "principle": "광고규제",
+      "source_article": "표시ㆍ광고의 공정화에 관한 법률 제4조 ⑤",
+      "subject": "사업자등",
+      "legal_basis": "표시ㆍ광고의 공정화에 관한 법률 제4조 ⑤는 사업자등이 표시·광고 행위를 하는 경우 공정위가 고시한 ‘중요정보’를 표시·광고하여야 한다. (공정위 고시된 중요정보 특정이 전제)",
+      "evidence_span": "공동이벤트 참여 시 개인정보 수집·이용·제공 안내 및 유의사항 반드시 숙지",
+      "why": "개인(신용)정보 안내를 ‘반드시 숙지’하도록 요구하는 문구가 존재하나, 본 항목만으로 공정위가 고시한 ‘중요정보’의 구체 항목 해당성과 그 누락 여부를 확인하기 어렵다. 따라서 이 기준(중요정보 고시·표시의무)으로는 판단 근거가 부족하다. / 근거 정합성 경고: evidence_span이 이 anchor의 격리된 증거창 밖이라 위반을 이 anchor에 귀속할 수 없습니다. (Evidence grounding warning: evidence_span was outside this anchor's isolated evidence window.)"
+    },
+    {
+      "cu_id": "cu_legal_article_a7c06d7da2323c8c",
+      "verdict": "INSUFFICIENT",
+      "score": 0.0,
+      "principle": "설명의무",
+      "source_article": "금융소비자 보호에 관한 법률 시행령 제13조",
+      "subject": "금융상품 광고 및 판매 준법 검토",
+      "legal_basis": "",
+      "evidence_span": "",
+      "why": "이 심의 항목은 자동 판단이 완료되지 않아 '근거 부족(추가 확인 필요)'으로 분류했습니다. 심사자가 직접 확인해 주세요."
+    }
+  ],
+  "violation_count": 6,
+  "disclosure_requirements": [
+    {
+      "id": "disclosure_review_process",
+      "label": "준법감시인 사전승인 및 심의필 표시",
+      "source": "은행 광고심의 기준 제4조/제9조",
+      "why": "은행 광고는 내부통제기준에 따른 사전승인과 심의필 표시 여부를 운영 절차로 확인해야 합니다."
+    }
+  ],
+  "overall_impression": {
+    "track": "B",
+    "standard": "대법원 2017두60109 전체적·궁극적 인상 기준",
+    "verdict": "MEDIUM",
+    "misleading_risk_score": 0.68,
+    "why": "복잡 위반 관점에서, 광고의 핵심 혜택(‘모두 참여하면 100% 지급’)이 상위 위계(헤드라인)로 강하게 제시되는 반면, 실제 지급 불확실성/배제 가능성은 다수의 낮은 위계 footnote(경품 지급일 기준 제외 사유, KB Pay 미가입 시 무효처리, 이벤트 기간 내 동시 참여 및 최초 연동 요건, 1인 1회 등)에 흩어져 있어 전체 인상-실체 간 간극이 형성될 가능성이 있음. 다만 ‘경품 변경·중단 가능’ 및 ‘경품 지급 대상 제외’ 고지가 존재하고, 직접적 수치 모순이나 ‘확정 보장’과 약관 사실의 정면 모순은 제시되지 않아 오인위험은 HIGH까지는 아니고 MEDIUM으로 판단함."
+  },
+  "overall_impression_risk": true,
+  "article_aggregation": [
+    {
+      "key": "금융소비자 보호에 관한 법률 시행령 제20조 ①-5",
+      "article": "금융소비자 보호에 관한 법률 시행령 제20조 ①-5",
+      "principles": [
+        "광고규제"
+      ],
+      "effective_verdict": "NON_COMPLIANT",
+      "max_score": 0.82,
+      "cu_count": 1,
+      "issue_count": 2,
+      "cu_titles": [
+        "계약/권리의무 중대 사항의 사실불일치 또는 불명확 표현"
+      ],
+      "anchor_spans": [
+        "2천 포인트리 100% 지급! (미지급/지급조건 불명확 위험)",
+        "모두 참여하면? 2천 포인트리 100% 지급!"
+      ]
+    },
+    {
+      "key": "금융소비자 보호에 관한 법률 제22조",
+      "article": "금융소비자 보호에 관한 법률 제22조",
+      "principles": [
+        "광고규제"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.42,
+      "cu_count": 1,
+      "issue_count": 1,
+      "cu_titles": [
+        "금융상품등 광고 준수사항(필수 고지/금지행위) 누락·오인 가능성"
+      ],
+      "anchor_spans": [
+        "모두 참여하면? 2천 포인트리 100% 지급!"
+      ]
+    },
+    {
+      "key": "금융소비자 보호에 관한 법률 시행령 제13조",
+      "article": "금융소비자 보호에 관한 법률 시행령 제13조",
+      "principles": [
+        "설명의무"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.0,
+      "cu_count": 1,
+      "issue_count": 1,
+      "cu_titles": [
+        "설명의무(위험·손실·해지 등) 누락"
+      ],
+      "anchor_spans": [
+        "모두 참여하면? 2천 포인트리 100% 지급!"
+      ]
+    },
+    {
+      "key": "표시ㆍ광고의 공정화에 관한 법률 시행령 제4조",
+      "article": "표시ㆍ광고의 공정화에 관한 법률 시행령 제4조",
+      "principles": [
+        "광고규제"
+      ],
+      "effective_verdict": "NOT_APPLICABLE",
+      "max_score": 0.0,
+      "cu_count": 1,
+      "issue_count": 0,
+      "cu_titles": [
+        "광고 실증의 객관성·독립성 결여"
+      ],
+      "anchor_spans": [
+        "※자세한 이벤트 내용 및 경품 지급 조건은 각 사 이벤트 페이지 참고",
+        "모두 참여하면? 2천 포인트리 100% 지급!"
+      ]
+    },
+    {
+      "key": "금융소비자 보호에 관한 감독규정 제15조",
+      "article": "금융소비자 보호에 관한 감독규정 제15조",
+      "principles": [
+        "부당권유행위 금지"
+      ],
+      "effective_verdict": "NOT_APPLICABLE",
+      "max_score": 0.0,
+      "cu_count": 1,
+      "issue_count": 0,
+      "cu_titles": [
+        "부당권유행위 금지 관련 고시사항 미안내로 인한 위반 가능성"
+      ],
+      "anchor_spans": [
+        "각 사 이벤트 혜택 ... (경품 선택/지급조건 불명확 위험)"
+      ]
+    }
+  ],
+  "principle_aggregation": [
+    {
+      "key": "광고규제",
+      "article": "금융소비자 보호에 관한 법률 시행령 제20조 ①-5",
+      "principles": [
+        "광고규제"
+      ],
+      "effective_verdict": "NON_COMPLIANT",
+      "max_score": 0.82,
+      "cu_count": 3,
+      "issue_count": 3,
+      "cu_titles": [
+        "계약/권리의무 중대 사항의 사실불일치 또는 불명확 표현",
+        "광고 실증의 객관성·독립성 결여",
+        "금융상품등 광고 준수사항(필수 고지/금지행위) 누락·오인 가능성"
+      ],
+      "anchor_spans": [
+        "2천 포인트리 100% 지급! (미지급/지급조건 불명확 위험)",
+        "※자세한 이벤트 내용 및 경품 지급 조건은 각 사 이벤트 페이지 참고",
+        "모두 참여하면? 2천 포인트리 100% 지급!"
+      ]
+    },
+    {
+      "key": "설명의무",
+      "article": "금융소비자 보호에 관한 법률 시행령 제13조",
+      "principles": [
+        "설명의무"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.0,
+      "cu_count": 1,
+      "issue_count": 1,
+      "cu_titles": [
+        "설명의무(위험·손실·해지 등) 누락"
+      ],
+      "anchor_spans": [
+        "모두 참여하면? 2천 포인트리 100% 지급!"
+      ]
+    },
+    {
+      "key": "부당권유행위 금지",
+      "article": "금융소비자 보호에 관한 감독규정 제15조",
+      "principles": [
+        "부당권유행위 금지"
+      ],
+      "effective_verdict": "NOT_APPLICABLE",
+      "max_score": 0.0,
+      "cu_count": 1,
+      "issue_count": 0,
+      "cu_titles": [
+        "부당권유행위 금지 관련 고시사항 미안내로 인한 위반 가능성"
+      ],
+      "anchor_spans": [
+        "각 사 이벤트 혜택 ... (경품 선택/지급조건 불명확 위험)"
+      ]
+    }
+  ],
+  "policy_evidence_chain_counts": {
+    "legal_basis_chains": 12,
+    "disclosure_chains": 12,
+    "exception_chains": 12,
+    "chain_diagnostics": 13
+  }
+}

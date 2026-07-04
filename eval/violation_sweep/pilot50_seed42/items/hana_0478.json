@@ -1,0 +1,471 @@
+{
+  "review_id": "hana_0478",
+  "bank_key": "hana",
+  "bank_label": "하나은행",
+  "title": "청년도약계좌 가입하면 해외여행 지원금 Get! 청년도약계좌 가입 이벤트",
+  "review_text_chars": 3813,
+  "workspace_id": "graphcompliance_mvp_jb_20260530",
+  "status": "completed",
+  "error": null,
+  "duration_sec": 239.742516374994,
+  "final_verdict": "needs_review",
+  "routing": {
+    "ad_scope": "product_ad",
+    "preapproval_required_status": "required",
+    "review_phrase_required_before_publication": true,
+    "review_phrase_expected_in_input": false,
+    "review_phrase_input_status": "absent_expected"
+  },
+  "review_run_id": "review_run_f146debb87a16841",
+  "violations": [
+    {
+      "cu_id": "cu_legal_clause_3c513cb5b8b57d42",
+      "verdict": "INSUFFICIENT",
+      "score": 0.58,
+      "principle": "부당권유행위 금지",
+      "source_article": "금융소비자 보호에 관한 법률 제21조 제21조",
+      "subject": "금융상품판매업자등",
+      "legal_basis": "금융소비자 보호에 관한 법률 제21조는 금융상품판매업자등이 계약 체결을 권유하는 경우 불확실한 사항을 확실하다고 오인하게 할 소지의 내용 알림 또는 비교대상·기준을 밝히지 않거나 객관 근거 없이 비교하여 우수·유리하다고 알리는 행위 등을 해서는 아니 된다고 규정한다(금융소비자 보호에 관한 법률 제21조 → 법률→시행령→감독규정→심의기준 위임 사슬).",
+      "evidence_span": "청년도약계좌 가입하면 해외여행 지원금 Get! 청년도약계좌 가입 이벤트",
+      "why": "비교대상·기준 제시 및 우위·최상급(비교에 기반한 유리성 단정) 요건에 필요한 핵심 표현/사실이 해당 문구 span에서 확인되지 않아, 금지유형(비교대상·기준 미제시 또는 객관근거 없는 비교로 우수·유리 알림)을 구성할 만큼 입증이 부족하다."
+    },
+    {
+      "cu_id": "cu_legal_clause_d17c14ff653d2849",
+      "verdict": "INSUFFICIENT",
+      "score": 0.52,
+      "principle": "광고규제",
+      "source_article": "표시ㆍ광고의 공정화에 관한 법률 제4조 ⑤",
+      "subject": "사업자등",
+      "legal_basis": "표시ㆍ광고의 공정화에 관한 법률 제4조제⑤항은 사업자가 표시ㆍ광고를 하는 경우 공정위가 고시한 ‘중요정보’를 표시ㆍ광고하여야 한다고 요구한다(표시ㆍ광고의 공정화에 관한 법률 제4조⑤ → 공정위 고시로 중요정보 구체화, 그 위임 사슬).",
+      "evidence_span": "참여기간 23년 09월 01일 ~ 23년 12월 31일",
+      "why": "이 span은 참여기간을 특정하여 고지하고 있으므로 ‘중요정보 미표시’ 위반으로 보기에는 부족하고, 중요정보 해당성 및 미포함 정황이 확인되지 않아 적합성 판단이 보류된다."
+    },
+    {
+      "cu_id": "cu_legal_clause_10b53bd2cf638c2c",
+      "verdict": "INSUFFICIENT",
+      "score": 0.45,
+      "principle": "광고규제",
+      "source_article": "금융소비자 보호에 관한 법률 시행령 제20조 ①-5",
+      "subject": "금융소비자 관련 행위",
+      "legal_basis": "금융소비자 보호에 관한 법률 시행령 제20조①-5는 계약 체결 여부나 금융소비자의 권리ㆍ의무에 중대한 영향을 미치는 사항을 사실과 다르게 알리거나 분명하지 않게 표현하는 행위를 금지한다(금융소비자 보호에 관한 법률 시행령 제20조①-5 → 법률 위임, 감독규정·심의기준으로 구체화 사슬).",
+      "evidence_span": "참여기간 내 청년도약계좌 가입하면 완료!",
+      "why": "권리ㆍ의무에 중대한 영향 사항의 ‘사실과 다르게’ 또는 ‘분명하지 않게’ 표현되었다는 점이 충분히 입증되지 않아 미흡으로 판단한다."
+    },
+    {
+      "cu_id": "cu_legal_clause_5a9a77e0886826da",
+      "verdict": "INSUFFICIENT",
+      "score": 0.38,
+      "principle": "광고규제",
+      "source_article": "금융소비자 보호에 관한 법률 제22조 ⑤",
+      "subject": "광고·판매 행위자",
+      "legal_basis": "금융소비자 보호에 관한 법률 제22조⑤ 및 표시ㆍ광고사항 준수 규정은 금융상품등 광고에서 표시ㆍ광고의 공정화에 관한 법률 제4조제1항에 따른 표시ㆍ광고사항이 있으면 그에 따라야 한다(금융소비자 보호에 관한 법률 제22조⑤ → 표시ㆍ광고 공정화 법 제4조 연계 위임 사슬).",
+      "evidence_span": "참여기간 23년 09월 01일 ~ 23년 12월 31일",
+      "why": "표시·광고사항 미준수로 보기에는 증거가 부족하여 미흡(보류)으로 판단한다."
+    },
+    {
+      "cu_id": "cu_legal_clause_d5d6f71aa0d25024",
+      "verdict": "INSUFFICIENT",
+      "score": 0.5,
+      "principle": "광고규제",
+      "source_article": "금융소비자 보호에 관한 법률 시행령 제20조 ①",
+      "subject": "광고·판매 행위자",
+      "legal_basis": "금융소비자 보호에 관한 법률 시행령 제20조①은 법 제22조제4항제1호마목의 금지행위로 ‘불확실한 사항에 대해 단정적 판단을 제공하거나 확실하다고 오인하게 할 소지가 있는 내용을 알리는 행위’ 등을 포함하여 광고 시 금지된다고 규정한다(시행령 제20조① → 법률 위임 및 감독규정/심의기준 사슬).",
+      "evidence_span": "만기 5년 동안 매월 70만원 한도 내에서 자유롭게 납입하면 ... 최대 6% 정부 기여금 ... 이자소득 비과세",
+      "why": "혜택 강조 자체는 확인되나, ‘확실한 오인 유발’까지 구성요건을 충족한다고 단정할 만큼의 증거(조건·제한의 전달 적정성)가 이 입력만으로 부족하여 미흡으로 판단한다. / 근거 정합성 경고: evidence_span이 이 anchor의 격리된 증거창 밖이라 위반을 이 anchor에 귀속할 수 없습니다. (Evidence grounding warning: evidence_span was outside this anchor's isolated evidence window.)"
+    },
+    {
+      "cu_id": "cu_legal_clause_10b53bd2cf638c2c",
+      "verdict": "INSUFFICIENT",
+      "score": 0.0,
+      "principle": "광고규제",
+      "source_article": "금융소비자 보호에 관한 법률 시행령 제20조 ①-5",
+      "subject": "금융소비자 관련 행위",
+      "legal_basis": "",
+      "evidence_span": "",
+      "why": "이 심의 항목은 자동 판단이 완료되지 않아 '근거 부족(추가 확인 필요)'으로 분류했습니다. 심사자가 직접 확인해 주세요."
+    },
+    {
+      "cu_id": "cu_legal_article_76887cffdfe55bc4",
+      "verdict": "INSUFFICIENT",
+      "score": 0.0,
+      "principle": "설명의무",
+      "source_article": "금융소비자 보호에 관한 법률 시행령 제24조",
+      "subject": "금융상품 광고 및 판매 준법 검토",
+      "legal_basis": "",
+      "evidence_span": "",
+      "why": "이 심의 항목은 자동 판단이 완료되지 않아 '근거 부족(추가 확인 필요)'으로 분류했습니다. 심사자가 직접 확인해 주세요."
+    },
+    {
+      "cu_id": "cu_legal_clause_0719a7b5e7d91182",
+      "verdict": "INSUFFICIENT",
+      "score": 0.0,
+      "principle": "적합성원칙",
+      "source_article": "금융소비자 보호에 관한 법률 제17조 ②-4",
+      "subject": "금융소비자 관련 행위",
+      "legal_basis": "",
+      "evidence_span": "",
+      "why": "이 심의 항목은 자동 판단이 완료되지 않아 '근거 부족(추가 확인 필요)'으로 분류했습니다. 심사자가 직접 확인해 주세요."
+    },
+    {
+      "cu_id": "cu_legal_clause_0719a7b5e7d91182",
+      "verdict": "INSUFFICIENT",
+      "score": 0.0,
+      "principle": "적합성원칙",
+      "source_article": "금융소비자 보호에 관한 법률 제17조 ②-4",
+      "subject": "금융소비자 관련 행위",
+      "legal_basis": "",
+      "evidence_span": "",
+      "why": "이 심의 항목은 자동 판단이 완료되지 않아 '근거 부족(추가 확인 필요)'으로 분류했습니다. 심사자가 직접 확인해 주세요."
+    },
+    {
+      "cu_id": "cu_legal_clause_5e42ad8b55bc652c",
+      "verdict": "INSUFFICIENT",
+      "score": 0.0,
+      "principle": "광고규제",
+      "source_article": "표시ㆍ광고의 공정화에 관한 법률 제3조 ①-4",
+      "subject": "광고·판매 행위자",
+      "legal_basis": "",
+      "evidence_span": "",
+      "why": "이 심의 항목은 자동 판단이 완료되지 않아 '근거 부족(추가 확인 필요)'으로 분류했습니다. 심사자가 직접 확인해 주세요."
+    }
+  ],
+  "violation_count": 10,
+  "disclosure_requirements": [
+    {
+      "id": "disclosure_deposit_rate_basis",
+      "label": "금리 범위 및 산정방법",
+      "source": "은행 광고심의 기준 제16조/제17조",
+      "why": "최고금리, 우대금리, 적용기간, 산정방법을 소비자가 오인하지 않도록 함께 표시해야 합니다."
+    },
+    {
+      "id": "disclosure_deposit_preferential_conditions",
+      "label": "우대조건 및 적용기간",
+      "source": "은행 광고심의 기준 제18조",
+      "why": "특판, 이벤트, 제휴 혜택은 대상, 자격요건, 기간, 내용을 함께 안내해야 합니다."
+    },
+    {
+      "id": "disclosure_depositor_protection",
+      "label": "예금자보호 부보내용",
+      "source": "은행 광고심의 기준 제16조",
+      "why": "예금성 상품 광고는 예금자보호법 등에 따른 부보내용을 유지 고지로 관리해야 합니다."
+    },
+    {
+      "id": "disclosure_review_number",
+      "label": "심의필 번호 및 유효기간",
+      "source": "은행 광고심의 기준 제9조/제16조",
+      "why": "사전승인 또는 연합회 심의 결과를 소비자가 쉽게 인식할 수 있도록 표시해야 합니다."
+    },
+    {
+      "id": "disclosure_review_process",
+      "label": "준법감시인 사전승인 및 심의필 표시",
+      "source": "은행 광고심의 기준 제4조/제9조",
+      "why": "은행 광고는 내부통제기준에 따른 사전승인과 심의필 표시 여부를 운영 절차로 확인해야 합니다."
+    }
+  ],
+  "overall_impression": {
+    "track": "B",
+    "standard": "대법원 2017두60109 전체적·궁극적 인상 기준",
+    "verdict": "MEDIUM",
+    "misleading_risk_score": 0.68,
+    "why": "전체적으로는 이벤트 경품(해외여행 지원금/상품권) 자체는 ‘추첨’으로 미선정 가능성이 문구에 나타나 있어 완전한 오인(확정으로 단정)은 아니나, (1) 가입/참여만으로 완료·혜택 기대를 강하게 유도하는 headline 문구와 (2) 실제 적격성·사후 요건(비과세 미적용, 납입중지 등) 및 위험성 관련 고지가 여러 조건문/각주로 분산되어 ‘가입하면 기대한 만큼의 혜택이 안정적으로 돌아온다’는 전체 인상을 과대 형성할 오인위험이 존재한다. 다만 수치/사실의 직접적 모순이나 ‘예금자보호’ 등 특정 강한 오인 단서는 제시되지 않아 위험 수준은 MEDIUM으로 판단."
+  },
+  "overall_impression_risk": true,
+  "article_aggregation": [
+    {
+      "key": "금융소비자 보호에 관한 법률 제21조 제21조",
+      "article": "금융소비자 보호에 관한 법률 제21조 제21조",
+      "principles": [
+        "부당권유행위 금지"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.58,
+      "cu_count": 1,
+      "issue_count": 1,
+      "cu_titles": [
+        "비교·우월 표현에 대한 객관 근거 필요"
+      ],
+      "anchor_spans": [
+        "청년도약계좌 가입하면 해외여행 지원금 Get! 청년도약계좌 가입 이벤트"
+      ]
+    },
+    {
+      "key": "표시ㆍ광고의 공정화에 관한 법률 제4조 ⑤",
+      "article": "표시ㆍ광고의 공정화에 관한 법률 제4조 ⑤",
+      "principles": [
+        "광고규제"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.52,
+      "cu_count": 1,
+      "issue_count": 1,
+      "cu_titles": [
+        "중요정보 누락에 따른 소비자 오인·피해 위험"
+      ],
+      "anchor_spans": [
+        "참여기간 23년 09월 01일 ~ 23년 12월 31일"
+      ]
+    },
+    {
+      "key": "금융소비자 보호에 관한 법률 시행령 제20조 ①",
+      "article": "금융소비자 보호에 관한 법률 시행령 제20조 ①",
+      "principles": [
+        "광고규제"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.5,
+      "cu_count": 1,
+      "issue_count": 1,
+      "cu_titles": [
+        "수익·환급 관련 오인 유발 광고(부당표현) 위험"
+      ],
+      "anchor_spans": [
+        "만기 5년 동안 매월 70만원 한도 내에서 자유롭게 납입하면 ... 최대 6% 정부 기여금 ... 이자소득 비과세"
+      ]
+    },
+    {
+      "key": "금융소비자 보호에 관한 법률 시행령 제20조 ①-5",
+      "article": "금융소비자 보호에 관한 법률 시행령 제20조 ①-5",
+      "principles": [
+        "광고규제"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.45,
+      "cu_count": 1,
+      "issue_count": 2,
+      "cu_titles": [
+        "계약/권리의무 중대 사항의 사실불일치 또는 불명확 표현"
+      ],
+      "anchor_spans": [
+        "본 홍보물은 법령 및 내부통제기준에 따른 절차를 거쳐 제공됩니다.",
+        "참여기간 내 청년도약계좌 가입하면 완료!",
+        "청년도약계좌 가입하면 해외여행 지원금 ..."
+      ]
+    },
+    {
+      "key": "금융소비자 보호에 관한 법률 제22조 ⑤",
+      "article": "금융소비자 보호에 관한 법률 제22조 ⑤",
+      "principles": [
+        "광고규제"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.38,
+      "cu_count": 1,
+      "issue_count": 1,
+      "cu_titles": [
+        "금융상품등 광고 표시·광고사항의 법정 기준 미준수"
+      ],
+      "anchor_spans": [
+        "참여기간 23년 09월 01일 ~ 23년 12월 31일"
+      ]
+    },
+    {
+      "key": "표시ㆍ광고의 공정화에 관한 법률 제3조 ①-4",
+      "article": "표시ㆍ광고의 공정화에 관한 법률 제3조 ①-4",
+      "principles": [
+        "광고규제"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.05,
+      "cu_count": 1,
+      "issue_count": 1,
+      "cu_titles": [
+        "비방적인 표시·광고로 인한 소비자 오인 및 거래질서 저해"
+      ],
+      "anchor_spans": [
+        "청년도약계좌 가입하면 해외여행 지원금 ...",
+        "청년도약계좌 가입하면 해외여행 지원금 Get! 청년도약계좌 가입 이벤트"
+      ]
+    },
+    {
+      "key": "금융소비자 보호에 관한 법률 시행령 제24조",
+      "article": "금융소비자 보호에 관한 법률 시행령 제24조",
+      "principles": [
+        "설명의무"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.0,
+      "cu_count": 1,
+      "issue_count": 1,
+      "cu_titles": [
+        "금융상품판매대리·중개업자의 고지·표지·증표 요건 미충족"
+      ],
+      "anchor_spans": [
+        "참여기간 내 청년도약계좌 가입하면 완료!"
+      ]
+    },
+    {
+      "key": "금융소비자 보호에 관한 법률 제17조 ②-4",
+      "article": "금융소비자 보호에 관한 법률 제17조 ②-4",
+      "principles": [
+        "적합성원칙"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.0,
+      "cu_count": 1,
+      "issue_count": 2,
+      "cu_titles": [
+        "적합성 권유 필요정보(추가정보 포함) 누락 리스크"
+      ],
+      "anchor_spans": [
+        "참여기간 내 청년도약계좌 가입하면 완료!"
+      ]
+    },
+    {
+      "key": "금융소비자 보호에 관한 감독규정 제14조 ⑥-11",
+      "article": "금융소비자 보호에 관한 감독규정 제14조 ⑥-11",
+      "principles": [
+        "불공정영업행위 금지"
+      ],
+      "effective_verdict": "NOT_APPLICABLE",
+      "max_score": 0.0,
+      "cu_count": 1,
+      "issue_count": 0,
+      "cu_titles": [
+        "비교·우월 표현에 대한 객관 근거 필요"
+      ],
+      "anchor_spans": [
+        "청년도약계좌 가입하면 해외여행 지원금 Get! 청년도약계좌 가입 이벤트"
+      ]
+    },
+    {
+      "key": "금융소비자 보호에 관한 감독규정 제19조 ②-10",
+      "article": "금융소비자 보호에 관한 감독규정 제19조 ②-10",
+      "principles": [
+        "광고규제"
+      ],
+      "effective_verdict": "NOT_APPLICABLE",
+      "max_score": 0.0,
+      "cu_count": 1,
+      "issue_count": 0,
+      "cu_titles": [
+        "광고 표제·부제 누락 또는 불충분(후보)"
+      ],
+      "anchor_spans": [
+        "참여기간 23년 09월 01일 ~ 23년 12월 31일"
+      ]
+    },
+    {
+      "key": "금융소비자 보호에 관한 법률 시행령 제20조 ①-3",
+      "article": "금융소비자 보호에 관한 법률 시행령 제20조 ①-3",
+      "principles": [
+        "광고규제"
+      ],
+      "effective_verdict": "NOT_APPLICABLE",
+      "max_score": 0.0,
+      "cu_count": 1,
+      "issue_count": 0,
+      "cu_titles": [
+        "비교대상·기준 미명확 또는 객관적 근거 부재"
+      ],
+      "anchor_spans": [
+        "만기 5년 ... 최대 6% 정부 기여금 ... 비과세 혜택",
+        "참여기간 23년 09월 01일 ~ 23년 12월 31일"
+      ]
+    }
+  ],
+  "principle_aggregation": [
+    {
+      "key": "부당권유행위 금지",
+      "article": "금융소비자 보호에 관한 법률 제21조 제21조",
+      "principles": [
+        "부당권유행위 금지"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.58,
+      "cu_count": 1,
+      "issue_count": 1,
+      "cu_titles": [
+        "비교·우월 표현에 대한 객관 근거 필요"
+      ],
+      "anchor_spans": [
+        "청년도약계좌 가입하면 해외여행 지원금 Get! 청년도약계좌 가입 이벤트"
+      ]
+    },
+    {
+      "key": "광고규제",
+      "article": "표시ㆍ광고의 공정화에 관한 법률 제4조 ⑤",
+      "principles": [
+        "광고규제"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.52,
+      "cu_count": 7,
+      "issue_count": 6,
+      "cu_titles": [
+        "계약/권리의무 중대 사항의 사실불일치 또는 불명확 표현",
+        "광고 표제·부제 누락 또는 불충분(후보)",
+        "금융상품등 광고 표시·광고사항의 법정 기준 미준수",
+        "비교대상·기준 미명확 또는 객관적 근거 부재",
+        "비방적인 표시·광고로 인한 소비자 오인 및 거래질서 저해",
+        "수익·환급 관련 오인 유발 광고(부당표현) 위험",
+        "중요정보 누락에 따른 소비자 오인·피해 위험"
+      ],
+      "anchor_spans": [
+        "만기 5년 ... 최대 6% 정부 기여금 ... 비과세 혜택",
+        "만기 5년 동안 매월 70만원 한도 내에서 자유롭게 납입하면 ... 최대 6% 정부 기여금 ... 이자소득 비과세",
+        "본 홍보물은 법령 및 내부통제기준에 따른 절차를 거쳐 제공됩니다.",
+        "참여기간 23년 09월 01일 ~ 23년 12월 31일",
+        "참여기간 내 청년도약계좌 가입하면 완료!",
+        "청년도약계좌 가입하면 해외여행 지원금 ...",
+        "청년도약계좌 가입하면 해외여행 지원금 Get! 청년도약계좌 가입 이벤트"
+      ]
+    },
+    {
+      "key": "설명의무",
+      "article": "금융소비자 보호에 관한 법률 시행령 제24조",
+      "principles": [
+        "설명의무"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.0,
+      "cu_count": 1,
+      "issue_count": 1,
+      "cu_titles": [
+        "금융상품판매대리·중개업자의 고지·표지·증표 요건 미충족"
+      ],
+      "anchor_spans": [
+        "참여기간 내 청년도약계좌 가입하면 완료!"
+      ]
+    },
+    {
+      "key": "적합성원칙",
+      "article": "금융소비자 보호에 관한 법률 제17조 ②-4",
+      "principles": [
+        "적합성원칙"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.0,
+      "cu_count": 1,
+      "issue_count": 2,
+      "cu_titles": [
+        "적합성 권유 필요정보(추가정보 포함) 누락 리스크"
+      ],
+      "anchor_spans": [
+        "참여기간 내 청년도약계좌 가입하면 완료!"
+      ]
+    },
+    {
+      "key": "불공정영업행위 금지",
+      "article": "금융소비자 보호에 관한 감독규정 제14조 ⑥-11",
+      "principles": [
+        "불공정영업행위 금지"
+      ],
+      "effective_verdict": "NOT_APPLICABLE",
+      "max_score": 0.0,
+      "cu_count": 1,
+      "issue_count": 0,
+      "cu_titles": [
+        "비교·우월 표현에 대한 객관 근거 필요"
+      ],
+      "anchor_spans": [
+        "청년도약계좌 가입하면 해외여행 지원금 Get! 청년도약계좌 가입 이벤트"
+      ]
+    }
+  ],
+  "policy_evidence_chain_counts": {
+    "legal_basis_chains": 19,
+    "disclosure_chains": 19,
+    "exception_chains": 19,
+    "chain_diagnostics": 19
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "review_id": "jb_0191",
+  "bank_key": "jb",
+  "bank_label": "전북은행",
+  "title": "펀드 투자에도 정석이 있다! 꼬박꼬박 적립식 펀드 이벤트",
+  "review_text_chars": 5752,
+  "workspace_id": "graphcompliance_mvp_jb_20260530",
+  "status": "failed",
+  "error": "BadRequestError: Error code: 400 - {'error': {'message': 'Your input exceeds the context window of this model. Please adjust your input and try again.', 'type': 'invalid_request_error', 'param': 'input', 'code': 'context_length_exceeded'}}",
+  "duration_sec": 139.00705133299925,
+  "final_verdict": null,
+  "violations": [],
+  "violation_count": 0,
+  "disclosure_requirements": [],
+  "overall_impression": {},
+  "overall_impression_risk": false,
+  "article_aggregation": [],
+  "principle_aggregation": [],
+  "policy_evidence_chain_counts": {}
+}

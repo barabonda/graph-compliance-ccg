@@ -1,0 +1,44 @@
+{
+  "sweep_id": "pilot50_seed42",
+  "csv": "/Users/barabonda/Documents/GraphRAG/evaluation/compliance_review_text_dataset_include_all_ready_only.csv",
+  "sample": 100,
+  "seed": 42,
+  "bank": null,
+  "limit_chars": null,
+  "concurrency": 2,
+  "workspace_id": "graphcompliance_mvp_jb_20260530",
+  "sampled_total": 100,
+  "plan": [
+    {
+      "bank_key": "hana",
+      "bank_label": "하나은행",
+      "available": 549,
+      "sampled": 25
+    },
+    {
+      "bank_key": "jb",
+      "bank_label": "전북은행",
+      "available": 364,
+      "sampled": 17
+    },
+    {
+      "bank_key": "kb",
+      "bank_label": "국민은행",
+      "available": 852,
+      "sampled": 39
+    },
+    {
+      "bank_key": "shinhan",
+      "bank_label": "신한은행",
+      "available": 40,
+      "sampled": 2
+    },
+    {
+      "bank_key": "woori",
+      "bank_label": "우리은행",
+      "available": 358,
+      "sampled": 17
+    }
+  ],
+  "created_at": "2026-07-04T13:43:12.504903+00:00"
+}

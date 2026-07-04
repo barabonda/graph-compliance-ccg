@@ -1,0 +1,352 @@
+{
+  "review_id": "woori_0077",
+  "bank_key": "woori",
+  "bank_label": "우리은행",
+  "title": "[셀럽]조선의 최고 셀럽을 아시오_",
+  "review_text_chars": 1734,
+  "workspace_id": "graphcompliance_mvp_jb_20260530",
+  "status": "completed",
+  "error": null,
+  "duration_sec": 219.0357999169937,
+  "final_verdict": "needs_review",
+  "routing": {
+    "ad_scope": "product_ad",
+    "preapproval_required_status": "required",
+    "review_phrase_required_before_publication": true,
+    "review_phrase_expected_in_input": false,
+    "review_phrase_input_status": "absent_expected"
+  },
+  "review_run_id": "review_run_67d0e72d42cf4d61",
+  "violations": [
+    {
+      "cu_id": "cu_legal_article_8ab2bc39fe9257ec",
+      "verdict": "INSUFFICIENT",
+      "score": 0.42,
+      "principle": "광고규제",
+      "source_article": "표시ㆍ광고의 공정화에 관한 법률 제3조",
+      "subject": "금융상품 광고 및 판매 준법 검토",
+      "legal_basis": "표시ㆍ광고의 공정화에 관한 법률 제3조 제1항은 사업자등에게 ‘소비자를 속이거나 잘못 알게 할 우려’가 있는 거짓·과장, 기만, 부당 비교, 비방 등의 표시·광고를 금지하고(같은 조 제2항은 구체 내용을 대통령령 위임), cu_plan_item.source_article의 위임 사슬(표시ㆍ광고의 공정화에 관한 법률 제3조 → 대통령령 및 감독규정/심의기준)을 통해 판단한다.",
+      "evidence_span": "셀럽이 되고 셀럽을 아시오?",
+      "why": "해당 광고 문구는 결과/혜택 기대(‘셀럽이 되고’)를 유발하나, 비교 대상 및 우위(최상급) 표현 요건을 규칙기반 사실로는 특정하기 어려워 심의기준상 ‘부당 비교/우월 표현’ 유형에 대한 법적 요건 충족 여부를 판단할 근거가 부족하므로 적합성이 확정되지 않는다(다만 결과 실현 가능성·조건이 명확히 규정되지 않는 점은 별도 심의 쟁점으로 남을 수 있다)."
+    },
+    {
+      "cu_id": "cu_legal_article_47c9e994975df429",
+      "verdict": "INSUFFICIENT",
+      "score": 0.45,
+      "principle": "광고규제",
+      "source_article": "표시ㆍ광고의 공정화에 관한 법률 제4조",
+      "subject": "금융상품 광고 및 판매 준법 검토",
+      "legal_basis": "표시ㆍ광고의 공정화에 관한 법률 제4조 제5항은 사업자등에게 공정거래위원회가 고시한 ‘중요정보’를 표시·광고에 포함하도록 요구한다(같은 조 제1항은 중요정보와 고시 가능 요건을 규정). 해당 위임 사슬은 표시ㆍ광고의 공정화에 관한 법률 제4조 → 대통령령(구체화) → 감독규정/심의기준으로 연결된다.",
+      "evidence_span": "셀럽동의하고 삼천냥 받으씨유 CU 편의점 3,000 선착순 5만명",
+      "why": "‘CU 편의점 3,000’ 및 ‘선착순 5만명’으로 혜택·한도는 제시되나, 규칙기반 요소(특히 설명·고시 대상의 ‘중요정보’가 무엇인지 및 실제로 고시된 중요정보가 이 문구에 적정 방식으로 포함되었는지)를 판단할 수 있을 만큼의 ‘중요정보 구성요건 충족 여부’에 관한 사실관계가 이 단문만으로는 확정되지 않아 미흡 여부 판단은 근거 부족 수준이다. 또한 문맥상 ‘동의’가 무엇인지(정확한 절차/대상)까지 이 구간만으로 완결적으로 특정되었다고 단정하기 어렵다."
+    },
+    {
+      "cu_id": "cu_legal_article_47c9e994975df429",
+      "verdict": "INSUFFICIENT",
+      "score": 0.5,
+      "principle": "광고규제",
+      "source_article": "표시ㆍ광고의 공정화에 관한 법률 제4조",
+      "subject": "금융상품 광고 및 판매 준법 검토",
+      "legal_basis": "표시ㆍ광고의 공정화에 관한 법률 제4조 제5항은 사업자등에게 공정거래위원회가 고시한 ‘중요정보’를 표시·광고에 포함하도록 요구한다. 따라서 혜택 제외(미동의 시 경품 당첨 제외)와 같은 소비자 의사결정에 중대한 영향을 주는 사항이 ‘중요정보’로 볼 정도로 충분히, 적정한 방식으로 제공되었는지 검토한다(제4조 제1항·제5항 및 위임 사슬).",
+      "evidence_span": "...미동의가 확인될 시 경품 당첨에서 제외됩니다.",
+      "why": "미동의 시 경품 당첨 제외라는 중요한 조건이 문구로 제시되어 오인 가능성을 줄이는 측면은 있으나, ‘중요정보’로서 고시된 범위 및 표시·고지의 적정한 전달 방식(글자·배치·통합고지 등)까지는 이 항목 사실만으로 확인되지 않아 위반 여부를 단정하기 어렵다. 따라서 적합성은 확정되지 않으며 근거 부족으로 본다. / 근거 정합성 경고: evidence_span이 이 anchor의 격리된 증거창 밖이라 위반을 이 anchor에 귀속할 수 없습니다. (Evidence grounding warning: evidence_span was outside this anchor's isolated evidence window.)"
+    },
+    {
+      "cu_id": "cu_legal_clause_10b53bd2cf638c2c",
+      "verdict": "INSUFFICIENT",
+      "score": 0.52,
+      "principle": "광고규제",
+      "source_article": "금융소비자 보호에 관한 법률 시행령 제20조 ①-5",
+      "subject": "금융소비자 관련 행위",
+      "legal_basis": "금융소비자 보호에 관한 법률 시행령 제20조 제1항 제5호는 계약 체결 여부나 금융소비자의 권리·의무에 중대한 영향을 미치는 사항을 ‘사실과 다르게 알리거나 분명하지 않게’ 표현하는 행위를 금지한다. 위임 사슬은 법률(금소법) → 시행령 제20조 광고 시 금지행위 → 감독규정 및 금융광고 심의기준으로 이어진다.",
+      "evidence_span": "연락처가 부정확하여 경품 발송이 어려울 경우 당첨이 취소될 수 있습니다.",
+      "why": "해당 문구는 연락처 부정확 시 경품 발송이 어려워 당첨이 ‘취소될 수 있음’을 고지하여 기대의 전부 오인으로 이어지지 않게 하는 측면이 있다. 다만 ‘취소’의 판정 기준·절차가 이 항목 사실만으로는 충분히 확인되지 않아, 권리·의무 중대사항을 ‘분명하지 않게 표현’한 위반으로 단정하기엔 근거가 부족하므로 미흡 여부는 확정할 수 없다."
+    },
+    {
+      "cu_id": "cu_legal_clause_5e42ad8b55bc652c",
+      "verdict": "INSUFFICIENT",
+      "score": 0.0,
+      "principle": "광고규제",
+      "source_article": "표시ㆍ광고의 공정화에 관한 법률 제3조 ①-4",
+      "subject": "광고·판매 행위자",
+      "legal_basis": "",
+      "evidence_span": "",
+      "why": "이 심의 항목은 자동 판단이 완료되지 않아 '근거 부족(추가 확인 필요)'으로 분류했습니다. 심사자가 직접 확인해 주세요."
+    },
+    {
+      "cu_id": "cu_legal_article_07219c9fc08939a2",
+      "verdict": "INSUFFICIENT",
+      "score": 0.0,
+      "principle": "광고규제",
+      "source_article": "표시ㆍ광고의 공정화에 관한 법률 시행령 제4조",
+      "subject": "금융상품 광고 및 판매 준법 검토",
+      "legal_basis": "",
+      "evidence_span": "",
+      "why": "이 심의 항목은 자동 판단이 완료되지 않아 '근거 부족(추가 확인 필요)'으로 분류했습니다. 심사자가 직접 확인해 주세요."
+    },
+    {
+      "cu_id": "cu_legal_article_b1f9c13b24c1b213",
+      "verdict": "INSUFFICIENT",
+      "score": 0.0,
+      "principle": "설명의무",
+      "source_article": "금융소비자 보호에 관한 감독규정 제13조",
+      "subject": "금융상품 광고 및 판매 준법 검토",
+      "legal_basis": "",
+      "evidence_span": "",
+      "why": "이 심의 항목은 자동 판단이 완료되지 않아 '근거 부족(추가 확인 필요)'으로 분류했습니다. 심사자가 직접 확인해 주세요."
+    },
+    {
+      "cu_id": "cu_legal_article_07219c9fc08939a2",
+      "verdict": "INSUFFICIENT",
+      "score": 0.0,
+      "principle": "광고규제",
+      "source_article": "표시ㆍ광고의 공정화에 관한 법률 시행령 제4조",
+      "subject": "금융상품 광고 및 판매 준법 검토",
+      "legal_basis": "",
+      "evidence_span": "",
+      "why": "이 심의 항목은 자동 판단이 완료되지 않아 '근거 부족(추가 확인 필요)'으로 분류했습니다. 심사자가 직접 확인해 주세요."
+    }
+  ],
+  "violation_count": 8,
+  "disclosure_requirements": [
+    {
+      "id": "disclosure_deposit_rate_basis",
+      "label": "금리 범위 및 산정방법",
+      "source": "은행 광고심의 기준 제16조/제17조",
+      "why": "최고금리, 우대금리, 적용기간, 산정방법을 소비자가 오인하지 않도록 함께 표시해야 합니다."
+    },
+    {
+      "id": "disclosure_deposit_preferential_conditions",
+      "label": "우대조건 및 적용기간",
+      "source": "은행 광고심의 기준 제18조",
+      "why": "특판, 이벤트, 제휴 혜택은 대상, 자격요건, 기간, 내용을 함께 안내해야 합니다."
+    },
+    {
+      "id": "disclosure_depositor_protection",
+      "label": "예금자보호 부보내용",
+      "source": "은행 광고심의 기준 제16조",
+      "why": "예금성 상품 광고는 예금자보호법 등에 따른 부보내용을 유지 고지로 관리해야 합니다."
+    },
+    {
+      "id": "disclosure_review_number",
+      "label": "심의필 번호 및 유효기간",
+      "source": "은행 광고심의 기준 제9조/제16조",
+      "why": "사전승인 또는 연합회 심의 결과를 소비자가 쉽게 인식할 수 있도록 표시해야 합니다."
+    },
+    {
+      "id": "disclosure_review_process",
+      "label": "준법감시인 사전승인 및 심의필 표시",
+      "source": "은행 광고심의 기준 제4조/제9조",
+      "why": "은행 광고는 내부통제기준에 따른 사전승인과 심의필 표시 여부를 운영 절차로 확인해야 합니다."
+    }
+  ],
+  "overall_impression": {
+    "track": "B",
+    "standard": "대법원 2017두60109 전체적·궁극적 인상 기준",
+    "verdict": "LOW",
+    "misleading_risk_score": 0.35,
+    "why": "본 광고는 ‘경품을 준다’는 이벤트성 혜택을 제시하되, 주요 조건(최초 신규 이용동의, 이벤트기간 내 급여이체 50만원 이상 및 우리은행 통장, 마케팅/SMS 동의 미동의 시 제외)과 경품의 지급/운영 관련 불확실성(지연 가능, 쿠폰 유효기간 60일 및 연장·환불 불가, 연락처 부정확 시 취소, 경품 이미지 변경 및 조기종료 가능)을 하위 고지로 명시하고 있어, 전체적으로 ‘무조건 안전한 확정 이익’으로 오인하도록 만드는 복잡 위반 간극이 크지 않습니다. 다만 일부 고지는 하단에 모여 있고(정보 밀집), ‘자동응모’ 표현은 실제 인정 요건이 구체화되어야 오해가 줄어드는 형태이므로 오인위험은 낮은 편이나 완전 0은 아닙니다."
+  },
+  "overall_impression_risk": false,
+  "article_aggregation": [
+    {
+      "key": "표시ㆍ광고의 공정화에 관한 법률 제4조",
+      "article": "표시ㆍ광고의 공정화에 관한 법률 제4조",
+      "principles": [
+        "광고규제"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.45,
+      "cu_count": 1,
+      "issue_count": 1,
+      "cu_titles": [
+        "중요정보 누락(또는 방법 불일치) 리스크"
+      ],
+      "anchor_spans": [
+        "셀럽동의하고 삼천냥 받으씨유 CU 편의점 3,000 선착순 5만명"
+      ]
+    },
+    {
+      "key": "표시ㆍ광고의 공정화에 관한 법률 제3조",
+      "article": "표시ㆍ광고의 공정화에 관한 법률 제3조",
+      "principles": [
+        "광고규제"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.42,
+      "cu_count": 1,
+      "issue_count": 1,
+      "cu_titles": [
+        "비교·우월 표현에 대한 객관 근거 필요"
+      ],
+      "anchor_spans": [
+        "셀럽이 되고 셀럽을 아시오?"
+      ]
+    },
+    {
+      "key": "표시ㆍ광고의 공정화에 관한 법률 제3조 ①-4",
+      "article": "표시ㆍ광고의 공정화에 관한 법률 제3조 ①-4",
+      "principles": [
+        "광고규제"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.0,
+      "cu_count": 1,
+      "issue_count": 1,
+      "cu_titles": [
+        "비방적인 표시·광고로 인한 소비자 오인 및 거래질서 저해"
+      ],
+      "anchor_spans": [
+        "셀럽이 되고 셀럽을 아시오?"
+      ]
+    },
+    {
+      "key": "표시ㆍ광고의 공정화에 관한 법률 시행령 제4조",
+      "article": "표시ㆍ광고의 공정화에 관한 법률 시행령 제4조",
+      "principles": [
+        "광고규제"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.0,
+      "cu_count": 1,
+      "issue_count": 1,
+      "cu_titles": [
+        "광고 실증의 객관성·독립성 결여"
+      ],
+      "anchor_spans": [
+        "셀럽이 되고 셀럽을 아시오?"
+      ]
+    },
+    {
+      "key": "금융소비자 보호에 관한 감독규정 제13조",
+      "article": "금융소비자 보호에 관한 감독규정 제13조",
+      "principles": [
+        "설명의무"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.0,
+      "cu_count": 1,
+      "issue_count": 1,
+      "cu_titles": [
+        "설명서 핵심 고지 누락 또는 형식·배치 미준수 위험"
+      ],
+      "anchor_spans": [
+        "셀럽동의하고 삼천냥 받으씨유 CU 편의점 3,000 선착순 5만명"
+      ]
+    },
+    {
+      "key": "금융소비자 보호에 관한 감독규정 제15조",
+      "article": "금융소비자 보호에 관한 감독규정 제15조",
+      "principles": [
+        "부당권유행위 금지"
+      ],
+      "effective_verdict": "NOT_APPLICABLE",
+      "max_score": 0.0,
+      "cu_count": 1,
+      "issue_count": 0,
+      "cu_titles": [
+        "부당권유행위 금지 관련 고시사항 미안내로 인한 위반 가능성"
+      ],
+      "anchor_spans": [
+        "급여이체만 되면 이벤트 자동응모 되옵니다~"
+      ]
+    },
+    {
+      "key": "금융소비자 보호에 관한 감독규정 제14조 ⑥-7",
+      "article": "금융소비자 보호에 관한 감독규정 제14조 ⑥-7",
+      "principles": [
+        "불공정영업행위 금지"
+      ],
+      "effective_verdict": "NOT_APPLICABLE",
+      "max_score": 0.0,
+      "cu_count": 1,
+      "issue_count": 0,
+      "cu_titles": [
+        "정당한 사유 없는 예치금 반환 거부"
+      ],
+      "anchor_spans": [
+        "고객정보 변경: 우리WON뱅킹-전체메뉴-MY PAGE-내정보-내정보 변경"
+      ]
+    }
+  ],
+  "principle_aggregation": [
+    {
+      "key": "광고규제",
+      "article": "표시ㆍ광고의 공정화에 관한 법률 제3조",
+      "principles": [
+        "광고규제"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.45,
+      "cu_count": 4,
+      "issue_count": 4,
+      "cu_titles": [
+        "광고 실증의 객관성·독립성 결여",
+        "비교·우월 표현에 대한 객관 근거 필요",
+        "비방적인 표시·광고로 인한 소비자 오인 및 거래질서 저해",
+        "중요정보 누락(또는 방법 불일치) 리스크"
+      ],
+      "anchor_spans": [
+        "셀럽동의하고 삼천냥 받으씨유 CU 편의점 3,000 선착순 5만명",
+        "셀럽이 되고 셀럽을 아시오?"
+      ]
+    },
+    {
+      "key": "설명의무",
+      "article": "금융소비자 보호에 관한 감독규정 제13조",
+      "principles": [
+        "설명의무"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.0,
+      "cu_count": 1,
+      "issue_count": 1,
+      "cu_titles": [
+        "설명서 핵심 고지 누락 또는 형식·배치 미준수 위험"
+      ],
+      "anchor_spans": [
+        "셀럽동의하고 삼천냥 받으씨유 CU 편의점 3,000 선착순 5만명"
+      ]
+    },
+    {
+      "key": "부당권유행위 금지",
+      "article": "금융소비자 보호에 관한 감독규정 제15조",
+      "principles": [
+        "부당권유행위 금지"
+      ],
+      "effective_verdict": "NOT_APPLICABLE",
+      "max_score": 0.0,
+      "cu_count": 1,
+      "issue_count": 0,
+      "cu_titles": [
+        "부당권유행위 금지 관련 고시사항 미안내로 인한 위반 가능성"
+      ],
+      "anchor_spans": [
+        "급여이체만 되면 이벤트 자동응모 되옵니다~"
+      ]
+    },
+    {
+      "key": "불공정영업행위 금지",
+      "article": "금융소비자 보호에 관한 감독규정 제14조 ⑥-7",
+      "principles": [
+        "불공정영업행위 금지"
+      ],
+      "effective_verdict": "NOT_APPLICABLE",
+      "max_score": 0.0,
+      "cu_count": 1,
+      "issue_count": 0,
+      "cu_titles": [
+        "정당한 사유 없는 예치금 반환 거부"
+      ],
+      "anchor_spans": [
+        "고객정보 변경: 우리WON뱅킹-전체메뉴-MY PAGE-내정보-내정보 변경"
+      ]
+    }
+  ],
+  "policy_evidence_chain_counts": {
+    "legal_basis_chains": 14,
+    "disclosure_chains": 14,
+    "exception_chains": 14,
+    "chain_diagnostics": 14
+  }
+}

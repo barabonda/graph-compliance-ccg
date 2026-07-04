@@ -1,0 +1,82 @@
+{
+  "review_id": "jb_0276",
+  "bank_key": "jb",
+  "bank_label": "전북은행",
+  "title": "싱어게인 TOP10 전주콘서트 할인 이벤트",
+  "review_text_chars": 15409,
+  "workspace_id": "graphcompliance_mvp_jb_20260530",
+  "status": "completed",
+  "error": null,
+  "duration_sec": 155.40719829099544,
+  "final_verdict": "pass_candidate",
+  "routing": {
+    "ad_scope": "product_ad",
+    "preapproval_required_status": "required",
+    "review_phrase_required_before_publication": true,
+    "review_phrase_expected_in_input": false,
+    "review_phrase_input_status": "absent_expected"
+  },
+  "review_run_id": "review_run_36ec8faeb79cce76",
+  "violations": [
+    {
+      "cu_id": "cu_legal_clause_10b53bd2cf638c2c",
+      "verdict": "INSUFFICIENT",
+      "score": 0.4,
+      "principle": "광고규제",
+      "source_article": "금융소비자 보호에 관한 법률 시행령 제20조 ①-5",
+      "subject": "금융소비자 관련 행위",
+      "legal_basis": "금융소비자 보호에 관한 법률 시행령 제20조 ①-5(제5호)는 광고 시 계약 체결 여부나 금융소비자의 권리·의무에 중대한 영향을 미치는 사항을 사실과 다르게 알리거나 분명하지 않게 표현하는 행위를 금지한다(이는 법 제22조 관련 위임에 따른 시행령 광고 금지행위에 해당).",
+      "evidence_span": "이벤트기간 : 2021.04.15 ~ 2021.05.26",
+      "why": "해당 문구는 이벤트기간을 특정하여 표시하고 있어, ‘계약 체결 여부나 금융소비자의 권리·의무에 중대한 영향을 미치는 사항’을 사실과 다르게 또는 분명하지 않게 표현했다는 위반요건을 그 자체로 입증하기 어렵다. 따라서 관련성은 있으나 사실관계(권리·의무에 중대한 영향인지, 불명확 오인 유발 여부)가 부족하여 적합 판단을 보류한다."
+    }
+  ],
+  "violation_count": 1,
+  "disclosure_requirements": [
+    {
+      "id": "disclosure_deposit_rate_basis",
+      "label": "금리 범위 및 산정방법",
+      "source": "은행 광고심의 기준 제16조/제17조",
+      "why": "최고금리, 우대금리, 적용기간, 산정방법을 소비자가 오인하지 않도록 함께 표시해야 합니다."
+    },
+    {
+      "id": "disclosure_deposit_preferential_conditions",
+      "label": "우대조건 및 적용기간",
+      "source": "은행 광고심의 기준 제18조",
+      "why": "특판, 이벤트, 제휴 혜택은 대상, 자격요건, 기간, 내용을 함께 안내해야 합니다."
+    },
+    {
+      "id": "disclosure_depositor_protection",
+      "label": "예금자보호 부보내용",
+      "source": "은행 광고심의 기준 제16조",
+      "why": "예금성 상품 광고는 예금자보호법 등에 따른 부보내용을 유지 고지로 관리해야 합니다."
+    },
+    {
+      "id": "disclosure_review_number",
+      "label": "심의필 번호 및 유효기간",
+      "source": "은행 광고심의 기준 제9조/제16조",
+      "why": "사전승인 또는 연합회 심의 결과를 소비자가 쉽게 인식할 수 있도록 표시해야 합니다."
+    },
+    {
+      "id": "disclosure_review_process",
+      "label": "준법감시인 사전승인 및 심의필 표시",
+      "source": "은행 광고심의 기준 제4조/제9조",
+      "why": "은행 광고는 내부통제기준에 따른 사전승인과 심의필 표시 여부를 운영 절차로 확인해야 합니다."
+    }
+  ],
+  "overall_impression": {
+    "track": "B",
+    "standard": "대법원 2017두60109 전체적·궁극적 인상 기준",
+    "verdict": "LOW",
+    "misleading_risk_score": 0.35,
+    "why": "전체적으로 ‘JB카드로 10% 즉시할인’이라는 혜택 메시지와, 대상카드/예매처, 고객별 최대 4매 한도 및 쿠폰 중복불가 같은 조건 고지가 함께 제시되어 조건부 적용이라는 실체가 headline의 강한 기대를 크게 뒤집지 않는다. 또한 공연 일정 변동 가능성과 변경·취소·환불이 예매처 기준임을 별도 고지해 ‘확정적·전면 보장’ 인상으로 오인될 간극이 제한적이다. 따라서 Track B의 복잡(흩어진 조각으로 인한 궁극적 오인) 위반 가능성은 낮게 평가된다."
+  },
+  "overall_impression_risk": false,
+  "article_aggregation": [],
+  "principle_aggregation": [],
+  "policy_evidence_chain_counts": {
+    "legal_basis_chains": 6,
+    "disclosure_chains": 6,
+    "exception_chains": 6,
+    "chain_diagnostics": 6
+  }
+}

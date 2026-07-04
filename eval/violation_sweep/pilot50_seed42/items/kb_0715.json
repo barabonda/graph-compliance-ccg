@@ -1,0 +1,172 @@
+{
+  "review_id": "kb_0715",
+  "bank_key": "kb",
+  "bank_label": "국민은행",
+  "title": "「우리 특별하고 소중한 아이(반려동물)」 등록하고, 행복한 반려생활 Start」",
+  "review_text_chars": 4115,
+  "workspace_id": "graphcompliance_mvp_jb_20260530",
+  "status": "completed",
+  "error": null,
+  "duration_sec": 325.6904247079947,
+  "final_verdict": "revise",
+  "routing": {
+    "ad_scope": "product_ad",
+    "preapproval_required_status": "required",
+    "review_phrase_required_before_publication": true,
+    "review_phrase_expected_in_input": false,
+    "review_phrase_input_status": "absent_expected"
+  },
+  "review_run_id": "review_run_b9e5b4bf7a2c4f96",
+  "violations": [
+    {
+      "cu_id": "cu_legal_clause_b3820a00676ecf94",
+      "verdict": "NON_COMPLIANT",
+      "score": 0.72,
+      "principle": "광고규제",
+      "source_article": "표시ㆍ광고의 공정화에 관한 법률 제3조 ①-3",
+      "subject": "광고·판매 행위자",
+      "legal_basis": "표시ㆍ광고의 공정화에 관한 법률 제3조 제1항 제3호는 사업자등이 소비자를 속이거나 잘못 알게 할 우려가 있는 표시ㆍ광고로 공정한 거래질서를 해칠 우려가 있는 ‘부당하게 비교하는 표시·광고’를 금지한다(표시ㆍ광고의 공정화에 관한 법률 제3조 ①-3 → 금감원 법령해석 위임 사슬: 금소법 시행령 광고 방법·절차/금지행위 및 금융소비자보호 감독규정/금융광고 심의기준).",
+      "evidence_span": "# 경품 당첨의 행운을 받아보세요!",
+      "why": "해당 심의 항목은 ‘부당하게 비교하는 표시·광고’의 해당 여부를 보는데, 주어진 해당 문구에서는 비교 대상이 제시되지 않는다. 비교 대상 요건이 충족되지 않으므로 이 유형 적용은 부적합하다는 취지에서 판단되나, CU의 매칭 구조상 비교광고 유형으로 심의되었다는 점을 고려하면 ‘규제 대상 유형을 오인하여 적용한 상태’로 볼 여지가 있어, 요건 충족 여부가 불명확하다는 수준을 넘지 못해 ‘적합’으로 결론내릴 수 없으므로 비적합 판정(해당 요건 불충족)으로 본다."
+    },
+    {
+      "cu_id": "cu_legal_clause_6a5cb35f986da72a",
+      "verdict": "INSUFFICIENT",
+      "score": 0.42,
+      "principle": "광고규제",
+      "source_article": "표시ㆍ광고의 공정화에 관한 법률 제3조 ①",
+      "subject": "사업자등",
+      "legal_basis": "표시ㆍ광고의 공정화에 관한 법률 제3조 제1항은 사업자등이 소비자를 속이거나 잘못 알게 할 우려가 있는 표시ㆍ광고로 공정한 거래질서를 해칠 우려가 있는 거짓·과장·기만·부당 비교·비방 등의 행위를 금지한다(표시ㆍ광고의 공정화에 관한 법률 제3조 ① → 금소법 시행령 광고 방법·절차/금지행위 및 금융소비자보호 감독규정/금융광고 심의기준).",
+      "evidence_span": "- 반려동물과 함께 여행을 꿈꾸는 고객들에게 평생 잊지 못할 추억 제공",
+      "why": "‘우위·최상급 표현’에 대해서는 문구상 강한 효용 강조가 인정되나, ‘비교 대상 제시’가 확인되지 않아 해당 심의 항목(비교·우월 표현의 객관 근거 필요) 요건을 완결적으로 적용하기 어렵다. 따라서 관련 사실관계(광고 전체에서 비교가 실제로 이뤄지는지, 객관적 근거의 제시 여부)를 확인할 필요가 있어 적합/위반을 단정하기 어렵다."
+    },
+    {
+      "cu_id": "cu_legal_article_8f6038435f309fdc",
+      "verdict": "INSUFFICIENT",
+      "score": 0.35,
+      "principle": "광고규제",
+      "source_article": "표시ㆍ광고의 공정화에 관한 법률 제10조",
+      "subject": "금융상품 광고 및 판매 준법 검토",
+      "legal_basis": "표시ㆍ광고의 공정화에 관한 법률 제10조는 제3조제1항을 위반하여 부당한 표시·광고 행위로 피해를 입은 자가 있는 경우 사업자등이 손해배상책임을 지는 구조이므로(표시ㆍ광고의 공정화에 관한 법률 제10조 → 제3조 위반 전제), 피해 요건 및 제3조 위반 해당성이 함께 확인되어야 한다.",
+      "evidence_span": "KB스타뱅킹에 반려동물 정보 등록 후 응모완료 고객 대상으로 추첨하여 경품 지급",
+      "why": "해당 문구는 ‘추첨’ 및 ‘응모완료 고객 대상으로’라는 선정 조건을 제시하고 있으나, 이 심의 항목(손해배상책임)에는 (1) 제3조제1항 위반에 해당하는 부당한 표시·광고와 (2) 피해 발생이 전제된다. 제공된 사실만으로는 제3조 위반(거짓·과장·기만·부당 비교·비방 등) 및 실제 피해 발생을 특정하기 어려워 손해배상책임 성립 여부를 단정할 수 없다."
+    }
+  ],
+  "violation_count": 3,
+  "disclosure_requirements": [
+    {
+      "id": "disclosure_review_process",
+      "label": "준법감시인 사전승인 및 심의필 표시",
+      "source": "은행 광고심의 기준 제4조/제9조",
+      "why": "은행 광고는 내부통제기준에 따른 사전승인과 심의필 표시 여부를 운영 절차로 확인해야 합니다."
+    }
+  ],
+  "overall_impression": {
+    "track": "B",
+    "standard": "대법원 2017두60109 전체적·궁극적 인상 기준",
+    "verdict": "MEDIUM",
+    "misleading_risk_score": 0.68,
+    "why": "이 광고는 ‘고금리/원금손실’처럼 직접적인 금전 손실 구조를 내세우진 않는 이벤트성 경품 안내입니다. 다만 Track B의 ‘전체적·궁극적 인상’ 관점에서, 전용 전세기·평생 잊지 못할 추억 등 강한 혜택/가능성 신호가 상단(높은 위계)에 집중되고, 실제 동반 가능을 좌우하는 예방접종·맹견 제한·체중(케이지 포함) 조건 및 쿠폰/수령 관련 손실·면책 조건은 footnote 또는 상대적으로 낮은 위계로 흩어져 있어 소비자가 ‘쉽게/확실히’ 받을 수 있다고 과도하게 기대할 위험이 존재합니다. 또한 ‘연락처 오류/수신 동의/유효기간’ 등 불이익 트리거가 존재하나, 혜택 문구에 비해 경고성이 덜 전면에 배치되어 전체 인상 간극이 완전히 해소되었다고 보긴 어렵습니다. 따라서 오인위험은 LOW보다 높고 MEDIUM으로 판단합니다."
+  },
+  "overall_impression_risk": true,
+  "article_aggregation": [
+    {
+      "key": "표시ㆍ광고의 공정화에 관한 법률 제3조 ①-3",
+      "article": "표시ㆍ광고의 공정화에 관한 법률 제3조 ①-3",
+      "principles": [
+        "광고규제"
+      ],
+      "effective_verdict": "NON_COMPLIANT",
+      "max_score": 0.72,
+      "cu_count": 1,
+      "issue_count": 1,
+      "cu_titles": [
+        "부당 비교 표시·광고 후보"
+      ],
+      "anchor_spans": [
+        "# 경품 당첨의 행운을 받아보세요!"
+      ]
+    },
+    {
+      "key": "표시ㆍ광고의 공정화에 관한 법률 제3조 ①",
+      "article": "표시ㆍ광고의 공정화에 관한 법률 제3조 ①",
+      "principles": [
+        "광고규제"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.42,
+      "cu_count": 1,
+      "issue_count": 1,
+      "cu_titles": [
+        "비교·우월 표현에 대한 객관 근거 필요"
+      ],
+      "anchor_spans": [
+        "반려동물과 함께 여행을 꿈꾸는 고객들에게 평생 잊지 못할 추억 제공"
+      ]
+    },
+    {
+      "key": "표시ㆍ광고의 공정화에 관한 법률 제10조",
+      "article": "표시ㆍ광고의 공정화에 관한 법률 제10조",
+      "principles": [
+        "광고규제"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.35,
+      "cu_count": 1,
+      "issue_count": 1,
+      "cu_titles": [
+        "손해배상책임(부당 표시·광고 위반 및 피해 발생) 가능성"
+      ],
+      "anchor_spans": [
+        "KB스타뱅킹에 반려동물 정보 등록 후 응모완료 고객 대상으로 추첨하여 경품 지급"
+      ]
+    },
+    {
+      "key": "표시ㆍ광고의 공정화에 관한 법률 제3조 ①-4",
+      "article": "표시ㆍ광고의 공정화에 관한 법률 제3조 ①-4",
+      "principles": [
+        "광고규제"
+      ],
+      "effective_verdict": "NOT_APPLICABLE",
+      "max_score": 0.1,
+      "cu_count": 1,
+      "issue_count": 0,
+      "cu_titles": [
+        "비방적인 표시·광고로 인한 소비자 오인 및 거래질서 저해"
+      ],
+      "anchor_spans": [
+        "# 경품 당첨의 행운을 받아보세요!"
+      ]
+    }
+  ],
+  "principle_aggregation": [
+    {
+      "key": "광고규제",
+      "article": "표시ㆍ광고의 공정화에 관한 법률 제3조 ①-3",
+      "principles": [
+        "광고규제"
+      ],
+      "effective_verdict": "NON_COMPLIANT",
+      "max_score": 0.72,
+      "cu_count": 4,
+      "issue_count": 3,
+      "cu_titles": [
+        "부당 비교 표시·광고 후보",
+        "비교·우월 표현에 대한 객관 근거 필요",
+        "비방적인 표시·광고로 인한 소비자 오인 및 거래질서 저해",
+        "손해배상책임(부당 표시·광고 위반 및 피해 발생) 가능성"
+      ],
+      "anchor_spans": [
+        "# 경품 당첨의 행운을 받아보세요!",
+        "KB스타뱅킹에 반려동물 정보 등록 후 응모완료 고객 대상으로 추첨하여 경품 지급",
+        "반려동물과 함께 여행을 꿈꾸는 고객들에게 평생 잊지 못할 추억 제공"
+      ]
+    }
+  ],
+  "policy_evidence_chain_counts": {
+    "legal_basis_chains": 5,
+    "disclosure_chains": 5,
+    "exception_chains": 5,
+    "chain_diagnostics": 6
+  }
+}

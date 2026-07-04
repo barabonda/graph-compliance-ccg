@@ -1,0 +1,346 @@
+{
+  "review_id": "jb_0204",
+  "bank_key": "jb",
+  "bank_label": "전북은행",
+  "title": "전북현대모터스 입장권할인 안내",
+  "review_text_chars": 2005,
+  "workspace_id": "graphcompliance_mvp_jb_20260530",
+  "status": "completed",
+  "error": null,
+  "duration_sec": 199.77142420900054,
+  "final_verdict": "needs_review",
+  "routing": {
+    "ad_scope": "product_ad",
+    "preapproval_required_status": "required",
+    "review_phrase_required_before_publication": true,
+    "review_phrase_expected_in_input": false,
+    "review_phrase_input_status": "absent_expected"
+  },
+  "review_run_id": "review_run_6bc401914d0540e9",
+  "violations": [
+    {
+      "cu_id": "cu_legal_clause_5a9a77e0886826da",
+      "verdict": "INSUFFICIENT",
+      "score": 0.52,
+      "principle": "광고규제",
+      "source_article": "금융소비자 보호에 관한 법률 제22조 ⑤",
+      "subject": "광고·판매 행위자",
+      "legal_basis": "금융소비자 보호에 관한 법률 제22조 ⑤는 금융상품등 광고에서 ‘표시·광고의 공정화에 관한 법률’ 제4조제1항에 따른 표시·광고사항이 있는 경우에는 그 법에서 정하는 바에 따라야 함을 요구한다(금융소비자 보호에 관한 법률 제22조 ⑤ → 금융소비자보호법 시행령 광고 방법·절차/금지행위 위임 → 금융소비자보호 감독규정 및 금융광고 심의기준).",
+      "evidence_span": "이벤트기간(2022.06.01 ~ 2022.06.30) 동안 전북현대모터스 입장권 할인 이벤트를 제공합니다.",
+      "why": "해당 문구는 ‘이벤트기간(2022.06.01~2022.06.30) 동안 입장권 할인 이벤트 제공’으로 기간 한정 자체를 표시하고 있으나, ‘표시·광고의 공정화에 관한 법률’ 제4조제1항에서 의미하는 ‘고시된 중요정보’가 무엇인지(및 이 사건 광고에서 그 중요정보가 특정되었는지)와 그 미준수 정황이 해당 항목 사실관계에서 확인되지 않아 판단 근거가 부족합니다."
+    },
+    {
+      "cu_id": "cu_legal_article_47c9e994975df429",
+      "verdict": "INSUFFICIENT",
+      "score": 0.45,
+      "principle": "광고규제",
+      "source_article": "표시ㆍ광고의 공정화에 관한 법률 제4조",
+      "subject": "금융상품 광고 및 판매 준법 검토",
+      "legal_basis": "표시ㆍ광고의 공정화에 관한 법률 제4조는 공정거래위원회가 고시한 ‘중요정보’가 있는 경우 그 중요정보를 사업자가 표시·광고에 포함해야 한다(표시ㆍ광고의 공정화에 관한 법률 제4조 → 금융소비자보호법 시행령/감독규정 및 금융광고 심의기준으로 세부 판단 위임).",
+      "evidence_span": "이벤트기간 제한에 따른 혜택 미적용 위험",
+      "why": "해당 항목 사실은 ‘이벤트기간 제한에 따른 혜택 미적용 위험’ 가능성을 시사하지만, 공정위가 ‘고시’한 중요정보(예: 기간·적용요건을 중요정보로 지정했는지) 및 해당 중요정보가 이 광고에서 ‘누락’되었는지에 대한 구체적 근거가 항목 내에서 확보되지 않아, 중요정보 미표시로 단정하기 어렵고 심의기준 위반 여부도 현재 사실만으로는 확정할 수 없습니다."
+    },
+    {
+      "cu_id": "cu_legal_clause_d17c14ff653d2849",
+      "verdict": "INSUFFICIENT",
+      "score": 0.52,
+      "principle": "광고규제",
+      "source_article": "표시ㆍ광고의 공정화에 관한 법률 제4조 ⑤",
+      "subject": "사업자등",
+      "legal_basis": "표시ㆍ광고의 공정화에 관한 법률 제4조 ⑤는 사업자등이 표시·광고 행위를 하는 경우, 제1항에 따라 고시된 중요정보를 표시·광고해야 함을 요구한다(표시ㆍ광고의 공정화에 관한 법률 제4조 ⑤ → 공정위 고시 중요정보 체계).",
+      "evidence_span": "이벤트기간(2022.06.01 ~ 2022.06.30) 동안 전북현대모터스 입장권 할인 이벤트를 제공합니다.",
+      "why": "기간(2022.06.01~2022.06.30) 및 할인 이벤트 제공은 ‘표시·광고 내용’으로 존재하나, 이 사건에서 해당 기간 정보가 공정위가 고시한 ‘중요정보’에 해당하는지, 그리고 그 고시된 중요정보가 광고에서 누락되었는지(또는 방법이 불일치했는지)에 대한 양성 근거가 항목 사실에서 확인되지 않아 ‘중요정보 미표시’ 위반으로 판단하기에 부족합니다."
+    },
+    {
+      "cu_id": "cu_legal_clause_5a9a77e0886826da",
+      "verdict": "INSUFFICIENT",
+      "score": 0.58,
+      "principle": "광고규제",
+      "source_article": "금융소비자 보호에 관한 법률 제22조 ⑤",
+      "subject": "광고·판매 행위자",
+      "legal_basis": "금융소비자 보호에 관한 법률 제22조 ⑤는 금융상품등 광고에서 ‘표시·광고의 공정화에 관한 법률’ 제4조제1항에 따른 표시·광고사항이 있는 경우에는 그 법에서 정하는 바에 따라야 한다(금융소비자 보호에 관한 법률 제22조 ⑤ → 금융소비자보호법 시행령 광고 방법·절차/금지행위 위임 → 금융소비자보호 감독규정 및 금융광고 심의기준).",
+      "evidence_span": "티켓링크에서 N, E열(지정석) 입장권을 JB카드로 예매하면 성인 기준 3천원 즉시 할인이 제공됩니다.",
+      "why": "‘티켓링크에서 N, E열(지정석) 입장권을 JB카드로 예매하면 성인 기준 3천원 즉시 할인’은 할인대상·채널·결제수단·좌석 제한을 문구로 제시하고 있으나, 이 항목만으로는 해당 제한이 공정위가 고시한 ‘중요정보’에 해당하여 ‘미준수(누락/불일치)’가 발생했다고 보기는 어렵고, 그 미준수 정황도 제시되지 않아 확정이 어렵습니다."
+    },
+    {
+      "cu_id": "cu_legal_article_1f5237d19fdfa401",
+      "verdict": "INSUFFICIENT",
+      "score": 0.49,
+      "principle": "부당권유행위 금지",
+      "source_article": "금융소비자 보호에 관한 감독규정 제15조",
+      "subject": "금융상품 광고 및 판매 준법 검토",
+      "legal_basis": "표시ㆍ광고의 공정화에 관한 법률 제4조 ⑤는 사업자등이 표시·광고 행위를 하는 경우, 제1항에 따라 고시된 중요정보를 표시·광고해야 한다(표시ㆍ광고의 공정화에 관한 법률 제4조 ⑤).",
+      "evidence_span": "자격 미충족으로 인한 혜택 미수령 위험",
+      "why": "‘경기당 고객별 1회’ 및 ‘티켓링크(웹, APP) 결제건에 한함’은 혜택 적용 범위를 제한하는 고지로 보이나, 이 제한이 공정위가 고시한 ‘중요정보’에 해당하는지 및 그 중요정보가 누락되었는지에 대한 근거가 부족하여, 법정 중요정보 미표시로 단정하기 어렵습니다. / 근거 정합성 경고: evidence_span이 이 anchor의 격리된 증거창 밖이라 위반을 이 anchor에 귀속할 수 없습니다. (Evidence grounding warning: evidence_span was outside this anchor's isolated evidence window.)"
+    },
+    {
+      "cu_id": "cu_legal_article_07219c9fc08939a2",
+      "verdict": "INSUFFICIENT",
+      "score": 0.5,
+      "principle": "광고규제",
+      "source_article": "표시ㆍ광고의 공정화에 관한 법률 시행령 제4조",
+      "subject": "금융상품 광고 및 판매 준법 검토",
+      "legal_basis": "표시ㆍ광고의 공정화에 관한 법률 시행령 제4조는 표시·광고 내용을 ‘실증’하기 위한 시험·조사에 대해 객관성과 독립성(및 불가 예외)을 요구한다(표시·광고의 공정화에 관한 법률 시행령 제4조).",
+      "evidence_span": "혜택 제공 시점에 일시정지, 탈회, 연체 상태이면 대상에서 제외될 수 있습니다.",
+      "why": "해당 문구는 ‘혜택 제공 시점에 일시정지, 탈회, 연체 시 대상에서 제외될 수 있다’는 조건부 리스크 고지 형태로서, 제공/적용의 불확실성을 ‘실증’ 의무 위반으로 전환할 정도의 주장(실증자료·시험·조사 등)이나 단정적 보장과는 결부되지 않습니다. 따라서 이 항목에서 실증 요건 위반으로 판단할 근거가 없습니다. / 근거 정합성 경고: evidence_span이 이 anchor의 격리된 증거창 밖이라 위반을 이 anchor에 귀속할 수 없습니다. (Evidence grounding warning: evidence_span was outside this anchor's isolated evidence window.)"
+    },
+    {
+      "cu_id": "cu_legal_article_8f6038435f309fdc",
+      "verdict": "INSUFFICIENT",
+      "score": 0.35,
+      "principle": "광고규제",
+      "source_article": "표시ㆍ광고의 공정화에 관한 법률 제10조",
+      "subject": "금융상품 광고 및 판매 준법 검토",
+      "legal_basis": "표시ㆍ광고의 공정화에 관한 법률 제10조는 제3조제1항 위반으로 피해가 있는 경우 손해배상책임을 규정한다(표시ㆍ광고의 공정화에 관한 법률 제10조).",
+      "evidence_span": "대상 가맹점 및 업종은 BC카드 가맹점 기준에 따릅니다.",
+      "why": "해당 문구는 ‘대상 가맹점 및 업종은 BC카드 가맹점 기준에 따릅니다’로 판단 기준을 제시하고 있으나, 이 항목에서 실제 ‘부당 표시·광고’로 인한 피해 발생 및 제3조제1항 위반이 구체적으로 확인되지 않아 손해배상책임 관련 판단은 확정할 수 없습니다."
+    },
+    {
+      "cu_id": "cu_legal_clause_d17c14ff653d2849",
+      "verdict": "INSUFFICIENT",
+      "score": 0.0,
+      "principle": "광고규제",
+      "source_article": "표시ㆍ광고의 공정화에 관한 법률 제4조 ⑤",
+      "subject": "사업자등",
+      "legal_basis": "",
+      "evidence_span": "",
+      "why": "이 심의 항목은 자동 판단이 완료되지 않아 '근거 부족(추가 확인 필요)'으로 분류했습니다. 심사자가 직접 확인해 주세요."
+    },
+    {
+      "cu_id": "cu_legal_clause_d17c14ff653d2849",
+      "verdict": "INSUFFICIENT",
+      "score": 0.0,
+      "principle": "광고규제",
+      "source_article": "표시ㆍ광고의 공정화에 관한 법률 제4조 ⑤",
+      "subject": "사업자등",
+      "legal_basis": "",
+      "evidence_span": "",
+      "why": "이 심의 항목은 자동 판단이 완료되지 않아 '근거 부족(추가 확인 필요)'으로 분류했습니다. 심사자가 직접 확인해 주세요."
+    },
+    {
+      "cu_id": "cu_legal_article_1f5237d19fdfa401",
+      "verdict": "INSUFFICIENT",
+      "score": 0.0,
+      "principle": "부당권유행위 금지",
+      "source_article": "금융소비자 보호에 관한 감독규정 제15조",
+      "subject": "금융상품 광고 및 판매 준법 검토",
+      "legal_basis": "",
+      "evidence_span": "",
+      "why": "이 심의 항목은 자동 판단이 완료되지 않아 '근거 부족(추가 확인 필요)'으로 분류했습니다. 심사자가 직접 확인해 주세요."
+    },
+    {
+      "cu_id": "cu_legal_article_1f5237d19fdfa401",
+      "verdict": "INSUFFICIENT",
+      "score": 0.0,
+      "principle": "부당권유행위 금지",
+      "source_article": "금융소비자 보호에 관한 감독규정 제15조",
+      "subject": "금융상품 광고 및 판매 준법 검토",
+      "legal_basis": "",
+      "evidence_span": "",
+      "why": "이 심의 항목은 자동 판단이 완료되지 않아 '근거 부족(추가 확인 필요)'으로 분류했습니다. 심사자가 직접 확인해 주세요."
+    },
+    {
+      "cu_id": "cu_legal_article_d231fe7ab3431421",
+      "verdict": "INSUFFICIENT",
+      "score": 0.0,
+      "principle": "불공정영업행위 금지",
+      "source_article": "금융소비자 보호에 관한 법률 시행령 제15조",
+      "subject": "금융상품 광고 및 판매 준법 검토",
+      "legal_basis": "",
+      "evidence_span": "",
+      "why": "이 심의 항목은 자동 판단이 완료되지 않아 '근거 부족(추가 확인 필요)'으로 분류했습니다. 심사자가 직접 확인해 주세요."
+    },
+    {
+      "cu_id": "cu_legal_clause_f94afed278380946",
+      "verdict": "INSUFFICIENT",
+      "score": 0.0,
+      "principle": "설명의무",
+      "source_article": "금융소비자 보호에 관한 법률 시행령 제13조 ③",
+      "subject": "광고·판매 행위자",
+      "legal_basis": "",
+      "evidence_span": "",
+      "why": "이 심의 항목은 자동 판단이 완료되지 않아 '근거 부족(추가 확인 필요)'으로 분류했습니다. 심사자가 직접 확인해 주세요."
+    },
+    {
+      "cu_id": "cu_legal_clause_89118e37a8bf3727",
+      "verdict": "INSUFFICIENT",
+      "score": 0.0,
+      "principle": "설명의무",
+      "source_article": "금융소비자 보호에 관한 법률 제19조 ①-2",
+      "subject": "광고·판매 행위자",
+      "legal_basis": "",
+      "evidence_span": "",
+      "why": "이 심의 항목은 자동 판단이 완료되지 않아 '근거 부족(추가 확인 필요)'으로 분류했습니다. 심사자가 직접 확인해 주세요."
+    },
+    {
+      "cu_id": "cu_legal_article_07219c9fc08939a2",
+      "verdict": "INSUFFICIENT",
+      "score": 0.0,
+      "principle": "광고규제",
+      "source_article": "표시ㆍ광고의 공정화에 관한 법률 시행령 제4조",
+      "subject": "금융상품 광고 및 판매 준법 검토",
+      "legal_basis": "",
+      "evidence_span": "",
+      "why": "이 심의 항목은 자동 판단이 완료되지 않아 '근거 부족(추가 확인 필요)'으로 분류했습니다. 심사자가 직접 확인해 주세요."
+    }
+  ],
+  "violation_count": 15,
+  "disclosure_requirements": [
+    {
+      "id": "disclosure_loan_rate_range",
+      "label": "대출금리 범위 및 산출기준",
+      "source": "금융광고규제 가이드라인/은행 광고심의 기준 제16조",
+      "why": "대출상품의 핵심 거래조건인 이자율에 대해 오인하지 않도록 범위와 산출기준을 표시해야 합니다."
+    },
+    {
+      "id": "disclosure_loan_screening_conditions",
+      "label": "심사 조건 및 대출 가능 여부",
+      "source": "금융광고규제 가이드라인 관련 Q&A",
+      "why": "승인 가능성이나 조건을 단정하지 않고 내부 심사에 따라 달라질 수 있음을 안내해야 합니다."
+    },
+    {
+      "id": "disclosure_loan_fees",
+      "label": "수수료 등 부대비용",
+      "source": "은행 광고심의 기준 제16조",
+      "why": "수수료, 중도상환수수료 등 소비자 부담 비용을 누락하지 않도록 확인해야 합니다."
+    },
+    {
+      "id": "disclosure_review_number",
+      "label": "심의필 번호 및 유효기간",
+      "source": "은행 광고심의 기준 제9조/제16조",
+      "why": "사전승인 또는 연합회 심의 결과를 소비자가 쉽게 인식할 수 있도록 표시해야 합니다."
+    },
+    {
+      "id": "disclosure_review_process",
+      "label": "준법감시인 사전승인 및 심의필 표시",
+      "source": "은행 광고심의 기준 제4조/제9조",
+      "why": "은행 광고는 내부통제기준에 따른 사전승인과 심의필 표시 여부를 운영 절차로 확인해야 합니다."
+    }
+  ],
+  "overall_impression": {
+    "track": "B",
+    "standard": "대법원 2017두60109 전체적·궁극적 인상 기준",
+    "verdict": "MEDIUM",
+    "misleading_risk_score": 0.68,
+    "why": "전체적으로는 ‘3천원 즉시 할인’이라는 혜택 주장과 ‘JB카드/좌석·채널/횟수 제한/제외 사유/대상 가맹점 기준/약관 참조’가 함께 존재해 기본적인 조건 고지는 제공됩니다. 다만 혜택 문구가 상위에서 강하게 주어지는 반면, 제외·적용범위를 결정하는 핵심 경고(연체·탈회·일시정지 제외, BC가맹점 기준, 심의필 유효기간 등)가 하단 풋노트로 분산되어 소비자가 ‘즉시 할인’의 적용범위를 과대추정할 여지가 남습니다. 또한 심의필 유효기간이 이벤트기간(6월)과 같은 맥락에서 명시되어 있어, 텍스트만으로는 소비자가 실제 적용 정합성을 즉시 이해하기 어렵다는 점이 오인위험을 높입니다. 다만 수치·사실 간 명백한 모순(CONTRADICTED)은 확인되지 않아 위험은 ‘HIGH’까지 보긴 어렵고 ‘MEDIUM’으로 판단합니다."
+  },
+  "overall_impression_risk": true,
+  "article_aggregation": [
+    {
+      "key": "금융소비자 보호에 관한 법률 제22조 ⑤",
+      "article": "금융소비자 보호에 관한 법률 제22조 ⑤",
+      "principles": [
+        "광고규제"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.58,
+      "cu_count": 1,
+      "issue_count": 2,
+      "cu_titles": [
+        "금융상품등 광고 표시·광고사항의 법정 기준 미준수"
+      ],
+      "anchor_spans": [
+        "이벤트기간(2022.06.01 ~ 2022.06.30) 동안 전북현대모터스 입장권 할인 이벤트를 제공합니다.",
+        "티켓링크에서 N, E열(지정석) 입장권을 JB카드로 예매하면 성인 기준 3천원 즉시 할인이 제공됩니다."
+      ]
+    },
+    {
+      "key": "표시ㆍ광고의 공정화에 관한 법률 제4조 ⑤",
+      "article": "표시ㆍ광고의 공정화에 관한 법률 제4조 ⑤",
+      "principles": [
+        "광고규제"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.52,
+      "cu_count": 1,
+      "issue_count": 2,
+      "cu_titles": [
+        "중요정보 누락에 따른 소비자 오인·피해 위험"
+      ],
+      "anchor_spans": [
+        "이벤트기간(2022.06.01 ~ 2022.06.30) 동안 전북현대모터스 입장권 할인 이벤트를 제공합니다.",
+        "티켓링크에서 N, E열(지정석) 입장권을 JB카드로 예매하면 성인 기준 3천원 즉시 할인이 제공됩니다."
+      ]
+    },
+    {
+      "key": "표시ㆍ광고의 공정화에 관한 법률 제4조",
+      "article": "표시ㆍ광고의 공정화에 관한 법률 제4조",
+      "principles": [
+        "광고규제"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.45,
+      "cu_count": 1,
+      "issue_count": 1,
+      "cu_titles": [
+        "중요정보 누락(또는 방법 불일치) 리스크"
+      ],
+      "anchor_spans": [
+        "이벤트기간 제한에 따른 혜택 미적용 위험"
+      ]
+    },
+    {
+      "key": "금융소비자 보호에 관한 법률 시행령 제13조 ③",
+      "article": "금융소비자 보호에 관한 법률 시행령 제13조 ③",
+      "principles": [
+        "설명의무"
+      ],
+      "effective_verdict": "NOT_APPLICABLE",
+      "max_score": 0.0,
+      "cu_count": 1,
+      "issue_count": 0,
+      "cu_titles": [
+        "위험등급 고려사항 미반영(후보)"
+      ],
+      "anchor_spans": [
+        "조건 미충족으로 인한 할인 미적용 위험"
+      ]
+    }
+  ],
+  "principle_aggregation": [
+    {
+      "key": "광고규제",
+      "article": "금융소비자 보호에 관한 법률 제22조 ⑤",
+      "principles": [
+        "광고규제"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.58,
+      "cu_count": 3,
+      "issue_count": 5,
+      "cu_titles": [
+        "금융상품등 광고 표시·광고사항의 법정 기준 미준수",
+        "중요정보 누락(또는 방법 불일치) 리스크",
+        "중요정보 누락에 따른 소비자 오인·피해 위험"
+      ],
+      "anchor_spans": [
+        "이벤트기간 제한에 따른 혜택 미적용 위험",
+        "이벤트기간(2022.06.01 ~ 2022.06.30) 동안 전북현대모터스 입장권 할인 이벤트를 제공합니다.",
+        "티켓링크에서 N, E열(지정석) 입장권을 JB카드로 예매하면 성인 기준 3천원 즉시 할인이 제공됩니다."
+      ]
+    },
+    {
+      "key": "설명의무",
+      "article": "금융소비자 보호에 관한 법률 시행령 제13조 ③",
+      "principles": [
+        "설명의무"
+      ],
+      "effective_verdict": "NOT_APPLICABLE",
+      "max_score": 0.0,
+      "cu_count": 1,
+      "issue_count": 0,
+      "cu_titles": [
+        "위험등급 고려사항 미반영(후보)"
+      ],
+      "anchor_spans": [
+        "조건 미충족으로 인한 할인 미적용 위험"
+      ]
+    }
+  ],
+  "policy_evidence_chain_counts": {
+    "legal_basis_chains": 20,
+    "disclosure_chains": 20,
+    "exception_chains": 20,
+    "chain_diagnostics": 20
+  }
+}

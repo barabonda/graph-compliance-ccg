@@ -1,0 +1,271 @@
+{
+  "review_id": "kb_0014",
+  "bank_key": "kb",
+  "bank_label": "국민은행",
+  "title": "경찰공무원 대상 「급여 연금이체」이벤트",
+  "review_text_chars": 4113,
+  "workspace_id": "graphcompliance_mvp_jb_20260530",
+  "status": "completed",
+  "error": null,
+  "duration_sec": 484.69928795799206,
+  "final_verdict": "needs_review",
+  "routing": {
+    "ad_scope": "product_ad",
+    "preapproval_required_status": "required",
+    "review_phrase_required_before_publication": true,
+    "review_phrase_expected_in_input": false,
+    "review_phrase_input_status": "absent_expected"
+  },
+  "review_run_id": "review_run_b24df52e57c3475e",
+  "violations": [
+    {
+      "cu_id": "cu_legal_clause_10b53bd2cf638c2c",
+      "verdict": "INSUFFICIENT",
+      "score": 0.55,
+      "principle": "광고규제",
+      "source_article": "금융소비자 보호에 관한 법률 시행령 제20조 ①-5",
+      "subject": "금융소비자 관련 행위",
+      "legal_basis": "금융소비자 보호에 관한 법률 시행령 제20조 ①-5는 ‘계약 체결 여부나 금융소비자의 권리ㆍ의무에 중대한 영향을 미치는 사항을 사실과 다르게 알리거나 분명하지 않게 표현하는 행위’를 금지한다(금융소비자보호법 시행령 제20조 ①-5의 위임에 따라 광고 시 금지행위 규율; 시행령→금융소비자보호법 시행령 광고 방법·절차/금지행위→금융소비자보호 감독규정 및 금융광고 심의기준).",
+      "evidence_span": "KB국민은행 계좌로 급여/연금이체 ‘신규’ 조건 충족 시 신세계상품권 2만원 전원 증정!",
+      "why": "‘계약 체결 여부나 금융소비자의 권리ㆍ의무에 중대한 영향을 미치는 사항’에 해당하는지 및 그 부분이 ‘사실과 다르게 알리거나 분명하지 않게’ 표현되었는지에 대한 직접 근거가 앵커 스팬과 evidence_window 팩트에 충분히 제시되지 않아, 해당 금지요건은 적합하다고 보기 어렵다(따라서 판단 기준에 따른 위반으로 보기에는 근거가 부족)."
+    },
+    {
+      "cu_id": "cu_legal_clause_10b53bd2cf638c2c",
+      "verdict": "INSUFFICIENT",
+      "score": 0.5,
+      "principle": "광고규제",
+      "source_article": "금융소비자 보호에 관한 법률 시행령 제20조 ①-5",
+      "subject": "금융소비자 관련 행위",
+      "legal_basis": "금융소비자 보호에 관한 법률 시행령 제20조 ①-5는 ‘계약 체결 여부나 금융소비자의 권리ㆍ의무에 중대한 영향을 미치는 사항을 사실과 다르게 알리거나 분명하지 않게 표현하는 행위’를 금지한다(시행령 제20조 ①-5; 시행령→금융소비자보호법 시행령 광고 방법·절차/금지행위→금융소비자보호 감독규정 및 금융광고 심의기준).",
+      "evidence_span": "KB국민은행 계좌로 급여/연금이체 ‘신규’ 조건 충족 시 신세계상품권 2만원 전원 증정!",
+      "why": "중대 사항(권리·의무 또는 계약 체결 관련)과 그에 대한 ‘사실과 다르게/분명하지 않게’ 표현이 앵커 스팬과 evidence_window 팩트로는 충분히 입증되지 않아 기준 충족이 불명확하므로 적합하다고 보기 어렵다."
+    },
+    {
+      "cu_id": "cu_legal_article_76887cffdfe55bc4",
+      "verdict": "INSUFFICIENT",
+      "score": 0.45,
+      "principle": "설명의무",
+      "source_article": "금융소비자 보호에 관한 법률 시행령 제24조",
+      "subject": "금융상품 광고 및 판매 준법 검토",
+      "legal_basis": "금융소비자 보호에 관한 법률 시행령 제24조는 금융상품판매대리·중개업자의 고지의무 등으로서, ‘급부를 받을 수 있는지 여부’와 같은 대통령령상 고지사항 및 표지 게시·증표 제시 기준을 준수하도록 요구한다(시행령 제24조; 시행령→법령→감독규정 및 금융광고 심의기준).",
+      "evidence_span": "혜택정보 안내 수신동의(안내수단 : 문자 동의 필수)",
+      "why": "‘문자 동의 필수’ 조건 고지는 존재하나, 시행령 제24조가 요구하는 ‘대통령령으로 정하는 사항’ 고지 범위 및 표지·증표 요건이 이 항목 스팬만으로 확인되지 않아 요건 충족/위반을 확정할 수 없다. 따라서 이 심의 기준에서는 적합성 판단에 필요한 근거가 부족하다."
+    },
+    {
+      "cu_id": "cu_legal_clause_10b53bd2cf638c2c",
+      "verdict": "INSUFFICIENT",
+      "score": 0.0,
+      "principle": "광고규제",
+      "source_article": "금융소비자 보호에 관한 법률 시행령 제20조 ①-5",
+      "subject": "금융소비자 관련 행위",
+      "legal_basis": "",
+      "evidence_span": "",
+      "why": "이 심의 항목은 자동 판단이 완료되지 않아 '근거 부족(추가 확인 필요)'으로 분류했습니다. 심사자가 직접 확인해 주세요."
+    }
+  ],
+  "violation_count": 4,
+  "disclosure_requirements": [
+    {
+      "id": "disclosure_deposit_rate_basis",
+      "label": "금리 범위 및 산정방법",
+      "source": "은행 광고심의 기준 제16조/제17조",
+      "why": "최고금리, 우대금리, 적용기간, 산정방법을 소비자가 오인하지 않도록 함께 표시해야 합니다."
+    },
+    {
+      "id": "disclosure_deposit_preferential_conditions",
+      "label": "우대조건 및 적용기간",
+      "source": "은행 광고심의 기준 제18조",
+      "why": "특판, 이벤트, 제휴 혜택은 대상, 자격요건, 기간, 내용을 함께 안내해야 합니다."
+    },
+    {
+      "id": "disclosure_depositor_protection",
+      "label": "예금자보호 부보내용",
+      "source": "은행 광고심의 기준 제16조",
+      "why": "예금성 상품 광고는 예금자보호법 등에 따른 부보내용을 유지 고지로 관리해야 합니다."
+    },
+    {
+      "id": "disclosure_review_number",
+      "label": "심의필 번호 및 유효기간",
+      "source": "은행 광고심의 기준 제9조/제16조",
+      "why": "사전승인 또는 연합회 심의 결과를 소비자가 쉽게 인식할 수 있도록 표시해야 합니다."
+    },
+    {
+      "id": "disclosure_review_process",
+      "label": "준법감시인 사전승인 및 심의필 표시",
+      "source": "은행 광고심의 기준 제4조/제9조",
+      "why": "은행 광고는 내부통제기준에 따른 사전승인과 심의필 표시 여부를 운영 절차로 확인해야 합니다."
+    }
+  ],
+  "overall_impression": {
+    "track": "B",
+    "standard": "대법원 2017두60109 전체적·궁극적 인상 기준",
+    "verdict": "MEDIUM",
+    "misleading_risk_score": 0.68,
+    "why": "혜택(‘전원 증정’, ‘신규 조건 충족’)이 headline/본문에서 강하게 드러나지만, ‘전원’의 실제 범위를 좌우하는 핵심 제한(응모 필수, 문자 동의 필수, 종료일 기준 동시 충족, 월별합산/신규 인정기준, 과거 1~2월 실적 제외, 급여성 자금 적요 문구 제한, 특정 고객군(KNP복지카드 등) 제외, 1회 지급 제한 등)이 주로 하단 고지(footnote)로 분산되어 전체적 인상에서 ‘전원에게 주는 단순 이벤트’로 오해될 가능성이 있습니다. 다만 광고 내에서 조건과 제외사유를 비교적 구체적으로 제시하고 있어, 사실과의 직접 모순(CONTRADICTED)보다는 ‘위계/분산으로 인한 과대 일반화’ 유형의 오인위험이 핵심이므로 MEDIUM으로 판단합니다."
+  },
+  "overall_impression_risk": true,
+  "article_aggregation": [
+    {
+      "key": "금융소비자 보호에 관한 법률 시행령 제20조 ①-5",
+      "article": "금융소비자 보호에 관한 법률 시행령 제20조 ①-5",
+      "principles": [
+        "광고규제"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.55,
+      "cu_count": 1,
+      "issue_count": 2,
+      "cu_titles": [
+        "계약/권리의무 중대 사항의 사실불일치 또는 불명확 표현"
+      ],
+      "anchor_spans": [
+        "KB국민은행 계좌로 급여/연금이체 ‘신규’ 조건 충족 시 신세계상품권 2만원 전원 증정!"
+      ]
+    },
+    {
+      "key": "금융소비자 보호에 관한 감독규정 제14조 ②",
+      "article": "금융소비자 보호에 관한 감독규정 제14조 ②",
+      "principles": [
+        "설명의무"
+      ],
+      "effective_verdict": "NOT_APPLICABLE",
+      "max_score": 0.1,
+      "cu_count": 1,
+      "issue_count": 0,
+      "cu_titles": [
+        "연계·제휴서비스 축소·변경 고지 누락 또는 기간/방법 미준수"
+      ],
+      "anchor_spans": [
+        "이벤트 기간 중 KB국민은행 입출금 계좌로 급여이체 또는 공무원연금 신규 수령 조건 충족시 전원 경품 지급"
+      ]
+    },
+    {
+      "key": "금융소비자 보호에 관한 감독규정 제15조 ①-1",
+      "article": "금융소비자 보호에 관한 감독규정 제15조 ①-1",
+      "principles": [
+        "부당권유행위 금지"
+      ],
+      "effective_verdict": "NOT_APPLICABLE",
+      "max_score": 0.05,
+      "cu_count": 1,
+      "issue_count": 0,
+      "cu_titles": [
+        "연락정보 등 개인정보 취득경로 관련 부당권유행위 금지"
+      ],
+      "anchor_spans": [
+        "KB국민은행 계좌로 급여/연금이체 ‘신규’ 조건 충족 시 신세계상품권 2만원 전원 증정!"
+      ]
+    },
+    {
+      "key": "금융소비자 보호에 관한 감독규정 제14조 ②-2",
+      "article": "금융소비자 보호에 관한 감독규정 제14조 ②-2",
+      "principles": [
+        "불공정영업행위 금지"
+      ],
+      "effective_verdict": "NOT_APPLICABLE",
+      "max_score": 0.05,
+      "cu_count": 1,
+      "issue_count": 0,
+      "cu_titles": [
+        "연계·제휴서비스 축소·변경 고지 방식(우편/전자우편) 요건"
+      ],
+      "anchor_spans": [
+        "KB국민은행 계좌로 급여/연금이체 ‘신규’ 조건 충족 시 신세계상품권 2만원 전원 증정!"
+      ]
+    },
+    {
+      "key": "금융소비자 보호에 관한 감독규정 제15조",
+      "article": "금융소비자 보호에 관한 감독규정 제15조",
+      "principles": [
+        "부당권유행위 금지"
+      ],
+      "effective_verdict": "NOT_APPLICABLE",
+      "max_score": 0.05,
+      "cu_count": 1,
+      "issue_count": 0,
+      "cu_titles": [
+        "부당권유행위 금지 관련 고시사항 미안내로 인한 위반 가능성"
+      ],
+      "anchor_spans": [
+        "KB국민은행 계좌로 급여/연금이체 ‘신규’ 조건 충족 시 신세계상품권 2만원 전원 증정!"
+      ]
+    }
+  ],
+  "principle_aggregation": [
+    {
+      "key": "광고규제",
+      "article": "금융소비자 보호에 관한 법률 시행령 제20조 ①-5",
+      "principles": [
+        "광고규제"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.55,
+      "cu_count": 1,
+      "issue_count": 2,
+      "cu_titles": [
+        "계약/권리의무 중대 사항의 사실불일치 또는 불명확 표현"
+      ],
+      "anchor_spans": [
+        "KB국민은행 계좌로 급여/연금이체 ‘신규’ 조건 충족 시 신세계상품권 2만원 전원 증정!"
+      ]
+    },
+    {
+      "key": "설명의무",
+      "article": "금융소비자 보호에 관한 감독규정 제14조 ②",
+      "principles": [
+        "설명의무"
+      ],
+      "effective_verdict": "NOT_APPLICABLE",
+      "max_score": 0.1,
+      "cu_count": 1,
+      "issue_count": 0,
+      "cu_titles": [
+        "연계·제휴서비스 축소·변경 고지 누락 또는 기간/방법 미준수"
+      ],
+      "anchor_spans": [
+        "이벤트 기간 중 KB국민은행 입출금 계좌로 급여이체 또는 공무원연금 신규 수령 조건 충족시 전원 경품 지급"
+      ]
+    },
+    {
+      "key": "부당권유행위 금지",
+      "article": "금융소비자 보호에 관한 감독규정 제15조 ①-1",
+      "principles": [
+        "부당권유행위 금지"
+      ],
+      "effective_verdict": "NOT_APPLICABLE",
+      "max_score": 0.05,
+      "cu_count": 2,
+      "issue_count": 0,
+      "cu_titles": [
+        "부당권유행위 금지 관련 고시사항 미안내로 인한 위반 가능성",
+        "연락정보 등 개인정보 취득경로 관련 부당권유행위 금지"
+      ],
+      "anchor_spans": [
+        "KB국민은행 계좌로 급여/연금이체 ‘신규’ 조건 충족 시 신세계상품권 2만원 전원 증정!"
+      ]
+    },
+    {
+      "key": "불공정영업행위 금지",
+      "article": "금융소비자 보호에 관한 감독규정 제14조 ②-2",
+      "principles": [
+        "불공정영업행위 금지"
+      ],
+      "effective_verdict": "NOT_APPLICABLE",
+      "max_score": 0.05,
+      "cu_count": 1,
+      "issue_count": 0,
+      "cu_titles": [
+        "연계·제휴서비스 축소·변경 고지 방식(우편/전자우편) 요건"
+      ],
+      "anchor_spans": [
+        "KB국민은행 계좌로 급여/연금이체 ‘신규’ 조건 충족 시 신세계상품권 2만원 전원 증정!"
+      ]
+    }
+  ],
+  "policy_evidence_chain_counts": {
+    "legal_basis_chains": 9,
+    "disclosure_chains": 9,
+    "exception_chains": 9,
+    "chain_diagnostics": 9
+  }
+}

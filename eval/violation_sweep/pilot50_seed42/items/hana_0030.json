@@ -1,0 +1,255 @@
+{
+  "review_id": "hana_0030",
+  "bank_key": "hana",
+  "bank_label": "하나은행",
+  "title": "4대연금 이벤트",
+  "review_text_chars": 6396,
+  "workspace_id": "graphcompliance_mvp_jb_20260530",
+  "status": "completed",
+  "error": null,
+  "duration_sec": 375.41858595800295,
+  "final_verdict": "reject",
+  "routing": {
+    "ad_scope": "product_ad",
+    "preapproval_required_status": "required",
+    "review_phrase_required_before_publication": true,
+    "review_phrase_expected_in_input": false,
+    "review_phrase_input_status": "absent_expected"
+  },
+  "review_run_id": "review_run_44ad8f4764879487",
+  "violations": [
+    {
+      "cu_id": "cu_legal_clause_10b53bd2cf638c2c",
+      "verdict": "NON_COMPLIANT",
+      "score": 0.84,
+      "principle": "광고규제",
+      "source_article": "금융소비자 보호에 관한 법률 시행령 제20조 ①-5",
+      "subject": "금융소비자 관련 행위",
+      "legal_basis": "금융소비자 보호에 관한 법률 시행령 제20조 제1항 제5호는 광고 시 ‘계약 체결 여부나 금융소비자의 권리·의무에 중대한 영향을 미치는 사항’을 사실과 다르게 알리거나 분명하지 않게 표현하는 행위를 금지한다(금융소비자 보호에 관한 법률 시행령 제20조 ①-5, 및 법 제22조 제4항 제1호 마목).",
+      "evidence_span": "연금은 하나은행으로~ 최대 6만원 혜택 5만원 캐시백+1만원 상품권",
+      "why": "해당 문구는 ‘최대 6만원’ 혜택(캐시백·상품권)을 강조하면서도, 실제 지급액이 산정·지급되는 구체 요건/제한조건을 동일 문장에 명확히 제시하지 않아 ‘계약 체결 여부나 금융소비자의 권리·의무에 중대한 영향을 미치는 사항’을 분명하지 않게 표현하는 금지유형에 해당한다. 따라서 적합하지 않다."
+    },
+    {
+      "cu_id": "cu_legal_article_b1f9c13b24c1b213",
+      "verdict": "INSUFFICIENT",
+      "score": 0.4,
+      "principle": "설명의무",
+      "source_article": "금융소비자 보호에 관한 감독규정 제13조",
+      "subject": "금융상품 광고 및 판매 준법 검토",
+      "legal_basis": "금융소비자 보호에 관한 감독규정 제13조 제1항 제4호는 일반금융소비자가 ‘해당 금융상품(계약)으로 받을 수 있는 혜택’과 ‘혜택을 받는데 필요한 조건’을 함께 알 수 있도록 설명서를 작성해야 한다(감독규정 제13조 제1항 제4호). 다만, 금지·위반은 광고 문구가 설명서 작성요건을 실제로 충족하지 못했는지(설명서로서의 고지 수준/구성)까지 사실관계 확인이 필요하다.",
+      "evidence_span": "연금은 하나은행으로~ 최대 6만원 혜택 5만원 캐시백+1만원 상품권",
+      "why": "해당 문구는 혜택을 강조하고 있으나, 이 항목의 규정은 ‘설명서’ 작성요건(혜택과 필요한 조건을 함께 알 수 있도록)을 전제로 하므로, 현재 제공된 사실만으로는 설명서 구성요건 미준수(혜택+조건의 동시 고지 부족)를 확정할 증거가 부족하다. 따라서 적합성 판단은 불충분하다."
+    },
+    {
+      "cu_id": "cu_legal_clause_10b53bd2cf638c2c",
+      "verdict": "INSUFFICIENT",
+      "score": 0.5,
+      "principle": "광고규제",
+      "source_article": "금융소비자 보호에 관한 법률 시행령 제20조 ①-5",
+      "subject": "금융소비자 관련 행위",
+      "legal_basis": "금융소비자 보호에 관한 법률 시행령 제20조 제1항 제5호는 계약 체결 여부나 권리·의무에 중대한 영향을 미치는 사항을 사실과 다르게 알리거나 분명하지 않게 표현하는 행위를 금지한다(시행령 제20조 ①-5, 법 제22조 제4항 제1호 마목). 다만, 해당 항목은 ‘참여대상(자격요건)’을 조건으로 구체화하고 있어 금지행위 구성요건에 직접 해당하는지 여부가 핵심이다.",
+      "evidence_span": "참여대상: 하나원큐 이벤트 신청(응모) 후, 하나은행으로 4대연금 · 처음 받으시는 손님 · 첫 연금 받기 전, 신청(응모)하기는 필수!",
+      "why": "해당 anchor는 혜택의 지급을 ‘조건(응모 후, 첫 수급자, 첫 연금 받기 전 응모 필수)’으로 제한해 참여요건을 구체화하고 있어, 계약/권리의무 관련 사항을 사실과 다르게 또는 분명하지 않게 표현한다고 보기 어렵다. 따라서 적합하다. / 근거 정합성 경고: evidence_span이 이 anchor의 격리된 증거창 밖이라 위반을 이 anchor에 귀속할 수 없습니다. (Evidence grounding warning: evidence_span was outside this anchor's isolated evidence window.)"
+    },
+    {
+      "cu_id": "cu_legal_article_1f5237d19fdfa401",
+      "verdict": "INSUFFICIENT",
+      "score": 0.35,
+      "principle": "부당권유행위 금지",
+      "source_article": "금융소비자 보호에 관한 감독규정 제15조",
+      "subject": "금융상품 광고 및 판매 준법 검토",
+      "legal_basis": "금융소비자 보호에 관한 감독규정 제15조는 부당권유행위를 금지하되, 본 사건 anchor는 권유행위 방식/고시사항 미안내 등 부당권유행위 구성요건에 해당하는지 여부를 확인해야 한다(감독규정 제15조 및 위임 체계).",
+      "evidence_span": "달달 하나 통장으로 연금 수급 시 본 이벤트 대상 제외",
+      "why": "부당권유행위 금지 규정의 핵심 구성요건(권유 방식·고시사항 등)과 anchor 사실이 직접 연결되지 않거나, 연결될 정도의 사실이 제공되지 않아 적용 판단을 내리기 어렵다. 따라서 근거 부족에 해당한다. / 근거 정합성 경고: evidence_span이 이 anchor의 격리된 증거창 밖이라 위반을 이 anchor에 귀속할 수 없습니다. (Evidence grounding warning: evidence_span was outside this anchor's isolated evidence window.)"
+    },
+    {
+      "cu_id": "cu_legal_clause_10b53bd2cf638c2c",
+      "verdict": "INSUFFICIENT",
+      "score": 0.45,
+      "principle": "광고규제",
+      "source_article": "금융소비자 보호에 관한 법률 시행령 제20조 ①-5",
+      "subject": "금융소비자 관련 행위",
+      "legal_basis": "금융소비자 보호에 관한 법률 시행령 제20조 제1항 제5호는 광고 시 계약 체결 여부나 금융소비자의 권리·의무에 중대한 영향을 미치는 사항을 사실과 다르게 또는 분명하지 않게 표현하는 행위를 금지한다(시행령 제20조 ①-5).",
+      "evidence_span": "현금 캐시백은 경품 지급일 당일 당행 연금수급상태를 유지하여야 하며, 계좌 해지하신 경우 지급 불가합니다.",
+      "why": "해당 문구는 지급요건(당일 연금수급 유지, 계좌 해지 시 미지급)을 조건으로 명확히 표시하고 있어, 단순히 시행령상 금지유형에 해당한다고 확정하기에는 사실관계가 부족하다. 따라서 미흡 여부는 판단을 보류한다."
+    },
+    {
+      "cu_id": "cu_legal_article_76887cffdfe55bc4",
+      "verdict": "INSUFFICIENT",
+      "score": 0.0,
+      "principle": "설명의무",
+      "source_article": "금융소비자 보호에 관한 법률 시행령 제24조",
+      "subject": "금융상품 광고 및 판매 준법 검토",
+      "legal_basis": "",
+      "evidence_span": "",
+      "why": "이 심의 항목은 자동 판단이 완료되지 않아 '근거 부족(추가 확인 필요)'으로 분류했습니다. 심사자가 직접 확인해 주세요."
+    },
+    {
+      "cu_id": "cu_legal_clause_b92a559796d6acf8",
+      "verdict": "INSUFFICIENT",
+      "score": 0.0,
+      "principle": "광고규제",
+      "source_article": "금융소비자 보호에 관한 감독규정 제19조 ①-5",
+      "subject": "금융소비자 관련 행위",
+      "legal_basis": "",
+      "evidence_span": "",
+      "why": "이 심의 항목은 자동 판단이 완료되지 않아 '근거 부족(추가 확인 필요)'으로 분류했습니다. 심사자가 직접 확인해 주세요."
+    }
+  ],
+  "violation_count": 7,
+  "disclosure_requirements": [
+    {
+      "id": "disclosure_deposit_rate_basis",
+      "label": "금리 범위 및 산정방법",
+      "source": "은행 광고심의 기준 제16조/제17조",
+      "why": "최고금리, 우대금리, 적용기간, 산정방법을 소비자가 오인하지 않도록 함께 표시해야 합니다."
+    },
+    {
+      "id": "disclosure_deposit_preferential_conditions",
+      "label": "우대조건 및 적용기간",
+      "source": "은행 광고심의 기준 제18조",
+      "why": "특판, 이벤트, 제휴 혜택은 대상, 자격요건, 기간, 내용을 함께 안내해야 합니다."
+    },
+    {
+      "id": "disclosure_depositor_protection",
+      "label": "예금자보호 부보내용",
+      "source": "은행 광고심의 기준 제16조",
+      "why": "예금성 상품 광고는 예금자보호법 등에 따른 부보내용을 유지 고지로 관리해야 합니다."
+    },
+    {
+      "id": "disclosure_review_number",
+      "label": "심의필 번호 및 유효기간",
+      "source": "은행 광고심의 기준 제9조/제16조",
+      "why": "사전승인 또는 연합회 심의 결과를 소비자가 쉽게 인식할 수 있도록 표시해야 합니다."
+    },
+    {
+      "id": "disclosure_review_process",
+      "label": "준법감시인 사전승인 및 심의필 표시",
+      "source": "은행 광고심의 기준 제4조/제9조",
+      "why": "은행 광고는 내부통제기준에 따른 사전승인과 심의필 표시 여부를 운영 절차로 확인해야 합니다."
+    }
+  ],
+  "overall_impression": {
+    "track": "B",
+    "standard": "대법원 2017두60109 전체적·궁극적 인상 기준",
+    "verdict": "MEDIUM",
+    "misleading_risk_score": 0.68,
+    "why": "혜택(캐시백/전원증정/최대 6만원, 최고금리 등) 문구가 전면에 강하게 제시되는 반면, 실제 수령 가능성을 좌우하는 복수 조건(‘첫 연금 전 응모’, 과거 수급 이력 제외, 지급일 당일 상태 유지·해지 시 미지급, 일부 계좌는 상품권으로 대체, 금리우대는 쿠폰 한도·가입시점·잔액조건 등)은 본문/footnote 형태로 분산되어 있다. 이로 인해 소비자가 ‘전원 증정=거의 자동’으로 오인하거나, 금리/혜택이 상한(최고금리) 수준으로 적용될 것이라 과대 기대할 수 있는 간극이 존재하므로 오인위험을 MEDIUM으로 판단한다. (명시적 사실모순은 확인되지 않음)"
+  },
+  "overall_impression_risk": true,
+  "article_aggregation": [
+    {
+      "key": "금융소비자 보호에 관한 법률 시행령 제20조 ①-5",
+      "article": "금융소비자 보호에 관한 법률 시행령 제20조 ①-5",
+      "principles": [
+        "광고규제"
+      ],
+      "effective_verdict": "NON_COMPLIANT",
+      "max_score": 0.84,
+      "cu_count": 1,
+      "issue_count": 1,
+      "cu_titles": [
+        "계약/권리의무 중대 사항의 사실불일치 또는 불명확 표현"
+      ],
+      "anchor_spans": [
+        "연금은 하나은행으로~ 최대 6만원 혜택 5만원 캐시백+1만원 상품권"
+      ]
+    },
+    {
+      "key": "금융소비자 보호에 관한 감독규정 제13조",
+      "article": "금융소비자 보호에 관한 감독규정 제13조",
+      "principles": [
+        "설명의무"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.4,
+      "cu_count": 1,
+      "issue_count": 1,
+      "cu_titles": [
+        "설명서 핵심 고지 누락 또는 형식·배치 미준수 위험"
+      ],
+      "anchor_spans": [
+        "연금은 하나은행으로~ 최대 6만원 혜택 5만원 캐시백+1만원 상품권"
+      ]
+    },
+    {
+      "key": "금융소비자 보호에 관한 감독규정 제19조 ①-5",
+      "article": "금융소비자 보호에 관한 감독규정 제19조 ①-5",
+      "principles": [
+        "광고규제"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.0,
+      "cu_count": 1,
+      "issue_count": 1,
+      "cu_titles": [
+        "상호 부각으로 인지 방해(금지)"
+      ],
+      "anchor_spans": [
+        "[연금하나 월복리 적금] 금리는 최저 연 2.95% ~ 최고 연 4.45%입니다(‘25.06.13기준, 세전, 1년제)."
+      ]
+    },
+    {
+      "key": "금융소비자 보호에 관한 법률 제22조",
+      "article": "금융소비자 보호에 관한 법률 제22조",
+      "principles": [
+        "광고규제"
+      ],
+      "effective_verdict": "COMPLIANT",
+      "max_score": 0.78,
+      "cu_count": 1,
+      "issue_count": 0,
+      "cu_titles": [
+        "금융상품등 광고 준수사항(필수 고지/금지행위) 누락·오인 가능성"
+      ],
+      "anchor_spans": [
+        "연금은 하나은행으로~ 최대 6만원 혜택 5만원 캐시백+1만원 상품권"
+      ]
+    }
+  ],
+  "principle_aggregation": [
+    {
+      "key": "광고규제",
+      "article": "금융소비자 보호에 관한 법률 시행령 제20조 ①-5",
+      "principles": [
+        "광고규제"
+      ],
+      "effective_verdict": "NON_COMPLIANT",
+      "max_score": 0.84,
+      "cu_count": 3,
+      "issue_count": 2,
+      "cu_titles": [
+        "계약/권리의무 중대 사항의 사실불일치 또는 불명확 표현",
+        "금융상품등 광고 준수사항(필수 고지/금지행위) 누락·오인 가능성",
+        "상호 부각으로 인지 방해(금지)"
+      ],
+      "anchor_spans": [
+        "[연금하나 월복리 적금] 금리는 최저 연 2.95% ~ 최고 연 4.45%입니다(‘25.06.13기준, 세전, 1년제).",
+        "연금은 하나은행으로~ 최대 6만원 혜택 5만원 캐시백+1만원 상품권"
+      ]
+    },
+    {
+      "key": "설명의무",
+      "article": "금융소비자 보호에 관한 감독규정 제13조",
+      "principles": [
+        "설명의무"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.4,
+      "cu_count": 1,
+      "issue_count": 1,
+      "cu_titles": [
+        "설명서 핵심 고지 누락 또는 형식·배치 미준수 위험"
+      ],
+      "anchor_spans": [
+        "연금은 하나은행으로~ 최대 6만원 혜택 5만원 캐시백+1만원 상품권"
+      ]
+    }
+  ],
+  "policy_evidence_chain_counts": {
+    "legal_basis_chains": 11,
+    "disclosure_chains": 11,
+    "exception_chains": 11,
+    "chain_diagnostics": 11
+  }
+}

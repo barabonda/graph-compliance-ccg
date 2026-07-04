@@ -1,0 +1,162 @@
+{
+  "review_id": "kb_0179",
+  "bank_key": "kb",
+  "bank_label": "국민은행",
+  "title": "리브 앤 라이브 3월 원데이 클래스",
+  "review_text_chars": 4167,
+  "workspace_id": "graphcompliance_mvp_jb_20260530",
+  "status": "completed",
+  "error": null,
+  "duration_sec": 169.94520933300373,
+  "final_verdict": "needs_review",
+  "routing": {
+    "ad_scope": "product_ad",
+    "preapproval_required_status": "required",
+    "review_phrase_required_before_publication": true,
+    "review_phrase_expected_in_input": false,
+    "review_phrase_input_status": "absent_expected"
+  },
+  "review_run_id": "review_run_b69a367bd31d0945",
+  "violations": [
+    {
+      "cu_id": "cu_legal_clause_5a9a77e0886826da",
+      "verdict": "INSUFFICIENT",
+      "score": 0.46,
+      "principle": "광고규제",
+      "source_article": "금융소비자 보호에 관한 법률 제22조 ⑤",
+      "subject": "광고·판매 행위자",
+      "legal_basis": "금융소비자 보호에 관한 법률 제22조 ⑤는 금융상품등에 관한 광고에 ‘표시·광고의 공정화에 관한 법률’ 제4조제1항에 따른 표시·광고사항이 있는 경우 그 법에서 정하는 바에 따라야 한다고 요구한다(금융소비자보호법 제22조 ⑤ → 표시·광고의 공정화에 관한 법률 제4조제1항).",
+      "evidence_span": "응모 대상 | 만 19세 이상 KB스타뱅킹 이용 고객",
+      "why": "해당 문구는 응모 자격요건을 한정해 안내하는 것으로 보이나, ‘표시·광고의 공정화에 관한 법률’ 제4조제1항상 표시·광고사항(중요정보) 존재 및 구체 항목을 확인할 수 있는 근거 사실이 없어 기준(법정 표시·광고사항 준수) 자체의 적용요건이 충분히 입증되지 않으므로 적합/부적합을 확정할 수 없다."
+    },
+    {
+      "cu_id": "cu_legal_article_47c9e994975df429",
+      "verdict": "INSUFFICIENT",
+      "score": 0.42,
+      "principle": "광고규제",
+      "source_article": "표시ㆍ광고의 공정화에 관한 법률 제4조",
+      "subject": "금융상품 광고 및 판매 준법 검토",
+      "legal_basis": "표시ㆍ광고의 공정화에 관한 법률 제4조는 공정거래위원회가 ‘중요정보’를 고시할 수 있는 요건이 충족되는 경우 사업자등은 그 중요정보를 표시·광고에 포함해야 한다고 정한다(표시·광고의 공정화에 관한 법률 제4조제1항 및 제4조제5항 → 금융소비자보호법 제22조 ③ 등 광고 공정성 준수에 연결).",
+      "evidence_span": "응모 대상 | 만 19세 이상 KB스타뱅킹 이용 고객",
+      "why": "공정위 ‘중요정보’ 고시의 적용대상인지(또는 어떤 고시 항목이 요구되는지) 확인되지 않아, 법정 중요정보 누락·방법불일치 위반을 특정할 근거가 부족하다."
+    },
+    {
+      "cu_id": "cu_legal_clause_d17c14ff653d2849",
+      "verdict": "INSUFFICIENT",
+      "score": 0.35,
+      "principle": "광고규제",
+      "source_article": "표시ㆍ광고의 공정화에 관한 법률 제4조 ⑤",
+      "subject": "사업자등",
+      "legal_basis": "표시ㆍ광고의 공정화에 관한 법률 제4조 ⑤는 사업자등이 표시·광고 행위를 하는 경우 공정거래위원회가 고시한 ‘중요정보’를 표시·광고해야 한다고 요구한다(표시·광고 공정화 법 제4조제5항 → 제4조제1항 ‘중요정보’ 고시 구조).",
+      "evidence_span": "연락처 오류 및 전화 미수신으로 인해 행사 전일까지 참석 미확정 시 당첨은 무효 처리 됩니다.",
+      "why": "사업자등의 표시·광고 행위는 인정되나, 공정위 고시 ‘중요정보’ 해당성과 누락·방법불일치 여부가 특정되지 않아 기준 위반을 단정하기 어렵다."
+    },
+    {
+      "cu_id": "cu_legal_clause_235079b5ebfdcc78",
+      "verdict": "INSUFFICIENT",
+      "score": 0.44,
+      "principle": "부당권유행위 금지",
+      "source_article": "금융소비자 보호에 관한 감독규정 제15조 ⑤-10",
+      "subject": "광고·판매 행위자",
+      "legal_basis": "금융소비자 보호에 관한 감독규정 제15조(부당권유행위 금지)는 방문·전화 등 실시간 대화로 권유하는 경우 필요한 사전정보(고시사항) 안내가 전제되어 위반 여부를 판단한다(감독규정 제15조 → 영 제16조제1항제1호 고시사항 구조).",
+      "evidence_span": "원데이 클래스 진행을 위해 수탁업체에 고객님의 정보를 제공하고, 운영 업무를 위탁합니다... 제공범위 : 이름, 성별, 생년월일, 휴대폰 번호",
+      "why": "부당권유행위 금지(실시간 권유 고시사항) 심의 기준의 전제가 충족되지 않아 해당 기준으로는 적합/부적합을 단정하기 어렵고, 정보제공/위탁의 적정성 위반 여부를 확인할 다른 근거 사실이 부족하다. / 근거 정합성 경고: evidence_span이 이 anchor의 격리된 증거창 밖이라 위반을 이 anchor에 귀속할 수 없습니다. (Evidence grounding warning: evidence_span was outside this anchor's isolated evidence window.)"
+    },
+    {
+      "cu_id": "cu_legal_article_47c9e994975df429",
+      "verdict": "INSUFFICIENT",
+      "score": 0.46,
+      "principle": "광고규제",
+      "source_article": "표시ㆍ광고의 공정화에 관한 법률 제4조",
+      "subject": "금융상품 광고 및 판매 준법 검토",
+      "legal_basis": "표시ㆍ광고의 공정화에 관한 법률 제4조는 공정위가 고시한 ‘중요정보’를 사업자등이 표시·광고에 포함해야 한다고 요구한다(표시·광고 공정화 법 제4조제1항 및 제4조제5항).",
+      "evidence_span": "원데이 클래스 진행 중 사진 및 영상이 촬영되며... 홍보 자료로 활용될 수 있습니다.",
+      "why": "중요정보 해당성과 누락·방법 불일치 여부가 구체적으로 특정되지 않아 위반을 단정할 수 없다."
+    }
+  ],
+  "violation_count": 5,
+  "disclosure_requirements": [
+    {
+      "id": "disclosure_loan_rate_range",
+      "label": "대출금리 범위 및 산출기준",
+      "source": "금융광고규제 가이드라인/은행 광고심의 기준 제16조",
+      "why": "대출상품의 핵심 거래조건인 이자율에 대해 오인하지 않도록 범위와 산출기준을 표시해야 합니다."
+    },
+    {
+      "id": "disclosure_loan_screening_conditions",
+      "label": "심사 조건 및 대출 가능 여부",
+      "source": "금융광고규제 가이드라인 관련 Q&A",
+      "why": "승인 가능성이나 조건을 단정하지 않고 내부 심사에 따라 달라질 수 있음을 안내해야 합니다."
+    },
+    {
+      "id": "disclosure_loan_fees",
+      "label": "수수료 등 부대비용",
+      "source": "은행 광고심의 기준 제16조",
+      "why": "수수료, 중도상환수수료 등 소비자 부담 비용을 누락하지 않도록 확인해야 합니다."
+    },
+    {
+      "id": "disclosure_review_number",
+      "label": "심의필 번호 및 유효기간",
+      "source": "은행 광고심의 기준 제9조/제16조",
+      "why": "사전승인 또는 연합회 심의 결과를 소비자가 쉽게 인식할 수 있도록 표시해야 합니다."
+    },
+    {
+      "id": "disclosure_review_process",
+      "label": "준법감시인 사전승인 및 심의필 표시",
+      "source": "은행 광고심의 기준 제4조/제9조",
+      "why": "은행 광고는 내부통제기준에 따른 사전승인과 심의필 표시 여부를 운영 절차로 확인해야 합니다."
+    }
+  ],
+  "overall_impression": {
+    "track": "B",
+    "standard": "대법원 2017두60109 전체적·궁극적 인상 기준",
+    "verdict": "MEDIUM",
+    "misleading_risk_score": 0.68,
+    "why": "이 광고는 ‘무료 원데이 클래스’와 ‘창작활동 지원/프로그램 내용’ 등 핵심 혜택을 본문에서 먼저 강하게 제시하지만, 당첨 유지의 무효(연락처/참석 미확정), 고객정보 제공, 촬영물 홍보 활용, 필수 앱·지참물, 인증 필수, 이용시간·휴관 등 핵심 제약/리스크가 하단 ‘알아두세요’ 또는 *고지에서 상대적으로 낮은 위계로 흩어져 있다. 또한 위험 고지 자체는 존재하고(거짓 주장 자체는 확인되지 않음) ‘연락/자격 요건’이 하단에서 어느 정도는 정직하게 제한하나, 전체적인 ‘쉽게 참여된다’는 인상을 충분히 조정하기엔 문장 배치가 비대칭이라 복잡 위반(조각난 조건을 종합하면 기대와 실체 사이 간극) 오인 위험이 중간 수준으로 판단된다."
+  },
+  "overall_impression_risk": true,
+  "article_aggregation": [
+    {
+      "key": "금융소비자 보호에 관한 감독규정 제15조 ⑤-10",
+      "article": "금융소비자 보호에 관한 감독규정 제15조 ⑤-10",
+      "principles": [
+        "부당권유행위 금지"
+      ],
+      "effective_verdict": "NOT_APPLICABLE",
+      "max_score": 0.0,
+      "cu_count": 1,
+      "issue_count": 0,
+      "cu_titles": [
+        "실시간 방문·전화 권유 정보 고지·진정성 결여"
+      ],
+      "anchor_spans": [
+        "당첨자 발표 | 2024.3.20(수) 이후 개별 연락"
+      ]
+    }
+  ],
+  "principle_aggregation": [
+    {
+      "key": "부당권유행위 금지",
+      "article": "금융소비자 보호에 관한 감독규정 제15조 ⑤-10",
+      "principles": [
+        "부당권유행위 금지"
+      ],
+      "effective_verdict": "NOT_APPLICABLE",
+      "max_score": 0.0,
+      "cu_count": 1,
+      "issue_count": 0,
+      "cu_titles": [
+        "실시간 방문·전화 권유 정보 고지·진정성 결여"
+      ],
+      "anchor_spans": [
+        "당첨자 발표 | 2024.3.20(수) 이후 개별 연락"
+      ]
+    }
+  ],
+  "policy_evidence_chain_counts": {
+    "legal_basis_chains": 10,
+    "disclosure_chains": 10,
+    "exception_chains": 10,
+    "chain_diagnostics": 10
+  }
+}

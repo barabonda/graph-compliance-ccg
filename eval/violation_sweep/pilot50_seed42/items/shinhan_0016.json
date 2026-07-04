@@ -1,0 +1,261 @@
+{
+  "review_id": "shinhan_0016",
+  "bank_key": "shinhan",
+  "bank_label": "신한은행",
+  "title": "Screenshot_20260703_083851_ SOL",
+  "review_text_chars": 7393,
+  "workspace_id": "graphcompliance_mvp_jb_20260530",
+  "status": "completed",
+  "error": null,
+  "duration_sec": 177.93156166600238,
+  "final_verdict": "needs_review",
+  "routing": {
+    "ad_scope": "product_ad",
+    "preapproval_required_status": "required",
+    "review_phrase_required_before_publication": true,
+    "review_phrase_expected_in_input": false,
+    "review_phrase_input_status": "absent_expected"
+  },
+  "review_run_id": "review_run_f4bba616441a91a0",
+  "violations": [
+    {
+      "cu_id": "cu_legal_article_47c9e994975df429",
+      "verdict": "INSUFFICIENT",
+      "score": 0.4,
+      "principle": "광고규제",
+      "source_article": "표시ㆍ광고의 공정화에 관한 법률 제4조",
+      "subject": "금융상품 광고 및 판매 준법 검토",
+      "legal_basis": "표시ㆍ광고의 공정화에 관한 법률 제4조는(법률→공정위 고시 ‘중요정보’→사업자의 표시·광고 포함 의무) 공정위가 고시한 ‘중요정보’를 사업자가 표시·광고에 포함해야 한다는 구조이며, 본 사안의 할인 이벤트 문구가 ‘고시된 중요정보’에 해당하는지 여부가 확인되지 않으면 법정 중요정보 누락 위반 판단이 곤란하다(표시ㆍ광고의 공정화에 관한 법률 제4조 ⑤; 사업자등은 표시ㆍ광고 행위를 하는 경우에는 제1항에 따라 고시된 중요정보를 표시ㆍ광고하여야 함).",
+      "evidence_span": "이벤트 CU에서 슈퍼SOL/SOL페이로 결제하면 get 아이스아메리카노 500원 할인",
+      "why": "제4조 ⑤의 ‘고시된 중요정보’에 관한 의무 위반(중요정보 누락 또는 미포함)을 판단하려면, 해당 광고에서 문제되는 ‘중요정보’의 존재와 광고물 내 미표시 정황이 필요하나 제공된 근거자료에는 ‘고시된 중요정보’의 구체 항목 매칭이 없어 심사기준 적용요건이 충족되었다고 보기 어렵다. 따라서 적합 여부 판단은 근거 부족 수준에 그친다."
+    },
+    {
+      "cu_id": "cu_legal_clause_d17c14ff653d2849",
+      "verdict": "INSUFFICIENT",
+      "score": 0.45,
+      "principle": "광고규제",
+      "source_article": "표시ㆍ광고의 공정화에 관한 법률 제4조 ⑤",
+      "subject": "사업자등",
+      "legal_basis": "표시ㆍ광고의 공정화에 관한 법률 제4조 ⑤는(법률→공정위 고시 ‘중요정보’→사업자 표시·광고 포함 의무) 사업자가 표시·광고 행위를 하는 경우 제1항에 따라 고시된 중요정보를 표시·광고해야 함을 요구하나, 해당 광고에서 문제되는 ‘고시된 중요정보’가 무엇인지 특정되지 않으면 위반 여부를 단정할 수 없다(표시ㆍ광고의 공정화에 관한 법률 제4조 ⑤).",
+      "evidence_span": "이벤트 CU에서 슈퍼SOL/SOL페이로 결제하면 get 아이스아메리카노 500원 할인",
+      "why": "제4조 ⑤의 의무(고시된 중요정보의 표시·광고)가 성립하려면 고시된 중요정보의 해당성과 광고물 내 미표시 정황이 필요하나, 제공 근거에는 중요정보 특정이 없어 ‘누락 위반’으로 판단할 만큼의 사실이 부족하다."
+    },
+    {
+      "cu_id": "cu_legal_article_47c9e994975df429",
+      "verdict": "INSUFFICIENT",
+      "score": 0.35,
+      "principle": "광고규제",
+      "source_article": "표시ㆍ광고의 공정화에 관한 법률 제4조",
+      "subject": "금융상품 광고 및 판매 준법 검토",
+      "legal_basis": "표시ㆍ광고의 공정화에 관한 법률 제4조는 공정위가 고시한 ‘중요정보’를 사업자가 표시·광고에 포함하도록 요구하는데(법률→공정위 고시→사업자), 이 사건 광고에서 ‘중요정보’로 보아야 할 구체 항목(고시 내용)과 미표시 정황이 확인되지 않으면 위반을 판단하기 어렵다(표시ㆍ광고의 공정화에 관한 법률 제4조 ⑤).",
+      "evidence_span": "(위와 동일) 결제만 하면 할인 발생한다는 뉘앙스에 따른 할인 미적용 리스크",
+      "why": "‘중요정보’ 누락을 전제로 한 위반 판단에는 고시된 중요정보의 구체 항목과 미표시 정황이 필요한데, 제공된 사실은 그런 매칭을 뒷받침하지 못하므로 위반 판단은 근거 부족에 해당한다."
+    },
+    {
+      "cu_id": "cu_legal_clause_d17c14ff653d2849",
+      "verdict": "INSUFFICIENT",
+      "score": 0.5,
+      "principle": "광고규제",
+      "source_article": "표시ㆍ광고의 공정화에 관한 법률 제4조 ⑤",
+      "subject": "사업자등",
+      "legal_basis": "표시ㆍ광고의 공정화에 관한 법률 제4조 ⑤는 사업자가 공정위가 고시한 ‘중요정보’를 표시·광고에 포함해야 한다고 요구하나, ‘기간 고지(2026.07.01~2026.10.31)’가 공정위 고시 ‘중요정보’ 항목에 해당하는지와 미포함 여부를 특정할 근거가 없어 위반 판단이 어렵다(표시ㆍ광고의 공정화에 관한 법률 제4조 ⑤).",
+      "evidence_span": "2026.07.01 ~ 2026.10.31",
+      "why": "기간 한정 고지 자체가 존재하더라도, 이를 공정위 고시 ‘중요정보’ 누락으로 연결하려면 고시 항목 특정이 필요하나 그 근거가 부족하여 판단은 적합/부적합을 가르기 어려운 상태다."
+    },
+    {
+      "cu_id": "cu_legal_article_30dce47c48d34de4",
+      "verdict": "INSUFFICIENT",
+      "score": 0.6,
+      "principle": "광고규제",
+      "source_article": "금융소비자 보호에 관한 법률 제22조",
+      "subject": "금융상품 광고 및 판매 준법 검토",
+      "legal_basis": "금융소비자 보호에 관한 법률 제22조 ②~④ 및 ⑤(법률→시행령/감독규정→금융광고 심의기준 체계)는 금융상품등에 관한 광고에서 금융소비자가 오해하지 않도록 명확하고 공정하게 전달하고, 또한 (법 제22조 제4항 각호) 특정 표현은 금지한다. 다만 본 광고의 ‘할인 이벤트 문구’가 금융상품(예금·대출 등) 광고의 ‘해당 구체 금지유형(보장성/예금성/대출성 등)’에 직접 해당하는지, 그리고 법정 필수 고지/금지 표현 비교요소가 충족되는지 사실확인이 부족하면 위반 판단이 어렵다(금융소비자 보호에 관한 법률 제22조 ②, ④, ⑤).",
+      "evidence_span": "행사 내용 CU 매장에서 신한 슈퍼SOL/SOL페이(터치결제/ 바코드결제/QR결제)로 get 아이스아메리카노 XL 구매 시 개당 500원 즉시 할인",
+      "why": "금융소비자 보호에 관한 법률 제22조의 적용을 전제로 하더라도, 이 사건 광고 문구가 법 제22조 제4항 각호의 금지유형(보장성/예금성/대출성 등)이나 제22조 제3항 필수 고지사항의 적용대상인지, 그리고 광고 전체 구성에서 해당 요소 누락이 있었는지에 대한 사실이 충분하지 않아 위반으로 단정하기 어렵다. 따라서 부적합 판단은 ‘근거 부족’에 해당한다."
+    },
+    {
+      "cu_id": "cu_legal_article_47c9e994975df429",
+      "verdict": "INSUFFICIENT",
+      "score": 0.5,
+      "principle": "광고규제",
+      "source_article": "표시ㆍ광고의 공정화에 관한 법률 제4조",
+      "subject": "금융상품 광고 및 판매 준법 검토",
+      "legal_basis": "표시ㆍ광고의 공정화에 관한 법률 제4조는 공정위 고시 ‘중요정보’ 표시 의무를 두고, 적용되면 누락 시 문제가 될 수 있다. 그러나 이 사건에서 문제되는 것이 특정 ‘중요정보’의 누락인지, 아니면 일반 할인조건의 이해 가능성 수준의 문제인지가 공정위 고시 항목과 연결되어 확인되지 않으면 위반으로 단정할 수 없다(표시ㆍ광고의 공정화에 관한 법률 제4조 ⑤).",
+      "evidence_span": "할인 적용 조건(결제수단/상품/방식) 미충족 리스크",
+      "why": "할인 미적용 리스크가 주장되더라도, 그것이 공정위 고시 ‘중요정보’ 누락에 해당한다는 사실 근거가 부족하므로 조항 위반으로 판정할 수 없다. / 근거 정합성 경고: evidence_span이 이 anchor의 격리된 증거창 밖이라 위반을 이 anchor에 귀속할 수 없습니다. (Evidence grounding warning: evidence_span was outside this anchor's isolated evidence window.)"
+    },
+    {
+      "cu_id": "cu_legal_clause_5a9a77e0886826da",
+      "verdict": "INSUFFICIENT",
+      "score": 0.0,
+      "principle": "광고규제",
+      "source_article": "금융소비자 보호에 관한 법률 제22조 ⑤",
+      "subject": "광고·판매 행위자",
+      "legal_basis": "",
+      "evidence_span": "",
+      "why": "이 심의 항목은 자동 판단이 완료되지 않아 '근거 부족(추가 확인 필요)'으로 분류했습니다. 심사자가 직접 확인해 주세요."
+    }
+  ],
+  "violation_count": 7,
+  "disclosure_requirements": [
+    {
+      "id": "disclosure_deposit_rate_basis",
+      "label": "금리 범위 및 산정방법",
+      "source": "은행 광고심의 기준 제16조/제17조",
+      "why": "최고금리, 우대금리, 적용기간, 산정방법을 소비자가 오인하지 않도록 함께 표시해야 합니다."
+    },
+    {
+      "id": "disclosure_deposit_preferential_conditions",
+      "label": "우대조건 및 적용기간",
+      "source": "은행 광고심의 기준 제18조",
+      "why": "특판, 이벤트, 제휴 혜택은 대상, 자격요건, 기간, 내용을 함께 안내해야 합니다."
+    },
+    {
+      "id": "disclosure_depositor_protection",
+      "label": "예금자보호 부보내용",
+      "source": "은행 광고심의 기준 제16조",
+      "why": "예금성 상품 광고는 예금자보호법 등에 따른 부보내용을 유지 고지로 관리해야 합니다."
+    },
+    {
+      "id": "disclosure_review_number",
+      "label": "심의필 번호 및 유효기간",
+      "source": "은행 광고심의 기준 제9조/제16조",
+      "why": "사전승인 또는 연합회 심의 결과를 소비자가 쉽게 인식할 수 있도록 표시해야 합니다."
+    },
+    {
+      "id": "disclosure_review_process",
+      "label": "준법감시인 사전승인 및 심의필 표시",
+      "source": "은행 광고심의 기준 제4조/제9조",
+      "why": "은행 광고는 내부통제기준에 따른 사전승인과 심의필 표시 여부를 운영 절차로 확인해야 합니다."
+    }
+  ],
+  "overall_impression": {
+    "track": "B",
+    "standard": "대법원 2017두60109 전체적·궁극적 인상 기준",
+    "verdict": "MEDIUM",
+    "misleading_risk_score": 0.68,
+    "why": "핵심 ‘복잡 위반’ 관점에서, 개별 조각(기간, 결제수단/방식, 복합결제 제한, 수량 한도, 대상 1종, 본인 명의 개인카드 요건, 제외 리스트, 중복/특정 제외, 행사 변경/조기종료)은 모두 존재해 직접적인 사실오류(CONTRADICTION) 정황은 확인되지 않습니다. 다만 혜택(헤드라인) 대비 고지들이 상대적으로 낮은 위계(footnote/부가 안내)로 내려가 있어, 소비자가 ‘결제만 하면 즉시 500원 할인’이라는 전체 인상을 먼저 형성하고 이후에 조건·제외를 충분히 재검토하지 않으면 할인 미적용(복합결제, 중복 불가, 본인 명의 개인카드 등)의 간극이 생길 가능성이 있습니다. 따라서 오인위험은 ‘LOW’보다는 ‘MEDIUM’으로 판단합니다."
+  },
+  "overall_impression_risk": true,
+  "article_aggregation": [
+    {
+      "key": "금융소비자 보호에 관한 법률 제22조",
+      "article": "금융소비자 보호에 관한 법률 제22조",
+      "principles": [
+        "광고규제"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.6,
+      "cu_count": 1,
+      "issue_count": 1,
+      "cu_titles": [
+        "금융상품등 광고 준수사항(필수 고지/금지행위) 누락·오인 가능성"
+      ],
+      "anchor_spans": [
+        "행사 내용 CU 매장에서 신한 슈퍼SOL/SOL페이(터치결제/ 바코드결제/QR결제)로 get 아이스아메리카노 XL 구매 시 개당 500원 즉시 할인"
+      ]
+    },
+    {
+      "key": "표시ㆍ광고의 공정화에 관한 법률 제4조",
+      "article": "표시ㆍ광고의 공정화에 관한 법률 제4조",
+      "principles": [
+        "광고규제"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.5,
+      "cu_count": 1,
+      "issue_count": 3,
+      "cu_titles": [
+        "중요정보 누락(또는 방법 불일치) 리스크"
+      ],
+      "anchor_spans": [
+        "(위와 동일) 결제만 하면 할인 발생한다는 뉘앙스에 따른 할인 미적용 리스크",
+        "이벤트 CU에서 슈퍼SOL/SOL페이로 결제하면 get 아이스아메리카노 500원 할인",
+        "할인 적용 조건(결제수단/상품/방식) 미충족 리스크"
+      ]
+    },
+    {
+      "key": "표시ㆍ광고의 공정화에 관한 법률 제4조 ⑤",
+      "article": "표시ㆍ광고의 공정화에 관한 법률 제4조 ⑤",
+      "principles": [
+        "광고규제"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.45,
+      "cu_count": 1,
+      "issue_count": 1,
+      "cu_titles": [
+        "중요정보 누락에 따른 소비자 오인·피해 위험"
+      ],
+      "anchor_spans": [
+        "이벤트 CU에서 슈퍼SOL/SOL페이로 결제하면 get 아이스아메리카노 500원 할인"
+      ]
+    },
+    {
+      "key": "금융소비자 보호에 관한 법률 제22조 ⑤",
+      "article": "금융소비자 보호에 관한 법률 제22조 ⑤",
+      "principles": [
+        "광고규제"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.0,
+      "cu_count": 1,
+      "issue_count": 1,
+      "cu_titles": [
+        "금융상품등 광고 표시·광고사항의 법정 기준 미준수"
+      ],
+      "anchor_spans": [
+        "이벤트 CU에서 슈퍼SOL/SOL페이로 결제하면 get 아이스아메리카노 500원 할인"
+      ]
+    },
+    {
+      "key": "표시ㆍ광고의 공정화에 관한 법률 시행령 제4조",
+      "article": "표시ㆍ광고의 공정화에 관한 법률 시행령 제4조",
+      "principles": [
+        "광고규제"
+      ],
+      "effective_verdict": "NOT_APPLICABLE",
+      "max_score": 0.05,
+      "cu_count": 1,
+      "issue_count": 0,
+      "cu_titles": [
+        "광고 실증의 객관성·독립성 결여"
+      ],
+      "anchor_spans": [
+        "이벤트 CU에서 슈퍼SOL/SOL페이로 결제하면 get 아이스아메리카노 500원 할인"
+      ]
+    }
+  ],
+  "principle_aggregation": [
+    {
+      "key": "광고규제",
+      "article": "표시ㆍ광고의 공정화에 관한 법률 제4조",
+      "principles": [
+        "광고규제"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.6,
+      "cu_count": 5,
+      "issue_count": 6,
+      "cu_titles": [
+        "광고 실증의 객관성·독립성 결여",
+        "금융상품등 광고 준수사항(필수 고지/금지행위) 누락·오인 가능성",
+        "금융상품등 광고 표시·광고사항의 법정 기준 미준수",
+        "중요정보 누락(또는 방법 불일치) 리스크",
+        "중요정보 누락에 따른 소비자 오인·피해 위험"
+      ],
+      "anchor_spans": [
+        "(위와 동일) 결제만 하면 할인 발생한다는 뉘앙스에 따른 할인 미적용 리스크",
+        "이벤트 CU에서 슈퍼SOL/SOL페이로 결제하면 get 아이스아메리카노 500원 할인",
+        "할인 적용 조건(결제수단/상품/방식) 미충족 리스크",
+        "행사 내용 CU 매장에서 신한 슈퍼SOL/SOL페이(터치결제/ 바코드결제/QR결제)로 get 아이스아메리카노 XL 구매 시 개당 500원 즉시 할인"
+      ]
+    }
+  ],
+  "policy_evidence_chain_counts": {
+    "legal_basis_chains": 11,
+    "disclosure_chains": 11,
+    "exception_chains": 11,
+    "chain_diagnostics": 11
+  }
+}

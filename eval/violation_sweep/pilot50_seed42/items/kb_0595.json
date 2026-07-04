@@ -1,0 +1,20 @@
+{
+  "review_id": "kb_0595",
+  "bank_key": "kb",
+  "bank_label": "국민은행",
+  "title": "「My저금통」과 함께하는 #이만큼챌린지 시즌3",
+  "review_text_chars": 3685,
+  "workspace_id": "graphcompliance_mvp_jb_20260530",
+  "status": "failed",
+  "error": "APITimeoutError: Request timed out.",
+  "duration_sec": 490.52903612500086,
+  "final_verdict": null,
+  "violations": [],
+  "violation_count": 0,
+  "disclosure_requirements": [],
+  "overall_impression": {},
+  "overall_impression_risk": false,
+  "article_aggregation": [],
+  "principle_aggregation": [],
+  "policy_evidence_chain_counts": {}
+}

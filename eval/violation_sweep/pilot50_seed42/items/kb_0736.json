@@ -1,0 +1,371 @@
+{
+  "review_id": "kb_0736",
+  "bank_key": "kb",
+  "bank_label": "국민은행",
+  "title": "「KB Star 신용대출」 한 달 이자 지원 이벤트",
+  "review_text_chars": 4196,
+  "workspace_id": "graphcompliance_mvp_jb_20260530",
+  "status": "completed",
+  "error": null,
+  "duration_sec": 276.08451345799403,
+  "final_verdict": "needs_review",
+  "routing": {
+    "ad_scope": "product_ad",
+    "preapproval_required_status": "required",
+    "review_phrase_required_before_publication": true,
+    "review_phrase_expected_in_input": false,
+    "review_phrase_input_status": "absent_expected"
+  },
+  "review_run_id": "review_run_165afef16be149a9",
+  "violations": [
+    {
+      "cu_id": "cu_legal_article_47c9e994975df429",
+      "verdict": "INSUFFICIENT",
+      "score": 0.4,
+      "principle": "광고규제",
+      "source_article": "표시ㆍ광고의 공정화에 관한 법률 제4조",
+      "subject": "금융상품 광고 및 판매 준법 검토",
+      "legal_basis": "표시ㆍ광고의 공정화에 관한 법률 제4조 제1항 및 제5항은 공정위가 고시한 ‘중요정보’가 있는 경우 사업자가 그 중요정보와 표시ㆍ광고 방법을 광고에 포함해 표시해야 한다(‘공정위 고시’ 전제)고 요구한다. (표시ㆍ광고의 공정화에 관한 법률 제4조: 중요정보의 고시 및 통합공고 제1항, 제5항)",
+      "evidence_span": "완료 이벤트기간 2021.07.16 ~ 2021.08.13",
+      "why": "해당 광고 문구는 이벤트 참여 가능 기간(‘완료 이벤트기간 2021.07.16 ~ 2021.08.13’)을 안내할 뿐, 공정위가 ‘고시’한 중요정보(구체 항목/범위 및 표시 방법)가 존재하는지(즉, 고시된 중요정보의 누락 또는 방법 불일치인지)를 판단할 사실이 제시되지 않아 기준 적용에 필요한 전제가 충족되지 않는다. 따라서 ‘중요정보 누락(또는 방법 불일치)’로 단정할 수 없고, 근거 자료가 부족하다."
+    },
+    {
+      "cu_id": "cu_legal_article_1f5237d19fdfa401",
+      "verdict": "INSUFFICIENT",
+      "score": 0.2,
+      "principle": "부당권유행위 금지",
+      "source_article": "금융소비자 보호에 관한 감독규정 제15조",
+      "subject": "금융상품 광고 및 판매 준법 검토",
+      "legal_basis": "금융소비자 보호에 관한 법률 제15조(부당권유행위 금지) 관련 규정은 ‘부당하게 권유하는 행위’를 금지하되, 대통령령/금융위원회 고시사항 위반 여부 등 세부 요건에 따라 위반 판단이 좌우된다. (금융소비자 보호에 관한 감독규정 제15조, 위임 구조)",
+      "evidence_span": "「KB Star 신용대출」 받고 한 달 이자 Get! Get! (100명 추첨)",
+      "why": "해당 심의 대상 문구는 ‘「KB Star 신용대출」 받고 한 달 이자 Get! Get! (100명 추첨)’으로, 특정 투자·대면 권유 방식 등 ‘부당권유행위’의 구체 유형(예: 방문·전화 등 실시간 대화로 권유하기 위한 것임을 고지해야 하는 항목 미안내, 특정 불특정 투자성 상품 권유 등)에 해당하는지 판단할 사실이 부족하다. 또한 ‘100명 추첨’은 혜택의 조건/제한을 나타내는 취지로도 해석될 여지가 있으나, 제공된 근거만으로 ‘부당권유행위 금지’ 위반(또는 고시사항 미안내)을 특정하기 어렵다. 따라서 관련 사실관계가 부족하여 적합성 판단이 불가하다."
+    },
+    {
+      "cu_id": "cu_legal_article_30dce47c48d34de4",
+      "verdict": "INSUFFICIENT",
+      "score": 0.55,
+      "principle": "광고규제",
+      "source_article": "금융소비자 보호에 관한 법률 제22조",
+      "subject": "금융상품 광고 및 판매 준법 검토",
+      "legal_basis": "금융소비자 보호에 관한 법률 제22조 제2항은 광고 시 금융소비자가 금융상품 내용을 오해하지 않도록 명확하고 공정하게 전달할 것을 요구하고, 제4항 제4호는 대출성 상품 광고에서 대출이자율 범위·산정방법, 대출이자의 지급·부과 시기 및 부수적 혜택·비용 등을 명확히 표시하지 않아 오인하게 하는 행위를 금지한다. (금융소비자 보호에 관한 법률 제22조 제2항, 제4항 제4호)",
+      "evidence_span": "복잡한 우대금리 조건과 중도상환수수료 부담이 없는 비대면 전용 신용대출 상품",
+      "why": "해당 문구에는 ‘중도상환수수료 부담이 없는’ 등의 단정적 요소가 존재하나, 금융소비자 보호에 관한 법률 제22조 제4항 제4호가 문제 삼는 ‘오인 유발’은 대출성 상품에서 필수로 명확히 표시해야 하는 항목(이자율 범위·산정방법, 이자 지급·부과 시기, 부수적 혜택·비용 등)과 실제 광고 표시를 대조해 누락/불명확을 특정해야 한다. 제공된 사실만으로는 필수 표시면(또는 생략 여부)을 구체적으로 판단할 수 없어 위반 확정이 불가능하며, 근거가 부족하므로 부적합으로 결론 내릴 수 없다."
+    },
+    {
+      "cu_id": "cu_legal_clause_f1d526ef6c601686",
+      "verdict": "INSUFFICIENT",
+      "score": 0.2,
+      "principle": "불공정영업행위 금지",
+      "source_article": "금융소비자 보호에 관한 감독규정 제14조 ②-1",
+      "subject": "광고·판매 행위자",
+      "legal_basis": "금융소비자 보호에 관한 법률 제19조 제1항은 일반금융소비자에게 계약 체결을 권유하거나 설명 요청이 있는 경우, 금융상품 및 (해당되는 경우) 연계·제휴서비스 등에 관한 ‘중요한 사항’을 일반금융소비자가 이해할 수 있도록 설명해야 한다. (금융소비자 보호에 관한 법률 제19조 제1항 제1호 및 제2호)",
+      "evidence_span": "완료 이벤트기간 2021.07.16 ~ 2021.08.13",
+      "why": "해당 위험 고지 문구는 연체이자 부과의 ‘조건’을 설명하는 것으로 보이며, 이 심의기준은 ‘연계·제휴서비스등’이 있는 경우 그 내용·이행책임·제공기간 등 중요한 사항을 설명해야 하는지 여부이다. 제공된 문구는 연계·제휴서비스등의 존재 및 그 필수 설명 항목과의 연관이 확인되지 않아, 제19조 제1항 제2호(연계·제휴서비스등) 요건 충족 여부를 판단할 수 없다. 따라서 이 심의 항목으로는 적합하지 않거나 근거가 부족하다. / 근거 정합성 경고: evidence_span이 이 anchor의 격리된 증거창 밖이라 위반을 이 anchor에 귀속할 수 없습니다. (Evidence grounding warning: evidence_span was outside this anchor's isolated evidence window.)"
+    },
+    {
+      "cu_id": "cu_legal_article_30dce47c48d34de4",
+      "verdict": "INSUFFICIENT",
+      "score": 0.0,
+      "principle": "광고규제",
+      "source_article": "금융소비자 보호에 관한 법률 제22조",
+      "subject": "금융상품 광고 및 판매 준법 검토",
+      "legal_basis": "",
+      "evidence_span": "",
+      "why": "이 심의 항목은 자동 판단이 완료되지 않아 '근거 부족(추가 확인 필요)'으로 분류했습니다. 심사자가 직접 확인해 주세요."
+    },
+    {
+      "cu_id": "cu_legal_clause_47503c5fae4fbfd8",
+      "verdict": "INSUFFICIENT",
+      "score": 0.0,
+      "principle": "설명의무",
+      "source_article": "금융소비자 보호에 관한 감독규정 제14조 ②",
+      "subject": "금융상품판매업자등",
+      "legal_basis": "",
+      "evidence_span": "",
+      "why": "이 심의 항목은 자동 판단이 완료되지 않아 '근거 부족(추가 확인 필요)'으로 분류했습니다. 심사자가 직접 확인해 주세요."
+    },
+    {
+      "cu_id": "cu_legal_clause_47503c5fae4fbfd8",
+      "verdict": "INSUFFICIENT",
+      "score": 0.0,
+      "principle": "설명의무",
+      "source_article": "금융소비자 보호에 관한 감독규정 제14조 ②",
+      "subject": "금융상품판매업자등",
+      "legal_basis": "",
+      "evidence_span": "",
+      "why": "이 심의 항목은 자동 판단이 완료되지 않아 '근거 부족(추가 확인 필요)'으로 분류했습니다. 심사자가 직접 확인해 주세요."
+    },
+    {
+      "cu_id": "cu_legal_clause_89118e37a8bf3727",
+      "verdict": "INSUFFICIENT",
+      "score": 0.0,
+      "principle": "설명의무",
+      "source_article": "금융소비자 보호에 관한 법률 제19조 ①-2",
+      "subject": "광고·판매 행위자",
+      "legal_basis": "",
+      "evidence_span": "",
+      "why": "이 심의 항목은 자동 판단이 완료되지 않아 '근거 부족(추가 확인 필요)'으로 분류했습니다. 심사자가 직접 확인해 주세요."
+    },
+    {
+      "cu_id": "cu_legal_clause_89118e37a8bf3727",
+      "verdict": "INSUFFICIENT",
+      "score": 0.0,
+      "principle": "설명의무",
+      "source_article": "금융소비자 보호에 관한 법률 제19조 ①-2",
+      "subject": "광고·판매 행위자",
+      "legal_basis": "",
+      "evidence_span": "",
+      "why": "이 심의 항목은 자동 판단이 완료되지 않아 '근거 부족(추가 확인 필요)'으로 분류했습니다. 심사자가 직접 확인해 주세요."
+    },
+    {
+      "cu_id": "cu_legal_article_47c9e994975df429",
+      "verdict": "INSUFFICIENT",
+      "score": 0.0,
+      "principle": "광고규제",
+      "source_article": "표시ㆍ광고의 공정화에 관한 법률 제4조",
+      "subject": "금융상품 광고 및 판매 준법 검토",
+      "legal_basis": "",
+      "evidence_span": "",
+      "why": "이 심의 항목은 자동 판단이 완료되지 않아 '근거 부족(추가 확인 필요)'으로 분류했습니다. 심사자가 직접 확인해 주세요."
+    },
+    {
+      "cu_id": "cu_legal_article_47c9e994975df429",
+      "verdict": "INSUFFICIENT",
+      "score": 0.0,
+      "principle": "광고규제",
+      "source_article": "표시ㆍ광고의 공정화에 관한 법률 제4조",
+      "subject": "금융상품 광고 및 판매 준법 검토",
+      "legal_basis": "",
+      "evidence_span": "",
+      "why": "이 심의 항목은 자동 판단이 완료되지 않아 '근거 부족(추가 확인 필요)'으로 분류했습니다. 심사자가 직접 확인해 주세요."
+    },
+    {
+      "cu_id": "cu_legal_article_76887cffdfe55bc4",
+      "verdict": "INSUFFICIENT",
+      "score": 0.0,
+      "principle": "설명의무",
+      "source_article": "금융소비자 보호에 관한 법률 시행령 제24조",
+      "subject": "금융상품 광고 및 판매 준법 검토",
+      "legal_basis": "",
+      "evidence_span": "",
+      "why": "이 심의 항목은 자동 판단이 완료되지 않아 '근거 부족(추가 확인 필요)'으로 분류했습니다. 심사자가 직접 확인해 주세요."
+    },
+    {
+      "cu_id": "cu_legal_article_f34c28326e6dbf92",
+      "verdict": "INSUFFICIENT",
+      "score": 0.0,
+      "principle": "설명의무",
+      "source_article": "금융소비자 보호에 관한 감독규정 제21조",
+      "subject": "금융상품 광고 및 판매 준법 검토",
+      "legal_basis": "",
+      "evidence_span": "",
+      "why": "이 심의 항목은 자동 판단이 완료되지 않아 '근거 부족(추가 확인 필요)'으로 분류했습니다. 심사자가 직접 확인해 주세요."
+    }
+  ],
+  "violation_count": 13,
+  "disclosure_requirements": [
+    {
+      "id": "disclosure_deposit_rate_basis",
+      "label": "금리 범위 및 산정방법",
+      "source": "은행 광고심의 기준 제16조/제17조",
+      "why": "최고금리, 우대금리, 적용기간, 산정방법을 소비자가 오인하지 않도록 함께 표시해야 합니다."
+    },
+    {
+      "id": "disclosure_deposit_preferential_conditions",
+      "label": "우대조건 및 적용기간",
+      "source": "은행 광고심의 기준 제18조",
+      "why": "특판, 이벤트, 제휴 혜택은 대상, 자격요건, 기간, 내용을 함께 안내해야 합니다."
+    },
+    {
+      "id": "disclosure_depositor_protection",
+      "label": "예금자보호 부보내용",
+      "source": "은행 광고심의 기준 제16조",
+      "why": "예금성 상품 광고는 예금자보호법 등에 따른 부보내용을 유지 고지로 관리해야 합니다."
+    },
+    {
+      "id": "disclosure_review_number",
+      "label": "심의필 번호 및 유효기간",
+      "source": "은행 광고심의 기준 제9조/제16조",
+      "why": "사전승인 또는 연합회 심의 결과를 소비자가 쉽게 인식할 수 있도록 표시해야 합니다."
+    },
+    {
+      "id": "disclosure_review_process",
+      "label": "준법감시인 사전승인 및 심의필 표시",
+      "source": "은행 광고심의 기준 제4조/제9조",
+      "why": "은행 광고는 내부통제기준에 따른 사전승인과 심의필 표시 여부를 운영 절차로 확인해야 합니다."
+    }
+  ],
+  "overall_impression": {
+    "track": "B",
+    "standard": "대법원 2017두60109 전체적·궁극적 인상 기준",
+    "verdict": "MEDIUM",
+    "misleading_risk_score": 0.47,
+    "why": "전반적으로 ‘이벤트로 한 달 이자(경품)를 받을 수 있다’는 헤드라인 혜택이 강하고(benefit_claim, headline 위계), 상품의 리스크/조건(금리 차등·변동, 연체 시 비용, 대출 제한, 이벤트 수령 무효/제외 조건 등)은 상대적으로 아래 위계에서 분산 고지됩니다. 특히 ‘한 달 이자 지원금’은 경품 산출금액이며 실제 발생이자와 차이가 날 수 있고, 약정 유지·자동이체 계좌·KB Pay·입금처리 조건 등 다수 전제에 따라 수령이 달라질 수 있음에도(QUALIFIES/MITIGATES로 일부 완화) 혜택 중심 인상이 먼저 형성되어 전체 인상 오인 위험이 ‘중간’ 수준으로 판단됩니다. 단, 구체적 조건/제외/무효 및 실제이자 차이 가능성 고지가 존재해 ‘HIGH’까지는 보기 어렵습니다."
+  },
+  "overall_impression_risk": true,
+  "article_aggregation": [
+    {
+      "key": "금융소비자 보호에 관한 법률 제22조",
+      "article": "금융소비자 보호에 관한 법률 제22조",
+      "principles": [
+        "광고규제"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.55,
+      "cu_count": 1,
+      "issue_count": 1,
+      "cu_titles": [
+        "금융상품등 광고 준수사항(필수 고지/금지행위) 누락·오인 가능성"
+      ],
+      "anchor_spans": [
+        "복잡한 우대금리 조건과 중도상환수수료 부담이 없는 비대면 전용 신용대출 상품"
+      ]
+    },
+    {
+      "key": "표시ㆍ광고의 공정화에 관한 법률 제4조",
+      "article": "표시ㆍ광고의 공정화에 관한 법률 제4조",
+      "principles": [
+        "광고규제"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.4,
+      "cu_count": 1,
+      "issue_count": 1,
+      "cu_titles": [
+        "중요정보 누락(또는 방법 불일치) 리스크"
+      ],
+      "anchor_spans": [
+        "완료 이벤트기간 2021.07.16 ~ 2021.08.13"
+      ]
+    },
+    {
+      "key": "금융소비자 보호에 관한 감독규정 제15조",
+      "article": "금융소비자 보호에 관한 감독규정 제15조",
+      "principles": [
+        "부당권유행위 금지"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.2,
+      "cu_count": 1,
+      "issue_count": 1,
+      "cu_titles": [
+        "부당권유행위 금지 관련 고시사항 미안내로 인한 위반 가능성"
+      ],
+      "anchor_spans": [
+        "「KB Star 신용대출」 받고 한 달 이자 Get! Get! (100명 추첨)"
+      ]
+    },
+    {
+      "key": "금융소비자 보호에 관한 감독규정 제14조 ②-1",
+      "article": "금융소비자 보호에 관한 감독규정 제14조 ②-1",
+      "principles": [
+        "불공정영업행위 금지"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.2,
+      "cu_count": 1,
+      "issue_count": 1,
+      "cu_titles": [
+        "연계·제휴서비스등 축소·변경 고지 방법/시기 미충족 리스크"
+      ],
+      "anchor_spans": [
+        "완료 이벤트기간 2021.07.16 ~ 2021.08.13"
+      ]
+    },
+    {
+      "key": "금융소비자 보호에 관한 감독규정 제14조 ②",
+      "article": "금융소비자 보호에 관한 감독규정 제14조 ②",
+      "principles": [
+        "설명의무"
+      ],
+      "effective_verdict": "NOT_APPLICABLE",
+      "max_score": 0.0,
+      "cu_count": 1,
+      "issue_count": 0,
+      "cu_titles": [
+        "연계·제휴서비스 축소·변경 고지 누락 또는 기간/방법 미준수"
+      ],
+      "anchor_spans": [
+        "완료 이벤트기간 2021.07.16 ~ 2021.08.13"
+      ]
+    }
+  ],
+  "principle_aggregation": [
+    {
+      "key": "광고규제",
+      "article": "표시ㆍ광고의 공정화에 관한 법률 제4조",
+      "principles": [
+        "광고규제"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.55,
+      "cu_count": 2,
+      "issue_count": 2,
+      "cu_titles": [
+        "금융상품등 광고 준수사항(필수 고지/금지행위) 누락·오인 가능성",
+        "중요정보 누락(또는 방법 불일치) 리스크"
+      ],
+      "anchor_spans": [
+        "복잡한 우대금리 조건과 중도상환수수료 부담이 없는 비대면 전용 신용대출 상품",
+        "완료 이벤트기간 2021.07.16 ~ 2021.08.13"
+      ]
+    },
+    {
+      "key": "부당권유행위 금지",
+      "article": "금융소비자 보호에 관한 감독규정 제15조",
+      "principles": [
+        "부당권유행위 금지"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.2,
+      "cu_count": 1,
+      "issue_count": 1,
+      "cu_titles": [
+        "부당권유행위 금지 관련 고시사항 미안내로 인한 위반 가능성"
+      ],
+      "anchor_spans": [
+        "「KB Star 신용대출」 받고 한 달 이자 Get! Get! (100명 추첨)"
+      ]
+    },
+    {
+      "key": "불공정영업행위 금지",
+      "article": "금융소비자 보호에 관한 감독규정 제14조 ②-1",
+      "principles": [
+        "불공정영업행위 금지"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.2,
+      "cu_count": 1,
+      "issue_count": 1,
+      "cu_titles": [
+        "연계·제휴서비스등 축소·변경 고지 방법/시기 미충족 리스크"
+      ],
+      "anchor_spans": [
+        "완료 이벤트기간 2021.07.16 ~ 2021.08.13"
+      ]
+    },
+    {
+      "key": "설명의무",
+      "article": "금융소비자 보호에 관한 감독규정 제14조 ②",
+      "principles": [
+        "설명의무"
+      ],
+      "effective_verdict": "NOT_APPLICABLE",
+      "max_score": 0.0,
+      "cu_count": 1,
+      "issue_count": 0,
+      "cu_titles": [
+        "연계·제휴서비스 축소·변경 고지 누락 또는 기간/방법 미준수"
+      ],
+      "anchor_spans": [
+        "완료 이벤트기간 2021.07.16 ~ 2021.08.13"
+      ]
+    }
+  ],
+  "policy_evidence_chain_counts": {
+    "legal_basis_chains": 14,
+    "disclosure_chains": 14,
+    "exception_chains": 14,
+    "chain_diagnostics": 14
+  }
+}

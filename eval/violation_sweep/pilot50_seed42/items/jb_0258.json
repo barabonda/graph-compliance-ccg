@@ -1,0 +1,233 @@
+{
+  "review_id": "jb_0258",
+  "bank_key": "jb",
+  "bank_label": "전북은행",
+  "title": "JB카드 Wa썸! 여름 페스티벌 이벤트",
+  "review_text_chars": 1433,
+  "workspace_id": "graphcompliance_mvp_jb_20260530",
+  "status": "completed",
+  "error": null,
+  "duration_sec": 154.6878098340021,
+  "final_verdict": "needs_review",
+  "routing": {
+    "ad_scope": "product_ad",
+    "preapproval_required_status": "required",
+    "review_phrase_required_before_publication": true,
+    "review_phrase_expected_in_input": false,
+    "review_phrase_input_status": "absent_expected"
+  },
+  "review_run_id": "review_run_2fa3734c80d082c0",
+  "violations": [
+    {
+      "cu_id": "cu_legal_article_47c9e994975df429",
+      "verdict": "INSUFFICIENT",
+      "score": 0.62,
+      "principle": "광고규제",
+      "source_article": "표시ㆍ광고의 공정화에 관한 법률 제4조",
+      "subject": "금융상품 광고 및 판매 준법 검토",
+      "legal_basis": "표시ㆍ광고의 공정화에 관한 법률 제4조제1항 및 제5항은 사업자가 공정거래위원회가 고시한 ‘중요정보’와 표시ㆍ광고 방법을 표시·광고에 포함해야 하는 행위를 요구한다(표시ㆍ광고의 공정화에 관한 법률 제4조제1항: “사업자등이 표시ㆍ광고에 포함하여야 하는 사항(이하 ‘중요정보’라 한다)과 표시ㆍ광고의 방법…”, 제4조제5항: “사업자등은…고시된 중요정보를 표시ㆍ광고하여야 한다”). cu_plan_item.source_article=표시ㆍ광고의 공정화에 관한 법률 제4조(법률→시행/고시 체계 및 통합공고 전제).",
+      "evidence_span": "여름엔 역시 삼.겹.살이지~ Wa썸! 여름 Festival JB카드 쓰고, 삼겹살 지원금 받자 !",
+      "why": "이 문구에서 지원금 수령을 기대하게 하는 방향성은 있으나, ‘중요정보’가 무엇으로 고시되었는지(또는 통합공고 기준에서 어떤 정보가 요구되는지)와 그 내용이 광고에 실제로 포함되었는지 여부를 해당 자료만으로 확정할 수 없어 적합 여부를 판단하기 어렵다. 따라서 ‘중요정보 누락(또는 방법 불일치)’로 위반 확정하기보다는 근거 부족으로 판단한다(표시ㆍ광고의 공정화에 관한 법률 제4조제1항·제5항)."
+    },
+    {
+      "cu_id": "cu_legal_article_30dce47c48d34de4",
+      "verdict": "INSUFFICIENT",
+      "score": 0.81,
+      "principle": "광고규제",
+      "source_article": "금융소비자 보호에 관한 법률 제22조",
+      "subject": "금융상품 광고 및 판매 준법 검토",
+      "legal_basis": "금융소비자 보호에 관한 법률 제22조제2항은 금융상품(금융상품등)에 관한 광고에서 금융소비자가 내용(계약 조건/혜택 취지)을 오해하지 않도록 명확하고 공정하게 전달할 의무를 부과한다. 또한 제22조제3항은 광고에 필수 포함사항(계약 체결 전 설명서·약관 읽어볼 것 권유 등)을 두고, 제22조제4항은 ‘보장 없이 보장’ 등 오인하게 하는 행위를 금지한다(법률 제22조제2항: “명확하고 공정하게 전달”, 제22조제3항: “금융상품…광고에는…포함되어야…”, 제22조제4항은 오인 유발 금지). cu_plan_item.source_article=금융소비자 보호에 관한 법률 제22조(법률→시행령→감독규정/심의기준 위임).",
+      "evidence_span": "여름엔 역시 삼.겹.살이지~ Wa썸! 여름 Festival JB카드 쓰고, 삼겹살 지원금 받자 !",
+      "why": "해당 문구는 ‘JB카드 쓰고, 삼겹살 지원금 받자’로 카드 이용과 지원금 수령을 강하게 연결하여 혜택 기대를 형성한다. 그러나 지원금 지급 조건(거래/횟수/세부 방식 등) 세부가 제시되지 않았을 수 있어 금융소비자가 혜택 산정·지급 조건을 오인할 우려가 있다. 금융소비자 보호에 관한 법률 제22조제2항이 요구하는 ‘명확하고 공정한 전달’에 비추어, 제공된 문구만으로는 오해 방지에 필요한 핵심 조건 고지의 충분성이 부족하므로 적합하지 않다(금융소비자 보호에 관한 법률 제22조제2항). / 예외 검토 필요: 제22조제2항(‘명확하고 공정하게 전달’) 및 제22조제4항(보장한도/제한조건/면책사항 등 핵심 조건을 충분히 고지하지 않아 오인하게 하는 행위 금지) 자체는 폐기/번복 근거가 되지 않습니다. 다만, 이번 판단의 비적합 사유는 ‘지원금 지급 조건(거래/횟수/세부 방식 등) 미제시’에 따른 오인 우려인데, 제공된 closure evidence는 보장성 상품의 ‘보장 제한조건/면책사항’ 등 금지 유형을 전제로 하고 있어 해당 문구가 “보장성 상품” 또는 “투자성/예금성/대출성” 광고에 해당하는지(또는 광고상 의무 고지 항목이 무엇인지)까지는 이 closure만으로 확정할 수 없습니다. 따라서 현 상태의 위반 결론은 그대로 단정하기보다는, 상품 유형 해당 여부 및 광고에서 필수 고지(제22조제3항 각 호 등)가 실제로 적용되는지에 대한 추가 확인이 필요하므로 ‘DOWNGRADE_TO_REVIEW’가 타당합니다."
+    },
+    {
+      "cu_id": "cu_legal_article_b1f9c13b24c1b213",
+      "verdict": "INSUFFICIENT",
+      "score": 0.55,
+      "principle": "설명의무",
+      "source_article": "금융소비자 보호에 관한 감독규정 제13조",
+      "subject": "금융상품 광고 및 판매 준법 검토",
+      "legal_basis": "금융소비자 보호에 관한 감독규정 제13조제1항제4호는 일반금융소비자가 해당 금융상품 계약으로 받을 수 있는 혜택이 있는 경우 ‘그 혜택 및 혜택을 받는 데 필요한 조건’을 함께 알 수 있도록 설명서를 작성하도록 요구한다. 또한 제13조제1항제5호는 계약 체결 판단/권익 보호에 중요한 사항(예: 카드 사용 및 권리·불이익 등 관련 핵심사항)을 요약하여 설명서 맨 앞에 두도록 정한다. cu_plan_item.source_article=금융소비자 보호에 관한 감독규정 제13조(법률→시행령→감독규정 및 심의기준 체계).",
+      "evidence_span": "여름엔 역시 삼.겹.살이지~ Wa썸! 여름 Festival JB카드 쓰고, 삼겹살 지원금 받자 !",
+      "why": "이 CU는 설명서(금융상품 계약 관련 문서) 작성·고지 의무의 준수 여부를 전제로 하나, 제공된 자료는 광고 문구 일부와 조건 미제시 ‘가능성’ 수준에 그친다. 특히 설명서 자체가 제공되었는지, 설명서에 혜택과 필요한 조건이 함께 알 수 있도록 구성되었는지 여부가 확인되지 않아 설명서 의무 위반으로 단정하기 어렵다. 따라서 광고 문구만으로는 설명서 요건 미충족을 확정하기보다는 근거 부족으로 본다(금융소비자 보호에 관한 감독규정 제13조제1항제4호)."
+    },
+    {
+      "cu_id": "cu_legal_article_76887cffdfe55bc4",
+      "verdict": "INSUFFICIENT",
+      "score": 0.4,
+      "principle": "설명의무",
+      "source_article": "금융소비자 보호에 관한 법률 시행령 제24조",
+      "subject": "금융상품 광고 및 판매 준법 검토",
+      "legal_basis": "금융소비자 보호에 관한 법률 시행령 제24조제1항은 금융상품판매대리·중개업자에게 급부를 받을 수 있는지 여부 등 ‘대통령령으로 정하는 사항’ 및 위탁 관련 정보 등을 고지하도록 하고, 제24조제2항은 표지 게시 및 증표 제시 기준을 충족하도록 요구한다. cu_plan_item.source_article=금융소비자 보호에 관한 법률 시행령 제24조(법률→시행령→감독규정/심의기준 위임 체계).",
+      "evidence_span": "여름엔 삼겹살이지! JB카드 「Wa썸! 여름」Festival 총 700명 추첨 경품 지급",
+      "why": "문구 자체는 추첨을 통한 경품 지급과 지급 인원을 제시하나, 금융상품판매대리·중개업자의 고지의무(시행령 제24조제1항) 및 표지·증표 요건(제24조제2항)을 충족했는지 여부를 확인할 수 있는 자료가 부족하다. 따라서 이 심의항목에서는 위반으로 확정하기 어렵고 근거 부족으로 본다(금융소비자 보호에 관한 법률 시행령 제24조)."
+    },
+    {
+      "cu_id": "cu_legal_article_47c9e994975df429",
+      "verdict": "INSUFFICIENT",
+      "score": 0.0,
+      "principle": "광고규제",
+      "source_article": "표시ㆍ광고의 공정화에 관한 법률 제4조",
+      "subject": "금융상품 광고 및 판매 준법 검토",
+      "legal_basis": "",
+      "evidence_span": "",
+      "why": "이 심의 항목은 자동 판단이 완료되지 않아 '근거 부족(추가 확인 필요)'으로 분류했습니다. 심사자가 직접 확인해 주세요."
+    }
+  ],
+  "violation_count": 5,
+  "disclosure_requirements": [
+    {
+      "id": "disclosure_deposit_rate_basis",
+      "label": "금리 범위 및 산정방법",
+      "source": "은행 광고심의 기준 제16조/제17조",
+      "why": "최고금리, 우대금리, 적용기간, 산정방법을 소비자가 오인하지 않도록 함께 표시해야 합니다."
+    },
+    {
+      "id": "disclosure_deposit_preferential_conditions",
+      "label": "우대조건 및 적용기간",
+      "source": "은행 광고심의 기준 제18조",
+      "why": "특판, 이벤트, 제휴 혜택은 대상, 자격요건, 기간, 내용을 함께 안내해야 합니다."
+    },
+    {
+      "id": "disclosure_depositor_protection",
+      "label": "예금자보호 부보내용",
+      "source": "은행 광고심의 기준 제16조",
+      "why": "예금성 상품 광고는 예금자보호법 등에 따른 부보내용을 유지 고지로 관리해야 합니다."
+    },
+    {
+      "id": "disclosure_review_number",
+      "label": "심의필 번호 및 유효기간",
+      "source": "은행 광고심의 기준 제9조/제16조",
+      "why": "사전승인 또는 연합회 심의 결과를 소비자가 쉽게 인식할 수 있도록 표시해야 합니다."
+    },
+    {
+      "id": "disclosure_review_process",
+      "label": "준법감시인 사전승인 및 심의필 표시",
+      "source": "은행 광고심의 기준 제4조/제9조",
+      "why": "은행 광고는 내부통제기준에 따른 사전승인과 심의필 표시 여부를 운영 절차로 확인해야 합니다."
+    }
+  ],
+  "overall_impression": {
+    "track": "B",
+    "standard": "대법원 2017두60109 전체적·궁극적 인상 기준",
+    "verdict": "MEDIUM",
+    "misleading_risk_score": 0.68,
+    "why": "이 광고는 이벤트 혜택(지원금/쿠폰)을 headline과 본문 표로 강하게 제시해 ‘결제하면 받을 수 있다’는 전체 인상을 만들고, 당첨은 ‘추첨’이며 실제 지급은 ‘누적구간+인원 제한+응모필수+휴대폰번호/카드 유지’ 조건에 좌우된다는 보정 요소들이 하단/footnote 및 표 내 조건으로 분산되어 표시됩니다. 고지 자체는 존재하나(연체 시 이자/할부 전환, 발송 불가 등도 포함) 혜택 대비 고지의 위계가 충분히 강하지 않아 전체적·궁극적 인상에서 ‘안전하게 혜택을 받을 수 있다’는 기대와 실체(추첨/조건부 수령)가 어긋날 오인 가능성이 있습니다. 반면 금리/연체 등 ‘계약 리스크’는 명시적으로 고지되어 사실상 내용 자체의 모순은 확인되지 않으므로 오인위험은 HIGH까지는 아니며 MEDIUM으로 판단합니다."
+  },
+  "overall_impression_risk": true,
+  "article_aggregation": [
+    {
+      "key": "금융소비자 보호에 관한 법률 제22조",
+      "article": "금융소비자 보호에 관한 법률 제22조",
+      "principles": [
+        "광고규제"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.81,
+      "cu_count": 1,
+      "issue_count": 1,
+      "cu_titles": [
+        "금융상품등 광고 준수사항(필수 고지/금지행위) 누락·오인 가능성"
+      ],
+      "anchor_spans": [
+        "여름엔 역시 삼.겹.살이지~ Wa썸! 여름 Festival JB카드 쓰고, 삼겹살 지원금 받자 !"
+      ]
+    },
+    {
+      "key": "표시ㆍ광고의 공정화에 관한 법률 제4조",
+      "article": "표시ㆍ광고의 공정화에 관한 법률 제4조",
+      "principles": [
+        "광고규제"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.62,
+      "cu_count": 1,
+      "issue_count": 1,
+      "cu_titles": [
+        "중요정보 누락(또는 방법 불일치) 리스크"
+      ],
+      "anchor_spans": [
+        "여름엔 역시 삼.겹.살이지~ Wa썸! 여름 Festival JB카드 쓰고, 삼겹살 지원금 받자 !"
+      ]
+    },
+    {
+      "key": "금융소비자 보호에 관한 감독규정 제13조",
+      "article": "금융소비자 보호에 관한 감독규정 제13조",
+      "principles": [
+        "설명의무"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.55,
+      "cu_count": 1,
+      "issue_count": 1,
+      "cu_titles": [
+        "설명서 핵심 고지 누락 또는 형식·배치 미준수 위험"
+      ],
+      "anchor_spans": [
+        "여름엔 역시 삼.겹.살이지~ Wa썸! 여름 Festival JB카드 쓰고, 삼겹살 지원금 받자 !"
+      ]
+    },
+    {
+      "key": "금융소비자 보호에 관한 법률 시행령 제24조",
+      "article": "금융소비자 보호에 관한 법률 시행령 제24조",
+      "principles": [
+        "설명의무"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.4,
+      "cu_count": 1,
+      "issue_count": 1,
+      "cu_titles": [
+        "금융상품판매대리·중개업자의 고지·표지·증표 요건 미충족"
+      ],
+      "anchor_spans": [
+        "여름엔 삼겹살이지! JB카드 「Wa썸! 여름」Festival 총 700명 추첨 경품 지급"
+      ]
+    }
+  ],
+  "principle_aggregation": [
+    {
+      "key": "광고규제",
+      "article": "표시ㆍ광고의 공정화에 관한 법률 제4조",
+      "principles": [
+        "광고규제"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.81,
+      "cu_count": 2,
+      "issue_count": 2,
+      "cu_titles": [
+        "금융상품등 광고 준수사항(필수 고지/금지행위) 누락·오인 가능성",
+        "중요정보 누락(또는 방법 불일치) 리스크"
+      ],
+      "anchor_spans": [
+        "여름엔 역시 삼.겹.살이지~ Wa썸! 여름 Festival JB카드 쓰고, 삼겹살 지원금 받자 !"
+      ]
+    },
+    {
+      "key": "설명의무",
+      "article": "금융소비자 보호에 관한 감독규정 제13조",
+      "principles": [
+        "설명의무"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.55,
+      "cu_count": 2,
+      "issue_count": 2,
+      "cu_titles": [
+        "금융상품판매대리·중개업자의 고지·표지·증표 요건 미충족",
+        "설명서 핵심 고지 누락 또는 형식·배치 미준수 위험"
+      ],
+      "anchor_spans": [
+        "여름엔 삼겹살이지! JB카드 「Wa썸! 여름」Festival 총 700명 추첨 경품 지급",
+        "여름엔 역시 삼.겹.살이지~ Wa썸! 여름 Festival JB카드 쓰고, 삼겹살 지원금 받자 !"
+      ]
+    }
+  ],
+  "policy_evidence_chain_counts": {
+    "legal_basis_chains": 7,
+    "disclosure_chains": 7,
+    "exception_chains": 7,
+    "chain_diagnostics": 7
+  }
+}
