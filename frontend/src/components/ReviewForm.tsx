@@ -50,36 +50,53 @@ export function ReviewForm({ running, onSubmit, draftPreset, onLoadSample, onLoa
   );
   const [draftQueue, setDraftQueue] = useState<ReviewRequest[]>([]);
   const [queueRunning, setQueueRunning] = useState(false);
-  // 이미지 광고 접수(멀티모달): base64(data: 프리픽스 제외)와 미리보기 URL.
-  const [adImage, setAdImage] = useState<{ base64: string; mediaType: string; preview: string; name: string } | null>(null);
+  // 이미지 광고 접수(멀티모달, 최대 5장 — 카드뉴스/다장 배너): base64와 미리보기 URL.
+  type AdImage = { base64: string; mediaType: string; preview: string; name: string };
+  const MAX_AD_IMAGES = 5;
+  const [adImages, setAdImages] = useState<AdImage[]>([]);
+  const adImage = adImages[0] ?? null; // 하위호환 참조(첨부 여부 판단용)
   const [imageError, setImageError] = useState("");
 
-  const handleImageFile = (file: File | null) => {
+  const readImageFile = (file: File): Promise<AdImage | null> =>
+    new Promise((resolve) => {
+      if (!/^image\/(png|jpeg|jpg|webp)$/.test(file.type)) {
+        setImageError("PNG/JPEG/WebP 이미지만 첨부할 수 있습니다.");
+        resolve(null);
+        return;
+      }
+      if (file.size > 8 * 1024 * 1024) {
+        setImageError("이미지는 장당 8MB 이하만 첨부할 수 있습니다.");
+        resolve(null);
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = () => {
+        const dataUrl = String(reader.result || "");
+        resolve({
+          base64: dataUrl.split(",", 2)[1] ?? "",
+          mediaType: file.type === "image/jpg" ? "image/jpeg" : file.type,
+          preview: dataUrl,
+          name: file.name,
+        });
+      };
+      reader.onerror = () => resolve(null);
+      reader.readAsDataURL(file);
+    });
+
+  const addImageFiles = async (files: File[]) => {
     setImageError("");
-    if (!file) {
-      setAdImage(null);
-      return;
-    }
-    if (!/^image\/(png|jpeg|jpg|webp)$/.test(file.type)) {
-      setImageError("PNG/JPEG/WebP 이미지만 첨부할 수 있습니다.");
-      return;
-    }
-    if (file.size > 8 * 1024 * 1024) {
-      setImageError("이미지는 8MB 이하만 첨부할 수 있습니다.");
-      return;
-    }
-    const reader = new FileReader();
-    reader.onload = () => {
-      const dataUrl = String(reader.result || "");
-      const base64 = dataUrl.split(",", 2)[1] ?? "";
-      setAdImage({
-        base64,
-        mediaType: file.type === "image/jpg" ? "image/jpeg" : file.type,
-        preview: dataUrl,
-        name: file.name,
-      });
-    };
-    reader.readAsDataURL(file);
+    const loaded = (await Promise.all(files.map(readImageFile))).filter((f): f is AdImage => f !== null);
+    if (!loaded.length) return;
+    setAdImages((prev) => {
+      const next = [...prev, ...loaded];
+      if (next.length > MAX_AD_IMAGES) setImageError(`이미지는 최대 ${MAX_AD_IMAGES}장까지 첨부할 수 있습니다.`);
+      return next.slice(0, MAX_AD_IMAGES);
+    });
+  };
+
+  const removeImageAt = (index: number) => {
+    setImageError("");
+    setAdImages((prev) => prev.filter((_, i) => i !== index));
   };
 
   // 프리셋/빠른 시나리오의 이미지 광고 — public 경로 이미지를 불러와 첨부 상태로 만든다.
@@ -89,7 +106,8 @@ export function ReviewForm({ running, onSubmit, draftPreset, onLoadSample, onLoa
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       const blob = await response.blob();
       const name = url.split("/").pop() || "ad-image.png";
-      handleImageFile(new File([blob], name, { type: blob.type || "image/png" }));
+      setAdImages([]);
+      await addImageFiles([new File([blob], name, { type: blob.type || "image/png" })]);
     } catch {
       setImageError("프리셋 이미지를 불러오지 못했습니다.");
     }
@@ -112,7 +130,8 @@ export function ReviewForm({ running, onSubmit, draftPreset, onLoadSample, onLoa
     if (example.imageUrl) {
       void loadImageFromUrl(example.imageUrl);
     } else {
-      handleImageFile(null);
+      setAdImages([]);
+      setImageError("");
     }
   };
 
@@ -162,8 +181,9 @@ export function ReviewForm({ running, onSubmit, draftPreset, onLoadSample, onLoa
       language: selectedBank.language,
       llm_model: llmModel || undefined,
       actor: getActor(),
-      image_base64: adImage?.base64 || undefined,
-      image_media_type: adImage?.mediaType || undefined,
+      images: adImages.length
+        ? adImages.map((image) => ({ base64: image.base64, media_type: image.mediaType }))
+        : undefined,
     };
   };
 
@@ -402,39 +422,66 @@ export function ReviewForm({ running, onSubmit, draftPreset, onLoadSample, onLoa
         <span className="mt-1 block text-right text-[11px] text-ink-4">{text.length}자</span>
       </label>
 
-      {/* 이미지 광고 접수(멀티모달) — 배너/전단 이미지에서 문안·레이아웃을 추출해 심의 */}
+      {/* 이미지 광고 접수(멀티모달, 최대 5장) — 카드뉴스·다장 배너를 한 광고로 심의 */}
       <div className="rounded-lg border border-line bg-surface-2 p-3">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <span className="text-xs font-bold text-ink-3">
-            이미지 광고 <span className="font-normal text-ink-4">배너·전단 이미지로 접수 (문안 자동 추출 + 이미지 수정안 생성)</span>
+            이미지 광고{" "}
+            <span className="font-normal text-ink-4">
+              배너·카드뉴스 이미지로 접수, 최대 {MAX_AD_IMAGES}장 (문안 자동 추출 + 이미지 수정 가이드)
+            </span>
           </span>
-          <label className="cursor-pointer rounded-md border border-line bg-surface px-3 py-1.5 text-[12px] font-bold text-ink-2 hover:border-brand hover:text-brand">
-            {adImage ? "이미지 바꾸기" : "이미지 첨부"}
+          <label
+            className={`rounded-md border border-line bg-surface px-3 py-1.5 text-[12px] font-bold text-ink-2 ${
+              adImages.length >= MAX_AD_IMAGES ? "cursor-not-allowed opacity-50" : "cursor-pointer hover:border-brand hover:text-brand"
+            }`}
+          >
+            {adImages.length ? `이미지 추가 (${adImages.length}/${MAX_AD_IMAGES})` : "이미지 첨부"}
             <input
               type="file"
               accept="image/png,image/jpeg,image/webp"
+              multiple
               className="hidden"
-              onChange={(event) => handleImageFile(event.target.files?.[0] ?? null)}
+              disabled={adImages.length >= MAX_AD_IMAGES}
+              onChange={(event) => {
+                void addImageFiles(Array.from(event.target.files ?? []));
+                event.target.value = "";
+              }}
             />
           </label>
         </div>
         {imageError && <p className="mt-2 text-[12px] font-semibold text-reject">{imageError}</p>}
-        {adImage && (
-          <div className="mt-2 flex items-start gap-3">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={adImage.preview} alt="첨부한 광고 이미지 미리보기" className="max-h-40 rounded-md border border-line" />
-            <div className="min-w-0 text-[12px] leading-relaxed text-ink-3">
-              <div className="truncate font-semibold text-ink-2">{adImage.name}</div>
-              <div>심의 시 이미지에서 문안을 추출하고, 심의 후 교정 문안이 반영된 이미지 수정안을 생성할 수 있습니다.</div>
-              <button
-                type="button"
-                onClick={() => handleImageFile(null)}
-                className="mt-1 rounded px-1.5 py-0.5 text-[11px] font-bold text-ink-4 hover:bg-surface hover:text-reject"
-              >
-                이미지 제거
-              </button>
+        {adImages.length > 0 && (
+          <>
+            <div className="mt-2 flex flex-wrap gap-2">
+              {adImages.map((image, index) => (
+                <figure key={`${image.name}_${index}`} className="relative w-[130px]">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={image.preview}
+                    alt={`첨부 이미지 ${index + 1}페이지 미리보기`}
+                    className="h-[92px] w-full rounded-md border border-line bg-white object-cover"
+                  />
+                  <span className="absolute top-1 left-1 rounded bg-black/60 px-1.5 py-0.5 text-[11px] font-bold text-white">
+                    {index + 1}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => removeImageAt(index)}
+                    aria-label={`${index + 1}페이지 제거`}
+                    className="absolute top-1 right-1 grid h-5 w-5 place-items-center rounded bg-black/60 text-[11px] font-bold text-white hover:bg-reject"
+                  >
+                    ✕
+                  </button>
+                  <figcaption className="mt-0.5 truncate text-[11px] text-ink-4">{image.name}</figcaption>
+                </figure>
+              ))}
             </div>
-          </div>
+            <p className="mt-1.5 text-[11.5px] leading-relaxed text-ink-4">
+              여러 장은 한 광고의 페이지 순서로 심의됩니다 — 문안을 순서대로 추출하고, 심의 후 1페이지 기준 이미지 수정
+              가이드를 생성할 수 있습니다.
+            </p>
+          </>
         )}
       </div>
 

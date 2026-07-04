@@ -177,19 +177,26 @@ export function AdPane({
           />
         ) : (
         <>
-        {/* 이미지 광고 원본 — 문안은 아래 추출 텍스트로 심의, 이미지는 대조용 */}
+        {/* 이미지 광고 원본(1~N페이지) — 문안은 아래 추출 텍스트로 심의, 이미지는 대조용 */}
         {result.ad_image?.available && (
           <div className="mb-3 overflow-hidden rounded-[14px] border border-line bg-white shadow-panel">
             <div className="border-b border-line bg-surface-2 px-4 py-2 text-xs font-bold text-ink-2">
-              접수된 광고 이미지 <span className="font-normal text-ink-4">아래 문안은 이미지에서 자동 추출됨 · 클릭하면 크게 보기</span>
+              접수된 광고 이미지{(result.ad_image.count ?? 1) > 1 ? ` · ${result.ad_image.count}페이지` : ""}{" "}
+              <span className="font-normal text-ink-4">아래 문안은 이미지에서 자동 추출됨 · 클릭하면 크게 보기</span>
             </div>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={`/api/ad-image/${result.review_run_id}/original`}
-              alt="접수된 광고 이미지 원본"
-              className="max-h-105 w-full cursor-zoom-in bg-white object-contain transition hover:opacity-95"
-              onClick={() => setImageZoomed(true)}
-            />
+            {Array.from({ length: result.ad_image.count ?? 1 }, (_, i) => {
+              const kind = i === 0 ? "original" : `original_${i + 1}`;
+              return (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  key={kind}
+                  src={`/api/ad-image/${result.review_run_id}/${kind}`}
+                  alt={`접수된 광고 이미지 ${i + 1}페이지`}
+                  className="max-h-105 w-full cursor-zoom-in border-b border-line bg-white object-contain transition last:border-b-0 hover:opacity-95"
+                  onClick={() => setImageZoomed(true)}
+                />
+              );
+            })}
             {result.ad_image.layout_notes && (
               <div className="border-t border-line px-4 py-2 text-[12px] leading-relaxed text-ink-3">
                 <strong className="text-ink-2">레이아웃 소견</strong> · {result.ad_image.layout_notes}

@@ -69,10 +69,15 @@ def _image_model() -> str:
 
 
 def extract_ad_from_image(image_b64: str, media_type: str, *, korean: bool = True) -> dict[str, str]:
-    """이미지 광고에서 {title, content_text, layout_notes}를 추출한다.
+    """단일 이미지 편의 래퍼 — extract_ad_from_images 참조."""
+    return extract_ad_from_images([{"base64": image_b64, "media_type": media_type}], korean=korean)
 
-    content_text 는 원문 그대로(언어 불문 verbatim), layout_notes 는 심사자
-    언어를 따른다 — KR 워크스페이스는 한국어, 비-KR(영어 우선)은 영어.
+
+def extract_ad_from_images(images: list[dict[str, str]], *, korean: bool = True) -> dict[str, str]:
+    """이미지 광고(1~N장, 카드뉴스·다장 배너)에서 {title, content_text, layout_notes}를 추출.
+
+    content_text 는 원문 그대로(언어 불문 verbatim, 페이지 순서대로),
+    layout_notes 는 심사자 언어를 따른다 — KR 한국어, 비-KR(영어 우선) 영어.
     실패는 그대로 예외로 올린다(no fallback) — 이미지 접수 실패가 텍스트 없이
     빈 심사로 이어지면 안 된다.
     """
@@ -80,37 +85,62 @@ def extract_ad_from_image(image_b64: str, media_type: str, *, korean: bool = Tru
         raise RuntimeError("anthropic package is required for image ad intake. Install anthropic.")
     if not os.environ.get("ANTHROPIC_API_KEY"):
         raise RuntimeError("ANTHROPIC_API_KEY is required for image ad intake.")
+    if not images:
+        raise RuntimeError("No ad images provided for extraction.")
     model = _vision_model()
     client = Anthropic(
         timeout=float(os.environ.get("CCG_ANTHROPIC_TIMEOUT_SECONDS", "120")),
         max_retries=1,
     )
+    multi = len(images) > 1
+    content: list[dict[str, Any]] = []
+    for index, image in enumerate(images, start=1):
+        if multi:
+            content.append({"type": "text", "text": f"[Page {index} of {len(images)}]"})
+        content.append(
+            {
+                "type": "image",
+                "source": {
+                    "type": "base64",
+                    "media_type": str(image.get("media_type") or "image/png"),
+                    "data": str(image.get("base64") or ""),
+                },
+            }
+        )
+    content.append(
+        {
+            "type": "text",
+            "text": (
+                "Extract the ad copy and layout notes from this multi-page advertisement. "
+                "Transcribe pages in order; the pages form ONE ad."
+                if multi
+                else "Extract the ad copy and layout notes from this advertisement image."
+            ),
+        }
+    )
     request: dict[str, Any] = {
         "model": model,
-        "max_tokens": 4096,
+        "max_tokens": 8192 if multi else 4096,
         "system": (
             "You transcribe financial advertisement images for a compliance pre-review pipeline. "
             "Transcribe EVERY piece of visible ad copy verbatim (including fine print, rates, "
             "conditions, review numbers) in reading order. Never invent text that is not in the image. "
             + (
+                "If multiple pages are given they form one ad — transcribe them in page order as one "
+                "continuous copy (do not repeat page markers in content_text). "
+                if multi
+                else ""
+            )
+            + (
                 "Write layout_notes and title in KOREAN (한국어) — the reviewer is a Korean "
-                "compliance officer. Keep layout_notes to 3-4 short sentences."
+                "compliance officer. Keep layout_notes to 3-4 short sentences"
+                + (" covering all pages (mention page numbers when relevant)." if multi else ".")
                 if korean
-                else "Write layout_notes in ENGLISH, 3-4 short sentences."
+                else "Write layout_notes in ENGLISH, 3-4 short sentences"
+                + (" covering all pages." if multi else ".")
             )
         ),
-        "messages": [
-            {
-                "role": "user",
-                "content": [
-                    {
-                        "type": "image",
-                        "source": {"type": "base64", "media_type": media_type, "data": image_b64},
-                    },
-                    {"type": "text", "text": "Extract the ad copy and layout notes from this advertisement image."},
-                ],
-            }
-        ],
+        "messages": [{"role": "user", "content": content}],
         "tools": [
             {
                 "name": "ad_image_extraction",
@@ -128,7 +158,10 @@ def extract_ad_from_image(image_b64: str, media_type: str, *, korean: bool = Tru
         if getattr(block, "type", None) == "tool_use" and getattr(block, "name", None) == "ad_image_extraction":
             data = dict(getattr(block, "input", {}) or {})
             LOGGER.info(
-                "ad_image.extracted model=%s text_chars=%d", model, len(str(data.get("content_text") or ""))
+                "ad_image.extracted model=%s pages=%d text_chars=%d",
+                model,
+                len(images),
+                len(str(data.get("content_text") or "")),
             )
             return {
                 "title": str(data.get("title") or ""),

@@ -29,7 +29,7 @@ except ImportError:  # pragma: no cover - optional provider.
     AnthropicAPIConnectionError = AnthropicAPIStatusError = AnthropicAuthenticationError = None  # type: ignore[assignment]
     AnthropicBadRequestError = AnthropicRateLimitError = None  # type: ignore[assignment]
 
-from ad_image import extract_ad_from_image, generate_revision_guide_image, refine_revision_guide_image
+from ad_image import extract_ad_from_images, generate_revision_guide_image, refine_revision_guide_image
 from env_loader import load_local_env
 from jb_data_context import search_products
 from llm_gateway import LLMGateway
@@ -48,22 +48,39 @@ CONSOLE_DIR = Path(__file__).resolve().parent / "console"
 AD_IMAGE_DIR = Path(__file__).resolve().parent / "outputs" / "ad_images"
 
 
+def payload_ad_images(payload: dict[str, Any]) -> list[dict[str, str]]:
+    """payload에서 접수 이미지 목록(1~N장) 추출 — 신형 images 배열 우선,
+    구형 단일 image_base64 는 1장짜리 목록으로 승격(하위호환)."""
+    images: list[dict[str, str]] = []
+    for row in payload.get("images") or []:
+        if isinstance(row, dict) and str(row.get("base64") or "").strip():
+            images.append(
+                {"base64": str(row["base64"]).strip(), "media_type": str(row.get("media_type") or "image/png")}
+            )
+    if not images and str(payload.get("image_base64") or "").strip():
+        images.append(
+            {
+                "base64": str(payload["image_base64"]).strip(),
+                "media_type": str(payload.get("image_media_type") or "image/png"),
+            }
+        )
+    return images[:5]  # 폭주 방지 — 카드뉴스 기준 5장이면 충분
+
+
 def intake_ad_image(payload: dict[str, Any]) -> dict[str, str] | None:
-    """이미지 광고 접수 — 문안이 비어 있으면 비전 추출로 채운다.
+    """이미지 광고 접수(1~N장) — 문안이 비어 있으면 비전 추출로 채운다.
 
     반환: 추출 메타(title/content_text/layout_notes) 또는 None(이미지 없음).
     추출 실패는 예외로 올라가 review 엔드포인트의 provider 오류 매핑을 탄다.
     """
-    image_b64 = str(payload.get("image_base64") or "").strip()
-    if not image_b64:
+    images = payload_ad_images(payload)
+    if not images:
         return None
-    media_type = str(payload.get("image_media_type") or "image/png")
     from utils import uses_korean_law_context
 
     # 레이아웃 소견은 심사자 언어를 따른다 — KR 한국어, 비-KR(영어 우선) 영어.
-    extracted = extract_ad_from_image(
-        image_b64,
-        media_type,
+    extracted = extract_ad_from_images(
+        images,
         korean=uses_korean_law_context(str(payload.get("workspace_id") or "")),
     )
     if not str(payload.get("content_text") or "").strip():
@@ -90,20 +107,26 @@ def find_ad_image(run_id: str, kind: str) -> Path | None:
 
 
 def attach_ad_image_result(jsonable: dict[str, Any], payload: dict[str, Any], extracted: dict[str, str] | None) -> None:
-    """결과에 ad_image 메타를 붙이고 원본 이미지를 run 파일로 보존한다."""
+    """결과에 ad_image 메타를 붙이고 원본 이미지(1~N장)를 run 파일로 보존한다.
+
+    파일명: 1장째는 original(기존 run 하위호환), 2장째부터 original_2, original_3…
+    """
     if extracted is None:
         return
     import base64 as _b64
 
     run_id = str(jsonable.get("review_run_id") or "")
-    media_type = str(payload.get("image_media_type") or "image/png")
+    images = payload_ad_images(payload)
     if run_id:
-        try:
-            save_ad_image(run_id, "original", _b64.b64decode(str(payload.get("image_base64") or "")), media_type)
-        except Exception as exc:  # noqa: BLE001 - 이미지 보존 실패가 결과 반환을 막지 않게.
-            logging.getLogger(__name__).warning("ad_image save failed run=%s err=%s", run_id, exc)
+        for index, image in enumerate(images, start=1):
+            kind = "original" if index == 1 else f"original_{index}"
+            try:
+                save_ad_image(run_id, kind, _b64.b64decode(image["base64"]), image["media_type"])
+            except Exception as exc:  # noqa: BLE001 - 이미지 보존 실패가 결과 반환을 막지 않게.
+                logging.getLogger(__name__).warning("ad_image save failed run=%s page=%d err=%s", run_id, index, exc)
     jsonable["ad_image"] = {
         "available": True,
+        "count": len(images),
         "layout_notes": extracted.get("layout_notes") or "",
         "extracted_title": extracted.get("title") or "",
     }
@@ -325,8 +348,13 @@ def review_stream(payload: dict[str, Any]) -> StreamingResponse:
 
 @app.get("/api/ad-image/{run_id}/{kind}")
 def ad_image_file(run_id: str, kind: str) -> FileResponse:
-    """저장된 광고 이미지(원본/수정안) 서빙. run_id는 파일명 화이트리스트로만 사용."""
-    if kind not in {"original", "revised"} or not run_id.replace("_", "").isalnum():
+    """저장된 광고 이미지(원본 페이지들/수정안) 서빙. run_id는 파일명 화이트리스트로만 사용.
+
+    kind: original(1페이지) · original_2..original_5(추가 페이지) · revised(수정 가이드).
+    """
+    import re as _re
+
+    if not _re.fullmatch(r"original(_[2-5])?|revised", kind) or not run_id.replace("_", "").isalnum():
         raise HTTPException(status_code=400, detail={"error": "bad_request", "message": "invalid image request"})
     path = find_ad_image(run_id, kind)
     if path is None:
