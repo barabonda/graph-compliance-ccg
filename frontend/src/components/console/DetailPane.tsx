@@ -91,7 +91,7 @@ function TrackBDetail({ result }: { result: ReviewOutput }) {
         )}
         {/* 근거 그래프 (혜택 주장 ← 완화/강화) */}
         <div className="mt-3">
-          <div className="mb-1.5 text-[10.5px] font-bold tracking-wider text-ink-4">근거 · 혜택 주장과 완화/강화</div>
+          <div className="mb-1.5 text-[11px] font-bold tracking-wider text-ink-4">근거 · 혜택 주장과 완화/강화</div>
           <OverallImpressionGraph graph={graph} />
         </div>
         {/* 점진적 공개 — 문장별 상세는 펼쳐야 보인다 */}
@@ -100,13 +100,13 @@ function TrackBDetail({ result }: { result: ReviewOutput }) {
             <div className="space-y-3 px-3 py-2.5">
               {trackB.why && (
                 <div>
-                  <div className="mb-1 text-[10.5px] font-bold tracking-wider text-ink-4">판단 이유</div>
+                  <div className="mb-1 text-[11px] font-bold tracking-wider text-ink-4">판단 이유</div>
                   <p className="m-0 text-[12.5px] leading-relaxed text-ink-2">{humanizeJudgment(trackB.why)}</p>
                 </div>
               )}
               {(trackB.misleading_factors?.length ?? 0) > 0 && (
                 <div>
-                  <div className="mb-1 text-[10.5px] font-bold tracking-wider text-ink-4">오인 요인</div>
+                  <div className="mb-1 text-[11px] font-bold tracking-wider text-ink-4">오인 요인</div>
                   <ul className="m-0 list-disc space-y-1 pl-4 text-[12px] leading-relaxed text-ink-2">
                     {trackB.misleading_factors!.map((factor, index) => (
                       <li key={index}>{humanizeJudgment(factor)}</li>
@@ -116,11 +116,11 @@ function TrackBDetail({ result }: { result: ReviewOutput }) {
               )}
               {(syn?.sentence_layers?.length ?? 0) > 0 && (
                 <div>
-                  <div className="mb-1 text-[10.5px] font-bold tracking-wider text-ink-4">문장 위계</div>
+                  <div className="mb-1 text-[11px] font-bold tracking-wider text-ink-4">문장 위계</div>
                   <div className="space-y-1">
                     {syn!.sentence_layers!.map((layer, index) => (
                       <div key={index} className="flex items-start gap-2 text-[12px]">
-                        <span className="shrink-0 rounded bg-surface-3 px-1.5 py-0.5 text-[10px] font-bold text-ink-3">
+                        <span className="shrink-0 rounded bg-surface-3 px-1.5 py-0.5 text-[11px] font-bold text-ink-3">
                           {ROLE_KO[layer.role ?? ""] ?? layer.role}
                         </span>
                         <span className="min-w-0 text-ink-2">{layer.text}</span>
@@ -168,15 +168,15 @@ export function DetailPane({ result, selectedAnchorId, resolved, onToggleResolve
             {/* 출처 계층: 이 근거가 국가 법령인지, 금소법 §22 위임 자율규제(심의기준)인지. */}
             {card.authorityTier === "guideline" && (
               <div className="mb-1 flex items-center gap-1.5">
-                <span className="rounded bg-surface-3 px-1.5 py-0.5 text-[10px] font-bold text-ink-2">
+                <span className="rounded bg-surface-3 px-1.5 py-0.5 text-[11px] font-bold text-ink-2">
                   자율규제 · 은행연합회 심의기준
                 </span>
-                <span className="text-[10.5px] text-ink-4">금소법 제22조 위임</span>
+                <span className="text-[11px] text-ink-4">금소법 제22조 위임</span>
               </div>
             )}
             {card.authorityTier === "law" && (
               <div className="mb-1">
-                <span className="rounded bg-reject-bg px-1.5 py-0.5 text-[10px] font-bold text-reject">
+                <span className="rounded bg-reject-bg px-1.5 py-0.5 text-[11px] font-bold text-reject">
                   법령 · 국가 법규범
                 </span>
               </div>
@@ -225,7 +225,7 @@ export function DetailPane({ result, selectedAnchorId, resolved, onToggleResolve
                       <span className="min-w-0 text-ink-3">
                         {fact.value}
                         {fact.page_or_chunk ? (
-                          <span className="ml-1.5 font-mono text-[10.5px] text-ink-4">· {fact.page_or_chunk}</span>
+                          <span className="ml-1.5 font-mono text-[11px] text-ink-4">· {fact.page_or_chunk}</span>
                         ) : null}
                       </span>
                     </div>
@@ -325,7 +325,7 @@ export function DetailPane({ result, selectedAnchorId, resolved, onToggleResolve
             색은 상태 텍스트와 게이지에만, 셀은 테두리 없이 배경 톤으로만 구분. */}
         <div className="mt-2.5 grid grid-cols-2 gap-2">
           <div className="rounded-[10px] bg-surface-2 px-3 py-2">
-            <div className="text-[10px] font-bold tracking-wider text-ink-4">판정</div>
+            <div className="text-[11px] font-bold tracking-wider text-ink-4">판정</div>
             <div className="mt-1 text-[12px] leading-relaxed">
               <span className="font-bold" style={{ color: headColor }}>
                 {isResolved ? "수정안 적용 · 해소" : TONE_WORD_SHORT[tone]}
@@ -339,7 +339,7 @@ export function DetailPane({ result, selectedAnchorId, resolved, onToggleResolve
             </div>
           </div>
           <div className="rounded-[10px] bg-surface-2 px-3 py-2">
-            <div className="flex justify-between text-[10px] font-bold tracking-wider text-ink-4">
+            <div className="flex justify-between text-[11px] font-bold tracking-wider text-ink-4">
               <span>위반 가능성</span>
               <span style={{ color: headColor }}>{grade.label}</span>
             </div>
@@ -349,7 +349,7 @@ export function DetailPane({ result, selectedAnchorId, resolved, onToggleResolve
           </div>
           {card.basis ? (
             <div className="col-span-2 rounded-[10px] bg-surface-2 px-3 py-2">
-              <div className="text-[10px] font-bold tracking-wider text-ink-4">대표 근거</div>
+              <div className="text-[11px] font-bold tracking-wider text-ink-4">대표 근거</div>
               <div className="mt-1 text-[12.5px] leading-relaxed font-medium break-keep text-ink">{card.basis}</div>
               {card.coBasis && (
                 <div className="mt-0.5 text-[11px] text-ink-4">병기 · {card.coBasis}</div>
@@ -360,7 +360,7 @@ export function DetailPane({ result, selectedAnchorId, resolved, onToggleResolve
         {/* 금소법 6대 판매원칙 — 이 사안이 어느 원칙 위반 후보인지가 준법 보고서의 1차 분류다 */}
         {principles.length > 0 && (
           <div className="mt-2 flex flex-wrap items-center gap-1.5 px-0.5">
-            <span className="text-[10px] font-bold tracking-wider text-ink-4">판매원칙</span>
+            <span className="text-[11px] font-bold tracking-wider text-ink-4">판매원칙</span>
             {principles.map((principle) => (
               <Tag key={principle} color={principleColor(principle)}>
                 {principle}
@@ -375,18 +375,18 @@ export function DetailPane({ result, selectedAnchorId, resolved, onToggleResolve
             <div className="space-y-2.5">
               {topJudgment?.legal_basis && (
                 <div className="rounded-md border border-line bg-surface-2 px-3 py-2">
-                  <span className="text-[10.5px] font-bold tracking-wider text-ink-4">적용 법리</span>
+                  <span className="text-[11px] font-bold tracking-wider text-ink-4">적용 법리</span>
                   <p className="mt-0.5 text-[13px] leading-relaxed text-ink-2">{humanizeJudgment(topJudgment.legal_basis)}</p>
                 </div>
               )}
               {(topJudgment?.criteria_findings?.length ?? 0) > 0 && (
                 <div>
-                  <span className="text-[10.5px] font-bold tracking-wider text-ink-4">판단 기준별 적용</span>
+                  <span className="text-[11px] font-bold tracking-wider text-ink-4">판단 기준별 적용</span>
                   <ol className="mt-1 space-y-1.5">
                     {topJudgment!.criteria_findings!.map((cf, i) => (
                       <li key={i} className="flex gap-2 rounded-md border border-line px-2.5 py-1.5">
                         <span
-                          className="mt-0.5 grid h-4 w-4 shrink-0 place-items-center rounded text-[10px] font-bold"
+                          className="mt-0.5 grid h-4 w-4 shrink-0 place-items-center rounded text-[11px] font-bold"
                           style={{
                             background: cf.satisfied ? "var(--reject-bg)" : "var(--surface-3)",
                             color: cf.satisfied ? "var(--reject)" : "var(--ink-4)",
@@ -408,7 +408,7 @@ export function DetailPane({ result, selectedAnchorId, resolved, onToggleResolve
               )}
               {topJudgment?.conclusion && (
                 <div className="rounded-md border-l-2 border-reject bg-reject-bg/40 px-3 py-2">
-                  <span className="text-[10.5px] font-bold tracking-wider text-reject">결론</span>
+                  <span className="text-[11px] font-bold tracking-wider text-reject">결론</span>
                   <p className="mt-0.5 text-[13px] leading-relaxed text-ink-2">{humanizeJudgment(topJudgment.conclusion)}</p>
                 </div>
               )}
@@ -477,7 +477,7 @@ export function DetailPane({ result, selectedAnchorId, resolved, onToggleResolve
                 <div key={group.principle} className="rounded-[10px] border border-line bg-surface-2 p-3">
                   <div className="mb-2 flex items-center gap-1.5">
                     <Tag tone="danger">{group.principle}</Tag>
-                    <span className="text-[10.5px] text-ink-4">원칙 기준 위임 사슬</span>
+                    <span className="text-[11px] text-ink-4">원칙 기준 위임 사슬</span>
                   </div>
                   <DelegationChain steps={group.steps} />
                 </div>
@@ -515,7 +515,7 @@ export function DetailPane({ result, selectedAnchorId, resolved, onToggleResolve
                   key={`${row.axis}_${row.key}_${i}`}
                   className="flex items-center gap-2 rounded-md border border-line bg-surface-2 px-2.5 py-1.5"
                 >
-                  <span className="rounded bg-surface-3 px-1.5 py-0.5 text-[10px] font-bold text-ink-3">
+                  <span className="rounded bg-surface-3 px-1.5 py-0.5 text-[11px] font-bold text-ink-3">
                     {row.axis === "article" ? "조항" : "원칙"}
                   </span>
                   <span className="min-w-0 flex-1 truncate font-mono text-[11.5px] text-ink" title={row.key}>
@@ -558,7 +558,7 @@ export function DetailPane({ result, selectedAnchorId, resolved, onToggleResolve
                   {(review.closure_evidence_ids ?? []).length > 0 && (
                     <div className="mt-2 flex flex-wrap gap-1.5">
                       {review.closure_evidence_ids.map((id) => (
-                        <span key={id} className="font-mono text-[10px] text-ink-4">
+                        <span key={id} className="font-mono text-[11px] text-ink-4">
                           {id}
                         </span>
                       ))}
@@ -664,7 +664,7 @@ export function DetailPane({ result, selectedAnchorId, resolved, onToggleResolve
               <div className="border-b border-[#f3d3cf] bg-reject-bg px-3 py-2.5">
                 <div className="mb-1 flex items-center gap-1.5">
                   <span className="h-1.5 w-1.5 rounded-full bg-reject" />
-                  <span className="text-[10.5px] font-bold tracking-wider text-reject">BEFORE · 현재 문안</span>
+                  <span className="text-[11px] font-bold tracking-wider text-reject">BEFORE · 현재 문안</span>
                 </div>
                 <div className="text-[13px] leading-relaxed text-[#8a2e26] line-through decoration-[#d6453a66]">
                   {suggestion?.before ?? anchor.span.text}
@@ -673,8 +673,8 @@ export function DetailPane({ result, selectedAnchorId, resolved, onToggleResolve
               <div className="bg-pass-bg px-3 py-2.5">
                 <div className="mb-1 flex items-center gap-1.5">
                   <span className="h-1.5 w-1.5 rounded-full bg-pass" />
-                  <span className="text-[10.5px] font-bold tracking-wider text-pass">AFTER · 제안 문안</span>
-                  <span className="ml-auto font-mono text-[9.5px] font-bold text-ink-4">Revision LLM · 권고</span>
+                  <span className="text-[11px] font-bold tracking-wider text-pass">AFTER · 제안 문안</span>
+                  <span className="ml-auto font-mono text-[11px] font-bold text-ink-4">Revision LLM · 권고</span>
                 </div>
                 <div className="text-[13px] leading-relaxed font-medium text-[#0c6b4a]">{suggestion?.after}</div>
               </div>

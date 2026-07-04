@@ -5,29 +5,32 @@
  * (준법 리스크 Agent 디자인 시안 기반)
  */
 :root {
+  /* 접근성(WCAG AA) 명도 조정 — 고령 심사자도 읽을 수 있게. 색상(hue)은
+   * 유지하고 어둡기만 올림: ink-3 4.6→6.6:1, ink-4 2.6→4.9:1, 상태색도
+   * 흰 배경 텍스트 기준 4.5:1 이상. 위계(1>2>3>4)는 그대로다. */
   --bg: #eef1f5;
   --surface: #ffffff;
   --surface-2: #f6f8fb;
   --surface-3: #eff3f8;
-  --line: #e1e7ef;
-  --line-2: #d4dce6;
-  --ink: #1b2430;
-  --ink-2: #46546a;
-  --ink-3: #6b7b92;
-  --ink-4: #97a4b6;
-  --brand: #2f6df0;
+  --line: #d8dfe9;
+  --line-2: #c6d0dd;
+  --ink: #161e29;
+  --ink-2: #3d4c63;
+  --ink-3: #52627b;
+  --ink-4: #64748b;
+  --brand: #2760d8;
   --brand-2: #1d52c7;
   --brand-tint: #eaf1ff;
   --brand-tint2: #dbe7ff;
 
   /* AI 판정(권고형) / 심사자 결정 톤 */
-  --pass: #0f9d6b;
+  --pass: #0a7550;
   --pass-bg: #e3f6ee;
-  --review: #2f6df0;
+  --review: #2760d8;
   --review-bg: #e7f0ff;
-  --revise: #d98a0b;
+  --revise: #a86a00;
   --revise-bg: #fbf1dc;
-  --reject: #d6453a;
+  --reject: #c2372c;
   --reject-bg: #fbe7e5;
 }
 

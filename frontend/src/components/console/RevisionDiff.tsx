@@ -86,7 +86,7 @@ function DiffLine({
       {hasTooltip && (
         <div className="pointer-events-none absolute top-full right-2 left-8 z-30 hidden group-hover:block">
           <div className="mt-0.5 rounded-[10px] border border-line bg-surface px-3 py-2 shadow-panel">
-            <div className="text-[10px] font-bold tracking-wider text-ink-4">
+            <div className="text-[11px] font-bold tracking-wider text-ink-4">
               {line.type === "del" ? "위험 이유" : "수정 이유"}
               {line.label ? ` · ${line.label}` : ""}
             </div>
@@ -94,7 +94,7 @@ function DiffLine({
             {line.basis && (
               <div className="mt-1 text-[11px] text-ink-4">{abbreviateLawNames(line.basis)}</div>
             )}
-            {interactive && <div className="mt-1 text-[10.5px] font-semibold text-brand-2">클릭하면 판정 상세로 이동</div>}
+            {interactive && <div className="mt-1 text-[11px] font-semibold text-brand-2">클릭하면 판정 상세로 이동</div>}
           </div>
         </div>
       )}

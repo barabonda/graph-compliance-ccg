@@ -462,7 +462,7 @@ export function ReviewForm({ running, onSubmit, draftPreset, onLoadSample, onLoa
           <div className="flex max-h-36 flex-col gap-1.5 overflow-auto">
             {draftQueue.map((item, index) => (
               <div key={item.dataset_item_id} className="flex items-center gap-2 rounded-md border border-line bg-surface px-2 py-1.5">
-                <span className="rounded bg-surface-3 px-1.5 py-0.5 font-mono text-[10px] font-bold text-ink-3">
+                <span className="rounded bg-surface-3 px-1.5 py-0.5 font-mono text-[11px] font-bold text-ink-3">
                   {index + 1}
                 </span>
                 <span className="min-w-0 flex-1 truncate text-[12px] font-semibold text-ink-2">

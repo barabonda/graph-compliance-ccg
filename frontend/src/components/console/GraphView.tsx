@@ -67,14 +67,14 @@ function GraphNode({
               <Icon name={meta.icon} size={14} color={meta.color} />
             </span>
             <span
-              className="font-mono text-[9.5px] leading-tight font-bold tracking-wide uppercase"
+              className="font-mono text-[11px] leading-tight font-bold tracking-wide uppercase"
               style={{ color: meta.color }}
             >
               {meta.type}
             </span>
           </div>
           <div className="line-clamp-3 text-[12.5px] leading-snug font-semibold break-keep text-ink">{label}</div>
-          {sub && <div className="mt-auto font-mono text-[10px] text-ink-4">{sub}</div>}
+          {sub && <div className="mt-auto font-mono text-[11px] text-ink-4">{sub}</div>}
         </div>
       </div>
     </foreignObject>
@@ -90,7 +90,7 @@ function TerminalNode({ x, y, label }: { x: number; y: number; label: string }) 
       >
         <div className="flex items-center gap-1.5">
           <Icon name="flag" size={14} color="#fff" />
-          <span className="font-mono text-[9.5px] font-bold tracking-wide uppercase">필요 고지 / 예외</span>
+          <span className="font-mono text-[11px] font-bold tracking-wide uppercase">필요 고지 / 예외</span>
         </div>
         <div className="line-clamp-3 text-[12.5px] leading-snug font-bold break-keep">{label}</div>
         <div className="mt-auto text-[11px] opacity-85">고지 충족 시 위반 완화 가능</div>
@@ -176,7 +176,7 @@ export function GraphView({ result, selectedAnchorId, onSelectAnchor }: Props) {
                 }}
               >
                 <div className="mb-1 flex items-center gap-1.5">
-                  <span className="font-mono text-[10.5px] font-bold text-ink-4">{card.code}</span>
+                  <span className="font-mono text-[11px] font-bold text-ink-4">{card.code}</span>
                   <span className="ml-auto h-1.5 w-1.5 rounded-full" style={{ background: color }} />
                 </div>
                 <div className="text-[12.5px] leading-snug font-semibold break-keep text-ink">“{card.quote}”</div>

@@ -22,7 +22,7 @@ export function DelegationChain({ steps }: { steps: DelegationStep[] }) {
           <span className="mt-1.5 h-3.5 w-3.5 shrink-0 rounded-full border-2 border-brand bg-surface" />
           <div className="min-w-0 flex-1">
             <span
-              className={`inline-block rounded px-1.5 py-0.5 text-[10px] font-bold ${LAYER_STYLE[step.layer] ?? "bg-surface-3 text-ink-2"}`}
+              className={`inline-block rounded px-1.5 py-0.5 text-[11px] font-bold ${LAYER_STYLE[step.layer] ?? "bg-surface-3 text-ink-2"}`}
             >
               {step.layer}
             </span>
@@ -60,7 +60,7 @@ export function PrincipleTags({ principles }: { principles: string[] }) {
   if (!principles.length) return null;
   return (
     <div className="flex flex-wrap items-center gap-1.5">
-      <span className="text-[10.5px] font-bold tracking-wider text-ink-4">판매원칙</span>
+      <span className="text-[11px] font-bold tracking-wider text-ink-4">판매원칙</span>
       {principles.map((p) => (
         <Tag key={p} color={principleColor(p)} tone="danger">
           {p}

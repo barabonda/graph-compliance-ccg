@@ -15,7 +15,7 @@ function NodeCard({ node }: { node: OverallGraphNode }) {
   const style = KIND_STYLE[node.kind];
   return (
     <div className="rounded-[10px] border px-3 py-2" style={{ background: style.bg, borderColor: style.color }}>
-      <div className="text-[10.5px] font-bold" style={{ color: style.color }}>
+      <div className="text-[11px] font-bold" style={{ color: style.color }}>
         {node.title}
       </div>
       <div className="mt-0.5 text-[12.5px] leading-snug break-keep text-ink">{node.text}</div>
@@ -78,7 +78,7 @@ export function OverallImpressionGraph({ graph }: { graph: OverallImpressionGrap
           </div>
         </>
       )}
-      <div className="mt-1.5 flex flex-wrap gap-x-3 gap-y-1 text-[10.5px] text-ink-4">
+      <div className="mt-1.5 flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-ink-4">
         <LegendDot color="var(--reject)" label="혜택(위험)" />
         <LegendDot color="var(--revise)" label="완화" />
         <LegendDot color="var(--pass)" label="강화" />

@@ -25,7 +25,7 @@ function StatMini({
 }) {
   return (
     <div className="text-center">
-      <div className="text-[10.5px] font-semibold whitespace-nowrap text-ink-4">{label}</div>
+      <div className="text-[11px] font-semibold whitespace-nowrap text-ink-4">{label}</div>
       <div className="mt-1">
         <span
           className={`font-extrabold ${minor ? "text-[16px]" : "text-[22px]"} ${
@@ -63,7 +63,7 @@ export function ExecSummary({ result, resolved }: { result: ReviewOutput; resolv
     <div className="flex shrink-0 items-stretch gap-4.5 rounded-[14px] border border-line bg-surface px-4.5 py-3.5 shadow-card">
       {/* 좌: AI 판정 */}
       <div className="flex flex-col justify-center gap-2 border-r border-line pr-4.5">
-        <div className="text-[10.5px] font-bold tracking-wider text-ink-4 uppercase">AI 판정 · 권고</div>
+        <div className="text-[11px] font-bold tracking-wider text-ink-4 uppercase">AI 판정 · 권고</div>
         <Badge tone={verdictBadgeTone(result.final_verdict)}>{aiLabel}</Badge>
         <div className="flex items-center gap-1.5">
           <span className="text-[11px] text-ink-3">오인 위험</span>
@@ -88,7 +88,7 @@ export function ExecSummary({ result, resolved }: { result: ReviewOutput; resolv
         </p>
         {/* 6대 판매원칙별 현황 — 심의 의견서의 원칙별 목차와 1:1. 0건도 "점검됨"의 정보. */}
         <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px]">
-          <span className="text-[10px] font-bold tracking-wider text-ink-4">판매원칙</span>
+          <span className="text-[11px] font-bold tracking-wider text-ink-4">판매원칙</span>
           {principleBreakdown(result, resolved).map(({ label, count }) => (
             <span key={label} className="flex items-center gap-1 whitespace-nowrap">
               <span

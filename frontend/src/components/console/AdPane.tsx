@@ -228,13 +228,13 @@ export function AdPane({
                       {/* 영어 메인: 원문이 이미 영어면 EN 줄은 중복이라 생략 */}
                       {lineT.en && !sameText(lineT.en, line.text) && (
                         <div className="flex gap-1.5">
-                          <span className="mt-0.5 shrink-0 rounded bg-surface-2 px-1 font-mono text-[9px] font-bold text-ink-4">EN</span>
+                          <span className="mt-0.5 shrink-0 rounded bg-surface-2 px-1 font-mono text-[11px] font-bold text-ink-4">EN</span>
                           <span>{lineT.en}</span>
                         </div>
                       )}
                       {lineT.sub && (
                         <div className="flex gap-1.5 break-keep">
-                          <span className="mt-0.5 shrink-0 rounded bg-surface-2 px-1 font-mono text-[9px] font-bold text-ink-4">{lineT.subLabel}</span>
+                          <span className="mt-0.5 shrink-0 rounded bg-surface-2 px-1 font-mono text-[11px] font-bold text-ink-4">{lineT.subLabel}</span>
                           <span>{lineT.sub}</span>
                         </div>
                       )}
@@ -262,7 +262,7 @@ export function AdPane({
           <div className="mt-3 overflow-hidden rounded-lg border border-line bg-surface-2">
             <div className="border-b border-line px-3 py-2 text-xs font-bold text-ink-2">
               문장별 참고 번역
-              <span className="ml-2 font-normal text-[10.5px] text-ink-4">
+              <span className="ml-2 font-normal text-[11px] text-ink-4">
                 {translations.note ?? "참고용 번역 — 심사 근거는 원문 기준"}
               </span>
             </div>
@@ -275,13 +275,13 @@ export function AdPane({
                   </div>
                   {s.en && !sameText(s.en, s.original) && (
                     <div className="mt-1 flex gap-1.5 text-[12px] leading-relaxed text-ink-2">
-                      <span className="mt-0.5 shrink-0 rounded bg-surface px-1 font-mono text-[9.5px] font-bold text-ink-4">EN</span>
+                      <span className="mt-0.5 shrink-0 rounded bg-surface px-1 font-mono text-[11px] font-bold text-ink-4">EN</span>
                       <span className="whitespace-pre-wrap">{s.en}</span>
                     </div>
                   )}
                   {(s.km ?? s.ko) && (
                     <div className="mt-1 flex gap-1.5 text-[12px] leading-relaxed break-keep text-ink-2">
-                      <span className="mt-0.5 shrink-0 rounded bg-surface px-1 font-mono text-[9.5px] font-bold text-ink-4">{s.km ? "KM" : "KO"}</span>
+                      <span className="mt-0.5 shrink-0 rounded bg-surface px-1 font-mono text-[11px] font-bold text-ink-4">{s.km ? "KM" : "KO"}</span>
                       <span className="whitespace-pre-wrap">{s.km ?? s.ko}</span>
                     </div>
                   )}
@@ -300,7 +300,7 @@ export function AdPane({
                 </summary>
                 {/* 표시 전용 — 하이라이트는 원문에만 적용(원문-번역 위치 정렬 불가) */}
                 <div className="mt-2 text-[13.5px] leading-relaxed whitespace-pre-wrap text-ink">{translations.en}</div>
-                <div className="mt-1.5 text-[10.5px] text-ink-4">{translations.note ?? "참고용 번역 — 심사 근거는 원문 기준"}</div>
+                <div className="mt-1.5 text-[11px] text-ink-4">{translations.note ?? "참고용 번역 — 심사 근거는 원문 기준"}</div>
               </details>
             )}
             {(translations.km ?? translations.ko) && (
@@ -309,7 +309,7 @@ export function AdPane({
                   {translations.km ? "ភាសាខ្មែរ · 크메르어 (참고용 번역)" : "한국어 (참고용 번역)"}
                 </summary>
                 <div className="mt-2 text-[13.5px] leading-relaxed break-keep whitespace-pre-wrap text-ink">{translations.km ?? translations.ko}</div>
-                <div className="mt-1.5 text-[10.5px] text-ink-4">{translations.note ?? "참고용 번역 — 심사 근거는 원문 기준"}</div>
+                <div className="mt-1.5 text-[11px] text-ink-4">{translations.note ?? "참고용 번역 — 심사 근거는 원문 기준"}</div>
               </details>
             )}
           </div>
@@ -333,7 +333,7 @@ export function AdPane({
                 </div>
               ))}
             </div>
-            <div className="mt-1.5 text-[10.5px] text-ink-4">
+            <div className="mt-1.5 text-[11px] text-ink-4">
               원문(외국어) 표현이 정책 개념 사전(PolicyHypernym)으로 정규화된 결과입니다.
             </div>
           </details>

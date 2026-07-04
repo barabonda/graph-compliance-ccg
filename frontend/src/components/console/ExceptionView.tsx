@@ -121,7 +121,7 @@ function VerifyRow({
         <div className="flex items-center gap-2">
           <span className="text-[13.5px] font-bold text-ink">{item.label}</span>
           {item.required && (
-            <span className="rounded-full bg-reject-bg px-1.5 py-px text-[10.5px] font-bold text-reject">필수</span>
+            <span className="rounded-full bg-reject-bg px-1.5 py-px text-[11px] font-bold text-reject">필수</span>
           )}
         </div>
         <div className="mt-1 text-[12px] leading-relaxed text-ink-3">

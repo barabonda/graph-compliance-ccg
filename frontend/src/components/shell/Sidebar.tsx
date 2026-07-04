@@ -48,7 +48,7 @@ export function Sidebar({ view, setView, result, resolvedCount }: Props) {
         </div>
         <div className="min-w-0">
           <div className="text-sm font-extrabold tracking-tight">JB Compliance</div>
-          <div className="font-mono text-[10px] text-ink-4">JunBub · CONTENT SAFEGUARD</div>
+          <div className="font-mono text-[11px] text-ink-4">JunBub · CONTENT SAFEGUARD</div>
         </div>
       </button>
 
@@ -74,7 +74,7 @@ export function Sidebar({ view, setView, result, resolvedCount }: Props) {
               </span>
               <span className="min-w-0">
                 <span className={`block text-[13px] font-bold ${active ? "text-brand-2" : "text-ink"}`}>{item.label}</span>
-                <span className="block text-[10.5px] text-ink-4">{item.sub}</span>
+                <span className="block text-[11px] text-ink-4">{item.sub}</span>
               </span>
             </button>
           );
@@ -83,20 +83,20 @@ export function Sidebar({ view, setView, result, resolvedCount }: Props) {
 
       <div className="mt-auto flex flex-col gap-2.5">
         <div className="rounded-[11px] border border-line bg-surface-2 px-3 py-3">
-          <div className="text-[10.5px] font-bold tracking-wider text-ink-4 uppercase">현재 ReviewRun</div>
+          <div className="text-[11px] font-bold tracking-wider text-ink-4 uppercase">현재 ReviewRun</div>
           <div className="mt-1.5 truncate font-mono text-[11px] font-bold text-ink-2">
             {result?.review_run_id ?? "—"}
           </div>
           <div className="mt-2.5 flex gap-2">
             <div className="flex-1">
-              <div className="text-[10.5px] text-ink-4">미해소 이슈</div>
+              <div className="text-[11px] text-ink-4">미해소 이슈</div>
               <div className={`text-[15px] font-extrabold ${openCount ? "text-reject" : "text-pass"}`}>
                 {openCount}
                 <span className="text-[11px] font-semibold text-ink-4">/{cards.length}</span>
               </div>
             </div>
             <div className="flex-1">
-              <div className="text-[10.5px] text-ink-4">필수 고지</div>
+              <div className="text-[11px] text-ink-4">필수 고지</div>
               <div className={`text-[15px] font-extrabold ${checks.length && met < checks.length ? "text-reject" : "text-pass"}`}>
                 {met}
                 <span className="text-[11px] font-semibold text-ink-4">/{checks.length}</span>
@@ -104,7 +104,7 @@ export function Sidebar({ view, setView, result, resolvedCount }: Props) {
             </div>
           </div>
         </div>
-        <p className="px-1 text-[10px] leading-relaxed text-ink-4">
+        <p className="px-1 text-[11px] leading-relaxed text-ink-4">
           AI 사전심의는 보조 자료이며 최종 심의 책임은 심사자에게 있습니다.
         </p>
       </div>

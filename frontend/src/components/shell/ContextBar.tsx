@@ -41,7 +41,7 @@ export function ContextBar({ status, result, reviewTitle, events, decision, onDe
         {result && (
           <div className="text-right">
             <div className="flex items-center justify-end gap-2">
-              <span className="text-[10.5px] font-bold tracking-wider text-ink-4">AI 판정</span>
+              <span className="text-[11px] font-bold tracking-wider text-ink-4">AI 판정</span>
               <Badge tone={verdictBadgeTone(result.final_verdict)}>{aiLabel}</Badge>
             </div>
             <div className="mt-1 flex items-center justify-end gap-1.5 text-[11px] text-ink-3">
@@ -64,7 +64,7 @@ export function ContextBar({ status, result, reviewTitle, events, decision, onDe
             style={{ background: DECISIONS[decision].bg }}
           >
             <div>
-              <div className="text-[10px] font-bold text-ink-4">심사자 확정</div>
+              <div className="text-[11px] font-bold text-ink-4">심사자 확정</div>
               <div className="text-[13.5px] font-extrabold" style={{ color: DECISIONS[decision].color }}>
                 {DECISIONS[decision].label}
               </div>

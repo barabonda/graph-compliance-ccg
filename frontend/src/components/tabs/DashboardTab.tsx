@@ -207,7 +207,7 @@ export function DashboardTab({ onOpenRun, onEditRun }: Props) {
                     <td className="max-w-[240px] px-4 py-2 font-medium text-ink">
                       <span className="flex items-center gap-1.5">
                         {run.seed ? (
-                          <span className="shrink-0 rounded bg-surface-3 px-1.5 py-0.5 text-[10px] font-bold text-ink-3">
+                          <span className="shrink-0 rounded bg-surface-3 px-1.5 py-0.5 text-[11px] font-bold text-ink-3">
                             데모
                           </span>
                         ) : null}
@@ -245,7 +245,7 @@ export function DashboardTab({ onOpenRun, onEditRun }: Props) {
                         조건 불러오기
                       </button>
                     </td>
-                    <td className="px-4 py-2 font-mono text-[10.5px] text-ink-4">{run.id.slice(0, 22)}</td>
+                    <td className="px-4 py-2 font-mono text-[11px] text-ink-4">{run.id.slice(0, 22)}</td>
                   </tr>
                 ))}
               </tbody>

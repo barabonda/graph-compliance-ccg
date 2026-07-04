@@ -127,9 +127,9 @@ function IssueCard({
         <div>
           <div className="mb-1 flex items-center gap-1.5">
             <span className="h-1.5 w-1.5 rounded-full bg-reject" />
-            <span className="text-[10.5px] font-bold tracking-wider text-ink-4">광고 주장</span>
+            <span className="text-[11px] font-bold tracking-wider text-ink-4">광고 주장</span>
             {row.claimTier && row.claimTier !== "unknown" && (
-              <span className="rounded bg-surface-3 px-1.5 text-[10px] font-bold text-ink-3">{row.claimTier}</span>
+              <span className="rounded bg-surface-3 px-1.5 text-[11px] font-bold text-ink-3">{row.claimTier}</span>
             )}
           </div>
           <p className="text-[13.5px] leading-relaxed font-semibold text-ink">{row.claimValue || "—"}</p>
@@ -145,7 +145,7 @@ function IssueCard({
         <div>
           <div className="mb-1 flex flex-wrap items-center gap-1.5">
             <span className="h-1.5 w-1.5 rounded-full bg-pass" />
-            <span className="text-[10.5px] font-bold tracking-wider text-ink-4">문서 근거</span>
+            <span className="text-[11px] font-bold tracking-wider text-ink-4">문서 근거</span>
             <span className="ml-auto">
               <DocButton doc={row.doc} page={row.page} fallbackId={row.doc?.document_id as string} />
             </span>
@@ -164,7 +164,7 @@ function IssueCard({
         {/* 판단 */}
         {row.comparison.rationale && (
           <div className="mt-2.5 rounded-md bg-surface-2 px-3 py-2">
-            <span className="text-[10.5px] font-bold tracking-wider text-ink-4">판단</span>
+            <span className="text-[11px] font-bold tracking-wider text-ink-4">판단</span>
             <p className="mt-0.5 text-[12.5px] leading-relaxed text-ink-2">{row.comparison.rationale}</p>
           </div>
         )}

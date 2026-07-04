@@ -131,13 +131,13 @@ function IssueCard({
               .toLowerCase()
               .includes(card.quote.replace(/\s+/g, " ").replace(/[…]+$|\.{3}$/g, "").trim().toLowerCase()) && (
             <div className="flex gap-1.5">
-              <span className="mt-0.5 shrink-0 rounded bg-surface-2 px-1 font-mono text-[8.5px] font-bold text-ink-4">EN</span>
+              <span className="mt-0.5 shrink-0 rounded bg-surface-2 px-1 font-mono text-[11px] font-bold text-ink-4">EN</span>
               <span>{quoteTranslation.en}</span>
             </div>
           )}
           {quoteTranslation.sub && (
             <div className="flex gap-1.5 break-keep">
-              <span className="mt-0.5 shrink-0 rounded bg-surface-2 px-1 font-mono text-[8.5px] font-bold text-ink-4">{quoteTranslation.subLabel}</span>
+              <span className="mt-0.5 shrink-0 rounded bg-surface-2 px-1 font-mono text-[11px] font-bold text-ink-4">{quoteTranslation.subLabel}</span>
               <span>{quoteTranslation.sub}</span>
             </div>
           )}
@@ -168,7 +168,7 @@ function IssueCard({
             </Tag>
           ))}
           {principles.length > 2 && (
-            <span className="text-[10.5px] text-ink-4">+{principles.length - 2}</span>
+            <span className="text-[11px] text-ink-4">+{principles.length - 2}</span>
           )}
         </div>
       )}
@@ -252,8 +252,8 @@ function TierSubHeader({
     <div className="mt-1 flex items-baseline gap-1.5 px-1">
       <span className="h-[7px] w-[7px] shrink-0 rounded-full" style={{ background: color }} />
       <span className="text-[11.5px] font-bold text-ink">{title}</span>
-      {sub ? <span className="text-[10.5px] text-ink-4">{sub}</span> : null}
-      <span className="ml-auto text-[10.5px] font-mono text-ink-4">{count}</span>
+      {sub ? <span className="text-[11px] text-ink-4">{sub}</span> : null}
+      <span className="ml-auto text-[11px] font-mono text-ink-4">{count}</span>
     </div>
   );
 }

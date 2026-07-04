@@ -103,9 +103,9 @@ export function CopilotPanel({ runId, workspaceId }: Props) {
                 읽기 전용 · 최종 판단은 심사자 — 저장된 심사 결과를 조회해 설명만 합니다
               </div>
               {runId ? (
-                <div className="mt-1 font-mono text-[10px] text-ink-4">이번 심사: {runId.slice(0, 28)}…</div>
+                <div className="mt-1 font-mono text-[11px] text-ink-4">이번 심사: {runId.slice(0, 28)}…</div>
               ) : (
-                <div className="mt-1 text-[10px] text-ink-4">열려 있는 심사 없음 — 최근 심사를 조회해 질문할 수 있습니다</div>
+                <div className="mt-1 text-[11px] text-ink-4">열려 있는 심사 없음 — 최근 심사를 조회해 질문할 수 있습니다</div>
               )}
             </div>
             <button type="button" onClick={() => setOpen(false)} className="p-1 text-ink-3 hover:text-ink" aria-label="닫기">
@@ -144,7 +144,7 @@ export function CopilotPanel({ runId, workspaceId }: Props) {
                 {m.tools && m.tools.length > 0 && (
                   <div className="mt-1 flex flex-wrap gap-1">
                     {m.tools.map((t, j) => (
-                      <span key={j} className="rounded bg-surface-2 px-1.5 py-0.5 font-mono text-[9.5px] text-ink-4">
+                      <span key={j} className="rounded bg-surface-2 px-1.5 py-0.5 font-mono text-[11px] text-ink-4">
                         🔍 {t}
                       </span>
                     ))}
