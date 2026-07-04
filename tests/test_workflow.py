@@ -2218,23 +2218,40 @@ def test_llm_gateway_reads_model_from_environment(monkeypatch: pytest.MonkeyPatc
 
 
 def test_llm_gateway_routes_claude_model_to_anthropic_tool_use(monkeypatch: pytest.MonkeyPatch) -> None:
+    class FakeStream:
+        """게이트웨이는 messages.stream(...) 컨텍스트로 최종 메시지를 얻는다(대형 요청 드랍 방지)."""
+
+        def __init__(self, message: object) -> None:
+            self._message = message
+
+        def __enter__(self) -> "FakeStream":
+            return self
+
+        def __exit__(self, *args: object) -> None:
+            return None
+
+        def get_final_message(self) -> object:
+            return self._message
+
     class FakeAnthropicClient:
         def __init__(self, **_: object) -> None:
             self.messages = self
 
-        def create(self, **kwargs: object) -> object:
+        def stream(self, **kwargs: object) -> FakeStream:
             tool_choice = kwargs["tool_choice"]
             assert isinstance(tool_choice, dict)
-            return SimpleNamespace(
-                id="msg_test",
-                stop_reason="tool_use",
-                content=[
-                    SimpleNamespace(
-                        type="tool_use",
-                        name=tool_choice["name"],
-                        input={"ok": True},
-                    )
-                ],
+            return FakeStream(
+                SimpleNamespace(
+                    id="msg_test",
+                    stop_reason="tool_use",
+                    content=[
+                        SimpleNamespace(
+                            type="tool_use",
+                            name=tool_choice["name"],
+                            input={"ok": True},
+                        )
+                    ],
+                )
             )
 
     monkeypatch.setenv("ANTHROPIC_API_KEY", "test-anthropic-key")
