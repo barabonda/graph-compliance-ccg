@@ -62,7 +62,9 @@ function SectionTitle({ icon, color, text }: { icon: string; color: string; text
   );
 }
 
-/** 놓쳤을 수 있는 고지 한 줄. 토글은 '적용/시뮬레이션'이 아니라 '심사자 확인함'. */
+/** 놓쳤을 수 있는 고지 한 줄. 토글은 '적용/시뮬레이션'이 아니라 '심사자 확인함'.
+ * 색 예산: 전면 워시 대신 흰 카드 + 좌측 세로 바(법령=빨강·심의기준=앰버)만 —
+ * 본문은 흰 배경 위 진한 잉크라 작은 글자도 또렷하다. */
 function VerifyRow({
   item,
   acknowledged,
@@ -72,36 +74,30 @@ function VerifyRow({
   acknowledged: boolean;
   onAck: () => void;
 }) {
+  const barColor = acknowledged ? "var(--pass)" : item.authorityTier === "law" ? "var(--reject)" : "var(--revise)";
   return (
     <div
-      className="flex items-start gap-3 rounded-[11px] px-3.5 py-3"
-      style={{
-        border: `1px solid ${acknowledged ? "var(--pass)" : "var(--revise)"}40`,
-        background: acknowledged ? "var(--surface-2)" : "var(--revise-bg)",
-        opacity: acknowledged ? 0.82 : 1,
-      }}
+      className="relative flex items-start gap-3 rounded-[11px] border border-line bg-surface py-3 pr-3.5 pl-4.5"
+      style={{ opacity: acknowledged ? 0.72 : 1 }}
     >
-      <Icon
-        name={acknowledged ? "check" : "alert"}
-        size={16}
-        color={acknowledged ? "var(--pass)" : "var(--revise)"}
-        style={{ flexShrink: 0, marginTop: 1 }}
-      />
+      <span className="absolute top-3 bottom-3 left-0 w-[3px] rounded-full" style={{ background: barColor }} />
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-center gap-2">
-          <span className="text-[13.5px] font-bold text-ink">{item.label}</span>
+          <span className={`text-[14px] font-bold text-ink ${acknowledged ? "line-through decoration-ink-4" : ""}`}>
+            {item.label}
+          </span>
           {item.required && (
             <span className="rounded-full bg-reject-bg px-1.5 py-px text-[11px] font-bold text-reject">필수</span>
           )}
           <TierBadge tier={item.authorityTier} note={item.tierNote} />
         </div>
-        <div className="mt-1 text-[12px] leading-relaxed text-ink-3">
+        <div className="mt-1 text-[12.5px] leading-relaxed break-keep text-ink-2">
           광고에서 이 고지를 자동으로 찾지 못했습니다. 표시 위치·맥락을 직접 확인하세요.
           {item.desc ? ` (${item.desc})` : ""}
         </div>
         {item.basis && (
-          <div className="mt-1.5 text-[11.5px] leading-relaxed break-keep text-ink-4" title={item.basis}>
-            <b className="text-ink-3">근거</b> · {abbreviateLawNames(item.basis)}
+          <div className="mt-1.5 text-[12px] leading-relaxed break-keep text-ink-3" title={item.basis}>
+            <b className="text-ink-2">근거</b> · {abbreviateLawNames(item.basis)}
             {item.coBasis ? ` · 병기 ${abbreviateLawNames(item.coBasis)}` : ""}
           </div>
         )}
@@ -110,7 +106,7 @@ function VerifyRow({
         type="button"
         onClick={onAck}
         aria-pressed={acknowledged}
-        className="inline-flex shrink-0 items-center gap-1 rounded-md border px-2.5 py-1 text-[11.5px] font-bold"
+        className="inline-flex shrink-0 items-center gap-1 rounded-md border px-2.5 py-1.5 text-[12px] font-bold"
         style={
           acknowledged
             ? { borderColor: "var(--pass)", background: "var(--pass-bg)", color: "var(--pass)" }
@@ -239,15 +235,13 @@ export function ExceptionView({ result, acknowledged, onToggleAck }: Props) {
             satisfied.map((item) => (
               <div
                 key={item.id}
-                className="flex items-center gap-3 rounded-[10px] px-3.5 py-2.5"
-                style={{ background: "var(--pass-bg)" }}
+                className="relative flex items-center gap-3 rounded-[10px] border border-line bg-surface py-2.5 pr-3.5 pl-4.5"
               >
+                <span className="absolute top-2.5 bottom-2.5 left-0 w-[3px] rounded-full bg-pass" />
                 <Icon name="check" size={15} color="var(--pass)" stroke={2.4} style={{ flexShrink: 0 }} />
-                <span className="min-w-0 flex-1 text-[13px] font-semibold" style={{ color: "var(--pass)" }}>
-                  {item.label}
-                </span>
+                <span className="min-w-0 flex-1 text-[13.5px] font-bold text-ink">{item.label}</span>
                 <TierBadge tier={item.authorityTier} note={item.tierNote} />
-                <span className="max-w-[45%] truncate text-[11.5px] text-ink-3" title={item.basis || item.desc}>
+                <span className="max-w-[45%] truncate text-[12px] text-ink-3" title={item.basis || item.desc}>
                   {item.basis ? abbreviateLawNames(item.basis) : item.desc}
                 </span>
               </div>
