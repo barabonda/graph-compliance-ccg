@@ -1,0 +1,304 @@
+{
+  "review_id": "woori_0335",
+  "bank_key": "woori",
+  "bank_label": "우리은행",
+  "title": "9월 가입 혜택 한눈에 모아보기",
+  "review_text_chars": 5825,
+  "workspace_id": "graphcompliance_mvp_jb_20260530",
+  "status": "completed",
+  "error": null,
+  "duration_sec": 202.4776410409977,
+  "final_verdict": "reject",
+  "routing": {
+    "ad_scope": "product_ad",
+    "preapproval_required_status": "required",
+    "review_phrase_required_before_publication": true,
+    "review_phrase_expected_in_input": false,
+    "review_phrase_input_status": "absent_expected"
+  },
+  "review_run_id": "review_run_30a8113885ee26f0",
+  "violations": [
+    {
+      "cu_id": "cu_legal_article_47c9e994975df429",
+      "verdict": "NON_COMPLIANT",
+      "score": 0.82,
+      "principle": "광고규제",
+      "source_article": "표시ㆍ광고의 공정화에 관한 법률 제4조",
+      "subject": "금융상품 광고 및 판매 준법 검토",
+      "legal_basis": "표시·광고의 공정화에 관한 법률 제4조 제1항 및 제2항에 따르면 공정거래위원회가 고시한 ‘중요정보’와 표시·광고 방법을 사업자가 표시·광고에 포함해야 하는데(표시·광고를 하지 아니하면 소비자 피해 우려), 해당 문구는 ‘추첨없이’ 및 ‘최대 29.9만원’의 적용범위·산정·지급 기준이 문장에 없어 중요정보 제공의무(고시된 중요정보의 표시·광고) 취지에 반할 소지가 있다. (표시ㆍ광고의 공정화에 관한 법률 제4조 제1항, 제5항 및 중요정보의 고시 및 통합공고)",
+      "evidence_span": "추첨없이 최대 29.9만원혜택",
+      "why": "해당 문구 ‘추첨없이 최대 29.9만원혜택’은 혜택 상한을 제시하면서도 산정·지급 기준(어떤 조건/대상/절차로 실제 지급액이 정해지는지)이 문장에 제시되지 않아 소비자가 중요한 정보를 오인할 우려가 있다. 이는 표시·광고의 공정화를 위해 공정거래위원회가 고시한 중요정보를 표시·광고에 포함해야 한다는 의무 취지에 비추어 부적합하므로 취지에 반하는 위반으로 판단한다(해당 문구에 산정·지급 기준 미기재)."
+    },
+    {
+      "cu_id": "cu_legal_article_4b87a5a783d001df",
+      "verdict": "INSUFFICIENT",
+      "score": 0.45,
+      "principle": "광고규제",
+      "source_article": "표시ㆍ광고의 공정화에 관한 법률 시행령 제6조",
+      "subject": "금융상품 광고 및 판매 준법 검토",
+      "legal_basis": "표시·광고의 공정화에 관한 법률 시행령 제6조는 실증자료를 열람하게 하거나 공개하는 경우 소비자의 구매 선택에 필요한 정보를 요약·정리할 수 있도록 하는데, 이 조문 자체는 ‘실증자료 공개의무’가 아니라 제공 방식·범위에 관한 재량/요건을 다룬다. (표시ㆍ광고의 공정화에 관한 법률 시행령 제6조 제1항)",
+      "evidence_span": "추첨없이 최대 29.9만원혜택",
+      "why": "해당 판단기준은 ‘실증자료 공개 시 정보 제공범위’이지만, 제시된 사실은 ‘실증자료(시험/조사) 공개 여부’나 ‘요약·정리된 정보의 적정성’에 관한 근거가 없다. 또한 법적 요소 중 비교 대상은 문구에서 확인되지 않아 기준 충족 여부가 불완전하므로, 위반을 단정하기에는 자료가 부족하여 적합성 판단은 ‘미흡’ 수준에 그친다."
+    },
+    {
+      "cu_id": "cu_legal_clause_10b53bd2cf638c2c",
+      "verdict": "INSUFFICIENT",
+      "score": 0.38,
+      "principle": "광고규제",
+      "source_article": "금융소비자 보호에 관한 법률 시행령 제20조 ①-5",
+      "subject": "금융소비자 관련 행위",
+      "legal_basis": "표시·광고의 공정화에 관한 법률 제3조 제1항은 소비자를 속이거나 잘못 알게 할 우려가 있는 표시·광고로서 공정한 거래질서를 해칠 우려가 있는 행위(그 중 ‘비방적인 표시·광고’ 포함)를 금지한다. 다만 해당 조문은 ‘비방’의 성립을 위해 해당 표시·광고가 특정 대상에 대한 비방으로 기능하는지 등이 필요하다. (표시·광고의 공정화에 관한 법률 제3조 제1항 및 제3조 제1항 제4호)",
+      "evidence_span": "추첨없이 최대 29.9만원혜택",
+      "why": "해당 심의항목은 ‘비방적인 표시·광고’ 유형을 전제로 하는데, 제공된 문구 사실관계만으로는 비방 대상이나 비방 취지(타 사업자/상품의 폄하)가 확인되지 않는다. 따라서 해당 금지유형에 대한 적용 가능성은 낮고, 위반을 단정하기도 어렵다."
+    },
+    {
+      "cu_id": "cu_legal_clause_5e42ad8b55bc652c",
+      "verdict": "INSUFFICIENT",
+      "score": 0.35,
+      "principle": "광고규제",
+      "source_article": "표시ㆍ광고의 공정화에 관한 법률 제3조 ①-4",
+      "subject": "광고·판매 행위자",
+      "legal_basis": "표시·광고의 공정화에 관한 법률 제3조 제1항은 소비자를 속이거나 잘못 알게 할 우려가 있는 표시·광고로서 공정한 거래질서를 해칠 우려가 있는 행위(그 중 ‘비방적인 표시·광고’ 포함)를 금지한다. (표시·광고의 공정화에 관한 법률 제3조 제1항 및 제1항 제4호)",
+      "evidence_span": "추첨없이 최대 29.9만원혜택",
+      "why": "비방 유형을 적용하기 위한 핵심 사실(비방 대상/내용)이 문구에서 확인되지 않아 해당 금지유형 적용이 곤란하다. 따라서 위반 여부를 확정하기에는 정보가 부족하다."
+    },
+    {
+      "cu_id": "cu_legal_clause_3c513cb5b8b57d42",
+      "verdict": "INSUFFICIENT",
+      "score": 0.42,
+      "principle": "부당권유행위 금지",
+      "source_article": "금융소비자 보호에 관한 법률 제21조 제21조",
+      "subject": "금융상품판매업자등",
+      "legal_basis": "금융소비자 보호에 관한 법률 제21조 및 같은 법 시행령 제20조 계열 규정은 금융상품 계약 체결을 권유하는 경우 불확실한 사항에 대한 단정적 판단, 비교대상·기준 미제시 등으로 소비자를 오인하게 할 우려가 있는 행위를 금지한다. (금융소비자 보호에 관한 법률 제21조; 근거 조문에서 단정적 판단/비교 기준 미제시 금지)",
+      "evidence_span": "청년드림 요금제로 개통하면 최대 5만원 (선착순)",
+      "why": "해당 문구는 ‘청년드림 요금제’ 및 ‘선착순’으로 조건을 한정하고 있어 오인 유발 가능성 자체는 존재하나, 심의항목의 핵심 요소인 비교 대상 제시는 확인되지 않는다. 또한 비교·우월을 전제로 한 위반유형으로 단정할 만큼의 사실이 부족하여 적합성 판단은 불충분하다."
+    },
+    {
+      "cu_id": "cu_legal_article_07219c9fc08939a2",
+      "verdict": "INSUFFICIENT",
+      "score": 0.5,
+      "principle": "광고규제",
+      "source_article": "표시ㆍ광고의 공정화에 관한 법률 시행령 제4조",
+      "subject": "금융상품 광고 및 판매 준법 검토",
+      "legal_basis": "표시·광고의 공정화에 관한 법률 시행령 제4조는 사업자가 표시·광고 중 사실과 관련한 사항을 ‘실증’하기 위해 시험 또는 조사하려는 경우, 객관적·타당한 방법 및 독립성 등 요건을 충족해야 함을 정한다. (표시·광고의 공정화에 관한 법률 시행령 제4조 제1항 제1호·제2호)",
+      "evidence_span": "Npay 포인트는 ... 유효기간(60일) 만료 이후 연장 및 환불, 재발송이 불가능합니다.",
+      "why": "해당 문구는 ‘실증자료(시험·조사) 공개/수행’에 관한 사실이 아니라, 포인트 사용 제한(유효기간 및 환불/재발송 불가) 고지에 관한 내용이다. 따라서 시행령 제4조의 ‘실증을 하려는 경우’ 요건을 전제로 위반 여부를 판단할 수 있는 사실(실증 행위 및 그 방법/기관)이 제공되지 않아, 위반 단정이 어렵다. / 근거 정합성 경고: evidence_span이 이 anchor의 격리된 증거창 밖이라 위반을 이 anchor에 귀속할 수 없습니다. (Evidence grounding warning: evidence_span was outside this anchor's isolated evidence window.)"
+    },
+    {
+      "cu_id": "cu_legal_clause_d17c14ff653d2849",
+      "verdict": "INSUFFICIENT",
+      "score": 0.0,
+      "principle": "광고규제",
+      "source_article": "표시ㆍ광고의 공정화에 관한 법률 제4조 ⑤",
+      "subject": "사업자등",
+      "legal_basis": "",
+      "evidence_span": "",
+      "why": "이 심의 항목은 자동 판단이 완료되지 않아 '근거 부족(추가 확인 필요)'으로 분류했습니다. 심사자가 직접 확인해 주세요."
+    },
+    {
+      "cu_id": "cu_legal_clause_5e42ad8b55bc652c",
+      "verdict": "INSUFFICIENT",
+      "score": 0.0,
+      "principle": "광고규제",
+      "source_article": "표시ㆍ광고의 공정화에 관한 법률 제3조 ①-4",
+      "subject": "광고·판매 행위자",
+      "legal_basis": "",
+      "evidence_span": "",
+      "why": "이 심의 항목은 자동 판단이 완료되지 않아 '근거 부족(추가 확인 필요)'으로 분류했습니다. 심사자가 직접 확인해 주세요."
+    }
+  ],
+  "violation_count": 8,
+  "disclosure_requirements": [
+    {
+      "id": "disclosure_deposit_rate_basis",
+      "label": "금리 범위 및 산정방법",
+      "source": "은행 광고심의 기준 제16조/제17조",
+      "why": "최고금리, 우대금리, 적용기간, 산정방법을 소비자가 오인하지 않도록 함께 표시해야 합니다."
+    },
+    {
+      "id": "disclosure_deposit_preferential_conditions",
+      "label": "우대조건 및 적용기간",
+      "source": "은행 광고심의 기준 제18조",
+      "why": "특판, 이벤트, 제휴 혜택은 대상, 자격요건, 기간, 내용을 함께 안내해야 합니다."
+    },
+    {
+      "id": "disclosure_depositor_protection",
+      "label": "예금자보호 부보내용",
+      "source": "은행 광고심의 기준 제16조",
+      "why": "예금성 상품 광고는 예금자보호법 등에 따른 부보내용을 유지 고지로 관리해야 합니다."
+    },
+    {
+      "id": "disclosure_review_number",
+      "label": "심의필 번호 및 유효기간",
+      "source": "은행 광고심의 기준 제9조/제16조",
+      "why": "사전승인 또는 연합회 심의 결과를 소비자가 쉽게 인식할 수 있도록 표시해야 합니다."
+    },
+    {
+      "id": "disclosure_review_process",
+      "label": "준법감시인 사전승인 및 심의필 표시",
+      "source": "은행 광고심의 기준 제4조/제9조",
+      "why": "은행 광고는 내부통제기준에 따른 사전승인과 심의필 표시 여부를 운영 절차로 확인해야 합니다."
+    }
+  ],
+  "overall_impression": {
+    "track": "B",
+    "standard": "대법원 2017두60109 전체적·궁극적 인상 기준",
+    "verdict": "MEDIUM",
+    "misleading_risk_score": 0.68,
+    "why": "복잡(다중) 조건이 존재함에도 ‘추첨 없음/응모만/조건 없이/최대’ 등의 혜택 문구가 상위 위계에 먼저 제시되어, 소비자가 ‘큰 혜택이 간단히 확정적으로 제공된다’는 전체 인상을 갖기 쉬운 구조다. 다만 다양한 유보(대상 요금제 제외, 선착순, 응모 절차, 마케팅/SMS 동의 및 연락처 정확성, 포인트 유효기간, 이벤트 변경·종료 가능성 등)가 footnote로는 제시되어 있어 완전 오인(강한 단정)은 어렵다. 따라서 오인위험은 중간 수준(MEDIUM)으로 판단."
+  },
+  "overall_impression_risk": true,
+  "article_aggregation": [
+    {
+      "key": "표시ㆍ광고의 공정화에 관한 법률 제4조",
+      "article": "표시ㆍ광고의 공정화에 관한 법률 제4조",
+      "principles": [
+        "광고규제"
+      ],
+      "effective_verdict": "NON_COMPLIANT",
+      "max_score": 0.82,
+      "cu_count": 1,
+      "issue_count": 1,
+      "cu_titles": [
+        "중요정보 누락(또는 방법 불일치) 리스크"
+      ],
+      "anchor_spans": [
+        "추첨없이 최대 29.9만원혜택",
+        "친구 1명만 추천해도 5만원"
+      ]
+    },
+    {
+      "key": "표시ㆍ광고의 공정화에 관한 법률 시행령 제6조",
+      "article": "표시ㆍ광고의 공정화에 관한 법률 시행령 제6조",
+      "principles": [
+        "광고규제"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.45,
+      "cu_count": 1,
+      "issue_count": 1,
+      "cu_titles": [
+        "실증자료 공개 시 정보 제공범위 부적정 리스크"
+      ],
+      "anchor_spans": [
+        "추첨없이 최대 29.9만원혜택"
+      ]
+    },
+    {
+      "key": "금융소비자 보호에 관한 법률 제21조 제21조",
+      "article": "금융소비자 보호에 관한 법률 제21조 제21조",
+      "principles": [
+        "부당권유행위 금지"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.42,
+      "cu_count": 1,
+      "issue_count": 1,
+      "cu_titles": [
+        "비교·우월 표현에 대한 객관 근거 필요"
+      ],
+      "anchor_spans": [
+        "청년드림 요금제로 개통하면 최대 5만원 (선착순)"
+      ]
+    },
+    {
+      "key": "금융소비자 보호에 관한 법률 시행령 제20조 ①-5",
+      "article": "금융소비자 보호에 관한 법률 시행령 제20조 ①-5",
+      "principles": [
+        "광고규제"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.38,
+      "cu_count": 1,
+      "issue_count": 1,
+      "cu_titles": [
+        "계약/권리의무 중대 사항의 사실불일치 또는 불명확 표현"
+      ],
+      "anchor_spans": [
+        "추첨없이 최대 29.9만원혜택"
+      ]
+    },
+    {
+      "key": "표시ㆍ광고의 공정화에 관한 법률 제3조 ①-4",
+      "article": "표시ㆍ광고의 공정화에 관한 법률 제3조 ①-4",
+      "principles": [
+        "광고규제"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.35,
+      "cu_count": 1,
+      "issue_count": 1,
+      "cu_titles": [
+        "비방적인 표시·광고로 인한 소비자 오인 및 거래질서 저해"
+      ],
+      "anchor_spans": [
+        "추첨없이 최대 29.9만원혜택"
+      ]
+    },
+    {
+      "key": "표시ㆍ광고의 공정화에 관한 법률 제4조 ⑤",
+      "article": "표시ㆍ광고의 공정화에 관한 법률 제4조 ⑤",
+      "principles": [
+        "광고규제"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.0,
+      "cu_count": 1,
+      "issue_count": 1,
+      "cu_titles": [
+        "중요정보 누락에 따른 소비자 오인·피해 위험"
+      ],
+      "anchor_spans": [
+        "V 개통하고 응모만 해도 3만원"
+      ]
+    }
+  ],
+  "principle_aggregation": [
+    {
+      "key": "광고규제",
+      "article": "표시ㆍ광고의 공정화에 관한 법률 제4조",
+      "principles": [
+        "광고규제"
+      ],
+      "effective_verdict": "NON_COMPLIANT",
+      "max_score": 0.82,
+      "cu_count": 5,
+      "issue_count": 5,
+      "cu_titles": [
+        "계약/권리의무 중대 사항의 사실불일치 또는 불명확 표현",
+        "비방적인 표시·광고로 인한 소비자 오인 및 거래질서 저해",
+        "실증자료 공개 시 정보 제공범위 부적정 리스크",
+        "중요정보 누락(또는 방법 불일치) 리스크",
+        "중요정보 누락에 따른 소비자 오인·피해 위험"
+      ],
+      "anchor_spans": [
+        "V 개통하고 응모만 해도 3만원",
+        "추첨없이 최대 29.9만원혜택",
+        "친구 1명만 추천해도 5만원"
+      ]
+    },
+    {
+      "key": "부당권유행위 금지",
+      "article": "금융소비자 보호에 관한 법률 제21조 제21조",
+      "principles": [
+        "부당권유행위 금지"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.42,
+      "cu_count": 1,
+      "issue_count": 1,
+      "cu_titles": [
+        "비교·우월 표현에 대한 객관 근거 필요"
+      ],
+      "anchor_spans": [
+        "청년드림 요금제로 개통하면 최대 5만원 (선착순)"
+      ]
+    }
+  ],
+  "policy_evidence_chain_counts": {
+    "legal_basis_chains": 9,
+    "disclosure_chains": 9,
+    "exception_chains": 9,
+    "chain_diagnostics": 9
+  }
+}

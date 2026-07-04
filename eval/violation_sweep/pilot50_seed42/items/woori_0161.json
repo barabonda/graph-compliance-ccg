@@ -1,0 +1,181 @@
+{
+  "review_id": "woori_0161",
+  "bank_key": "woori",
+  "bank_label": "우리은행",
+  "title": "주택청약 1+1 더블혜택 이벤트",
+  "review_text_chars": 1054,
+  "workspace_id": "graphcompliance_mvp_jb_20260530",
+  "status": "completed",
+  "error": null,
+  "duration_sec": 141.23758629099757,
+  "final_verdict": "needs_review",
+  "routing": {
+    "ad_scope": "product_ad",
+    "preapproval_required_status": "required",
+    "review_phrase_required_before_publication": true,
+    "review_phrase_expected_in_input": false,
+    "review_phrase_input_status": "absent_expected"
+  },
+  "review_run_id": "review_run_337707d85fbab9f9",
+  "violations": [
+    {
+      "cu_id": "cu_legal_article_47c9e994975df429",
+      "verdict": "INSUFFICIENT",
+      "score": 0.55,
+      "principle": "광고규제",
+      "source_article": "표시ㆍ광고의 공정화에 관한 법률 제4조",
+      "subject": "금융상품 광고 및 판매 준법 검토",
+      "legal_basis": "표시ㆍ광고의 공정화에 관한 법률 제4조제1항은 공정거래위원회가 ‘중요정보’와 ‘표시ㆍ광고 방법’을 고시한 경우, 사업자는 그 고시된 중요정보를 표시·광고해야 한다(표시ㆍ광고의 공정화에 관한 법률 제4조 → 시행령/관련 위임 → 감독·심의기준).",
+      "evidence_span": "우리 마음속 첫 번째 금융 청약저축 가입하면 WON뱅킹에서 1+1 더블혜택",
+      "why": "광고 문구가 ‘중요정보’에 해당하는지(공정거래위원회가 고시한 중요정보 항목이 무엇인지) 및 그 중요정보·표시 방법 불충족이 무엇인지에 대한 특정 사실이 제시되지 않았다. 또한 동일 광고 내에서 ‘SMS 마케팅 동의 필수’, ‘선착순 조기 소진 시 자동마감’ 등 조건/제한 고지 존재가 확인되므로(완화·한정), ‘중요정보 전부 미표시’와 같은 단정 위반까지는 판단하기 어렵다. 따라서 법정 중요정보 고시 요건의 불충족 여부에 대한 근거가 부족하다."
+    },
+    {
+      "cu_id": "cu_legal_article_76887cffdfe55bc4",
+      "verdict": "INSUFFICIENT",
+      "score": 0.4,
+      "principle": "설명의무",
+      "source_article": "금융소비자 보호에 관한 법률 시행령 제24조",
+      "subject": "금융상품 광고 및 판매 준법 검토",
+      "legal_basis": "금융소비자 보호에 관한 법률 시행령 제24조는 금융상품판매대리·중개업자가 금융소비자에게 ‘급부를 받을 수 있는지 여부’ 등 대통령령으로 정하는 사항을 고지하고, 표지 게시·증표 제시 요건을 충족해야 한다(금융소비자 보호에 관한 법률 시행령 제24조 → 관련 법 제26조 위임 → 심의기준).",
+      "evidence_span": "· 주택청약종합저축은 예금자보호법에 의해 예금보험공사가 보호하지 않습니다. 단, 주택도시기기금에 의해 정부가 별도 관리하고 있습니다.",
+      "why": "해당 광고 문구는 예금자보호 관련 내용을 고지하고 있으나, 금융상품판매대리·중개업자의 ‘고지의무 등’(시행령 제24조)이 요구하는 구체 고지 항목들이 이 문구만으로 충족되는지 확인이 되지 않는다. 따라서 위반 또는 적합을 단정하기 어렵고, 근거 부족으로 미흡 판정은 보류한다."
+    }
+  ],
+  "violation_count": 2,
+  "disclosure_requirements": [
+    {
+      "id": "disclosure_deposit_rate_basis",
+      "label": "금리 범위 및 산정방법",
+      "source": "은행 광고심의 기준 제16조/제17조",
+      "why": "최고금리, 우대금리, 적용기간, 산정방법을 소비자가 오인하지 않도록 함께 표시해야 합니다."
+    },
+    {
+      "id": "disclosure_deposit_preferential_conditions",
+      "label": "우대조건 및 적용기간",
+      "source": "은행 광고심의 기준 제18조",
+      "why": "특판, 이벤트, 제휴 혜택은 대상, 자격요건, 기간, 내용을 함께 안내해야 합니다."
+    },
+    {
+      "id": "disclosure_depositor_protection",
+      "label": "예금자보호 부보내용",
+      "source": "은행 광고심의 기준 제16조",
+      "why": "예금성 상품 광고는 예금자보호법 등에 따른 부보내용을 유지 고지로 관리해야 합니다."
+    },
+    {
+      "id": "disclosure_review_number",
+      "label": "심의필 번호 및 유효기간",
+      "source": "은행 광고심의 기준 제9조/제16조",
+      "why": "사전승인 또는 연합회 심의 결과를 소비자가 쉽게 인식할 수 있도록 표시해야 합니다."
+    },
+    {
+      "id": "disclosure_review_process",
+      "label": "준법감시인 사전승인 및 심의필 표시",
+      "source": "은행 광고심의 기준 제4조/제9조",
+      "why": "은행 광고는 내부통제기준에 따른 사전승인과 심의필 표시 여부를 운영 절차로 확인해야 합니다."
+    }
+  ],
+  "overall_impression": {
+    "track": "B",
+    "standard": "대법원 2017두60109 전체적·궁극적 인상 기준",
+    "verdict": "MEDIUM",
+    "misleading_risk_score": 0.68,
+    "why": "본 광고는 경품 이벤트 성격의 ‘혜택-조건’ 구조이며, 예금자보호 미해당 고지 등 중요한 위험/유의사항도 제공되어 있어 사실관계의 직접 모순은 뚜렷하지 않습니다(FACT CONTRADICTIONS 없음). 그러나 ‘선착순 전원’처럼 강한 혜택 신호와 ‘조기 소진 시 자동마감’ 고지가 낮은 위계(footnote)로 분리되고, SMS 동의/수신 및 계좌 유지 등 제외·자격 상실 조건이 누적되어 혜택의 확정성 인상을 강화하는 방향으로 전체 인상이 형성될 수 있어 오인 위험을 MEDIUM으로 판단합니다."
+  },
+  "overall_impression_risk": true,
+  "article_aggregation": [
+    {
+      "key": "표시ㆍ광고의 공정화에 관한 법률 제4조",
+      "article": "표시ㆍ광고의 공정화에 관한 법률 제4조",
+      "principles": [
+        "광고규제"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.55,
+      "cu_count": 1,
+      "issue_count": 1,
+      "cu_titles": [
+        "중요정보 누락(또는 방법 불일치) 리스크"
+      ],
+      "anchor_spans": [
+        "우리 마음속 첫 번째 금융 청약저축 가입하면 WON뱅킹에서 1+1 더블혜택"
+      ]
+    },
+    {
+      "key": "금융소비자 보호에 관한 감독규정 제15조",
+      "article": "금융소비자 보호에 관한 감독규정 제15조",
+      "principles": [
+        "부당권유행위 금지"
+      ],
+      "effective_verdict": "NOT_APPLICABLE",
+      "max_score": 0.0,
+      "cu_count": 1,
+      "issue_count": 0,
+      "cu_titles": [
+        "부당권유행위 금지 관련 고시사항 미안내로 인한 위반 가능성"
+      ],
+      "anchor_spans": [
+        "우리 마음속 첫 번째 금융 청약저축 가입하면 WON뱅킹에서 1+1 더블혜택"
+      ]
+    },
+    {
+      "key": "금융소비자 보호에 관한 감독규정 제15조 ①-3",
+      "article": "금융소비자 보호에 관한 감독규정 제15조 ①-3",
+      "principles": [
+        "부당권유행위 금지"
+      ],
+      "effective_verdict": "NOT_APPLICABLE",
+      "max_score": 0.0,
+      "cu_count": 1,
+      "issue_count": 0,
+      "cu_titles": [
+        "방문·전화 권유자 성명/소속 고지 누락"
+      ],
+      "anchor_spans": [
+        "우리 마음속 첫 번째 금융 청약저축 가입하면 WON뱅킹에서 1+1 더블혜택"
+      ]
+    }
+  ],
+  "principle_aggregation": [
+    {
+      "key": "광고규제",
+      "article": "표시ㆍ광고의 공정화에 관한 법률 제4조",
+      "principles": [
+        "광고규제"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.55,
+      "cu_count": 1,
+      "issue_count": 1,
+      "cu_titles": [
+        "중요정보 누락(또는 방법 불일치) 리스크"
+      ],
+      "anchor_spans": [
+        "우리 마음속 첫 번째 금융 청약저축 가입하면 WON뱅킹에서 1+1 더블혜택"
+      ]
+    },
+    {
+      "key": "부당권유행위 금지",
+      "article": "금융소비자 보호에 관한 감독규정 제15조",
+      "principles": [
+        "부당권유행위 금지"
+      ],
+      "effective_verdict": "NOT_APPLICABLE",
+      "max_score": 0.0,
+      "cu_count": 2,
+      "issue_count": 0,
+      "cu_titles": [
+        "방문·전화 권유자 성명/소속 고지 누락",
+        "부당권유행위 금지 관련 고시사항 미안내로 인한 위반 가능성"
+      ],
+      "anchor_spans": [
+        "우리 마음속 첫 번째 금융 청약저축 가입하면 WON뱅킹에서 1+1 더블혜택"
+      ]
+    }
+  ],
+  "policy_evidence_chain_counts": {
+    "legal_basis_chains": 7,
+    "disclosure_chains": 7,
+    "exception_chains": 7,
+    "chain_diagnostics": 7
+  }
+}

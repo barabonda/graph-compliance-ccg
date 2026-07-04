@@ -1,0 +1,20 @@
+{
+  "review_id": "woori_0318",
+  "bank_key": "woori",
+  "bank_label": "우리은행",
+  "title": "더블쿠폰 요금제 가입하고, 쿠폰 2개 받아가자!",
+  "review_text_chars": 3964,
+  "workspace_id": "graphcompliance_mvp_jb_20260530",
+  "status": "failed",
+  "error": "BadRequestError: Error code: 400 - {'error': {'message': 'Your input exceeds the context window of this model. Please adjust your input and try again.', 'type': 'invalid_request_error', 'param': 'input', 'code': 'context_length_exceeded'}}",
+  "duration_sec": 175.19630420899193,
+  "final_verdict": null,
+  "violations": [],
+  "violation_count": 0,
+  "disclosure_requirements": [],
+  "overall_impression": {},
+  "overall_impression_risk": false,
+  "article_aggregation": [],
+  "principle_aggregation": [],
+  "policy_evidence_chain_counts": {}
+}

@@ -1,0 +1,20 @@
+{
+  "review_id": "woori_0217",
+  "bank_key": "woori",
+  "bank_label": "우리은행",
+  "title": "우리페이X우리은행 올 여름 식스펙ay",
+  "review_text_chars": 13768,
+  "workspace_id": "graphcompliance_mvp_jb_20260530",
+  "status": "failed",
+  "error": "APITimeoutError: Request timed out.",
+  "duration_sec": 798.3799004580069,
+  "final_verdict": null,
+  "violations": [],
+  "violation_count": 0,
+  "disclosure_requirements": [],
+  "overall_impression": {},
+  "overall_impression_risk": false,
+  "article_aggregation": [],
+  "principle_aggregation": [],
+  "policy_evidence_chain_counts": {}
+}

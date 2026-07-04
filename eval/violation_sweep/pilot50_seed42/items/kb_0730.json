@@ -1,0 +1,20 @@
+{
+  "review_id": "kb_0730",
+  "bank_key": "kb",
+  "bank_label": "국민은행",
+  "title": "KB청춘마루 8월 프로그램 및 참여 안내 -응모『방구석 라이프』",
+  "review_text_chars": 20979,
+  "workspace_id": "graphcompliance_mvp_jb_20260530",
+  "status": "failed",
+  "error": "APITimeoutError: Request timed out.",
+  "duration_sec": 443.3680820419977,
+  "final_verdict": null,
+  "violations": [],
+  "violation_count": 0,
+  "disclosure_requirements": [],
+  "overall_impression": {},
+  "overall_impression_risk": false,
+  "article_aggregation": [],
+  "principle_aggregation": [],
+  "policy_evidence_chain_counts": {}
+}

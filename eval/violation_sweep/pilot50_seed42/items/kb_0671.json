@@ -1,0 +1,218 @@
+{
+  "review_id": "kb_0671",
+  "bank_key": "kb",
+  "bank_label": "국민은행",
+  "title": "새로운 KB스타뱅킹 런칭기념 「KB Star 정기예금」특별금리 이벤트!",
+  "review_text_chars": 3569,
+  "workspace_id": "graphcompliance_mvp_jb_20260530",
+  "status": "completed",
+  "error": null,
+  "duration_sec": 184.7806760000094,
+  "final_verdict": "needs_review",
+  "routing": {
+    "ad_scope": "product_ad",
+    "preapproval_required_status": "required",
+    "review_phrase_required_before_publication": true,
+    "review_phrase_expected_in_input": false,
+    "review_phrase_input_status": "absent_expected"
+  },
+  "review_run_id": "review_run_136121e8a7a145da",
+  "violations": [
+    {
+      "cu_id": "cu_legal_clause_a1729f7b18b457d6",
+      "verdict": "INSUFFICIENT",
+      "score": 0.35,
+      "principle": "광고규제",
+      "source_article": "금융소비자 보호에 관한 법률 제22조 ③",
+      "subject": "금융상품판매업자등",
+      "legal_basis": "금융소비자 보호에 관한 법률 제22조 ③은 금융상품판매업자등이 하는 금융상품등 광고에 ‘금융상품 설명서 및 약관 읽어볼 것을 권유하는 내용’ 등 필수 기재사항을 포함하라고 요구한다(금융소비자보호법 시행령 광고 방법·절차/금지행위로 세부가 위임, 금융소비자보호 감독규정 및 금융광고 심의기준으로 구체 적용).",
+      "evidence_span": "새로운 KB스타뱅킹 런칭기념 「KB Star 정기예금」특별금리 이벤트!",
+      "why": "광고의 ‘특별금리 이벤트’ 존재 사실은 확인되나, 금소법 제22조 ③이 요구하는 필수 포함 내용(설명서·약관 읽어볼 것을 권유 등) 충족 여부를 판단할 수 있는 광고 내 추가 문구(설명서·약관 권유, 명칭/내용, 예금성 상품의 관련 고지 등)가 해당 EvidenceWindow에 없어 기준요건 적용이 불가능하므로 ‘적합 여부 판단에 필요한 자료 부족’에 해당한다."
+    },
+    {
+      "cu_id": "cu_legal_article_1f5237d19fdfa401",
+      "verdict": "INSUFFICIENT",
+      "score": 0.45,
+      "principle": "부당권유행위 금지",
+      "source_article": "금융소비자 보호에 관한 감독규정 제15조",
+      "subject": "금융상품 광고 및 판매 준법 검토",
+      "legal_basis": "금융소비자 보호에 관한 감독규정 제15조는 ‘부당권유행위 금지’를 두고, 관련 고시사항(금융위원회가 정하여 고시하는 사항)을 열거한다(영 제16조제1항제1호 등에서 위임). 다만, 이 CU는 감독규정 위반의 특정 구성요건 충족(예: 권유 방식과 고지사항 미안내 등)에 대한 광고 내 근거가 필요하다.",
+      "evidence_span": "「KB Star 정기예금」 최고 연 1.7%를 드립니다!",
+      "why": "‘최고 연 1.7%’ 표현은 문구상 권유·오인 위험 점검 대상이 될 수 있으나, 부당권유행위 금지(감독규정 제15조)가 문제되는 ‘고시사항 미안내’ 등 구체 구성요건을 충족하는지 여부를 판단할 만큼의 광고 내 고지/권유 구조 관련 근거가 EvidenceWindow에 없다. 따라서 기준 충족 여부를 확정할 수 없어 자료 부족에 해당한다."
+    },
+    {
+      "cu_id": "cu_legal_clause_2dd9ac7e2afcbe92",
+      "verdict": "INSUFFICIENT",
+      "score": 0.5,
+      "principle": "설명의무",
+      "source_article": "금융소비자 보호에 관한 법률 제19조 ①-3",
+      "subject": "광고·판매 행위자",
+      "legal_basis": "금융소비자 보호에 관한 법률 제19조 ①-3(설명의무)는 금융상품 계약 체결 권유 등에서 청약철회 관련 사항을 포함한 ‘중요한 사항’을 일반금융소비자가 이해할 수 있도록 설명하도록 요구한다.",
+      "evidence_span": "※21.10.25(월) 기준, 세금공제 전",
+      "why": "세금공제 전 기준 표기는 오인 방지 목적의 고지로 기능할 수 있으나, CU에서 다루는 ‘청약철회 관련 설명의무’ 충족 여부를 판단할 핵심 근거(청약철회 기한·행사방법·효과에 대한 설명)가 EvidenceWindow에 없어 기준 적용은 자료 부족에 해당한다."
+    },
+    {
+      "cu_id": "cu_legal_article_4728545fb0f61592",
+      "verdict": "INSUFFICIENT",
+      "score": 0.45,
+      "principle": "설명의무",
+      "source_article": "금융소비자 보호에 관한 법률 시행령 제14조",
+      "subject": "금융상품 광고 및 판매 준법 검토",
+      "legal_basis": "금융소비자 보호에 관한 법률 시행령 제14조는 설명서에 법 제19조제1항 각 호의 사항 포함, 이해가능성, 설명한 사람 서명 및 설명 전 제공 방법 등을 요구한다(일부 계약/제공 형태는 제외 또는 예외 가능).",
+      "evidence_span": "이벤트 기간 적용이율 2021.10.25(월)~2021.11.17(일)",
+      "why": "해당 EvidenceWindow는 ‘이벤트 기간 적용이율’ 기간을 제시할 뿐, 설명서 제공(해당 법 제19조 각 호 사항 포함 여부), 서명, 설명 전 제공 방식 등 설명서 요건 충족 여부를 판단할 만큼의 광고 내 근거가 없다. 예금성 상품은 설명서 제외 가능 등 예외도 존재하므로, 현재로서는 위반 확정을 할 수 없어 자료 부족에 해당한다."
+    },
+    {
+      "cu_id": "cu_legal_clause_47503c5fae4fbfd8",
+      "verdict": "INSUFFICIENT",
+      "score": 0.25,
+      "principle": "설명의무",
+      "source_article": "금융소비자 보호에 관한 감독규정 제14조 ②",
+      "subject": "금융상품판매업자등",
+      "legal_basis": "금융소비자 보호에 관한 감독규정 제14조 ②는 연계·제휴서비스등을 축소·변경하는 경우 그 사실을 6개월 전부터 매월 2개 이상의 방법으로 고지해야 하며, 불가피 사유 시 즉시 고지한다고 규정한다(또한 ‘연계·제휴서비스등’ 존재 및 변경 사실이 전제).",
+      "evidence_span": "KB Star 정기예금 가입기간(10.25~11.7) 中 신규가입 고객에게 적용",
+      "why": "해당 EvidenceWindow은 ‘가입기간 중 신규가입 고객에게 적용’이라는 조건 고지로 보이며, 연계·제휴서비스등의 ‘축소·변경’ 사실 및 그 고지 방식(6개월 전부터 매월 2개 이상 방법 또는 즉시 고지 사유)이 제시되지 않았다. 따라서 해당 CU의 적용 구성요건을 확인할 수 없어 자료 부족(적합성 판단 불가)이다."
+    },
+    {
+      "cu_id": "cu_legal_article_b3552364de7994d8",
+      "verdict": "INSUFFICIENT",
+      "score": 0.5,
+      "principle": "광고규제",
+      "source_article": "금융소비자 보호에 관한 법률 시행령 제25조",
+      "subject": "금융상품 광고 및 판매 준법 검토",
+      "legal_basis": "금융소비자 보호에 관한 법률 시행령 제25조(금융상품자문업자의 영업행위준칙 등) 및 관련 규정은 금융상품자문업자에게 적용되는 준수사항을 두며, 광고에 있어 금융소비자가 오인되지 않도록 ‘보호한도/미보호’ 등 사실 고지를 요구하는 취지로 심사된다(해당 CU는 자문업 영업행위준칙 위반 여부를 전제로 하므로, 광고 내용이 자문 관련 금지/요건과 모순되는지 여부가 핵심).",
+      "evidence_span": "예금 및 적금은 ... 1인당 '최고 5천만원' ... 초과하는 나머지 금액은 보호하지 않습니다.",
+      "why": "해당 문구는 예금자보호 한도(1인당 최고 5천만원)와 초과분 미보호를 명확히 표시하고 있어 오인될 위험을 낮추는 방향의 사실 고지로 판단된다. 자문업 영업행위준칙(금지/요건)과의 직접적 모순 정황도 제시되지 않아 적합하다. / 근거 정합성 경고: evidence_span이 이 anchor의 격리된 증거창 밖이라 위반을 이 anchor에 귀속할 수 없습니다. (Evidence grounding warning: evidence_span was outside this anchor's isolated evidence window.)"
+    },
+    {
+      "cu_id": "cu_legal_clause_4295edc874f50ffd",
+      "verdict": "INSUFFICIENT",
+      "score": 0.0,
+      "principle": "광고규제",
+      "source_article": "금융소비자 보호에 관한 법률 제22조 ③-1",
+      "subject": "광고·판매 행위자",
+      "legal_basis": "",
+      "evidence_span": "",
+      "why": "이 심의 항목은 자동 판단이 완료되지 않아 '근거 부족(추가 확인 필요)'으로 분류했습니다. 심사자가 직접 확인해 주세요."
+    }
+  ],
+  "violation_count": 7,
+  "disclosure_requirements": [
+    {
+      "id": "disclosure_deposit_rate_basis",
+      "label": "금리 범위 및 산정방법",
+      "source": "은행 광고심의 기준 제16조/제17조",
+      "why": "최고금리, 우대금리, 적용기간, 산정방법을 소비자가 오인하지 않도록 함께 표시해야 합니다."
+    },
+    {
+      "id": "disclosure_deposit_preferential_conditions",
+      "label": "우대조건 및 적용기간",
+      "source": "은행 광고심의 기준 제18조",
+      "why": "특판, 이벤트, 제휴 혜택은 대상, 자격요건, 기간, 내용을 함께 안내해야 합니다."
+    },
+    {
+      "id": "disclosure_depositor_protection",
+      "label": "예금자보호 부보내용",
+      "source": "은행 광고심의 기준 제16조",
+      "why": "예금성 상품 광고는 예금자보호법 등에 따른 부보내용을 유지 고지로 관리해야 합니다."
+    },
+    {
+      "id": "disclosure_review_number",
+      "label": "심의필 번호 및 유효기간",
+      "source": "은행 광고심의 기준 제9조/제16조",
+      "why": "사전승인 또는 연합회 심의 결과를 소비자가 쉽게 인식할 수 있도록 표시해야 합니다."
+    },
+    {
+      "id": "disclosure_review_process",
+      "label": "준법감시인 사전승인 및 심의필 표시",
+      "source": "은행 광고심의 기준 제4조/제9조",
+      "why": "은행 광고는 내부통제기준에 따른 사전승인과 심의필 표시 여부를 운영 절차로 확인해야 합니다."
+    }
+  ],
+  "overall_impression": {
+    "track": "B",
+    "standard": "대법원 2017두60109 전체적·궁극적 인상 기준",
+    "verdict": "MEDIUM",
+    "misleading_risk_score": 0.68,
+    "why": "전체적으로 최고금리(연 1.7%)와 조건(신규가입, 가입기간/이벤트 적용기간, 세금공제 전 등) 및 위험고지(예금자보호 한도, 압류/질권 등)가 포함되어 있어 ‘전면적 거짓’ 수준의 모순은 확인되지 않는다. 다만 (1) 혜택성 핵심 문구가 높은 위계로 제시되는 반면 (2) 적용기간/자격/세부 기준이 서로 다른 문장과 여러 기간 축으로 분산·중복되어 있고 (3) 만기 구간 표기 혼재가 있어, 소비자가 ‘최고 1.7%가 자신의 상황에서 정확히 어떻게 적용되는지’를 단번에 오인할 여지가 있다. 그 결과 복잡 위반(전체적·궁극적 인상에서의 안전한 고금리 기대와 실체 사이 간극) 오인 위험은 중간으로 판단된다."
+  },
+  "overall_impression_risk": true,
+  "article_aggregation": [
+    {
+      "key": "금융소비자 보호에 관한 감독규정 제15조",
+      "article": "금융소비자 보호에 관한 감독규정 제15조",
+      "principles": [
+        "부당권유행위 금지"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.45,
+      "cu_count": 1,
+      "issue_count": 1,
+      "cu_titles": [
+        "부당권유행위 금지 관련 고시사항 미안내로 인한 위반 가능성"
+      ],
+      "anchor_spans": [
+        "「KB Star 정기예금」 최고 연 1.7%를 드립니다!"
+      ]
+    },
+    {
+      "key": "표시ㆍ광고의 공정화에 관한 법률 시행령 제4조",
+      "article": "표시ㆍ광고의 공정화에 관한 법률 시행령 제4조",
+      "principles": [
+        "광고규제"
+      ],
+      "effective_verdict": "NOT_APPLICABLE",
+      "max_score": 0.0,
+      "cu_count": 1,
+      "issue_count": 0,
+      "cu_titles": [
+        "광고 실증의 객관성·독립성 결여"
+      ],
+      "anchor_spans": [
+        "[1개월]: 연 0.6% [3개월]: 연 1.0% [6개월]: 연 1.1% [12개월]: 연 1.5% [24개월]: 연 1.55% [36개월]: 연 1.7%"
+      ]
+    }
+  ],
+  "principle_aggregation": [
+    {
+      "key": "부당권유행위 금지",
+      "article": "금융소비자 보호에 관한 감독규정 제15조",
+      "principles": [
+        "부당권유행위 금지"
+      ],
+      "effective_verdict": "INSUFFICIENT",
+      "max_score": 0.45,
+      "cu_count": 1,
+      "issue_count": 1,
+      "cu_titles": [
+        "부당권유행위 금지 관련 고시사항 미안내로 인한 위반 가능성"
+      ],
+      "anchor_spans": [
+        "「KB Star 정기예금」 최고 연 1.7%를 드립니다!"
+      ]
+    },
+    {
+      "key": "광고규제",
+      "article": "표시ㆍ광고의 공정화에 관한 법률 시행령 제4조",
+      "principles": [
+        "광고규제"
+      ],
+      "effective_verdict": "NOT_APPLICABLE",
+      "max_score": 0.0,
+      "cu_count": 1,
+      "issue_count": 0,
+      "cu_titles": [
+        "광고 실증의 객관성·독립성 결여"
+      ],
+      "anchor_spans": [
+        "[1개월]: 연 0.6% [3개월]: 연 1.0% [6개월]: 연 1.1% [12개월]: 연 1.5% [24개월]: 연 1.55% [36개월]: 연 1.7%"
+      ]
+    }
+  ],
+  "policy_evidence_chain_counts": {
+    "legal_basis_chains": 14,
+    "disclosure_chains": 14,
+    "exception_chains": 14,
+    "chain_diagnostics": 14
+  }
+}
