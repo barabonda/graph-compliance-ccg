@@ -190,11 +190,15 @@ def evaluate_records(records: list[EvaluationRecord], predictions: dict[str, dic
                 "id": record.record_id,
                 "gold": {
                     "violation": record.labels.violation,
+                    "violation_types": record.labels.violation_types,
                     "articles": record.labels.articles,
+                    "required_disclosures": record.labels.required_disclosures,
                     "risk_level": record.labels.risk_level,
                     "expected_routing": record.labels.expected_routing,
                 },
                 "prediction": summary.__dict__,
+                # 콘솔 딥링크용 — 예측 원본(raw prediction)에 있으면 그대로 노출.
+                "review_run_id": str((predictions.get(record.record_id) or {}).get("review_run_id") or ""),
             }
             for record, summary in zip(records, summaries, strict=True)
         ],
@@ -458,6 +462,38 @@ def run_live_predictions(
     return predictions
 
 
+def eval_review_model() -> str:
+    """활성 심사 모델명(provenance/태그용). anthropic 토글이면 ANTHROPIC_MODEL."""
+    import os
+
+    if (os.environ.get("LLM_PROVIDER") or "").strip().lower() == "anthropic":
+        return os.environ.get("ANTHROPIC_MODEL", "claude-sonnet-5")
+    return os.environ.get("OPENAI_MODEL", "gpt-5.4-nano")
+
+
+def persist_eval_run(record: EvaluationRecord, output: dict[str, Any], *, workspace_id: str, model: str) -> None:
+    """합성 평가 심사를 운영 로그(run_store)에도 남긴다 — jbbank_eval과 동일 계약.
+
+    actor='synth_eval'로 태그해 실제 심사 run(사람 actor)과 필터로 구분되게 하고,
+    review_run_id를 통해 대시보드 평가 로그 → /api/runs/{id} 딥링크가 살아있게 한다.
+    """
+    from run_store import record_run
+
+    record_run(
+        output,
+        title=record.title or record.record_id,
+        channel=record.channel,
+        product_group=record.product_group,
+        selected_product_name=str(record.facts.get("product_name") or ""),
+        source_type="synthetic_eval",
+        model=model,
+        content_text=record.text,
+        actor="synth_eval",
+        workspace_id=workspace_id,
+        language=record.language,
+    )
+
+
 def run_live_predictions_sequential(
     records: list[EvaluationRecord],
     *,
@@ -468,11 +504,14 @@ def run_live_predictions_sequential(
     from workflow import GraphComplianceCCGWorkflow, review_input_from_payload
 
     workflow = GraphComplianceCCGWorkflow()
+    model = eval_review_model()
     predictions: dict[str, dict[str, Any]] = {}
     for record in records:
         payload = review_payload_for_record(record, workspace_id=workspace_id)
         output = workflow.review(review_input_from_payload(payload))
-        predictions[record.record_id] = to_jsonable(output)
+        jsonable = to_jsonable(output)
+        predictions[record.record_id] = jsonable
+        persist_eval_run(record, jsonable, workspace_id=workspace_id, model=model)
         if save_path:
             append_prediction_jsonl(save_path, record.record_id, predictions[record.record_id])
     return predictions
@@ -484,7 +523,9 @@ def run_one_live_prediction(record: EvaluationRecord, workspace_id: str) -> dict
 
     payload = review_payload_for_record(record, workspace_id=workspace_id)
     output = GraphComplianceCCGWorkflow().review(review_input_from_payload(payload))
-    return to_jsonable(output)
+    jsonable = to_jsonable(output)
+    persist_eval_run(record, jsonable, workspace_id=workspace_id, model=eval_review_model())
+    return jsonable
 
 
 def error_prediction(record_id: str, exc: Exception) -> dict[str, Any]:

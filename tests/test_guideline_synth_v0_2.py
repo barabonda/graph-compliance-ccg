@@ -244,26 +244,188 @@ def test_breakdown_prf_and_build() -> None:
         EvaluationRecord(
             record_id="m1",
             text="x",
-            facts={"injected_violation_code": "SUPERLATIVE_NO_BASIS"},
+            facts={"injected_violation_code": "SUPERLATIVE_NO_BASIS", "product_name": "JB 참 괜찮은 정기예금"},
             product_group="deposit",
-            labels=EvaluationLabels(violation=True),
+            labels=EvaluationLabels(
+                violation=True,
+                articles=["금소법 제22조", "은행 광고심의 기준 제17조"],
+                required_disclosures=["우대조건", "예금자보호 여부 및 한도"],
+                expected_routing="revise",
+            ),
         ),
         EvaluationRecord(
             record_id="c1",
             text="y",
             facts={},
             product_group="deposit",
-            labels=EvaluationLabels(violation=False),
+            labels=EvaluationLabels(violation=False, expected_routing="pass_candidate"),
         ),
     ]
-    # m1 predicted violation (reject), c1 predicted clean (pass) -> perfect
+    # m1 predicted violation (revise); pipeline cites a LOWER delegation article + lists disclosures.
     predictions = {
-        "m1": {"final_verdict": "reject", "detected_issues": [], "cu_plan": []},
+        "m1": {
+            "final_verdict": "revise",
+            "detected_issues": [],
+            "cu_plan": [{"plan_item_id": "p1", "source_article": "금융소비자보호에 관한 법률 시행령 제20조"}],
+            "effective_judgments": [{"plan_item_id": "p1", "verdict": "NON_COMPLIANT"}],
+            "disclosure_requirements": [{"label": "우대조건 및 적용기간"}],
+            "product_fact_context": {"disclosure_checks": [{"label": "예금자보호 부보내용", "gate_status": "ON", "present": False}]},
+        },
         "c1": {"final_verdict": "pass_candidate", "detected_issues": [], "cu_plan": []},
     }
     code_type = {"SUPERLATIVE_NO_BASIS": "금지행위"}
     report = module.build(records, predictions, code_type)
-    assert report["overall"]["precision"] == 1.0
-    assert report["overall"]["recall"] == 1.0
-    assert report["per_violation_type_recall"]["금지행위"]["recall"] == 1.0
+    ax = report["axes"]
+    # A: binary detection perfect
+    assert ax["A_violation_detection"]["precision"] == 1.0
+    assert ax["A_violation_detection"]["recall"] == 1.0
+    # B: exact article match fails (gold §22 vs pred 시행령 §20), family merge succeeds
+    assert ax["B_articles"]["exact_match"]["counts"]["tp"] == 0
+    assert ax["B_articles"]["family_merged"]["counts"]["tp"] >= 1
+    # C: coverage recall — 우대조건→우대조건 및 적용기간 (required), 예금자보호→부보내용 (missing)
+    assert ax["C_required_disclosures"]["coverage_recall"]["detected"] >= 1
+    assert ax["C_required_disclosures"]["missing_detection_recall"]["detected"] >= 1
+    # D: routing — gold revise vs pred revise = exact
+    assert ax["D_routing_confusion"]["matrix"]["revise"]["revise"] == 1
+    assert ax["D_routing_confusion"]["matrix"]["pass_candidate"]["pass_candidate"] == 1
+    # E: per-type recall + code exact-match declared N/A
+    assert ax["E_violation_type_recall"]["per_type"]["금지행위"]["recall"] == 1.0
+    assert "N/A" in ax["E_violation_type_recall"]["exact_code_match"]
+    # F: clean control no overblocking
+    assert ax["F_clean_control_overblocking"]["reject_fp"] == 0
     assert report["per_product_group"]["deposit"]["counts"]["tp"] == 1
+    # per selected product name aggregation (coordinator: product_group 뭉갬 해소)
+    assert "JB 참 괜찮은 정기예금" in report["selected_product_names"]
+    pn = report["per_product_name"]["JB 참 괜찮은 정기예금"]
+    assert pn["violation_detection"]["tp"] == 1
+    assert pn["required_disclosure_coverage"]["detected"] >= 1
+    assert "3-way" in report["product_selection_note"]
+
+
+def test_disclosure_hit_keyword_matching() -> None:
+    hit = breakdown.disclosure_hit
+    assert hit("우대조건", ["우대조건 및 적용기간", "가입기간"]) is True
+    assert hit("대출금리 범위 및 산출기준", ["금리 범위 및 산정방법"]) is True
+    assert hit("예금자보호 여부 및 한도", ["예금자보호 부보내용"]) is True
+    assert hit("예금자보호", ["상품설명서·약관 확인"]) is False
+
+
+def test_article_family_shared_from_vlm() -> None:
+    fam = breakdown.article_family
+    # all 금소법 delegation-chain articles collapse to one family
+    assert fam("금소법 제22조") == fam("금융소비자보호에 관한 법률 시행령 제20조") == fam("은행 광고심의 기준 제17조")
+    # 표시광고공정화법 is a separate family
+    assert fam("표시·광고의 공정화에 관한 법률 제3조") != fam("금소법 제22조")
+
+
+# ---- record-level match / overall_pass (레코드별 통과 검증) ----
+
+def test_compute_record_match_needs_review_hold_is_not_a_pass() -> None:
+    """pred가 needs_review(유보)면 gold가 revise를 기대할 때 인접(adjacent)이어도
+    통과로 세지 않는다 — overall_pass 정의의 핵심 정직성 게이트."""
+    from evaluate import EvaluationLabels, EvaluationRecord
+
+    record = EvaluationRecord(
+        record_id="hold1",
+        text="x",
+        labels=EvaluationLabels(
+            violation=True,
+            articles=["금소법 제22조"],
+            required_disclosures=["우대조건"],
+            expected_routing="revise",
+        ),
+    )
+    output = {"product_fact_context": {"disclosure_checks": []}}
+    # violation/article_family/disclosures 모두 일치하도록 조작한 스텁 summary —
+    # 오직 routing(needs_review 유보) 축 하나만으로 overall_pass가 막히는지 검증.
+    summary = {
+        "predicted_violation": True,
+        "predicted_articles": ["금소법 제22조"],
+        "predicted_routing": "needs_review",
+    }
+    matches, overall_pass = breakdown.compute_record_match(record, output, summary)
+    assert matches["routing"] == {"gold": "revise", "pred": "needs_review", "exact": False, "adjacent": True}
+    assert overall_pass is False  # 인접이지만 유보라서 통과 아님
+
+
+def test_compute_record_match_needs_review_exact_gold_match_passes() -> None:
+    """gold도 needs_review를 기대하는 케이스(정말 애매해서 사람 확인이 정답)는
+    정확일치이므로 통과로 인정한다 — 유보 자체를 막는 게 아니라 '근접 매칭으로
+    유보를 얼버무리는 것'만 막는다."""
+    from evaluate import EvaluationLabels, EvaluationRecord
+
+    record = EvaluationRecord(
+        record_id="hold2",
+        text="x",
+        labels=EvaluationLabels(violation=False, expected_routing="needs_review"),
+    )
+    output = {}
+    summary = {"predicted_violation": False, "predicted_articles": [], "predicted_routing": "needs_review"}
+    matches, overall_pass = breakdown.compute_record_match(record, output, summary)
+    assert matches["routing"]["exact"] is True
+    assert overall_pass is True
+
+
+def test_build_metrics_report_full_gold_and_matches() -> None:
+    """evaluate.evaluate_records()에 실린 gold가 violation_types/required_disclosures까지
+    완전하고, review_run_id·matches·overall_pass가 채워지는지 — 라이브 재심사 없이
+    기존 predictions만으로 재계산."""
+    from evaluate import EvaluationLabels, EvaluationRecord
+
+    records = [
+        EvaluationRecord(
+            record_id="m1",
+            text="x",
+            facts={"injected_violation_code": "SUPERLATIVE_NO_BASIS", "product_name": "JB 참 괜찮은 정기예금"},
+            product_group="deposit",
+            labels=EvaluationLabels(
+                violation=True,
+                violation_types=["SUPERLATIVE_NO_BASIS"],
+                articles=["금소법 제22조", "은행 광고심의 기준 제17조"],
+                required_disclosures=["우대조건", "예금자보호 여부 및 한도"],
+                expected_routing="revise",
+            ),
+        ),
+        EvaluationRecord(
+            record_id="c1",
+            text="y",
+            facts={},
+            product_group="deposit",
+            labels=EvaluationLabels(violation=False, expected_routing="pass_candidate"),
+        ),
+    ]
+    predictions = {
+        "m1": {
+            "review_run_id": "review_run_m1",
+            "final_verdict": "revise",
+            "detected_issues": [],
+            "cu_plan": [{"plan_item_id": "p1", "source_article": "금융소비자보호에 관한 법률 시행령 제20조"}],
+            "effective_judgments": [{"plan_item_id": "p1", "verdict": "NON_COMPLIANT"}],
+            "disclosure_requirements": [{"label": "우대조건 및 적용기간"}],
+            "product_fact_context": {
+                "disclosure_checks": [{"label": "예금자보호 부보내용", "gate_status": "ON", "present": False}]
+            },
+        },
+        "c1": {"review_run_id": "review_run_c1", "final_verdict": "pass_candidate", "detected_issues": [], "cu_plan": []},
+    }
+    report = breakdown.build_metrics_report(records, predictions)
+
+    m1 = next(r for r in report["records"] if r["id"] == "m1")
+    assert m1["gold"]["violation_types"] == ["SUPERLATIVE_NO_BASIS"]
+    assert m1["gold"]["required_disclosures"] == ["우대조건", "예금자보호 여부 및 한도"]
+    assert m1["review_run_id"] == "review_run_m1"
+    assert m1["matches"]["violation"] is True
+    assert m1["matches"]["article_exact"] is False  # gold §22 vs pred 시행령 §20
+    assert m1["matches"]["article_family"] is True  # 위임사슬 계열 병합
+    assert m1["matches"]["disclosures"] == {"gold_n": 2, "matched_n": 2, "recall": 1.0}
+    assert m1["matches"]["routing"]["exact"] is True
+    assert m1["overall_pass"] is True
+
+    c1 = next(r for r in report["records"] if r["id"] == "c1")
+    assert c1["gold"]["violation_types"] == []
+    assert c1["review_run_id"] == "review_run_c1"
+    assert c1["matches"]["disclosures"] == {"gold_n": 0, "matched_n": 0, "recall": 1.0}
+    assert c1["overall_pass"] is True
+
+    assert "overall_pass_definition" in report
+    assert report["overall_pass_summary"] == {"pass": 2, "total": 2, "rate": 1.0}

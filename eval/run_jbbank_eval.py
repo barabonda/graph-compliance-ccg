@@ -162,7 +162,13 @@ def _row_from_output(item: dict[str, Any], output: dict[str, Any]) -> dict[str, 
     }
 
 
-def build_report(rows: list[dict[str, Any]], *, workspace_id: str) -> dict[str, Any]:
+def build_report(
+    rows: list[dict[str, Any]],
+    *,
+    workspace_id: str,
+    review_model: str = "",
+    product_selection: str = "product_group_only",
+) -> dict[str, Any]:
     verdict_counts: dict[str, int] = {}
     group_counts: dict[str, int] = {}
     for row in rows:
@@ -174,6 +180,10 @@ def build_report(rows: list[dict[str, Any]], *, workspace_id: str) -> dict[str, 
         "batch": f"jbbank_eval_{int(time.time())}",
         "generated_at": int(time.time()),
         "gold_available": False,
+        "review_model": review_model,
+        # 실제 광고는 특정 그래프 상품에 결속하지 않고 상품군만 지정해 심사(들어오는 광고를
+        # 그대로 심사하는 현실 경로). 합성셋은 selected_product_name으로 상품 선택 심사.
+        "product_selection": product_selection,
         "note": "전북은행 실제 승인 광고물 — 위반 gold 없음. 정밀도·재현율 미산출; 판정 분포·검출 이슈 로그만.",
         "workspace_id": workspace_id,
         "record_count": len(rows),
@@ -229,7 +239,9 @@ def main() -> int:
                     LOGGER.exception("review failed dir=%s", item["source_dir"])
 
     rows.sort(key=lambda r: r["source_dir"])
-    report = build_report(rows, workspace_id=args.workspace_id)
+    import os
+    review_model = os.environ.get("ANTHROPIC_MODEL") if os.environ.get("LLM_PROVIDER", "").lower() == "anthropic" else os.environ.get("OPENAI_MODEL", "gpt-5.4-nano")
+    report = build_report(rows, workspace_id=args.workspace_id, review_model=str(review_model or ""))
     args.report.parent.mkdir(parents=True, exist_ok=True)
     args.report.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
     LOGGER.info("wrote %s (records=%d, flagged=%d)", args.report, report["record_count"], report["flagged_count"])
