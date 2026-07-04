@@ -13,9 +13,10 @@ from utils import to_jsonable, uses_korean_law_context
 # 비-KR 관할 언어 규칙 — judge.py NON_KR_LAW_OVERRIDE(kunwoo)와 같은 append 패턴.
 # KR 워크스페이스에서는 붙지 않으므로 KR 프롬프트는 바이트 단위로 동일하다.
 NON_KR_LANGUAGE_OVERRIDE = (
-    "\nAD LANGUAGE (non-Korean jurisdiction): every `after` MUST be written in the SAME language as "
-    "the original ad (English ad → English replacement copy; Khmer ad → Khmer). NEVER translate or "
-    "rewrite the ad into Korean. `notes_for_reviewer` stays Korean for the Korean compliance reviewer."
+    "\nAD LANGUAGE (non-Korean jurisdiction, English-first): every `after` MUST be written in the "
+    "SAME language as the original ad (English ad → English replacement copy; Khmer ad → Khmer). "
+    "NEVER translate or rewrite the ad into Korean. Write `why_problematic` and "
+    "`notes_for_reviewer` in ENGLISH as well — no Korean anywhere in the output."
 )
 
 
@@ -452,8 +453,16 @@ def fallback_suggestions(risk_rows: list[dict[str, Any]], korean: bool = True) -
                 "anchor_id": anchor_id,
                 "severity": "revise",
                 "risky_text": span,
-                "why_problematic": "근거와 조건을 함께 제시하지 않으면 소비자 오인 가능성이 있습니다.",
-                "required_disclosures": ["적용 조건, 위험, 수수료, 상품설명서 확인 문구"],
+                "why_problematic": (
+                    "근거와 조건을 함께 제시하지 않으면 소비자 오인 가능성이 있습니다."
+                    if korean
+                    else "Without the underlying conditions and evidence, this wording may mislead consumers."
+                ),
+                "required_disclosures": (
+                    ["적용 조건, 위험, 수수료, 상품설명서 확인 문구"]
+                    if korean
+                    else ["Applicable conditions, risks, fees, and a reference to the product terms"]
+                ),
                 "before": span,
                 # after 는 광고 문안 자체이므로 관할 언어를 따른다(비-KR은 영어 메인).
                 # 위험/수정 이유·검토 노트는 한국 준법감시인용이라 한국어 유지.
@@ -462,7 +471,11 @@ def fallback_suggestions(risk_rows: list[dict[str, Any]], korean: bool = True) -
                     if korean
                     else "Please review the product's terms, conditions and key notices before deciding to apply."
                 ),
-                "notes_for_reviewer": "LLM 수정안이 필터링되어 안전한 기본 교정안을 제시했습니다.",
+                "notes_for_reviewer": (
+                    "LLM 수정안이 필터링되어 안전한 기본 교정안을 제시했습니다."
+                    if korean
+                    else "The model's suggestions were filtered out; a safe default correction is provided."
+                ),
             }
         )
     return suggestions

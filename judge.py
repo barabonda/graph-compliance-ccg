@@ -22,6 +22,11 @@ NON_KR_LAW_OVERRIDE = (
     "위 1)에 예시로 든 한국 법령(금융소비자보호법·시행령·감독규정·금융광고 심의기준)과 "
     "'법률→시행령→감독규정→심의기준' 위임 사슬은 이 관할에 적용되지 않으므로 절대 인용하지 마세요. "
     "evidence에 제시되지 않은 외부 법령을 만들어내지 마세요."
+    "\nOUTPUT LANGUAGE OVERRIDE: this jurisdiction's reviews are English-first. The earlier rule "
+    "'모든 산출 텍스트는 한국어' does NOT apply here — write ALL free-text output fields "
+    "(legal_basis, finding, conclusion, reservation, why, disclosure suggestions) in ENGLISH. "
+    "Use plain compliance English instead of verdict enums (say 'violation', 'insufficient "
+    "grounds', 'compliant'). evidence_span stays a verbatim copy of the original ad text."
 )
 
 

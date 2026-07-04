@@ -6,7 +6,14 @@ from typing import Any
 
 from llm_gateway import LLMGateway
 from schemas import Claim, ReviewInput, SentenceUnit
-from utils import to_jsonable
+from utils import to_jsonable, uses_korean_law_context
+
+# 비-KR 관할 출력 언어 — judge.py NON_KR_LAW_OVERRIDE와 같은 append 패턴(KR 무회귀).
+NON_KR_OUTPUT_OVERRIDE = (
+    "\nOUTPUT LANGUAGE OVERRIDE: this workspace is a non-Korean jurisdiction and reviews are "
+    "English-first. The rule '모든 산출은 한국어' does NOT apply — write ALL free-text output "
+    "(representative_consumer_impression, misleading_factors, why) in ENGLISH."
+)
 
 
 OVERALL_IMPRESSION_SCHEMA: dict[str, Any] = {
@@ -116,6 +123,7 @@ class LLMOverallImpressionJudge:
                 "종합하면 안전·확정 인상과 실체가 괴리). 법적 위반을 단정하지 말고 라우팅용 오인위험만 판단. "
                 "명시된 조건·한도·변동·예금자보호·위험·수수료·심의 고지는 완화 증거로 보되, footnote로 약하게 "
                 "표시되면 완화력이 제한됨을 반영하세요. 모든 산출은 한국어."
+                + ("" if uses_korean_law_context(review_input.workspace_id) else NON_KR_OUTPUT_OVERRIDE)
             ),
             user=(
                 "[ad]\n"

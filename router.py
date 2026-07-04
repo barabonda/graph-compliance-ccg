@@ -60,20 +60,30 @@ def build_output(
                 "severity": severity_from_score(judgment.score),
                 "problem_span": judgment.evidence_span,
                 "rationale": judgment.why,
-                "required_action": action_for_verdict(judgment.verdict),
+                "required_action": action_for_verdict(judgment.verdict, korean=uses_korean_law_context(review_input.workspace_id)),
             }
             for judgment in actionable_effective
             if judgment.verdict in {"NON_COMPLIANT", "INSUFFICIENT"}
         ]
     )
+    korean_ws = uses_korean_law_context(review_input.workspace_id)
     if misleading_verdict in {"HIGH", "MEDIUM"} or misleading_score >= 0.45:
         detected_issues.append(
             {
                 "risk_code": "TRACK_B_OVERALL_IMPRESSION",
                 "severity": severity_from_score(misleading_score),
                 "problem_span": track_b.get("representative_consumer_impression", ""),
-                "rationale": track_b.get("why", "광고 전체 인상 기준 소비자 오인 가능성을 검토해야 합니다."),
-                "required_action": "전체 문안에서 조건, 제한, 위험, 고지를 더 균형 있게 표시하세요.",
+                "rationale": track_b.get(
+                    "why",
+                    "광고 전체 인상 기준 소비자 오인 가능성을 검토해야 합니다."
+                    if korean_ws
+                    else "Review the risk of consumer confusion based on the ad's overall impression.",
+                ),
+                "required_action": (
+                    "전체 문안에서 조건, 제한, 위험, 고지를 더 균형 있게 표시하세요."
+                    if korean_ws
+                    else "Present conditions, limits, risks, and disclosures more evenly across the whole copy."
+                ),
             }
         )
     if graph.cu_plan and final != "pass_candidate":
@@ -118,13 +128,21 @@ def build_output(
                     "source_article": basis["representative_basis"],
                     "authority_tier": basis["authority_tier"],
                     "co_basis": basis.get("co_basis", ""),
-                    "risk_title": "필수고지 현저성 또는 누락",
-                    "subject": "고지 표시",
-                    "constraint": "혜택과 불이익을 균형 있게 명확히 전달해야 합니다.",
+                    "risk_title": "필수고지 현저성 또는 누락" if korean_ws else "Required disclosure missing or insufficiently prominent",
+                    "subject": "고지 표시" if korean_ws else "Disclosure display",
+                    "constraint": (
+                        "혜택과 불이익을 균형 있게 명확히 전달해야 합니다."
+                        if korean_ws
+                        else "Benefits and drawbacks must be communicated clearly and in balance."
+                    ),
                     "severity": 2 if basis["authority_tier"] == "guideline" else 3,
                     "problem_span": str(diagnostic.get("evidence") or ""),
                     "rationale": rationale,
-                    "required_action": "조건, 기간, 한도, 세전/세후, 예금자보호 등 필요한 고지를 혜택 문구와 같은 맥락에서 충분히 보이게 표시하세요.",
+                    "required_action": (
+                        "조건, 기간, 한도, 세전/세후, 예금자보호 등 필요한 고지를 혜택 문구와 같은 맥락에서 충분히 보이게 표시하세요."
+                        if korean_ws
+                        else "Show the required disclosures (conditions, term, limits, tax basis, deposit protection) with prominence comparable to the benefit claims."
+                    ),
                 }
             )
     system_review_items = system_review_items_for(graph)
@@ -265,12 +283,13 @@ def severity_from_score(score: float) -> int:
     return 1
 
 
-def action_for_verdict(verdict: str) -> str:
+def action_for_verdict(verdict: str, korean: bool = True) -> str:
+    # 비-KR(영어 우선) 관할은 심사 산출 텍스트를 영어로 통일한다.
     if verdict == "NON_COMPLIANT":
-        return "위험 표현을 수정하고 누락된 근거/고지를 보완하세요."
+        return "위험 표현을 수정하고 누락된 근거/고지를 보완하세요." if korean else "Revise the risky wording and add the missing evidence/disclosures."
     if verdict == "INSUFFICIENT":
-        return "추가 근거, 상품조건, 고지 문구를 확인하세요."
-    return "추가 조치 없음"
+        return "추가 근거, 상품조건, 고지 문구를 확인하세요." if korean else "Verify additional evidence, product terms, and disclosure wording."
+    return "추가 조치 없음" if korean else "No further action required."
 
 
 # 사용자(준법감시자)에게 보이는 판정 어휘. 내부 enum(needs_review 등)을 그대로
