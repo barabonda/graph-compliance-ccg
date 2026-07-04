@@ -988,6 +988,58 @@ def test_workflow_uses_cross_encoder_reranker_before_llm_rerank() -> None:
     assert output.cu_plan[0]["retrieval_scores"]["cross_encoder_score"] == pytest.approx(0.95)
 
 
+class MeaningDroppingExtractionLLM(CapturingExtractionLLM):
+    """Simulates Claude's non-strict tool-use fallback dropping 'meaning'.
+
+    Reproduces the LIVE_REVIEW_ERROR: 'meaning' failures observed in the
+    synth v0.2 eval run — the extraction schema is large enough to force the
+    non-strict Anthropic tool-use retry path, where `required` is no longer
+    grammar-enforced, and Claude occasionally omits a required string field.
+    """
+
+    def structured(self, *, name, system, user, schema, timeout_seconds=None, model=None):
+        payload = super().structured(name=name, system=system, user=user, schema=schema, timeout_seconds=timeout_seconds, model=model)
+        if name in {"graphcompliance_context_extraction", "graphcompliance_context_claims"}:
+            for claim in payload.get("claims", []):
+                claim.pop("meaning", None)
+                for qualifier in claim.get("qualifiers", []):
+                    qualifier.pop("meaning", None)
+        return payload
+
+
+def test_context_extractor_tolerates_missing_meaning_field(caplog: pytest.LogCaptureFixture) -> None:
+    """Missing 'meaning' must degrade gracefully (logged), not raise KeyError.
+
+    Regression test for the synth v0.2 eval LIVE_REVIEW_ERROR: 'meaning'
+    failures — Claude's non-strict tool-use fallback (large schema) does not
+    grammar-enforce `required`, so a claim or qualifier can arrive without a
+    `meaning` key even though the prompt instructs the model to include it.
+    """
+    llm = MeaningDroppingExtractionLLM()
+    extractor = LLMContextExtractor(llm)
+
+    with caplog.at_level(logging.WARNING, logger="context_extractor"):
+        claims = extractor.extract(
+            ReviewInput(
+                content_text=(
+                    "최고 연 5.0% 금리를 확정 제공한다. "
+                    "기본금리와 우대금리는 가입기간, 우대조건 충족 여부에 따라 달라질 수 있다."
+                )
+            ),
+            review_run_id="run_missing_meaning",
+        )
+
+    assert claims[0].meaning == ""
+    assert claims[0].qualifiers[0].meaning == ""
+    # The rest of the claim survives untouched — this is a targeted defense,
+    # not a low-quality blanket fallback.
+    assert claims[0].risk_hypernym == "definitive-rate claim"
+    assert claims[0].qualifiers[0].risk_reason == "조건 없는 확정 제공으로 오인될 수 있음"
+    missing_field_logs = [record for record in caplog.records if "required_field_missing" in record.message]
+    assert len(missing_field_logs) == 2  # claim.meaning + qualifier.meaning
+    assert all("field=meaning" in record.message for record in missing_field_logs)
+
+
 def test_context_extractor_prompt_preserves_risky_claims_separately() -> None:
     llm = CapturingExtractionLLM()
     extractor = LLMContextExtractor(llm)
@@ -1397,7 +1449,9 @@ def test_product_fact_analyzer_accepts_selected_product(monkeypatch: pytest.Monk
 
 
 def test_base_product_name_resolves_to_disclosure_variant(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setattr(jb_data_context_module, "match_products_from_neo4j", lambda text, claims, product_group: [])
+    monkeypatch.setattr(
+        jb_data_context_module, "match_products_from_neo4j", lambda text, claims, product_group, workspace_id="": []
+    )
     monkeypatch.setattr(
         jb_data_context_module,
         "load_product_rows",

@@ -143,6 +143,17 @@ CLAIM_FACT_COMPARISON_SCHEMA: dict[str, Any] = {
 
 # 단일 상품 확정 우선순위. 사용자가 명시적으로 선택한 상품(selected_product)은 퍼지
 # 패밀리 매칭이 함께 잡혀도 우선한다 — 선택 상품이 퍼지 매칭에 묻혀 모호 처리되던 버그 방지.
+#
+# 의도적으로 "selected_product_not_found"는 여기 없다(다국어 조사에서 확인 대상으로
+# 지목됨 — _workspace_i18n/01_findings.md #1). jb_data_context.selected_product_match()
+# 는 사용자가 타이핑한 상품명이 검색 어디에도 안 걸리면 이 match_basis로 빈 후보
+# (document_count=0, documents=[])를 만들어 반환하는데, 이걸 확정 티어에 넣으면
+# "존재하지 않는 상품"이 마치 확정된 것처럼 통과해 사실 대조를 건너뛴 채 조용히
+# NO_PRODUCT_DOCUMENT로 흘러가 버린다 — 진짜 "찾지 못함" 신호가 뭉개진다.
+# KH 상품 매칭이 workspace_id로 올바르게 스코프되면(jb_data_context.search_products/
+# match_products_from_neo4j) 정확히 타이핑한 KH 상품명은 "selected_product" 또는
+# "exact_product_name"/"exact_product_family" 티어로 정상 확정되므로, 이 티어 누락이
+# KH 확정 실패의 원인이 아니다 — 그래서 추가하지 않는다.
 PRODUCT_MATCH_PRIORITY = ("selected_product", "exact_product_name", "exact_product_family")
 
 
@@ -627,6 +638,12 @@ def build_disclosure_checks(
                 "channel": gate_summary.get("channel"),
             }
         return checks
+    # 아래 내장 폴백 목록은 한국 법령·심의기준의 필수 고지(한국어 라벨·한국어 토큰
+    # 매칭)다. 비-KR 관할은 그래프 카탈로그가 비어 있으면 고지 점검 없음으로 두는
+    # 것이 맞다 — KH 심사에 '최고금리 적용 조건/예금자보호 한도' 같은 KR 고지
+    # 의무가 한국어로 주입되고, 영어 광고라 전부 '누락'으로 뜨는 오탐을 막는다.
+    if not uses_korean_law_context(review_input.workspace_id):
+        return []
     if product_group == "deposit":
         return attach_product_doc_evidence([
             # 조건 고지는 "우대조건" 같은 정형 문구 외에 계약기간별 약정이율·고시

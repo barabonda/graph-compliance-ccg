@@ -148,7 +148,13 @@ class LLMOverallImpressionJudge:
         score = calibrate_score(result["verdict"], float(result["misleading_risk_score"]))
         return {
             "track": "B",
-            "standard": "대법원 2017두60109 전체적·궁극적 인상 기준",
+            # 판단 기준 라벨 — KR은 대법원 판례 기준, 비-KR 관할에 한국 판례를
+            # 인용하면 안 되므로 일반적 '전체 인상' 기준 표기로 대체한다.
+            "standard": (
+                "대법원 2017두60109 전체적·궁극적 인상 기준"
+                if uses_korean_law_context(review_input.workspace_id)
+                else "Overall net impression standard (as perceived by the average consumer)"
+            ),
             "verdict": result["verdict"],
             "misleading_risk_score": score,
             "representative_consumer_impression": result["representative_consumer_impression"],

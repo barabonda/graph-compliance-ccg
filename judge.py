@@ -46,9 +46,32 @@ FEATURE_KO: dict[str, str] = {
     "sales_process_context": "판매과정 관여 정황",
 }
 
+# 비-KR(영어 우선) 워크스페이스용 영어 요건명 — 판정 산출물(criteria_findings의
+# criterion)에 그대로 노출되므로, KH 심사에서 한국어 요건명이 새지 않게 한다.
+FEATURE_EN: dict[str, str] = {
+    "universal_scope_expression": "Unlimited-audience expression (anyone / all customers)",
+    "unconditional_expression": "No-conditions expression",
+    "certainty_expression": "Definitive / certainty expression",
+    "guarantee_expression": "Guarantee expression",
+    "benefit_claim_expression": "Benefit emphasis expression",
+    "risk_downplay_expression": "Risk-downplaying expression",
+    "past_performance_claim": "Past-performance / future-return implication",
+    "comparison_target": "Comparison target presented",
+    "comparative_superiority_claim": "Superiority / superlative claim",
+    "coercion_or_tie_in_context": "Coercion or tie-in context",
+    "product_fact_assertion": "Definitive product-fact assertion",
+    "sales_process_context": "Sales-process involvement context",
+}
+
 
 def feature_ko(feature: str) -> str:
     return FEATURE_KO.get(feature, feature)
+
+
+def feature_label(feature: str, *, korean: bool = True) -> str:
+    if korean:
+        return FEATURE_KO.get(feature, feature)
+    return FEATURE_EN.get(feature, feature)
 
 
 _REGULATOR_GROUNDING_PATH = Path(__file__).resolve().parent / "eval" / "regulator_grounding.jsonl"
@@ -224,6 +247,7 @@ class LLMComplianceJudge:
     ) -> list[LLMJudgment]:
         if not plan:
             return []
+        korean = uses_korean_law_context(workspace_id)
         anchor_by_id = {anchor.anchor_id: anchor for anchor in anchors}
         window_by_plan_id = {window.plan_item_id: window for window in windows}
         judgment_items = []
@@ -234,7 +258,7 @@ class LLMComplianceJudge:
             anchor = anchor_by_id.get(item.anchor_id)
             if not anchor:
                 # Coverage guarantee: never drop a CUPlan item silently.
-                judgments.append(missing_judgment(review_run_id, item, reason="anchor"))
+                judgments.append(missing_judgment(review_run_id, item, reason="anchor", korean=korean))
                 continue
             window = window_by_plan_id.get(item.plan_item_id)
             item_by_plan_id[item.plan_item_id] = item
@@ -245,7 +269,7 @@ class LLMComplianceJudge:
                     "cu_plan_item": to_jsonable(item),
                     # 규칙기반 판단 레이어를 명시적으로 제시 — LLM은 이 요건들에
                     # 사실을 적용해 설명을 '종합'한다(처음부터 판단하지 않는다).
-                    "legal_test": build_legal_test(item, anchor),
+                    "legal_test": build_legal_test(item, anchor, korean=korean),
                     # 상품문서 대조 신호: 광고 주장 ↔ 약관/상품설명서 사실의 모순.
                     "product_fact_signals": (product_fact_signals or {}).get(item.anchor_id, []),
                     "evidence_window": to_jsonable(window) if window else {},
@@ -344,7 +368,7 @@ class LLMComplianceJudge:
             if item.plan_item_id not in seen_plan_ids:
                 # Coverage guarantee: the judge call returned no row for this
                 # CUPlan item, so backfill INSUFFICIENT instead of leaving it unjudged.
-                judgments.append(missing_judgment(review_run_id, item, reason="no_row"))
+                judgments.append(missing_judgment(review_run_id, item, reason="no_row", korean=korean))
         return judgments
 
     def review_exception(
@@ -419,12 +443,14 @@ def build_related_sentences(
     return related
 
 
-def build_legal_test(item: CUPlanItem, anchor: ContextAnchor) -> dict[str, Any]:
+def build_legal_test(item: CUPlanItem, anchor: ContextAnchor, *, korean: bool = True) -> dict[str, Any]:
     """규칙기반 판단 레이어: 이 CU의 법적 요건 ↔ 광고에서 매칭된 사실.
 
     legal_element_profile.required_positive_features를 요건(criterion)으로,
     matched/missing_required_features로 충족 여부를, anchor.feature_set.evidence로
     그 요건을 뒷받침하는 사실 텍스트를 제시한다. LLM은 이 위에 사실 적용을 종합한다.
+    ``korean=False``(비-KR 관할)에서는 요건명을 영어로 제시해, 판정 산출물의
+    criteria_findings.criterion 에 한국어 요건명이 새지 않게 한다.
     """
     profile = item.legal_element_profile
     matched = set(item.matched_required_features or [])
@@ -438,21 +464,21 @@ def build_legal_test(item: CUPlanItem, anchor: ContextAnchor) -> dict[str, Any]:
     required = (profile.required_positive_features if profile else []) or item.matched_required_features or []
     required_elements = [
         {
-            "criterion": feature_ko(feature),
+            "criterion": feature_label(feature, korean=korean),
             "rule_satisfied": feature in matched,
             "matched_facts": evidence_by_feature.get(feature, []),
         }
         for feature in required
     ]
     return {
-        "action_type_ko": feature_ko(profile.action_type) if profile and profile.action_type in FEATURE_KO else (profile.action_type if profile else ""),
+        "action_type_ko": feature_label(profile.action_type, korean=korean) if profile and profile.action_type in FEATURE_KO else (profile.action_type if profile else ""),
         "risk_title": item.risk_title or (profile.risk_title if profile else ""),
         "cu_definition": item.constraint or item.context,
         "cu_principle": item.principle,
         "cu_subject": item.subject,
         "required_elements": required_elements,
         "matched_facts": sorted({fact for facts in evidence_by_feature.values() for fact in facts}),
-        "anchor_positive_features": [feature_ko(f) for f in (feature_set.positive_features if feature_set else [])],
+        "anchor_positive_features": [feature_label(f, korean=korean) for f in (feature_set.positive_features if feature_set else [])],
     }
 
 
@@ -500,13 +526,19 @@ def evidence_span_belongs_to_anchor(evidence_span: str, anchor: ContextAnchor) -
     return span in anchor_evidence or (bool(anchor_span) and anchor_span in span)
 
 
-def missing_judgment(review_run_id: str, item: CUPlanItem, *, reason: str) -> LLMJudgment:
+def missing_judgment(review_run_id: str, item: CUPlanItem, *, reason: str, korean: bool = True) -> LLMJudgment:
     """Backfill an INSUFFICIENT judgment so every CUPlan item is accounted for."""
-    note = {
-        # 사용자 노출 문구 — 심사 실무 언어로.
-        "no_row": "이 심의 항목은 자동 판단이 완료되지 않아 '근거 부족(추가 확인 필요)'으로 분류했습니다. 심사자가 직접 확인해 주세요.",
-        "anchor": "이 심의 항목과 연결된 광고 문구를 특정하지 못해 '근거 부족(추가 확인 필요)'으로 분류했습니다. 심사자가 직접 확인해 주세요.",
-    }.get(reason, "자동 판단이 완료되지 않아 '근거 부족(추가 확인 필요)'으로 분류했습니다.")
+    if korean:
+        note = {
+            # 사용자 노출 문구 — 심사 실무 언어로.
+            "no_row": "이 심의 항목은 자동 판단이 완료되지 않아 '근거 부족(추가 확인 필요)'으로 분류했습니다. 심사자가 직접 확인해 주세요.",
+            "anchor": "이 심의 항목과 연결된 광고 문구를 특정하지 못해 '근거 부족(추가 확인 필요)'으로 분류했습니다. 심사자가 직접 확인해 주세요.",
+        }.get(reason, "자동 판단이 완료되지 않아 '근거 부족(추가 확인 필요)'으로 분류했습니다.")
+    else:
+        note = {
+            "no_row": "Automated judgment did not complete for this review item — classified as 'insufficient grounds (reviewer confirmation required)'. Please review manually.",
+            "anchor": "The ad expression linked to this review item could not be identified — classified as 'insufficient grounds (reviewer confirmation required)'. Please review manually.",
+        }.get(reason, "Automated judgment did not complete — classified as 'insufficient grounds (reviewer confirmation required)'.")
     return LLMJudgment(
         judgment_id=stable_id("judgment", review_run_id, item.plan_item_id),
         plan_item_id=item.plan_item_id,

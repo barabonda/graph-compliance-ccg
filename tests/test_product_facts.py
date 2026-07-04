@@ -7,7 +7,7 @@ ProductFact가 0개로 추출되지 않았다.
 
 from __future__ import annotations
 
-from product_facts import resolve_single_product
+from product_facts import PRODUCT_MATCH_PRIORITY, resolve_single_product
 
 
 def _m(basis, product):
@@ -47,3 +47,19 @@ def test_genuine_ambiguity_returns_none():
 def test_no_match_returns_none():
     assert resolve_single_product([]) is None
     assert resolve_single_product([_m("fuzzy", "x"), _m("token_overlap", "y")]) is None
+
+
+def test_selected_product_not_found_stays_unresolved():
+    """다국어 조사(_workspace_i18n/01_findings.md #1)에서 확인 대상으로 지목된
+    PRODUCT_MATCH_PRIORITY 티어 누락 지점의 회귀 테스트.
+
+    ``selected_product_not_found``는 의도적으로 확정 티어에서 제외된다 —
+    포함시키면 "타이핑했지만 어디에도 없는 상품"이 마치 확정된 것처럼 통과해
+    실제로는 없는 상품에 대한 사실 대조를 건너뛴 채 조용히 진행되어 버린다.
+    workspace_id가 검색 체인 끝까지 전파되면(jb_data_context.py) 정확히
+    타이핑한 상품명은 이 티어가 아니라 "selected_product"/"exact_product_name"
+    티어로 정상 확정되므로, 이 배타는 KH 확정 실패의 원인이 아니다.
+    """
+    assert "selected_product_not_found" not in PRODUCT_MATCH_PRIORITY
+    matched = [_m("selected_product_not_found", "존재하지 않는 상품")]
+    assert resolve_single_product(matched) is None
