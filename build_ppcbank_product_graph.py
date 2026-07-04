@@ -324,6 +324,27 @@ def _tool_facts(msg) -> list[dict]:
 
 
 # ── phase: ingest (MERGE into KH Neo4j sandbox) ───────────────────────────────
+def clean_doc_text(path: Path) -> str:
+    """Return the product page body as clean text for the ProductDocument.full_text
+    property, so the graph is self-contained for remote clients / text2cypher
+    (no dependency on local files). Strips the markdown title + PoC provenance
+    header (.md) and the site nav/footer chrome (.txt), keeping the page body
+    verbatim."""
+    if not path.exists():
+        return ""
+    out: list[str] = []
+    for ln in path.read_text(encoding="utf-8", errors="ignore").split("\n"):
+        s = ln.strip()
+        if s == "About PPCBank":  # footer begins — stop
+            break
+        if s == "Skip to main content" or s.startswith("# ") or s.startswith("> "):
+            continue
+        out.append(ln.rstrip())
+    while out and not out[0].strip():
+        out.pop(0)
+    return "\n".join(out).strip()
+
+
 def build_rows(data: dict) -> tuple[list, list, list, list, list]:
     now = datetime.now(timezone.utc).isoformat()
     root = os.environ.get("JB_PRODUCT_DISCLOSURE_ROOT", "")
@@ -358,6 +379,9 @@ def build_rows(data: dict) -> tuple[list, list, list, list, list]:
         rel_path = entry["text_file"]
         file_path = os.path.join(root, rel_path) if root else str(PRODUCTS_DIR / rel_path)
         document_id = stable_id("product_document", product, rel_path)
+        # Embed the full page text INTO the graph so remote clients / text2cypher
+        # can read the source without access to local files.
+        full_text = clean_doc_text(PRODUCTS_DIR / rel_path)
         documents.setdefault(document_id, {
             "id": document_id, "product_id": product_id, "product_name": product,
             "product_group": group, "label_id": label_id, "label": DOC_LABEL,
@@ -367,6 +391,7 @@ def build_rows(data: dict) -> tuple[list, list, list, list, list]:
             "file_name": rel_path, "relative_path": rel_path,
             "original_name": entry["original_name"], "exists": os.path.exists(file_path),
             "metadata_source": POC_SOURCE, "source_url": entry["source_url"],
+            "full_text": full_text, "content_chars": len(full_text),
             "workspace_id": WORKSPACE_ID,
             "source": POC_SOURCE, "ingest_source": POC_SOURCE, "created_at": now, "updated_at": now,
         })
