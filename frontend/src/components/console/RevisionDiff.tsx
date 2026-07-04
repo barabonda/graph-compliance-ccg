@@ -5,6 +5,7 @@ import { abbreviateLawNames } from "@/lib/labels";
 import { buildRevisionDiff, correctedTextFromDiff, type RevisionDiffLine } from "@/lib/revisionDiff";
 import type { ReviewOutput } from "@/lib/types";
 import { Icon } from "../Icon";
+import { ImageLightbox } from "./ImageLightbox";
 
 /**
  * 수정안 unified diff — GitHub 코드리뷰 문법.
@@ -123,6 +124,7 @@ export function RevisionDiff({
   const [imageGenState, setImageGenState] = useState<"idle" | "loading" | "done" | "error">("idle");
   const [revisedImage, setRevisedImage] = useState<string | null>(null);
   const [imageGenError, setImageGenError] = useState("");
+  const [zoomed, setZoomed] = useState<{ src: string; caption: string; downloadName?: string } | null>(null);
 
   const generateRevisedImage = async () => {
     if (imageGenState === "loading") return;
@@ -183,7 +185,9 @@ export function RevisionDiff({
         </div>
         {hasChanges && (
           <div className="mt-3.5 flex flex-wrap items-center gap-x-4 gap-y-2">
-            <div className="min-w-0 flex-1">
+            {/* min-w 를 확보해야 좁은 컬럼에서 낱글자 세로 줄바꿈으로 깨지지 않는다
+                (버튼들이 flex 폭을 잠식하면 텍스트가 1글자 폭까지 줄어드는 문제). */}
+            <div className="min-w-[180px] flex-1 break-keep">
               <div className="text-[13.5px] font-bold">
                 위험 문구 {diff.changedCount}곳 완화
                 {diff.disclosureAddCount ? ` · 필수 고지 ${diff.disclosureAddCount}건 추가` : ""}
@@ -215,35 +219,65 @@ export function RevisionDiff({
         )}
       </div>
 
-      {/* 이미지 수정안 — 교정 문안을 원본 배너 레이아웃에 반영해 생성 */}
+      {/* 이미지 수정 가이드 — 원본 위에 교정 위치를 표시한 검수 마크업. 좁은 컬럼이라
+          세로 스택 전폭으로 크게 보여주고, 클릭하면 라이트박스로 확대한다. */}
       {result.ad_image?.available && (imageGenState === "error" || revisedImage) && (
         <div className="border-b border-line bg-surface-2 px-4 py-3">
           {imageGenState === "error" && (
             <p className="text-[12.5px] font-semibold text-reject">{imageGenError}</p>
           )}
           {revisedImage && (
-            <div className="grid gap-3 md:grid-cols-2">
+            <div className="space-y-3">
+              <figure>
+                <figcaption className="mb-1 flex items-center justify-between text-[11px] font-bold text-pass">
+                  <span>AFTER · AI 수정 가이드</span>
+                  <span className="font-normal text-ink-4">클릭하면 크게 보기 · 다운로드</span>
+                </figcaption>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={revisedImage}
+                  alt="교정 위치를 표시한 이미지 수정 가이드"
+                  className="w-full cursor-zoom-in rounded-md border border-pass/50 bg-white object-contain transition hover:shadow-panel"
+                  onClick={() =>
+                    setZoomed({
+                      src: revisedImage,
+                      caption: "AI 수정 가이드 — 교정 위치 마크업",
+                      downloadName: `${result.review_run_id}_revision_guide.png`,
+                    })
+                  }
+                />
+              </figure>
               <figure>
                 <figcaption className="mb-1 text-[11px] font-bold text-ink-4">BEFORE · 접수 원본</figcaption>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={`/api/ad-image/${result.review_run_id}/original`}
                   alt="원본 광고 이미지"
-                  className="w-full rounded-md border border-line bg-white object-contain"
+                  className="w-full cursor-zoom-in rounded-md border border-line bg-white object-contain transition hover:shadow-panel"
+                  onClick={() =>
+                    setZoomed({
+                      src: `/api/ad-image/${result.review_run_id}/original`,
+                      caption: "접수 원본 광고 이미지",
+                    })
+                  }
                 />
               </figure>
-              <figure>
-                <figcaption className="mb-1 text-[11px] font-bold text-pass">AFTER · AI 수정 가이드</figcaption>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={revisedImage} alt="교정 위치를 표시한 이미지 수정 가이드" className="w-full rounded-md border border-pass/50 bg-white object-contain" />
-              </figure>
-              <p className="md:col-span-2 text-[11px] leading-relaxed text-ink-4">
+              <p className="text-[11px] leading-relaxed text-ink-4">
                 수정 가이드는 완성 시안이 아니라 어느 자리에 어떤 문구를 반영해야 하는지 표시한 검수 마크업입니다 —
-                실제 반영 문구는 좌측 교정안(diff)을 기준으로 디자이너가 적용합니다.
+                실제 반영 문구는 아래 교정안(diff)을 기준으로 디자이너가 적용합니다.
               </p>
             </div>
           )}
         </div>
+      )}
+      {zoomed && (
+        <ImageLightbox
+          src={zoomed.src}
+          alt={zoomed.caption}
+          caption={zoomed.caption}
+          downloadName={zoomed.downloadName}
+          onClose={() => setZoomed(null)}
+        />
       )}
 
       {/* diff 헤더 — GitHub 파일 헤더 오마주 */}

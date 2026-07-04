@@ -13,6 +13,7 @@ import type { ReviewOutput } from "@/lib/types";
 import { Icon } from "../Icon";
 import { Tag } from "../ui";
 import { PaneHeader } from "./common";
+import { ImageLightbox } from "./ImageLightbox";
 import { RevisionDiff } from "./RevisionDiff";
 
 /** 번역이 원문과 사실상 같은지(공백 정규화) — 영어 원문에 EN 줄 중복 방지. */
@@ -109,6 +110,7 @@ export function AdPane({
   // null = 아직 사용자가 안 골랐음 → 수정할 게 있으면 '수정안'이 기본(결론부터),
   // 클린 광고면 원문. 사용자가 토글하면 그 선택을 따른다.
   const [modeChoice, setModeChoice] = useState<"original" | "diff" | null>(null);
+  const [imageZoomed, setImageZoomed] = useState(false);
   const lines = useMemo(() => buildAdLines(result, reviewedText), [result, reviewedText]);
   // 수정안 diff — GitHub unified diff 형태 (구 '교정본'/수정안 탭 통합)
   const diff = useMemo(() => buildRevisionDiff(result, reviewedText), [result, reviewedText]);
@@ -179,13 +181,14 @@ export function AdPane({
         {result.ad_image?.available && (
           <div className="mb-3 overflow-hidden rounded-[14px] border border-line bg-white shadow-panel">
             <div className="border-b border-line bg-surface-2 px-4 py-2 text-xs font-bold text-ink-2">
-              접수된 광고 이미지 <span className="font-normal text-ink-4">아래 문안은 이미지에서 자동 추출됨</span>
+              접수된 광고 이미지 <span className="font-normal text-ink-4">아래 문안은 이미지에서 자동 추출됨 · 클릭하면 크게 보기</span>
             </div>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={`/api/ad-image/${result.review_run_id}/original`}
               alt="접수된 광고 이미지 원본"
-              className="max-h-105 w-full object-contain bg-white"
+              className="max-h-105 w-full cursor-zoom-in bg-white object-contain transition hover:opacity-95"
+              onClick={() => setImageZoomed(true)}
             />
             {result.ad_image.layout_notes && (
               <div className="border-t border-line px-4 py-2 text-[12px] leading-relaxed text-ink-3">
@@ -363,6 +366,14 @@ export function AdPane({
           </>
         )}
       </div>
+      {imageZoomed && result.ad_image?.available && (
+        <ImageLightbox
+          src={`/api/ad-image/${result.review_run_id}/original`}
+          alt="접수된 광고 이미지 원본"
+          caption="접수 원본 광고 이미지"
+          onClose={() => setImageZoomed(false)}
+        />
+      )}
     </div>
   );
 }
