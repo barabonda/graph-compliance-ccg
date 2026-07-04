@@ -31,6 +31,24 @@ interface ReviewMeta {
   channelLabel: string;
 }
 
+/**
+ * 저장된 ReviewOutput만으로 원문 텍스트를 재구성한다(원문을 별도 보관하지 않는 딥링크용).
+ * sentence_units의 span 오프셋에 각 문장 텍스트를 배치해 하이라이트 좌표계를 보존한다.
+ */
+function reconstructReviewedText(output: ReviewOutput): string {
+  const units = output.sentence_units ?? [];
+  if (!units.length) return "";
+  const maxEnd = units.reduce((max, u) => Math.max(max, u.span?.end ?? 0), 0);
+  if (!maxEnd) return units.map((u) => u.span?.text ?? u.text ?? "").join(" ");
+  const buf = new Array<string>(maxEnd).fill(" ");
+  for (const unit of units) {
+    const start = unit.span?.start ?? 0;
+    const text = unit.span?.text ?? unit.text ?? "";
+    for (let i = 0; i < text.length && start + i < maxEnd; i += 1) buf[start + i] = text[i];
+  }
+  return buf.join("");
+}
+
 export default function Page() {
   const { state, runReview, selectAnchor, loadSample } = useReview();
   const [view, setView] = useState<ViewKey>("home");
@@ -109,6 +127,23 @@ export default function Page() {
       setMeta({
         title: run.title,
         channelLabel: CHANNELS.find((item) => item.value === run.channel)?.label ?? run.channel,
+      });
+      setResolved(new Set());
+      setAcknowledged(new Set());
+      setDecision(null);
+      setView("review");
+    },
+    [loadSample],
+  );
+
+  /** 평가 로그(run_id만 아는 상태)에서 저장된 실행을 콘솔 상세로 딥링크. */
+  const handleOpenRunId = useCallback(
+    async (runId: string) => {
+      const output = await fetchRun(runId);
+      loadSample(output, reconstructReviewedText(output));
+      setMeta({
+        title: output.ad_image?.extracted_title || output.context_frame?.summary || "평가 실행 상세",
+        channelLabel: "",
       });
       setResolved(new Set());
       setAcknowledged(new Set());
@@ -379,7 +414,7 @@ export default function Page() {
           {view === "dashboard" && (
             <div className="flex flex-col gap-4">
               <div className="rounded-[14px] border border-line bg-surface p-4 shadow-card">
-                <DashboardTab onOpenRun={handleOpenRun} onEditRun={handleEditRun} />
+                <DashboardTab onOpenRun={handleOpenRun} onEditRun={handleEditRun} onOpenRunId={handleOpenRunId} />
               </div>
               {/* 감사 로그(별도 탭 폐지) — 현재 로드된 실행의 단계 추적과 컨텍스트 raw를
                   운영/디버깅 화면 안에서 펼쳐 본다. */}

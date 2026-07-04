@@ -116,6 +116,21 @@ export const VERDICT_LABELS: Record<FinalVerdict, [string, string]> = {
   reject: ["반려 권고", "명백한 위반 가능성이 있어 배포 전 수정 필요"],
 };
 
+/**
+ * 판정별 표시 색(CSS 변수) — 위험 카드·대시보드·평가 로그에서 공통 사용.
+ * reject=위험(빨강), revise=경고(주황), needs_review=주의(파랑), pass_candidate=정상(초록).
+ */
+export const VERDICT_COLOR: Record<string, string> = {
+  reject: "var(--reject)",
+  revise: "var(--revise)",
+  needs_review: "var(--review)",
+  pass_candidate: "var(--pass)",
+};
+
+export function verdictColor(verdict: string): string {
+  return VERDICT_COLOR[verdict] ?? "var(--ink-2)";
+}
+
 /** 심사자 결정 어휘(확정형) — 로컬 데모 상태로만 기록. */
 export const DECISIONS = {
   approve: { label: "승인", color: "var(--pass)", bg: "var(--pass-bg)" },

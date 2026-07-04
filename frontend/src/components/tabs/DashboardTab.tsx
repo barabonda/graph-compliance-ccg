@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { fetchRuns } from "@/lib/api";
-import { principleColor, VERDICT_LABELS } from "@/lib/labels";
+import { principleColor, verdictColor, VERDICT_LABELS } from "@/lib/labels";
 import type { FinalVerdict, RunSummary } from "@/lib/types";
 import { Icon } from "../Icon";
 import { EmptyState } from "../ui";
@@ -11,16 +11,11 @@ import { EvalPanel } from "./EvalPanel";
 interface Props {
   onOpenRun: (run: RunSummary) => void;
   onEditRun?: (run: RunSummary) => void;
+  /** 평가 로그 레코드의 run_id를 콘솔 실행 상세로 딥링크. */
+  onOpenRunId?: (runId: string) => void;
 }
 
 const VERDICT_ORDER: FinalVerdict[] = ["reject", "revise", "needs_review", "pass_candidate"];
-
-const VERDICT_TONE: Record<string, string> = {
-  reject: "var(--reject)",
-  revise: "var(--revise)",
-  needs_review: "var(--revise)",
-  pass_candidate: "var(--pass)",
-};
 
 function verdictLabel(verdict: string): string {
   return VERDICT_LABELS[verdict as FinalVerdict]?.[0] ?? verdict ?? "—";
@@ -91,7 +86,7 @@ function formatTime(ts: number): string {
   return `${d.getMonth() + 1}/${d.getDate()} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
 
-export function DashboardTab({ onOpenRun, onEditRun }: Props) {
+export function DashboardTab({ onOpenRun, onEditRun, onOpenRunId }: Props) {
   const [runs, setRuns] = useState<RunSummary[] | null>(null);
   const [error, setError] = useState<string>("");
   // 서브탭: 실행 기록(집계·심사 로그) vs 평가 로그(정밀도/재현율 리포트).
@@ -157,7 +152,7 @@ export function DashboardTab({ onOpenRun, onEditRun }: Props) {
     return (
       <div className="space-y-4">
         {header}
-        <EvalPanel />
+        <EvalPanel onOpenRunId={onOpenRunId} />
       </div>
     );
   }
@@ -184,7 +179,7 @@ export function DashboardTab({ onOpenRun, onEditRun }: Props) {
   const verdictBars = VERDICT_ORDER.map((key) => ({
     key: VERDICT_LABELS[key][0],
     value: count(key),
-    tint: VERDICT_TONE[key],
+    tint: verdictColor(key),
   }));
 
   return (
@@ -273,7 +268,7 @@ export function DashboardTab({ onOpenRun, onEditRun }: Props) {
                     <td className="px-3 py-2 whitespace-nowrap text-ink-3">{run.actor || "—"}</td>
                     <td className="px-3 py-2 whitespace-nowrap font-mono text-[11px] text-ink-3">{run.model || "GPT-5.4-nano"}</td>
                     <td className="px-3 py-2 whitespace-nowrap">
-                      <span className="font-bold" style={{ color: VERDICT_TONE[run.final_verdict] ?? "var(--ink-2)" }}>
+                      <span className="font-bold" style={{ color: verdictColor(run.final_verdict) }}>
                         {verdictLabel(run.final_verdict)}
                       </span>
                     </td>

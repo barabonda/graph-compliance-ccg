@@ -313,28 +313,112 @@ export interface RunSummary {
   seed?: boolean;
 }
 
-/** 평가 리포트 요약(운영 대시보드 평가 로그 목록). */
+/** 평가 리포트 종류. `jbbank_live_eval`은 실제 광고 판정 로그(정답 라벨 없음). */
+export type EvalReportKind = "json" | "md" | "jbbank_live_eval";
+
+/** 판정 분포(정답 라벨 없는 라이브 로그). */
+export type EvalVerdictCounts = Partial<Record<FinalVerdict, number>> & Record<string, number>;
+
+/** 합성 gold 리포트 분류 지표. */
+export interface EvalMetrics {
+  micro_f1?: number;
+  macro_f1?: number;
+  micro_f2?: number;
+  macro_f2?: number;
+  mcc?: number;
+}
+
+/** 혼동행렬 카운트(합성 gold). */
+export interface EvalConfusionCounts {
+  tp?: number;
+  fp?: number;
+  fn?: number;
+  tn?: number;
+}
+
+/** CCG 위반 검출 지표(합성 gold). */
+export interface EvalCcgMetrics {
+  violation_precision?: number;
+  violation_recall?: number;
+  overblocking_rate?: number;
+  clean_non_pass_rate?: number;
+  [key: string]: number | undefined;
+}
+
+/**
+ * 평가 리포트 요약(운영 대시보드 평가 로그 목록). `GET /api/eval/reports`.
+ * - 합성 gold 리포트: `metrics`/`counts`/`ccg_metrics` 존재(정밀도·재현율 산출).
+ * - JB 실제광고 로그: `kind:"jbbank_live_eval"`, `gold_available:false`, `verdict_counts` 존재.
+ */
 export interface EvalReportSummary {
   name: string;
-  kind: "json" | "md";
+  kind: EvalReportKind;
   size: number;
   mtime: number;
   record_count?: number;
-  metrics?: {
-    micro_f1?: number;
-    macro_f1?: number;
-    micro_f2?: number;
-    macro_f2?: number;
-    mcc?: number;
-  };
-  counts?: { tp?: number; fp?: number; fn?: number; tn?: number };
+  /** 배치 식별자(있을 때). */
+  batch?: string;
+  /** false면 정답 라벨 없음 — 정밀도/재현율 미산출, 판정 분포만. */
+  gold_available?: boolean;
+  /** JB 실제광고 로그: 판정 분포. */
+  verdict_counts?: EvalVerdictCounts;
+  workspace_id?: string;
+  /** 합성 gold: 분류 지표(F1/MCC). */
+  metrics?: EvalMetrics;
+  /** 합성 gold: 혼동행렬 카운트. */
+  counts?: EvalConfusionCounts;
+  /** 합성 gold: 위반 검출 지표(정밀도/재현율). */
+  ccg_metrics?: EvalCcgMetrics;
 }
 
-/** 단일 평가 리포트 상세 — JSON metrics 또는 마크다운 텍스트. */
+/** JB 실제광고 로그의 개별 심사 레코드. `run_id`로 `/api/runs/{run_id}` 상세에 연결. */
+export interface JbLiveEvalRecord {
+  id: string;
+  source_dir?: string;
+  title: string;
+  product_group?: string;
+  /** 전체 ReviewOutput 상세 딥링크 키. */
+  run_id?: string;
+  final_verdict: string;
+  misleading_verdict?: string;
+  issue_count?: number;
+  missing_disclosures?: string[];
+  detected_risk_codes?: string[];
+}
+
+/** JB 실제광고 라이브 평가 리포트 본문(`EvalReportDetail.content`). */
+export interface JbLiveEvalReport {
+  kind: "jbbank_live_eval";
+  batch?: string;
+  generated_at?: number;
+  gold_available?: boolean;
+  note?: string;
+  workspace_id?: string;
+  record_count?: number;
+  flagged_count?: number;
+  verdict_counts?: EvalVerdictCounts;
+  product_group_counts?: Record<string, number>;
+  records?: JbLiveEvalRecord[];
+}
+
+/** 합성 gold 리포트 본문(`EvalReportDetail.content`). 확정 필드만 명시, 나머지는 원본 JSON. */
+export interface GoldEvalReport {
+  record_count?: number;
+  metrics?: EvalMetrics;
+  counts?: EvalConfusionCounts;
+  ccg_metrics?: EvalCcgMetrics;
+  [key: string]: unknown;
+}
+
+/**
+ * 단일 평가 리포트 상세 — `GET /api/eval/reports/{name}`.
+ * - `.json` → `content`(원본 JSON). 본문 `kind`로 gold/live 분기.
+ * - `.md`   → `text`(마크다운 원문).
+ */
 export interface EvalReportDetail {
   name: string;
-  kind: "json" | "md";
-  content?: Record<string, unknown>;
+  kind: EvalReportKind;
+  content?: JbLiveEvalReport | GoldEvalReport | Record<string, unknown>;
   text?: string;
 }
 
