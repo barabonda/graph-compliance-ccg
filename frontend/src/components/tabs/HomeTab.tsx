@@ -178,6 +178,7 @@ export function HomeTab({
                     channel: example.channel,
                     product_group: example.product,
                     selected_product_name: example.selectedProduct || undefined,
+                    image_url: example.imageUrl,
                   })
                 }
                 className="rounded-[11px] border border-line bg-surface-2 p-3 text-left hover:border-brand hover:bg-brand-tint"
@@ -187,7 +188,9 @@ export function HomeTab({
                   {groupLabel(example.product)} · {channelLabel(example.channel)}
                   {example.selectedProduct ? ` · ${example.selectedProduct}` : ""}
                 </span>
-                <span className="mt-1 line-clamp-2 block text-[11.5px] leading-relaxed text-ink-3">{example.text}</span>
+                <span className="mt-1 line-clamp-2 block text-[11.5px] leading-relaxed text-ink-3">
+                  {example.text || (example.imageUrl ? "배너 이미지 접수 — VLM이 문안·레이아웃을 추출해 심사하고 이미지 수정안까지 생성합니다." : "")}
+                </span>
               </button>
             ))}
           </div>

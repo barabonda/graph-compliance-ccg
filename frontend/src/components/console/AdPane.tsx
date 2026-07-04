@@ -174,7 +174,27 @@ export function AdPane({
             onSelectAnchor={onSelectAnchor}
           />
         ) : (
-        // 광고 크리에이티브 미리보기
+        <>
+        {/* 이미지 광고 원본 — 문안은 아래 추출 텍스트로 심의, 이미지는 대조용 */}
+        {result.ad_image?.available && (
+          <div className="mb-3 overflow-hidden rounded-[14px] border border-line bg-white shadow-panel">
+            <div className="border-b border-line bg-surface-2 px-4 py-2 text-xs font-bold text-ink-2">
+              접수된 광고 이미지 <span className="font-normal text-ink-4">아래 문안은 이미지에서 자동 추출됨</span>
+            </div>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={`/api/ad-image/${result.review_run_id}/original`}
+              alt="접수된 광고 이미지 원본"
+              className="max-h-105 w-full object-contain bg-white"
+            />
+            {result.ad_image.layout_notes && (
+              <div className="border-t border-line px-4 py-2 text-[12px] leading-relaxed text-ink-3">
+                <strong className="text-ink-2">레이아웃 소견</strong> · {result.ad_image.layout_notes}
+              </div>
+            )}
+          </div>
+        )}
+        {/* 광고 크리에이티브 미리보기 */}
         <div className="overflow-hidden rounded-[14px] border border-line bg-white shadow-panel">
           <div className="px-5.5 py-5 text-white" style={{ background: "linear-gradient(135deg,#1d3a6e,#2f6df0)" }}>
             <div className="mb-3 flex items-center justify-between">
@@ -231,6 +251,7 @@ export function AdPane({
             </span>
           </div>
         </div>
+        </>
         )}
 
         {/* 문장별 참고 번역 — 영어 메인 · 크메르어(KM) 서브 병기 (표시 전용) */}

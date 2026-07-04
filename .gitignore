@@ -22,3 +22,4 @@ eval/*predictions*.jsonl
 eval/*_report*.json
 eval/report_*.json
 eval/retrieval_sweep_*.json
+outputs/ad_images/

@@ -613,6 +613,8 @@ export interface ReviewOutput {
   highlight_spans: HighlightSpanRow[];
   /** 참고용 번역(표시 전용) — 비-KR workspace 심사에서만 채워짐. KR은 null/미포함. */
   ad_translations?: AdTranslations | null;
+  /** 이미지 광고 접수 메타 — 원본은 GET /api/ad-image/{run_id}/original 로 서빙. */
+  ad_image?: { available: boolean; layout_notes?: string; extracted_title?: string } | null;
 }
 
 /** 비-KR 심사용 참고 번역. 판정 파이프라인에는 개입하지 않는 표시 전용 데이터.
@@ -657,4 +659,9 @@ export interface ReviewRequest {
   llm_model?: string;
   /** 실행자 가명(브라우저별). 실행 기록에 누가 돌렸는지 표시. */
   actor?: string;
+  /** 이미지 광고 접수(base64, data: 프리픽스 제외). 문안이 비어 있으면 비전 추출로 채운다. */
+  image_base64?: string;
+  image_media_type?: string;
+  /** 프리셋 전달용(프론트 전용) — 폼이 이 URL의 이미지를 불러와 첨부한다. 서버로는 안 보냄. */
+  image_url?: string;
 }

@@ -17,6 +17,19 @@ from fastapi.staticfiles import StaticFiles
 from neo4j.exceptions import AuthError, ServiceUnavailable
 from openai import APIConnectionError, APIStatusError, AuthenticationError, BadRequestError, RateLimitError
 
+try:
+    from anthropic import (
+        APIConnectionError as AnthropicAPIConnectionError,
+        APIStatusError as AnthropicAPIStatusError,
+        AuthenticationError as AnthropicAuthenticationError,
+        BadRequestError as AnthropicBadRequestError,
+        RateLimitError as AnthropicRateLimitError,
+    )
+except ImportError:  # pragma: no cover - optional provider.
+    AnthropicAPIConnectionError = AnthropicAPIStatusError = AnthropicAuthenticationError = None  # type: ignore[assignment]
+    AnthropicBadRequestError = AnthropicRateLimitError = None  # type: ignore[assignment]
+
+from ad_image import extract_ad_from_image, generate_revised_image
 from env_loader import load_local_env
 from jb_data_context import search_products
 from llm_gateway import LLMGateway
@@ -32,6 +45,61 @@ logging.basicConfig(
 )
 app = FastAPI(title="GraphCompliance CCG", version="0.1.0")
 CONSOLE_DIR = Path(__file__).resolve().parent / "console"
+AD_IMAGE_DIR = Path(__file__).resolve().parent / "outputs" / "ad_images"
+
+
+def intake_ad_image(payload: dict[str, Any]) -> dict[str, str] | None:
+    """이미지 광고 접수 — 문안이 비어 있으면 비전 추출로 채운다.
+
+    반환: 추출 메타(title/content_text/layout_notes) 또는 None(이미지 없음).
+    추출 실패는 예외로 올라가 review 엔드포인트의 provider 오류 매핑을 탄다.
+    """
+    image_b64 = str(payload.get("image_base64") or "").strip()
+    if not image_b64:
+        return None
+    media_type = str(payload.get("image_media_type") or "image/png")
+    extracted = extract_ad_from_image(image_b64, media_type)
+    if not str(payload.get("content_text") or "").strip():
+        payload["content_text"] = extracted["content_text"]
+    if not str(payload.get("title") or "").strip():
+        payload["title"] = extracted["title"]
+    return extracted
+
+
+def save_ad_image(run_id: str, kind: str, data: bytes, media_type: str) -> str:
+    AD_IMAGE_DIR.mkdir(parents=True, exist_ok=True)
+    ext = "png" if "png" in media_type else "jpg"
+    path = AD_IMAGE_DIR / f"{run_id}_{kind}.{ext}"
+    path.write_bytes(data)
+    return path.name
+
+
+def find_ad_image(run_id: str, kind: str) -> Path | None:
+    for ext in ("png", "jpg"):
+        path = AD_IMAGE_DIR / f"{run_id}_{kind}.{ext}"
+        if path.exists():
+            return path
+    return None
+
+
+def attach_ad_image_result(jsonable: dict[str, Any], payload: dict[str, Any], extracted: dict[str, str] | None) -> None:
+    """결과에 ad_image 메타를 붙이고 원본 이미지를 run 파일로 보존한다."""
+    if extracted is None:
+        return
+    import base64 as _b64
+
+    run_id = str(jsonable.get("review_run_id") or "")
+    media_type = str(payload.get("image_media_type") or "image/png")
+    if run_id:
+        try:
+            save_ad_image(run_id, "original", _b64.b64decode(str(payload.get("image_base64") or "")), media_type)
+        except Exception as exc:  # noqa: BLE001 - 이미지 보존 실패가 결과 반환을 막지 않게.
+            logging.getLogger(__name__).warning("ad_image save failed run=%s err=%s", run_id, exc)
+    jsonable["ad_image"] = {
+        "available": True,
+        "layout_notes": extracted.get("layout_notes") or "",
+        "extracted_title": extracted.get("title") or "",
+    }
 
 # 심사 코파일럿(AG-UI/LangGraph) — 의존성 문제로 실패해도 심의 API 는 살아있어야 한다.
 # ag_ui_langgraph.add_langgraph_fastapi_endpoint 대신 직접 라우트를 정의하는 이유:
@@ -102,9 +170,11 @@ def products_search(q: str = "", product_group: str = "auto", limit: int = 12) -
 @app.post("/api/review")
 def review(payload: dict[str, Any]) -> dict[str, Any]:
     try:
+        extracted_image = intake_ad_image(payload)
         workflow = workflow_for(payload)
         output = workflow.review(review_input_from_payload(payload))
         jsonable = to_jsonable(output)
+        attach_ad_image_result(jsonable, payload, extracted_image)
         record_run(
             jsonable,
             title=str(payload.get("title") or ""),
@@ -150,6 +220,16 @@ def review(payload: dict[str, Any]) -> dict[str, Any]:
         raise HTTPException(status_code=503, detail=openai_error_detail("openai_connection_failed", exc)) from exc
     except APIStatusError as exc:
         raise HTTPException(status_code=exc.status_code, detail=openai_error_detail("openai_api_error", exc)) from exc
+    except tuple(exc for exc in [AnthropicAuthenticationError] if exc is not None) as exc:
+        raise HTTPException(status_code=401, detail=llm_error_detail("anthropic_auth_failed", exc)) from exc
+    except tuple(exc for exc in [AnthropicRateLimitError] if exc is not None) as exc:
+        raise HTTPException(status_code=429, detail=llm_error_detail("anthropic_rate_limited", exc)) from exc
+    except tuple(exc for exc in [AnthropicBadRequestError] if exc is not None) as exc:
+        raise HTTPException(status_code=400, detail=llm_error_detail("anthropic_bad_request", exc)) from exc
+    except tuple(exc for exc in [AnthropicAPIConnectionError] if exc is not None) as exc:
+        raise HTTPException(status_code=503, detail=llm_error_detail("anthropic_connection_failed", exc)) from exc
+    except tuple(exc for exc in [AnthropicAPIStatusError] if exc is not None) as exc:
+        raise HTTPException(status_code=getattr(exc, "status_code", 502), detail=llm_error_detail("anthropic_api_error", exc)) from exc
     except RuntimeError as exc:
         detail = runtime_error_detail(exc)
         raise HTTPException(status_code=detail.pop("status_code"), detail=detail) from exc
@@ -163,10 +243,30 @@ def review_stream(payload: dict[str, Any]) -> StreamingResponse:
 
         def worker() -> None:
             try:
+                extracted_image = None
+                if str(payload.get("image_base64") or "").strip():
+                    event_queue.put(
+                        {
+                            "event": "step_started",
+                            "step": "Image ad intake",
+                            "summary": "이미지 광고에서 문안과 레이아웃 정보를 추출합니다.",
+                        }
+                    )
+                    extracted_image = intake_ad_image(payload)
+                    event_queue.put(
+                        {
+                            "event": "step_completed",
+                            "step": "Image ad intake",
+                            "summary": f"광고 문안 {len(str(payload.get('content_text') or ''))}자 추출 완료.",
+                            "counts": {"chars": len(str(payload.get("content_text") or ""))},
+                        }
+                    )
                 workflow = workflow_for(payload)
                 review_input = review_input_from_payload(payload)
                 for event in workflow.review_events(review_input):
                     jsonable = to_jsonable(event)
+                    if jsonable.get("event") == "result" and isinstance(jsonable.get("result"), dict):
+                        attach_ad_image_result(jsonable["result"], payload, extracted_image)
                     # 결과를 먼저 클라이언트로 보낸다 — 스냅샷 저장(파일+Neo4j)의 지연이나
                     # 실패가 result 전달을 막거나 유실시키지 않도록. record_run은 예외를
                     # 던지지 않지만, 순서 자체로도 결과 전달을 보장한다.
@@ -214,6 +314,70 @@ def review_stream(payload: dict[str, Any]) -> StreamingResponse:
             yield json.dumps(event, ensure_ascii=False) + "\n"
 
     return StreamingResponse(event_lines(), media_type="application/x-ndjson")
+
+
+@app.get("/api/ad-image/{run_id}/{kind}")
+def ad_image_file(run_id: str, kind: str) -> FileResponse:
+    """저장된 광고 이미지(원본/수정안) 서빙. run_id는 파일명 화이트리스트로만 사용."""
+    if kind not in {"original", "revised"} or not run_id.replace("_", "").isalnum():
+        raise HTTPException(status_code=400, detail={"error": "bad_request", "message": "invalid image request"})
+    path = find_ad_image(run_id, kind)
+    if path is None:
+        raise HTTPException(status_code=404, detail={"error": "not_found", "message": "ad image not found"})
+    media = "image/png" if path.suffix == ".png" else "image/jpeg"
+    return FileResponse(path, media_type=media)
+
+
+@app.post("/api/revision-image")
+def revision_image(payload: dict[str, Any]) -> dict[str, Any]:
+    """교정 문안을 반영한 수정 배너 이미지 생성.
+
+    입력: {review_run_id, corrected_text, disclosure_text?}
+    원본 이미지는 심사 접수 시 저장된 파일을 사용한다(클라이언트 경로 입력 없음).
+    """
+    run_id = str(payload.get("review_run_id") or "").strip()
+    corrected_text = str(payload.get("corrected_text") or "").strip()
+    if not run_id or not corrected_text:
+        raise HTTPException(
+            status_code=422,
+            detail={"error": "bad_request", "message": "review_run_id and corrected_text are required."},
+        )
+    original = find_ad_image(run_id, "original")
+    if original is None:
+        raise HTTPException(
+            status_code=404,
+            detail={"error": "not_found", "message": "이 심사에는 저장된 원본 광고 이미지가 없습니다."},
+        )
+    run_snapshot = load_run(run_id) or {}
+    layout_notes = str(((run_snapshot.get("result") or run_snapshot).get("ad_image") or {}).get("layout_notes") or "")
+    media = "image/png" if original.suffix == ".png" else "image/jpeg"
+    try:
+        revised = generate_revised_image(
+            original.read_bytes(),
+            media,
+            corrected_text,
+            layout_notes=layout_notes,
+            disclosure_text=str(payload.get("disclosure_text") or ""),
+        )
+    except (BadRequestError, AuthenticationError, RateLimitError, APIConnectionError, APIStatusError) as exc:
+        raise HTTPException(
+            status_code=502,
+            detail={"error": "image_generation_failed", "message": "이미지 수정안 생성에 실패했습니다.", "cause": str(exc)[:400]},
+        ) from exc
+    except RuntimeError as exc:
+        raise HTTPException(
+            status_code=503,
+            detail={"error": "image_generation_unavailable", "message": str(exc)},
+        ) from exc
+    name = save_ad_image(run_id, "revised", revised, "image/png")
+    import base64 as _b64
+
+    return {
+        "review_run_id": run_id,
+        "file": name,
+        "image_base64": _b64.b64encode(revised).decode("ascii"),
+        "media_type": "image/png",
+    }
 
 
 def _product_document_node(document_id: str) -> dict[str, Any] | None:
@@ -385,6 +549,14 @@ def openai_error_detail(code: str, exc: Exception) -> dict[str, Any]:
     }
 
 
+def llm_error_detail(code: str, exc: Exception) -> dict[str, Any]:
+    return {
+        "error": code,
+        "message": friendly_llm_message(code, exc),
+        "cause": str(exc),
+    }
+
+
 def friendly_openai_message(code: str, exc: Exception) -> str:
     text = str(exc)
     if "insufficient_quota" in text:
@@ -396,6 +568,23 @@ def friendly_openai_message(code: str, exc: Exception) -> str:
     if code == "openai_connection_failed":
         return "OpenAI network connection failed."
     return "OpenAI API request failed."
+
+
+def friendly_llm_message(code: str, exc: Exception) -> str:
+    text = str(exc)
+    if "insufficient_quota" in text:
+        return "LLM provider quota or billing is insufficient for this API key."
+    if code == "anthropic_rate_limited":
+        return "Anthropic rate limit or quota blocked the LLM call."
+    if code == "anthropic_auth_failed":
+        return "Anthropic authentication failed. Check ANTHROPIC_API_KEY."
+    if code == "anthropic_connection_failed":
+        return "Anthropic network connection failed."
+    if code == "anthropic_bad_request":
+        return "Anthropic rejected the request. Check Claude model name and structured tool-use support."
+    if code == "anthropic_api_error":
+        return "Anthropic API request failed."
+    return friendly_openai_message(code, exc)
 
 
 def stream_error_event(code: str, detail: dict[str, Any]) -> str:
@@ -440,6 +629,18 @@ def stream_error_payload(exc: Exception) -> dict[str, Any]:
         detail = openai_error_detail("openai_api_error", exc)
         detail["status_code"] = exc.status_code
         return stream_error_dict("openai_api_error", detail)
+    if AnthropicAuthenticationError is not None and isinstance(exc, AnthropicAuthenticationError):
+        return stream_error_dict("anthropic_auth_failed", llm_error_detail("anthropic_auth_failed", exc))
+    if AnthropicRateLimitError is not None and isinstance(exc, AnthropicRateLimitError):
+        return stream_error_dict("anthropic_rate_limited", llm_error_detail("anthropic_rate_limited", exc))
+    if AnthropicBadRequestError is not None and isinstance(exc, AnthropicBadRequestError):
+        return stream_error_dict("anthropic_bad_request", llm_error_detail("anthropic_bad_request", exc))
+    if AnthropicAPIConnectionError is not None and isinstance(exc, AnthropicAPIConnectionError):
+        return stream_error_dict("anthropic_connection_failed", llm_error_detail("anthropic_connection_failed", exc))
+    if AnthropicAPIStatusError is not None and isinstance(exc, AnthropicAPIStatusError):
+        detail = llm_error_detail("anthropic_api_error", exc)
+        detail["status_code"] = getattr(exc, "status_code", 502)
+        return stream_error_dict("anthropic_api_error", detail)
     if isinstance(exc, RuntimeError):
         detail = runtime_error_detail(exc)
         return stream_error_dict(str(detail.get("error") or "review_runtime_error"), detail)
@@ -491,6 +692,20 @@ def runtime_error_detail(exc: RuntimeError) -> dict[str, Any]:
             "status_code": 503,
             "error": "openai_key_missing",
             "message": "OPENAI_API_KEY is required for LLM-only review.",
+            "cause": message,
+        }
+    if "ANTHROPIC_API_KEY is required" in message:
+        return {
+            "status_code": 503,
+            "error": "anthropic_key_missing",
+            "message": "ANTHROPIC_API_KEY is required for Claude review models.",
+            "cause": message,
+        }
+    if "anthropic package is required" in message:
+        return {
+            "status_code": 503,
+            "error": "anthropic_package_missing",
+            "message": "The anthropic Python package is required for Claude review models.",
             "cause": message,
         }
     return {

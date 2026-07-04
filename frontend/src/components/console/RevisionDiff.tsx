@@ -119,6 +119,36 @@ export function RevisionDiff({
   const diff = useMemo(() => buildRevisionDiff(result, reviewedText), [result, reviewedText]);
   const hasChanges = diff.changedCount > 0 || diff.disclosureAddCount > 0;
   const [copied, setCopied] = useState(false);
+  // 이미지 수정안(멀티모달) — 접수 이미지가 있는 run 에서만 노출.
+  const [imageGenState, setImageGenState] = useState<"idle" | "loading" | "done" | "error">("idle");
+  const [revisedImage, setRevisedImage] = useState<string | null>(null);
+  const [imageGenError, setImageGenError] = useState("");
+
+  const generateRevisedImage = async () => {
+    if (imageGenState === "loading") return;
+    setImageGenState("loading");
+    setImageGenError("");
+    try {
+      const response = await fetch("/api/revision-image", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          review_run_id: result.review_run_id,
+          corrected_text: correctedTextFromDiff(diff),
+        }),
+      });
+      if (!response.ok) {
+        const body = (await response.json().catch(() => null)) as { detail?: { message?: string } } | null;
+        throw new Error(body?.detail?.message ?? `이미지 생성 실패 (HTTP ${response.status})`);
+      }
+      const data = (await response.json()) as { image_base64: string; media_type: string };
+      setRevisedImage(`data:${data.media_type};base64,${data.image_base64}`);
+      setImageGenState("done");
+    } catch (error) {
+      setImageGenError(error instanceof Error ? error.message : "이미지 생성에 실패했습니다.");
+      setImageGenState("error");
+    }
+  };
 
   const copyCorrected = async () => {
     const text = correctedTextFromDiff(diff);
@@ -170,9 +200,51 @@ export function RevisionDiff({
               <Icon name={copied ? "check" : "clause"} size={14} color="#fff" />
               {copied ? "복사됨" : "교정안 복사"}
             </button>
+            {result.ad_image?.available && (
+              <button
+                type="button"
+                onClick={() => void generateRevisedImage()}
+                disabled={imageGenState === "loading"}
+                className="flex shrink-0 items-center gap-1.5 rounded-[10px] bg-white/16 px-3 py-2 text-[12.5px] font-bold text-white transition hover:bg-white/28 disabled:cursor-wait disabled:opacity-70"
+              >
+                <Icon name="alert" size={14} color="#fff" />
+                {imageGenState === "loading" ? "이미지 생성 중…" : revisedImage ? "이미지 다시 생성" : "이미지 수정안 생성"}
+              </button>
+            )}
           </div>
         )}
       </div>
+
+      {/* 이미지 수정안 — 교정 문안을 원본 배너 레이아웃에 반영해 생성 */}
+      {result.ad_image?.available && (imageGenState === "error" || revisedImage) && (
+        <div className="border-b border-line bg-surface-2 px-4 py-3">
+          {imageGenState === "error" && (
+            <p className="text-[12.5px] font-semibold text-reject">{imageGenError}</p>
+          )}
+          {revisedImage && (
+            <div className="grid gap-3 md:grid-cols-2">
+              <figure>
+                <figcaption className="mb-1 text-[11px] font-bold text-ink-4">BEFORE · 접수 원본</figcaption>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={`/api/ad-image/${result.review_run_id}/original`}
+                  alt="원본 광고 이미지"
+                  className="w-full rounded-md border border-line bg-white object-contain"
+                />
+              </figure>
+              <figure>
+                <figcaption className="mb-1 text-[11px] font-bold text-pass">AFTER · AI 이미지 수정안</figcaption>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={revisedImage} alt="교정 문안이 반영된 이미지 수정안" className="w-full rounded-md border border-pass/50 bg-white object-contain" />
+              </figure>
+              <p className="md:col-span-2 text-[11px] leading-relaxed text-ink-4">
+                이미지 수정안은 교정 문안을 원본 레이아웃에 반영해 생성한 시안입니다 — 게시 전 문구·수치가 교정안과
+                일치하는지 심사자가 확인해야 합니다.
+              </p>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* diff 헤더 — GitHub 파일 헤더 오마주 */}
       <div className="flex flex-wrap items-center gap-x-3 gap-y-1 border-b border-line bg-surface-2 px-4 py-2.5">

@@ -50,6 +50,56 @@ export function ReviewForm({ running, onSubmit, draftPreset, onLoadSample, onLoa
   );
   const [draftQueue, setDraftQueue] = useState<ReviewRequest[]>([]);
   const [queueRunning, setQueueRunning] = useState(false);
+  // 이미지 광고 접수(멀티모달): base64(data: 프리픽스 제외)와 미리보기 URL.
+  const [adImage, setAdImage] = useState<{ base64: string; mediaType: string; preview: string; name: string } | null>(null);
+  const [imageError, setImageError] = useState("");
+
+  const handleImageFile = (file: File | null) => {
+    setImageError("");
+    if (!file) {
+      setAdImage(null);
+      return;
+    }
+    if (!/^image\/(png|jpeg|jpg|webp)$/.test(file.type)) {
+      setImageError("PNG/JPEG/WebP 이미지만 첨부할 수 있습니다.");
+      return;
+    }
+    if (file.size > 8 * 1024 * 1024) {
+      setImageError("이미지는 8MB 이하만 첨부할 수 있습니다.");
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      const dataUrl = String(reader.result || "");
+      const base64 = dataUrl.split(",", 2)[1] ?? "";
+      setAdImage({
+        base64,
+        mediaType: file.type === "image/jpg" ? "image/jpeg" : file.type,
+        preview: dataUrl,
+        name: file.name,
+      });
+    };
+    reader.readAsDataURL(file);
+  };
+
+  // 프리셋/빠른 시나리오의 이미지 광고 — public 경로 이미지를 불러와 첨부 상태로 만든다.
+  const loadImageFromUrl = async (url: string) => {
+    try {
+      const response = await fetch(url);
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const blob = await response.blob();
+      const name = url.split("/").pop() || "ad-image.png";
+      handleImageFile(new File([blob], name, { type: blob.type || "image/png" }));
+    } catch {
+      setImageError("프리셋 이미지를 불러오지 못했습니다.");
+    }
+  };
+
+  useEffect(() => {
+    if (draftPreset?.image_url) void loadImageFromUrl(draftPreset.image_url);
+    // 폼은 draftPreset 별로 key 리마운트되므로 mount 시 1회면 충분하다.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const fillExample = (example: ExamplePreset) => {
     setTitle(example.title);
@@ -59,6 +109,11 @@ export function ReviewForm({ running, onSubmit, draftPreset, onLoadSample, onLoa
     setProductQuery(example.selectedProduct);
     setProductOpen(false);
     setText(example.text);
+    if (example.imageUrl) {
+      void loadImageFromUrl(example.imageUrl);
+    } else {
+      handleImageFile(null);
+    }
   };
 
   useEffect(() => {
@@ -107,17 +162,19 @@ export function ReviewForm({ running, onSubmit, draftPreset, onLoadSample, onLoa
       language: selectedBank.language,
       llm_model: llmModel || undefined,
       actor: getActor(),
+      image_base64: adImage?.base64 || undefined,
+      image_media_type: adImage?.mediaType || undefined,
     };
   };
 
   const handleSubmit = (event: FormEvent) => {
     event.preventDefault();
-    if (!text.trim() || running || queueRunning) return;
+    if ((!text.trim() && !adImage) || running || queueRunning) return;
     void onSubmit(buildPayload());
   };
 
   const addToQueue = () => {
-    if (!text.trim()) return;
+    if (!text.trim() && !adImage) return;
     setDraftQueue((items) => [...items, { ...buildPayload(), dataset_item_id: `queue_${Date.now()}_${items.length + 1}` }]);
   };
 
@@ -325,18 +382,61 @@ export function ReviewForm({ running, onSubmit, draftPreset, onLoadSample, onLoa
 
       <label className="block">
         <span className="mb-1 flex items-center gap-1.5 text-xs font-bold text-ink-3">
-          광고 문안 <span className="font-normal text-ink-4">심의 대상 원문 전체를 붙여넣으세요</span>
+          광고 문안{" "}
+          <span className="font-normal text-ink-4">
+            {adImage ? "이미지 첨부됨 — 비워두면 이미지에서 문안을 자동 추출합니다" : "심의 대상 원문 전체를 붙여넣으세요"}
+          </span>
         </span>
         <textarea
           className={`${fieldClass} min-h-44 resize-y`}
           value={text}
           onChange={(event) => setText(event.target.value)}
           rows={8}
-          placeholder="광고 제목과 본문, 고지 문구를 포함한 전체 문안을 입력합니다…"
-          required
+          placeholder={
+            adImage
+              ? "(선택) 비워두면 첨부한 이미지에서 문안을 자동 추출해 심의합니다."
+              : "광고 제목과 본문, 고지 문구를 포함한 전체 문안을 입력합니다…"
+          }
+          required={!adImage}
         />
         <span className="mt-1 block text-right text-[11px] text-ink-4">{text.length}자</span>
       </label>
+
+      {/* 이미지 광고 접수(멀티모달) — 배너/전단 이미지에서 문안·레이아웃을 추출해 심의 */}
+      <div className="rounded-lg border border-line bg-surface-2 p-3">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <span className="text-xs font-bold text-ink-3">
+            이미지 광고 <span className="font-normal text-ink-4">배너·전단 이미지로 접수 (문안 자동 추출 + 이미지 수정안 생성)</span>
+          </span>
+          <label className="cursor-pointer rounded-md border border-line bg-surface px-3 py-1.5 text-[12px] font-bold text-ink-2 hover:border-brand hover:text-brand">
+            {adImage ? "이미지 바꾸기" : "이미지 첨부"}
+            <input
+              type="file"
+              accept="image/png,image/jpeg,image/webp"
+              className="hidden"
+              onChange={(event) => handleImageFile(event.target.files?.[0] ?? null)}
+            />
+          </label>
+        </div>
+        {imageError && <p className="mt-2 text-[12px] font-semibold text-reject">{imageError}</p>}
+        {adImage && (
+          <div className="mt-2 flex items-start gap-3">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={adImage.preview} alt="첨부한 광고 이미지 미리보기" className="max-h-40 rounded-md border border-line" />
+            <div className="min-w-0 text-[12px] leading-relaxed text-ink-3">
+              <div className="truncate font-semibold text-ink-2">{adImage.name}</div>
+              <div>심의 시 이미지에서 문안을 추출하고, 심의 후 교정 문안이 반영된 이미지 수정안을 생성할 수 있습니다.</div>
+              <button
+                type="button"
+                onClick={() => handleImageFile(null)}
+                className="mt-1 rounded px-1.5 py-0.5 text-[11px] font-bold text-ink-4 hover:bg-surface hover:text-reject"
+              >
+                이미지 제거
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
 
       {noProduct && (
         <div className="rounded-lg border border-revise/40 bg-revise-bg px-3 py-2.5 text-[12px] leading-relaxed text-ink-2">
@@ -400,14 +500,14 @@ export function ReviewForm({ running, onSubmit, draftPreset, onLoadSample, onLoa
           <button
             type="button"
             onClick={addToQueue}
-            disabled={!text.trim()}
+            disabled={!text.trim() && !adImage}
             className="rounded-md border border-line bg-surface px-4 py-2.5 text-sm font-bold text-ink-2 hover:border-brand hover:text-brand disabled:cursor-not-allowed disabled:opacity-50"
           >
             대기열 추가
           </button>
           <button
             type="submit"
-            disabled={running || queueRunning || !text.trim()}
+            disabled={running || queueRunning || (!text.trim() && !adImage)}
             className="flex items-center gap-2 rounded-md bg-brand px-6 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-brand/90 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {running || queueRunning ? "심의 분석 중…" : "심의 분석 시작"}

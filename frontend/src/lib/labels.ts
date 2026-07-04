@@ -328,6 +328,8 @@ export interface ExamplePreset {
   title: string;
   selectedProduct: string;
   text: string;
+  /** 이미지 광고 프리셋(멀티모달 데모) — public/ 경로. 문안은 VLM이 이미지에서 추출. */
+  imageUrl?: string;
 }
 
 export const EXAMPLES: ExamplePreset[] = [
@@ -354,6 +356,17 @@ export const EXAMPLES: ExamplePreset[] = [
     title: "ELS 광고 초안",
     selectedProduct: "",
     text: "요즘 같은 변동성 장세에서는 ELS를 이해하는 것이 중요합니다. OO증권의 더블찬스 ELS는 안정성과 수익성을 동시에 고려한 상품입니다. 지난 3년간 유사 구조 상품의 조기상환 성공률이 높았기 때문에, 중위험 투자자에게 좋은 선택이 될 수 있습니다.",
+  },
+  {
+    // 멀티모달(VLM) 접수 데모 — 배너 이미지에서 문안·레이아웃을 추출해 심사하고,
+    // 심사 후 교정 문안을 반영한 이미지 수정안까지 생성하는 시나리오.
+    label: "예금 · 이미지 배너 (VLM 접수)",
+    product: "deposit",
+    channel: "banner",
+    title: "JB 특판예금 이미지 광고",
+    selectedProduct: "",
+    text: "",
+    imageUrl: "/samples/jb_teukpan_banner.png",
   },
 ];
 
