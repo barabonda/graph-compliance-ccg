@@ -2,18 +2,13 @@
 
 import { useMemo, useState } from "react";
 import { PRODUCT_GROUPS } from "@/lib/labels";
-import {
-  type AnnotatedText,
-  buildAdLines,
-  buildCorrectedCopy,
-  buildDocumentDiff,
-  conditionalDisclosures,
-  correctedDocument,
-} from "@/lib/selectors";
+import { buildRevisionDiff } from "@/lib/revisionDiff";
+import { type AnnotatedText, buildAdLines, conditionalDisclosures } from "@/lib/selectors";
 import type { ReviewOutput } from "@/lib/types";
 import { Icon } from "../Icon";
 import { Tag } from "../ui";
 import { PaneHeader } from "./common";
+import { RevisionDiff } from "./RevisionDiff";
 
 interface Props {
   result: ReviewOutput;
@@ -100,18 +95,14 @@ export function AdPane({
   onSelectAnchor,
   onToggleResolve,
 }: Props) {
-  const [mode, setMode] = useState<"original" | "corrected">("original");
+  // null = 아직 사용자가 안 골랐음 → 수정할 게 있으면 '수정안'이 기본(결론부터),
+  // 클린 광고면 원문. 사용자가 토글하면 그 선택을 따른다.
+  const [modeChoice, setModeChoice] = useState<"original" | "diff" | null>(null);
   const lines = useMemo(() => buildAdLines(result, reviewedText), [result, reviewedText]);
-  // 교정본 = 백엔드의 일관 재작성 전체 문서(원문↔교정본 diff). 없으면(구버전 데이터)
-  // 기존 per-span 짜깁기로 폴백.
-  const correctedDoc = useMemo(() => correctedDocument(result), [result]);
-  const corrected = useMemo(
-    () =>
-      correctedDoc
-        ? buildDocumentDiff(reviewedText, correctedDoc)
-        : buildCorrectedCopy(result, reviewedText, resolved),
-    [result, reviewedText, resolved, correctedDoc],
-  );
+  // 수정안 diff — GitHub unified diff 형태 (구 '교정본'/수정안 탭 통합)
+  const diff = useMemo(() => buildRevisionDiff(result, reviewedText), [result, reviewedText]);
+  const diffCount = diff.changedCount + diff.disclosureAddCount;
+  const mode = modeChoice ?? (diffCount > 0 ? "diff" : "original");
   const conditional = conditionalDisclosures(result, reviewedText);
   const actionable = (result.anchor_display ?? []).filter((item) => item.display_role === "actionable").length;
   const productGroup =
@@ -131,17 +122,17 @@ export function AdPane({
             <div className="flex rounded-lg border border-line bg-surface-2 p-0.5">
               <button
                 type="button"
-                onClick={() => setMode("original")}
-                className={`rounded-md px-2.5 py-1 text-[11.5px] font-bold ${mode === "original" ? "bg-surface text-ink shadow-card" : "text-ink-3"}`}
+                onClick={() => setModeChoice("diff")}
+                className={`rounded-md px-2.5 py-1 text-[11.5px] font-bold ${mode === "diff" ? "bg-surface text-pass shadow-card" : "text-ink-3"}`}
               >
-                원문
+                수정안{diffCount ? ` ${diffCount}` : ""}
               </button>
               <button
                 type="button"
-                onClick={() => setMode("corrected")}
-                className={`rounded-md px-2.5 py-1 text-[11.5px] font-bold ${mode === "corrected" ? "bg-surface text-pass shadow-card" : "text-ink-3"}`}
+                onClick={() => setModeChoice("original")}
+                className={`rounded-md px-2.5 py-1 text-[11.5px] font-bold ${mode === "original" ? "bg-surface text-ink shadow-card" : "text-ink-3"}`}
               >
-                교정본{corrected.changedCount ? ` ${corrected.changedCount}` : ""}
+                원문
               </button>
             </div>
             <Tag>
@@ -152,7 +143,18 @@ export function AdPane({
         }
       />
       <div className="flex-1 overflow-y-auto px-5 pt-4 pb-7">
-        {/* 광고 크리에이티브 미리보기 */}
+        {mode === "diff" ? (
+          // 수정안 — GitHub unified diff. -/+ 줄 hover 로 위험/수정 이유, 클릭으로 판정 상세.
+          <RevisionDiff
+            result={result}
+            reviewedText={reviewedText}
+            reviewTitle={reviewTitle}
+            productGroup={productGroup}
+            selectedAnchorId={selectedAnchorId}
+            onSelectAnchor={onSelectAnchor}
+          />
+        ) : (
+        // 광고 크리에이티브 미리보기
         <div className="overflow-hidden rounded-[14px] border border-line bg-white shadow-panel">
           <div className="px-5.5 py-5 text-white" style={{ background: "linear-gradient(135deg,#1d3a6e,#2f6df0)" }}>
             <div className="mb-3 flex items-center justify-between">
@@ -164,65 +166,33 @@ export function AdPane({
             </div>
           </div>
 
-          {mode === "original" ? (
-            // 원문의 장식성 들여쓰기·중앙정렬 공백은 접고(whitespace 기본 접기),
-            // 문단 경계(공백 전용 줄)는 고정 간격으로 치환해 읽는 흐름만 남긴다.
-            <div className="space-y-1.5 px-5.5 py-5 text-[15px] leading-[1.55] break-keep text-ink">
-              {lines.map((line) =>
-                line.text.trim() ? (
-                  <div key={line.key}>
-                    <LineText
-                      annotated={line.annotated}
-                      selectedAnchorId={selectedAnchorId}
-                      resolved={resolved}
-                      onSelectAnchor={onSelectAnchor}
-                    />
-                  </div>
-                ) : (
-                  <div key={line.key} className="h-1.5" aria-hidden />
-                ),
-              )}
-            </div>
-          ) : (
-            <div className="px-5.5 py-5 text-[15px] leading-[1.45] break-keep whitespace-pre-wrap text-ink">
-              {corrected.segments.map((seg, index) =>
-                seg.changed ? (
-                  <mark
-                    key={index}
-                    className="rounded bg-pass-bg px-0.5 font-medium text-[#0c6b4a] decoration-clone"
-                    style={{ boxShadow: "inset 0 -2px 0 var(--pass)" }}
-                  >
-                    {seg.text}
-                  </mark>
-                ) : (
-                  <span key={index}>{seg.text}</span>
-                ),
-              )}
-            </div>
-          )}
-
-          <div className="border-t border-line bg-surface-2 px-5.5 py-2.5 text-[11.5px] leading-relaxed text-ink-3">
-            {mode === "corrected" ? (
-              correctedDoc ? (
-                <span>
-                  광고 전체를 일관되게 재작성한 교정본입니다. 초록 구간이 변경된 부분이며{" "}
-                  {corrected.changedCount}곳이 수정되었습니다.
-                </span>
-              ) : corrected.changedCount ? (
-                <span>
-                  적용된 수정안 {corrected.changedCount}건이 반영된 교정본입니다. 초록 구간이 변경된 문안입니다.
-                </span>
+          {/* 원문의 장식성 들여쓰기·중앙정렬 공백은 접고(whitespace 기본 접기),
+              문단 경계(공백 전용 줄)는 고정 간격으로 치환해 읽는 흐름만 남긴다. */}
+          <div className="space-y-1.5 px-5.5 py-5 text-[15px] leading-[1.55] break-keep text-ink">
+            {lines.map((line) =>
+              line.text.trim() ? (
+                <div key={line.key}>
+                  <LineText
+                    annotated={line.annotated}
+                    selectedAnchorId={selectedAnchorId}
+                    resolved={resolved}
+                    onSelectAnchor={onSelectAnchor}
+                  />
+                </div>
               ) : (
-                <span>전체 교정본이 아직 생성되지 않았습니다. 원문에서 개별 수정안을 확인하세요.</span>
-              )
-            ) : (
-              <span>
-                {channelLabel}
-                {matchedProduct ? ` · 대상 상품: ${matchedProduct}` : ""} · 원문 {reviewedText.length}자
-              </span>
+                <div key={line.key} className="h-1.5" aria-hidden />
+              ),
             )}
           </div>
+
+          <div className="border-t border-line bg-surface-2 px-5.5 py-2.5 text-[11.5px] leading-relaxed text-ink-3">
+            <span>
+              {channelLabel}
+              {matchedProduct ? ` · 대상 상품: ${matchedProduct}` : ""} · 원문 {reviewedText.length}자
+            </span>
+          </div>
         </div>
+        )}
 
         {mode === "original" && (
           <>

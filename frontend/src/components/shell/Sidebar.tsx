@@ -4,13 +4,13 @@ import type { ReviewOutput } from "@/lib/types";
 import { buildIssueCards, disclosureIsSatisfied } from "@/lib/selectors";
 import { Icon } from "../Icon";
 
-export type ViewKey = "home" | "new" | "review" | "revision" | "graph" | "exception" | "product" | "audit" | "dashboard";
+export type ViewKey = "home" | "new" | "review" | "graph" | "exception" | "product" | "audit" | "dashboard";
 
 const NAV: { key: ViewKey; label: string; sub: string; icon: string }[] = [
   { key: "home", label: "홈", sub: "상태 · 최근 심사", icon: "dashboard" },
   { key: "new", label: "새 심사", sub: "문안 접수 · 실행", icon: "plus" },
-  { key: "review", label: "심사 콘솔", sub: "광고 원문 · 위험", icon: "review" },
-  { key: "revision", label: "수정안", sub: "Before/After", icon: "spark" },
+  // 수정안은 심사 콘솔의 '수정안' diff 모드로 통합 (별도 탭 폐지)
+  { key: "review", label: "심사 콘솔", sub: "원문 · 위험 · 수정안", icon: "review" },
   { key: "graph", label: "근거 경로", sub: "설명 그래프", icon: "graph" },
   { key: "exception", label: "사전심사 체크리스트", sub: "충족·확인 필요 점검", icon: "shield" },
   { key: "product", label: "상품 사실", sub: "문서 대조", icon: "layers" },
