@@ -593,6 +593,128 @@ def run_detail(run_id: str) -> dict[str, Any]:
 
 EVAL_DIR = Path(__file__).resolve().parent / "eval"
 
+# 유형별/조문별 분해 요약에서 카드에 노출할 최대 항목 수(정밀도·재현율 상위 N).
+_EVAL_BREAKDOWN_TOP_N = 5
+
+
+def _classify_eval_report(name: str, data: dict[str, Any] | None) -> tuple[bool, str]:
+    """평가 산출물이 "리포트"인지, 어떤 종류인지 판별한다.
+
+    ``is_report``는 하드 필터가 아니라 additive 플래그다 — 프론트가 토글로
+    중간 산출물(batch·quality·grounding·metrics 중간본)을 보이거나 숨길 수 있게
+    한다. 판별 우선순위:
+
+    1. 파일명에 "report"가 포함되거나, 내용에 article_metrics/verdict_counts/kind
+       필드가 있으면 리포트로 본다(``is_report=True``). 유형별 분해 shape
+       (``per_violation_type_recall``/``per_product_group`` — synth_v0_2_breakdown.py류
+       산출)도 동일하게 리포트로 본다 — 파일명이 "report"를 포함하지 않아도(예:
+       synth_v0_2_metrics.json) 정밀도·재현율 분해가 있으면 카드로 노출해야 하기 때문.
+    2. report_kind는 내용 기반 판별을 파일명 기반보다 우선한다:
+       - verdict_counts 또는 문자열 kind 필드가 있으면 "live"
+         (예: JB 실제 광고 라이브 심사 — gold 없이 판정 분포만 있음)
+       - article_metrics(dict)가 있으면 "gold"
+         (규제/합성 gold 라벨 대비 정밀도·재현율 산출 — 예: regulator_vlm_full_report.json)
+       - 그 외 파일명에 "synth"가 포함되거나 유형별 분해 shape이 있으면 "synthetic"
+         (합성 데이터셋 구성/품질 리포트 또는 향후 synth_v0_2 유형별 분해)
+       - 파일명에 "guideline"이 포함되면 "guideline"
+       - 아무 것도 안 맞으면 "unknown"
+    """
+    stem = name.rsplit(".", 1)[0].lower()
+    has_article_metrics = bool(data) and isinstance(data.get("article_metrics"), dict)
+    has_verdict_counts = bool(data) and isinstance(data.get("verdict_counts"), dict)
+    has_kind_field = bool(data) and isinstance(data.get("kind"), str)
+    has_type_breakdown = bool(data) and (
+        isinstance(data.get("per_violation_type_recall"), dict) or isinstance(data.get("per_product_group"), dict)
+    )
+
+    is_report = (
+        ("report" in stem) or has_article_metrics or has_verdict_counts or has_kind_field or has_type_breakdown
+    )
+
+    if has_verdict_counts or has_kind_field:
+        report_kind = "live"
+    elif has_article_metrics:
+        report_kind = "gold"
+    elif "synth" in stem or has_type_breakdown:
+        report_kind = "synthetic"
+    elif "guideline" in stem:
+        report_kind = "guideline"
+    else:
+        report_kind = "unknown"
+
+    return is_report, report_kind
+
+
+def _eval_breakdown_summary(data: dict[str, Any]) -> list[dict[str, Any]] | None:
+    """유형별/조문별 분해가 있으면 top-N 정밀도·재현율 요약을 만든다.
+
+    알려진 분해 shape 세 가지를 인식한다(모두 optional — 없으면 건너뛴다):
+    - ``article_metrics.per_article``: 조문별 {tp,fp,fn,tn,f1,f2} (gold 리포트)
+    - ``per_violation_type_recall``: 위반유형별 {mutations,detected,recall}
+      (synth_v0_2_breakdown.py 산출 — 향후 synth_v0_2 리포트)
+    - ``per_product_group``: 상품군별 {counts,precision,recall,f1}
+      (synth_v0_2_breakdown.py 산출)
+    """
+    blocks: list[dict[str, Any]] = []
+
+    article_metrics = data.get("article_metrics")
+    per_article = article_metrics.get("per_article") if isinstance(article_metrics, dict) else None
+    if isinstance(per_article, dict) and per_article:
+        rows = []
+        for key, v in per_article.items():
+            if not isinstance(v, dict):
+                continue
+            tp, fp, fn = v.get("tp", 0) or 0, v.get("fp", 0) or 0, v.get("fn", 0) or 0
+            support = tp + fn
+            rows.append(
+                {
+                    "key": key,
+                    "precision": round(tp / (tp + fp), 4) if (tp + fp) else 0.0,
+                    "recall": round(tp / (tp + fn), 4) if (tp + fn) else 0.0,
+                    "f1": v.get("f1"),
+                    "support": support,
+                }
+            )
+        rows.sort(key=lambda r: r["support"], reverse=True)
+        blocks.append({"dimension": "article", "top": rows[:_EVAL_BREAKDOWN_TOP_N]})
+
+    per_violation_type = data.get("per_violation_type_recall")
+    if isinstance(per_violation_type, dict) and per_violation_type:
+        rows = [
+            {
+                "key": key,
+                "recall": v.get("recall"),
+                "detected": v.get("detected"),
+                "support": v.get("mutations"),
+            }
+            for key, v in per_violation_type.items()
+            if isinstance(v, dict)
+        ]
+        rows.sort(key=lambda r: (r["support"] or 0), reverse=True)
+        blocks.append({"dimension": "violation_type", "top": rows[:_EVAL_BREAKDOWN_TOP_N]})
+
+    per_product_group = data.get("per_product_group")
+    if isinstance(per_product_group, dict) and per_product_group:
+        rows = []
+        for key, v in per_product_group.items():
+            if not isinstance(v, dict):
+                continue
+            counts = v.get("counts") if isinstance(v.get("counts"), dict) else {}
+            support = (counts.get("tp", 0) or 0) + (counts.get("fn", 0) or 0)
+            rows.append(
+                {
+                    "key": key,
+                    "precision": v.get("precision"),
+                    "recall": v.get("recall"),
+                    "f1": v.get("f1"),
+                    "support": support,
+                }
+            )
+        rows.sort(key=lambda r: r["support"], reverse=True)
+        blocks.append({"dimension": "product_group", "top": rows[:_EVAL_BREAKDOWN_TOP_N]})
+
+    return blocks or None
+
 
 def _eval_report_summary(path: Path) -> dict[str, Any]:
     """리포트 파일 요약 — 목록 카드용. metrics-shape JSON이면 핵심 지표만 추린다."""
@@ -603,12 +725,15 @@ def _eval_report_summary(path: Path) -> dict[str, Any]:
         "size": stat.st_size,
         "mtime": int(stat.st_mtime),
     }
+    data: dict[str, Any] | None = None
     if path.suffix == ".json":
         try:
-            data = json.loads(path.read_text(encoding="utf-8"))
+            parsed = json.loads(path.read_text(encoding="utf-8"))
         except Exception:  # noqa: BLE001 — 손상 파일은 목록에서 요약만 생략.
-            return info
-        if isinstance(data, dict):
+            parsed = None
+        if isinstance(parsed, dict):
+            data = parsed
+        if data is not None:
             metrics = data.get("article_metrics") if isinstance(data.get("article_metrics"), dict) else None
             info["record_count"] = data.get("record_count")
             if isinstance(metrics, dict):
@@ -632,6 +757,18 @@ def _eval_report_summary(path: Path) -> dict[str, Any]:
                     for key in ("violation_precision", "violation_recall", "overblocking_rate", "clean_non_pass_rate")
                     if data["ccg_metrics"].get(key) is not None
                 }
+            # additive: 리포트 본문에 있으면 노출(없으면 생략 — 프론트 옵셔널 처리).
+            if "model" in data:
+                info["model"] = data.get("model")
+            if "product_selection" in data:
+                info["product_selection"] = data.get("product_selection")
+            breakdown = _eval_breakdown_summary(data)
+            if breakdown:
+                info["breakdown"] = breakdown
+
+    is_report, report_kind = _classify_eval_report(path.name, data)
+    info["is_report"] = is_report
+    info["report_kind"] = report_kind
     return info
 
 
@@ -661,6 +798,38 @@ def eval_report_detail(name: str):
         except Exception as exc:  # noqa: BLE001
             raise HTTPException(status_code=422, detail={"error": "parse_error", "message": str(exc)[:200]}) from exc
     return {"name": name, "kind": "md", "text": path.read_text(encoding="utf-8")}
+
+
+@app.post("/api/product-doc-intake")
+def product_doc_intake(payload: dict[str, Any]) -> dict[str, Any]:
+    """상품 문서 시점 인식 접수 — KG 버전 적재 + 변경 추적(새 심사 데모 기능).
+
+    payload: {file_base64, media_type, file_name?, workspace_id?, llm_model?}
+    반환: {version_id, product_name, effective_date, facts, changes, timeline}
+    """
+    from product_doc_intake import extract_doc_metadata, extract_document_text, ingest_doc_version
+
+    file_base64 = str(payload.get("file_base64") or "").strip()
+    if not file_base64:
+        raise HTTPException(status_code=422, detail={"error": "bad_request", "message": "file_base64 is required."})
+    media_type = str(payload.get("media_type") or "text/plain")
+    workspace_id = str(payload.get("workspace_id") or "graphcompliance_mvp_jb_20260530")
+    model = str(payload.get("llm_model") or "").strip()
+    try:
+        text = extract_document_text(file_base64, media_type)
+        metadata = extract_doc_metadata(text, llm=LLMGateway(model=model) if model else None)
+        return ingest_doc_version(
+            workspace_id=workspace_id,
+            metadata=metadata,
+            source_name=str(payload.get("file_name") or "uploaded_document"),
+        )
+    except ServiceUnavailable as exc:
+        raise HTTPException(
+            status_code=503,
+            detail={"error": "neo4j_unavailable", "message": "Neo4j is unavailable.", "cause": str(exc)[:200]},
+        ) from exc
+    except RuntimeError as exc:
+        raise HTTPException(status_code=422, detail={"error": "doc_intake_failed", "message": str(exc)}) from exc
 
 
 @app.post("/api/copilot")

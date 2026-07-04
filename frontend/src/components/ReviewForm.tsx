@@ -99,6 +99,74 @@ export function ReviewForm({ running, onSubmit, draftPreset, onLoadSample, onLoa
     setAdImages((prev) => prev.filter((_, i) => i !== index));
   };
 
+  // 상품 문서 시점 인식 접수(데모) — 문서를 KG 버전으로 적재하고 변경점을 추적한다.
+  interface DocIntakeResult {
+    product_name: string;
+    doc_type: string;
+    effective_date: string;
+    date_evidence: string;
+    facts: { field: string; value: string }[];
+    previous_effective_date: string;
+    changes: { field: string; kind: "changed" | "added" | "removed"; old: string; new: string }[];
+    timeline: { id: string; effective_date: string; doc_type: string; source_name?: string }[];
+  }
+  const [docIntakeState, setDocIntakeState] = useState<"idle" | "loading" | "done" | "error">("idle");
+  const [docIntakeError, setDocIntakeError] = useState("");
+  const [docResult, setDocResult] = useState<DocIntakeResult | null>(null);
+
+  const intakeProductDoc = async (file: File) => {
+    if (docIntakeState === "loading") return;
+    setDocIntakeState("loading");
+    setDocIntakeError("");
+    try {
+      const dataUrl = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(String(reader.result || ""));
+        reader.onerror = () => reject(new Error("파일을 읽지 못했습니다."));
+        reader.readAsDataURL(file);
+      });
+      const base64 = dataUrl.split(",", 2)[1] ?? "";
+      const selectedBank = BANKS.find((item) => item.value === bank) ?? BANKS[0];
+      const response = await fetch("/api/product-doc-intake", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          file_base64: base64,
+          media_type: file.type || (file.name.endsWith(".pdf") ? "application/pdf" : "text/plain"),
+          file_name: file.name,
+          workspace_id: selectedBank.workspaceId,
+          llm_model: llmModel || undefined,
+        }),
+      });
+      if (!response.ok) {
+        const body = (await response.json().catch(() => null)) as { detail?: { message?: string } } | null;
+        throw new Error(body?.detail?.message ?? `문서 접수 실패 (HTTP ${response.status})`);
+      }
+      const data = (await response.json()) as DocIntakeResult;
+      setDocResult(data);
+      setDocIntakeState("done");
+      // 인식한 상품명을 상품 선택에 반영 — 심사 사실 대조와 이어지도록.
+      if (data.product_name && !selectedProduct) {
+        setSelectedProduct(data.product_name);
+        setProductQuery(data.product_name);
+      }
+    } catch (error) {
+      setDocIntakeError(error instanceof Error ? error.message : "문서 접수에 실패했습니다.");
+      setDocIntakeState("error");
+    }
+  };
+
+  const intakeSampleDoc = async (version: 1 | 2) => {
+    try {
+      const res = await fetch(`/samples/product_doc_v${version}.md`);
+      const blob = await res.blob();
+      await intakeProductDoc(new File([blob], `product_doc_v${version}.md`, { type: "text/markdown" }));
+    } catch {
+      setDocIntakeError("샘플 문서를 불러오지 못했습니다.");
+      setDocIntakeState("error");
+    }
+  };
+
   // 프리셋/빠른 시나리오의 이미지 광고 — public 경로 이미지를 불러와 첨부 상태로 만든다.
   const loadImageFromUrl = async (url: string) => {
     try {
@@ -482,6 +550,125 @@ export function ReviewForm({ running, onSubmit, draftPreset, onLoadSample, onLoa
               가이드를 생성할 수 있습니다.
             </p>
           </>
+        )}
+      </div>
+
+      {/* 상품 문서 시점 인식 접수(데모) — KG 버전 적재 + 규제·조건 변경 추적 */}
+      <div className="rounded-lg border border-line bg-surface-2 p-3">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <span className="text-xs font-bold text-ink-3">
+            상품 문서 접수{" "}
+            <span className="font-normal text-ink-4">시행일 자동 인식 → KG 버전 적재 → 조건 변경 추적</span>
+          </span>
+          <div className="flex items-center gap-1.5">
+            <button
+              type="button"
+              onClick={() => void intakeSampleDoc(1)}
+              disabled={docIntakeState === "loading"}
+              className="rounded-md border border-line bg-surface px-2.5 py-1.5 text-[11.5px] font-bold text-ink-3 hover:border-brand hover:text-brand disabled:opacity-50"
+            >
+              샘플 v1 (2025-09)
+            </button>
+            <button
+              type="button"
+              onClick={() => void intakeSampleDoc(2)}
+              disabled={docIntakeState === "loading"}
+              className="rounded-md border border-line bg-surface px-2.5 py-1.5 text-[11.5px] font-bold text-ink-3 hover:border-brand hover:text-brand disabled:opacity-50"
+            >
+              샘플 v2 (2026-05 개정)
+            </button>
+            <label
+              className={`rounded-md border border-line bg-surface px-3 py-1.5 text-[12px] font-bold text-ink-2 ${
+                docIntakeState === "loading" ? "cursor-wait opacity-50" : "cursor-pointer hover:border-brand hover:text-brand"
+              }`}
+            >
+              {docIntakeState === "loading" ? "접수 중…" : "문서 첨부"}
+              <input
+                type="file"
+                accept=".pdf,.md,.txt,application/pdf,text/markdown,text/plain"
+                className="hidden"
+                disabled={docIntakeState === "loading"}
+                onChange={(event) => {
+                  const file = event.target.files?.[0];
+                  if (file) void intakeProductDoc(file);
+                  event.target.value = "";
+                }}
+              />
+            </label>
+          </div>
+        </div>
+        {docIntakeState === "loading" && (
+          <p className="mt-2 text-[12px] text-ink-3">문서에서 시행일·핵심 사실을 추출해 지식그래프에 적재하는 중…</p>
+        )}
+        {docIntakeError && <p className="mt-2 text-[12px] font-semibold text-reject">{docIntakeError}</p>}
+        {docResult && (
+          <div className="mt-2.5 space-y-2.5 rounded-[10px] border border-line bg-surface p-3">
+            {/* 시점 인식 결과 */}
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-[13px] font-bold text-ink">{docResult.product_name}</span>
+              <span className="rounded bg-surface-3 px-1.5 py-0.5 text-[11px] font-bold text-ink-3">{docResult.doc_type}</span>
+              {docResult.effective_date ? (
+                <span className="rounded-full bg-brand-tint px-2 py-0.5 text-[11.5px] font-bold text-brand-2" title={docResult.date_evidence}>
+                  시행일 {docResult.effective_date} 인식
+                </span>
+              ) : (
+                <span className="rounded-full bg-revise-bg px-2 py-0.5 text-[11.5px] font-bold text-revise">
+                  시행일 미명시 — 심사자 확인 필요
+                </span>
+              )}
+              <span className="text-[11.5px] text-ink-4">사실 {docResult.facts.length}건 KG 적재</span>
+            </div>
+            {/* 버전 타임라인 */}
+            {docResult.timeline.length > 0 && (
+              <div className="flex flex-wrap items-center gap-1 text-[11.5px]">
+                <span className="mr-1 font-bold text-ink-4">버전 이력</span>
+                {docResult.timeline.map((v, i) => (
+                  <span key={v.id ?? i} className="flex items-center gap-1">
+                    {i > 0 && <span className="text-ink-4">→</span>}
+                    <span
+                      className={`rounded-md px-2 py-0.5 font-mono font-bold ${
+                        v.effective_date === docResult.effective_date
+                          ? "bg-ink text-white"
+                          : "bg-surface-3 text-ink-3"
+                      }`}
+                    >
+                      {v.effective_date || "시점 미상"}
+                    </span>
+                  </span>
+                ))}
+              </div>
+            )}
+            {/* 변경 추적 */}
+            {docResult.changes.length > 0 ? (
+              <div className="rounded-[9px] border border-revise/35 bg-revise-bg px-3 py-2.5">
+                <div className="mb-1.5 text-[12px] font-bold text-revise">
+                  조건 변경 {docResult.changes.length}건 감지 — 직전 버전({docResult.previous_effective_date}) 대비
+                </div>
+                <ul className="space-y-1">
+                  {docResult.changes.map((change, i) => (
+                    <li key={i} className="text-[12px] leading-relaxed break-keep text-ink-2">
+                      <b className="text-ink">{change.field}</b>
+                      {change.kind === "changed" && (
+                        <>
+                          : <span className="text-reject line-through">{change.old}</span>{" "}
+                          <span className="text-ink-4">→</span> <b className="text-pass">{change.new}</b>
+                        </>
+                      )}
+                      {change.kind === "added" && <>: <b className="text-pass">{change.new}</b> <span className="text-ink-4">(신설)</span></>}
+                      {change.kind === "removed" && <>: <span className="text-reject line-through">{change.old}</span> <span className="text-ink-4">(삭제)</span></>}
+                    </li>
+                  ))}
+                </ul>
+                <p className="mt-1.5 text-[11px] leading-relaxed text-ink-3">
+                  이 시행일 이후 광고는 변경된 조건 기준으로 심사됩니다 — 구버전 수치를 인용한 광고는 사실 대조에서 모순으로 잡힙니다.
+                </p>
+              </div>
+            ) : docResult.timeline.length > 1 ? (
+              <p className="text-[12px] text-ink-3">직전 버전 대비 조건 변경 없음.</p>
+            ) : (
+              <p className="text-[12px] text-ink-3">첫 버전으로 적재됨 — 개정 문서를 접수하면 변경점을 자동 추적합니다.</p>
+            )}
+          </div>
         )}
       </div>
 
