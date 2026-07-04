@@ -4,7 +4,7 @@ import { principleColor, verdictBadgeTone, VERDICT_LABELS, abbreviateLawNames } 
 import {
   buildEvidencePath,
   buildIssueCards,
-  delegationByPrinciple,
+  delegationChain,
   judgmentsForAnchor,
   planItemsForAnchor,
   type EvidenceNodeKind,
@@ -12,7 +12,7 @@ import {
 import type { FinalVerdict, LLMJudgment, ReviewOutput } from "@/lib/types";
 import { Icon } from "../Icon";
 import { EmptyState, Tag } from "../ui";
-import { DelegationChain, PrincipleTags } from "./DelegationChain";
+import { DelegationChain } from "./DelegationChain";
 import { PaneHeader } from "./common";
 import { TONE_BG, TONE_COLOR, TONE_WORD_SHORT } from "./RiskList";
 
@@ -47,16 +47,30 @@ const FINAL_TONE_BG: Record<string, string> = {
   reject: "linear-gradient(150deg,#c2372c,#9e2c23)",
 };
 
-/** 레이어 사이 세로 커넥터 — 흐름의 의미(grounding·위임·판정)를 라벨로 명시. */
-function Connector({ label }: { label: string }) {
+/** 한 지점 ↔ N개 브랜치 사이 부챗살 엣지. invert=true 면 N→1 수렴. */
+function FanEdges({ n, invert }: { n: number; invert?: boolean }) {
+  if (n <= 0) return null;
+  const H = 34;
   return (
-    <div className="flex flex-col items-center py-1" aria-hidden>
-      <span className="h-3.5 w-0.5 bg-line-2" />
-      <span className="rounded-full border border-line bg-surface px-2.5 py-0.5 text-[11px] font-bold text-ink-3">
-        {label}
-      </span>
-      <span className="h-3.5 w-0.5 bg-line-2" />
-      <Icon name="arrowR" size={13} color="var(--ink-4)" style={{ transform: "rotate(90deg)", marginTop: -2 }} />
+    <svg viewBox={`0 0 1000 ${H}`} preserveAspectRatio="none" className="block h-8 w-full" aria-hidden>
+      {Array.from({ length: n }, (_, i) => {
+        const cx = ((i + 0.5) / n) * 1000;
+        const d = invert
+          ? `M ${cx} 0 C ${cx} ${H * 0.55}, 500 ${H * 0.45}, 500 ${H}`
+          : `M 500 0 C 500 ${H * 0.45}, ${cx} ${H * 0.55}, ${cx} ${H}`;
+        return <path key={i} d={d} fill="none" stroke="var(--line-2)" strokeWidth={2} vectorEffect="non-scaling-stroke" />;
+      })}
+    </svg>
+  );
+}
+
+/** 브랜치 내부 세로 커넥터(미니). */
+function BranchLink({ label }: { label?: string }) {
+  return (
+    <div className="flex flex-col items-center py-0.5" aria-hidden>
+      <span className="h-2.5 w-0.5 bg-line-2" />
+      {label && <span className="my-0.5 text-[11px] font-bold text-ink-4">{label}</span>}
+      <span className="h-2.5 w-0.5 bg-line-2" />
     </div>
   );
 }
@@ -94,7 +108,6 @@ export function GraphView({ result, selectedAnchorId, onSelectAnchor }: Props) {
   const plans = planItemsForAnchor(result, activeId);
   const judgments = judgmentsForAnchor(result, activeId);
   const judgmentByPlan = new Map<string, LLMJudgment>(judgments.map((j) => [j.plan_item_id, j]));
-  const delegationGroups = delegationByPrinciple(result, activeId).filter((g) => g.steps.length > 0);
   const finalVerdict = (result.final_verdict ?? "needs_review") as FinalVerdict;
   const finalTone = verdictBadgeTone(finalVerdict);
   const verdictCounts = judgments.reduce<Record<string, number>>((acc, j) => {
@@ -175,65 +188,87 @@ export function GraphView({ result, selectedAnchorId, onSelectAnchor }: Props) {
             </div>
           </Layer>
 
-          <Connector label={`grounding — 심의 기준 ${plans.length}건 매칭`} />
-
-          {/* ② 심의 기준(CU) — 한 표현이 여러 기준에 걸리는 fan-out을 그대로 보여준다 */}
-          <Layer no="②" title="심의 기준 · Compliance Unit" sub={`${plans.length}건 · 각 기준별 개별 판정`}>
-            <div className="grid gap-2" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(230px, 1fr))" }}>
+          {/* ② CU Plan 브랜치 — 논문(GraphCompliance Fig.2)의 anchor → CU Plan fan-out.
+              각 CU 가 자기 조문·위임 사슬을 따로 갖는다는 사실을 브랜치(가지)로 표현:
+              CU 카드 → 그 CU 의 위임 사슬 → 그 CU 의 개별 판정 (ŷ, s). */}
+          <div className="flex flex-col items-center pt-1">
+            <span className="rounded-full border border-line bg-surface px-2.5 py-0.5 text-[11px] font-bold text-ink-3">
+              grounding — 심의 기준 {plans.length}건, 각자 다른 근거 법령으로
+            </span>
+          </div>
+          <FanEdges n={plans.length} />
+          <div className="overflow-x-auto">
+            <div
+              className="grid items-stretch gap-3"
+              style={{ gridTemplateColumns: `repeat(${Math.max(plans.length, 1)}, minmax(240px, 1fr))`, minWidth: plans.length * 252 }}
+            >
               {plans.map((item) => {
                 const judgment = judgmentByPlan.get(item.plan_item_id);
                 const meta = judgment ? JUDGMENT_LABEL[judgment.verdict] : null;
+                // 이 CU 전용 위임 사슬 — 체인 행이 plan_item_id 를 들고 있다.
+                const chain = (result.policy_evidence_chains?.legal_basis_chains ?? []).find(
+                  (row) => String(row["plan_item_id"] ?? "") === item.plan_item_id && row.status === "FOUND",
+                );
+                const deleg = chain ? delegationChain(chain) : null;
                 return (
-                  <div
-                    key={item.plan_item_id}
-                    className="flex flex-col gap-1.5 rounded-[11px] border bg-surface p-3"
-                    style={{ borderColor: meta ? `color-mix(in srgb, ${meta.color} 40%, var(--line))` : "var(--line)" }}
-                  >
-                    <div className="flex items-center gap-1.5">
-                      {item.principle && <Tag color={principleColor(item.principle)}>{item.principle}</Tag>}
-                      {meta && (
-                        <span className="ml-auto text-[11px] font-bold whitespace-nowrap" style={{ color: meta.color }}>
-                          {meta.word}
-                          {judgment && judgment.verdict !== "NOT_APPLICABLE" ? ` ${(judgment.score * 100).toFixed(0)}%` : ""}
-                        </span>
+                  <div key={item.plan_item_id} className="flex min-w-0 flex-col">
+                    {/* CU 노드 — 논문의 4-tuple(subject·constraint) 요약 */}
+                    <div
+                      className="flex flex-col gap-1.5 rounded-[11px] border-2 bg-surface p-3"
+                      style={{ borderColor: meta ? `color-mix(in srgb, ${meta.color} 45%, var(--line))` : "var(--line)" }}
+                    >
+                      <div className="flex items-center gap-1.5">
+                        <span className="font-mono text-[11px] font-bold text-ink-4">CU</span>
+                        {item.principle && <Tag color={principleColor(item.principle)}>{item.principle}</Tag>}
+                      </div>
+                      <div className="line-clamp-2 text-[12.5px] leading-snug font-semibold break-keep text-ink">
+                        {item.risk_title || item.constraint || item.subject}
+                      </div>
+                      {item.subject && item.constraint && (
+                        <div className="line-clamp-2 text-[11px] leading-relaxed text-ink-3">
+                          {item.subject} · {item.constraint}
+                        </div>
                       )}
                     </div>
-                    <div className="line-clamp-2 text-[12.5px] leading-snug font-semibold break-keep text-ink">
-                      {item.risk_title || item.constraint || item.subject}
+                    <BranchLink label="근거 · 위임 사슬" />
+                    {/* 이 CU 의 법령 위임 사슬 — 권위 계층 세로 위계 */}
+                    <div className="flex-1 rounded-[11px] border border-line bg-surface px-3.5 py-3">
+                      {deleg && deleg.steps.length > 0 ? (
+                        <DelegationChain steps={deleg.steps} />
+                      ) : (
+                        <div className="text-[11.5px] leading-relaxed text-ink-3">
+                          <span className="mr-1.5 inline-block rounded bg-surface-3 px-1.5 py-0.5 text-[11px] font-bold text-ink-2">조문</span>
+                          {abbreviateLawNames(item.source_article) || "근거 조문 확인 필요"}
+                        </div>
+                      )}
                     </div>
-                    <div className="mt-auto line-clamp-2 text-[11px] leading-relaxed text-ink-3" title={item.source_article}>
-                      {abbreviateLawNames(item.source_article)}
+                    <BranchLink label="판정" />
+                    {/* 이 CU 의 개별 판정 (ŷ, s) */}
+                    <div
+                      className="rounded-[11px] px-3 py-2 text-center text-[12.5px] font-bold"
+                      style={{
+                        color: meta?.color ?? "var(--ink-4)",
+                        background: meta ? `color-mix(in srgb, ${meta.color} 10%, white)` : "var(--surface-2)",
+                        border: `1px solid ${meta ? `color-mix(in srgb, ${meta.color} 35%, var(--line))` : "var(--line)"}`,
+                      }}
+                    >
+                      {meta ? meta.word : "판정 없음"}
+                      {judgment && judgment.verdict !== "NOT_APPLICABLE" ? ` · 위반 가능성 ${(judgment.score * 100).toFixed(0)}%` : ""}
                     </div>
                   </div>
                 );
               })}
             </div>
-          </Layer>
+          </div>
+          <FanEdges n={plans.length} invert />
+          <div className="flex flex-col items-center pb-1">
+            <span className="rounded-full border border-line bg-surface px-2.5 py-0.5 text-[11px] font-bold text-ink-3">
+              판정 종합 — 기준별 판정이 최종 결과로 수렴
+            </span>
+          </div>
 
-          <Connector label="근거 조문 — 법령 위임 사슬 (법률 → 시행령 → 감독규정 → 심의기준)" />
-
-          {/* ③ 법령 위임 사슬 — 조문이 어느 권위 계층에서 왔는지 세로 위계로 */}
-          <Layer no="③" title="법령 위임 사슬" sub="원칙별 · 권위 계층 순서">
-            {delegationGroups.length > 0 ? (
-              <div className="grid gap-2.5" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))" }}>
-                {delegationGroups.map((group) => (
-                  <div key={group.principle} className="rounded-[11px] border border-line bg-surface px-4 py-3.5">
-                    <div className="mb-2">
-                      <PrincipleTags principles={[group.principle]} />
-                    </div>
-                    <DelegationChain steps={group.steps} />
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="text-[12.5px] text-ink-4">이 표현에 연결된 위임 사슬이 없습니다 — 대표 조문은 위 심의 기준 카드를 참고하세요.</div>
-            )}
-          </Layer>
-
-          <Connector label="조문 적용 → 판정" />
-
-          {/* ④ 판정 — 개별 판정이 최종 결과로 수렴 */}
-          <Layer no="④" title="판정" sub="개별 판정 → 광고 전체 최종 결과">
+          {/* ③ 최종 결과 — 수렴 노드 */}
+          <Layer no="③" title="최종 결과" sub="이 표현의 판정 집계 → 광고 전체 판정">
             <div className="flex flex-wrap items-stretch gap-3">
               <div className="min-w-[200px] flex-1 rounded-[11px] border border-line bg-surface p-3">
                 <div className="mb-1.5 text-[11px] font-bold text-ink-4">이 표현의 개별 판정</div>
