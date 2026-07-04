@@ -22,6 +22,26 @@ from neo4j import GraphDatabase, unit_of_work
 LOGGER = logging.getLogger(__name__)
 
 WS = os.environ.get("CCG_WORKSPACE_ID", "graphcompliance_mvp_jb_20260530")
+
+# 코파일럿 대화/T2C 모델 — 기본 Claude Sonnet 5(판정 모델과 동일 계열).
+# claude-* 면 Anthropic(ChatAnthropic), 그 외는 OpenAI(ChatOpenAI)로 라우팅.
+COPILOT_MODEL = os.environ.get("CCG_COPILOT_MODEL", "claude-sonnet-5")
+
+
+def chat_model():
+    """코파일럿용 LangChain 챗 모델. 판정 게이트웨이와 동일한 provider 분기 규칙."""
+    if COPILOT_MODEL.startswith("claude"):
+        from langchain_anthropic import ChatAnthropic
+
+        # Claude 5 계열: 샘플링 파라미터 전달 금지(400). max_tokens 는 답변+도구호출 여유분.
+        # thinking 은 명시적으로 끈다 — Sonnet 5 기본(adaptive)이 만든 thinking 블록이
+        # AG-UI 상태 왕복에서 빈 thinking 필드를 잃어 재전송 시 400
+        # ("thinking.thinking: Field required")이 나기 때문. 도구 루프 챗에는 불필요.
+        # (Fable 5는 disabled 자체가 400이라 이 경로와 비호환 — 코파일럿 모델로 쓰지 말 것)
+        return ChatAnthropic(model=COPILOT_MODEL, max_tokens=8096, thinking={"type": "disabled"})
+    from langchain_openai import ChatOpenAI
+
+    return ChatOpenAI(model=COPILOT_MODEL)
 QUERY_TIMEOUT_S = 15.0
 T2C_MAX_ROWS = 15
 CELL_CLIP = 350
@@ -281,9 +301,7 @@ def _validate_cypher(cypher: str) -> str:
 
 
 def _generate_cypher(question: str, error_feedback: str = "") -> str:
-    from langchain_openai import ChatOpenAI
-
-    model = ChatOpenAI(model=os.environ.get("OPENAI_MODEL", "gpt-5.4-nano"))
+    model = chat_model()
     prompt = f"""당신은 Cypher 쿼리 생성기입니다. 아래 그래프 스키마에서 질문에 답하는 읽기 전용 Cypher 하나만 출력하세요.
 
 {_SCHEMA_SUMMARY}

@@ -23,7 +23,7 @@ from langgraph.prebuilt import ToolNode
 from langgraph.types import Command
 from typing_extensions import Annotated, Literal, NotRequired, TypedDict
 
-from copilot_graph_tools import GRAPH_TOOLS
+from copilot_graph_tools import GRAPH_TOOLS, chat_model
 
 # "ag-ui" 키(하이픈)는 class 문법으로 못 쓰므로 functional TypedDict.
 # 이 키가 스키마에 있어야 어댑터가 넣어주는 공유 컨텍스트가 노드까지 전달된다.
@@ -80,9 +80,9 @@ def _context_text(state: dict) -> str:
 async def chat_node(
     state: CopilotAgentState, config: RunnableConfig
 ) -> Command[Literal["tool_node", "__end__"]]:
-    from langchain_openai import ChatOpenAI
-
-    model = ChatOpenAI(model=os.environ.get("OPENAI_MODEL", "gpt-5.4-nano"))
+    # 모델은 copilot_graph_tools.chat_model() — 기본 Claude Sonnet 5,
+    # CCG_COPILOT_MODEL env 로 교체 가능 (claude-*→Anthropic, 그 외→OpenAI).
+    model = chat_model()
     fe_tools = (state.get("copilotkit") or {}).get("actions", [])
     bound = model.bind_tools([*fe_tools, *GRAPH_TOOLS])
 
