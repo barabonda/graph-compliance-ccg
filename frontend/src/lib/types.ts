@@ -615,12 +615,15 @@ export interface ReviewOutput {
   ad_translations?: AdTranslations | null;
 }
 
-/** 비-KR 심사용 참고 번역. 판정 파이프라인에는 개입하지 않는 표시 전용 데이터. */
+/** 비-KR 심사용 참고 번역. 판정 파이프라인에는 개입하지 않는 표시 전용 데이터.
+ * 영어(en)가 메인, 크메르어(km)가 서브. ko 는 과거 런 호환용(레거시). */
 export interface AdTranslations {
   en: string | null;
-  ko: string | null;
+  km?: string | null;
+  /** @deprecated 과거 런 호환용 — 신규 런은 km 을 사용한다. */
+  ko?: string | null;
   /** 문장별 정렬 번역(sentence_units 분할 그대로) — 원문 아래 문장 단위 병기용. */
-  sentences?: { original: string; en: string | null; ko: string | null }[] | null;
+  sentences?: { original: string; en: string | null; km?: string | null; ko?: string | null }[] | null;
   note?: string;
 }
 

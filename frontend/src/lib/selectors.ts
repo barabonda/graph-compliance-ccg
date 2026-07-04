@@ -1688,28 +1688,49 @@ export function aggregationForAnchor(result: ReviewOutput, anchor: ContextAnchor
   return [...articles, ...principles];
 }
 
-/** 문장별 참고 번역 매핑 — sentence_id → {en, ko}.
+/** 참고 번역 표시행 — en 메인 + sub(신규 런 km, 과거 런 ko 레거시). */
+export interface SentenceTranslation {
+  en: string | null;
+  /** 서브 언어 번역 텍스트(km 우선, 없으면 레거시 ko). */
+  sub: string | null;
+  /** 서브 칩 라벨: 크메르어면 "KM", 레거시 한국어면 "KO". */
+  subLabel: "KM" | "KO" | null;
+}
+
+function translationRow(row: { en?: string | null; km?: string | null; ko?: string | null }): SentenceTranslation {
+  const sub = row.km ?? null;
+  const legacy = row.ko ?? null;
+  return {
+    en: row.en ?? null,
+    sub: sub ?? legacy,
+    subLabel: sub ? "KM" : legacy ? "KO" : null,
+  };
+}
+
+/** 문장별 참고 번역 매핑 — sentence_id → {en, sub, subLabel}.
  * ad_translations.sentences는 sentence_units와 같은 순서/개수로 생성된다(백엔드
  * 계약). 개수가 다르면(과거 run 등) 빈 맵을 돌려 렌더를 생략한다. 표시 전용. */
 export function sentenceTranslationsById(
   result: ReviewOutput,
-): Map<string, { en: string | null; ko: string | null }> {
-  const map = new Map<string, { en: string | null; ko: string | null }>();
+): Map<string, SentenceTranslation> {
+  const map = new Map<string, SentenceTranslation>();
   const sentences = result.ad_translations?.sentences ?? null;
   const units = result.sentence_units ?? [];
   if (!sentences || sentences.length !== units.length) return map;
   units.forEach((unit, index) => {
     const row = sentences[index];
-    if (row && (row.en || row.ko)) map.set(unit.sentence_id, { en: row.en, ko: row.ko });
+    if (!row) return;
+    const t = translationRow(row);
+    if (t.en || t.sub) map.set(unit.sentence_id, t);
   });
   return map;
 }
 
-/** 인용문(quote, 말줄임 가능) → 그 문장이 속한 참고 번역 {en, ko}. 없으면 null. */
+/** 인용문(quote, 말줄임 가능) → 그 문장이 속한 참고 번역. 없으면 null. */
 export function translationForQuote(
   result: ReviewOutput,
   quote: string,
-): { en: string | null; ko: string | null } | null {
+): SentenceTranslation | null {
   const sentences = result.ad_translations?.sentences ?? null;
   if (!sentences?.length) return null;
   const norm = (value: string) => value.replace(/\s+/g, " ").replace(/[…]+$|\.{3}$/g, "").trim();
@@ -1718,7 +1739,8 @@ export function translationForQuote(
   for (const row of sentences) {
     const original = norm(row.original);
     if (original.includes(core) || core.includes(original)) {
-      if (row.en || row.ko) return { en: row.en, ko: row.ko };
+      const t = translationRow(row);
+      if (t.en || t.sub) return t;
     }
   }
   return null;

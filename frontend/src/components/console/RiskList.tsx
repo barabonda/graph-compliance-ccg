@@ -120,19 +120,25 @@ function IssueCard({
       >
         “{card.quote}”
       </div>
-      {/* 인용 문장의 참고 번역 — 심사 근거는 원문 기준 */}
+      {/* 인용 문장의 참고 번역 — 영어 메인·크메르어 서브, 심사 근거는 원문 기준 */}
       {quoteTranslation && (
         <div className="mt-1 space-y-0.5 text-[11px] leading-relaxed text-ink-3">
-          {quoteTranslation.en && (
+          {/* 원문이 이미 영어(EN 번역이 인용문을 포함)면 EN 줄은 중복이라 생략 */}
+          {quoteTranslation.en &&
+            !quoteTranslation.en
+              .replace(/\s+/g, " ")
+              .trim()
+              .toLowerCase()
+              .includes(card.quote.replace(/\s+/g, " ").replace(/[…]+$|\.{3}$/g, "").trim().toLowerCase()) && (
             <div className="flex gap-1.5">
               <span className="mt-0.5 shrink-0 rounded bg-surface-2 px-1 font-mono text-[8.5px] font-bold text-ink-4">EN</span>
               <span>{quoteTranslation.en}</span>
             </div>
           )}
-          {quoteTranslation.ko && (
+          {quoteTranslation.sub && (
             <div className="flex gap-1.5 break-keep">
-              <span className="mt-0.5 shrink-0 rounded bg-surface-2 px-1 font-mono text-[8.5px] font-bold text-ink-4">KO</span>
-              <span>{quoteTranslation.ko}</span>
+              <span className="mt-0.5 shrink-0 rounded bg-surface-2 px-1 font-mono text-[8.5px] font-bold text-ink-4">{quoteTranslation.subLabel}</span>
+              <span>{quoteTranslation.sub}</span>
             </div>
           )}
         </div>

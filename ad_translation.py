@@ -1,7 +1,8 @@
 """Reference-only ad translation for non-KR workspaces (display only).
 
-Korean reviewers also review overseas (e.g. Khmer/English) ad copy, so the
-console shows English/Korean reference translations under the original text.
+Non-KR (e.g. Cambodia) reviews are English-first: the console shows the ad in
+English as the main language with a Khmer (km) reference line under it — no
+Korean in the ad content area.
 
 Hard rules:
 - Display only. The translation is NEVER fed into the judging pipeline
@@ -32,7 +33,7 @@ TRANSLATION_SCHEMA: dict[str, Any] = {
     "additionalProperties": False,
     "properties": {
         "en": {"type": "string", "description": "Faithful English translation of the full ad text."},
-        "ko": {"type": "string", "description": "광고 전문의 충실한 한국어 번역."},
+        "km": {"type": "string", "description": "Faithful Khmer (Cambodian) translation of the full ad text."},
         "sentences": {
             "type": "array",
             "description": "Per-sentence aligned translations, SAME order and count as the input sentence list.",
@@ -41,13 +42,13 @@ TRANSLATION_SCHEMA: dict[str, Any] = {
                 "additionalProperties": False,
                 "properties": {
                     "en": {"type": "string"},
-                    "ko": {"type": "string"},
+                    "km": {"type": "string"},
                 },
-                "required": ["en", "ko"],
+                "required": ["en", "km"],
             },
         },
     },
-    "required": ["en", "ko", "sentences"],
+    "required": ["en", "km", "sentences"],
 }
 
 _cache: dict[str, dict[str, Any]] = {}
@@ -60,18 +61,18 @@ def translate_ad_for_display(
     workspace_id: str,
     sentence_texts: list[str] | None = None,
 ) -> dict[str, Any] | None:
-    """Return {en, ko, sentences, note} for non-KR workspaces, or None for KR.
+    """Return {en, km, sentences, note} for non-KR workspaces, or None for KR.
 
-    ``sentences`` is a per-sentence aligned list [{original, en, ko}] following the
+    ``sentences`` is a per-sentence aligned list [{original, en, km}] following the
     review pipeline's own sentence segmentation (sentence_units), so the console
-    can interleave EN/KO right under each original sentence. Display only.
+    can interleave EN(메인)/KM(서브) right under each original sentence. Display only.
     """
     if uses_korean_law_context(workspace_id):
         return None
     text = (content_text or "").strip()
     sentences = [s.strip() for s in (sentence_texts or []) if s and s.strip()]
     if not text:
-        return {"en": None, "ko": None, "sentences": None, "note": TRANSLATION_NOTE}
+        return {"en": None, "km": None, "sentences": None, "note": TRANSLATION_NOTE}
 
     key = content_hash(text + "\x00" + "\x00".join(sentences))
     with _cache_lock:
@@ -79,7 +80,7 @@ def translate_ad_for_display(
     if cached is not None:
         return dict(cached)
 
-    translations: dict[str, Any] = {"en": None, "ko": None, "sentences": None, "note": TRANSLATION_NOTE}
+    translations: dict[str, Any] = {"en": None, "km": None, "sentences": None, "note": TRANSLATION_NOTE}
     try:
         numbered = "\n".join(f"{i + 1}. {s}" for i, s in enumerate(sentences))
         result = llm.structured(
@@ -87,25 +88,26 @@ def translate_ad_for_display(
             schema=TRANSLATION_SCHEMA,
             system=(
                 "You translate advertisement copy for compliance reviewers. Translate the given ad text "
-                "faithfully into BOTH English (en) and Korean (ko). Preserve meaning, numbers, rates, "
-                "conditions and disclaimers exactly; do not soften, embellish or omit anything. If the "
-                "original already is in one of the target languages, return it unchanged for that language. "
-                "Also translate EACH numbered sentence in [sentences] individually — return the 'sentences' "
-                "array in the SAME order with the SAME count. Reference display only — never add commentary."
+                "faithfully into BOTH English (en) and Khmer (km, Cambodian). Preserve meaning, numbers, "
+                "rates, conditions and disclaimers exactly; do not soften, embellish or omit anything. If "
+                "the original already is in one of the target languages, return it unchanged for that "
+                "language. Also translate EACH numbered sentence in [sentences] individually — return the "
+                "'sentences' array in the SAME order with the SAME count. Reference display only — never "
+                "add commentary."
             ),
             user=f"[ad_text]\n{text}\n\n[sentences]\n{numbered if sentences else '(none)'}",
         )
         en = str(result.get("en") or "").strip()
-        ko = str(result.get("ko") or "").strip()
+        km = str(result.get("km") or "").strip()
         translations["en"] = en or None
-        translations["ko"] = ko or None
+        translations["km"] = km or None
         rows = result.get("sentences") or []
         if sentences and len(rows) == len(sentences):
             translations["sentences"] = [
                 {
                     "original": sentences[i],
                     "en": str(rows[i].get("en") or "").strip() or None,
-                    "ko": str(rows[i].get("ko") or "").strip() or None,
+                    "km": str(rows[i].get("km") or "").strip() or None,
                 }
                 for i in range(len(sentences))
             ]

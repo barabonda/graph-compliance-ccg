@@ -15,6 +15,12 @@ import { Tag } from "../ui";
 import { PaneHeader } from "./common";
 import { RevisionDiff } from "./RevisionDiff";
 
+/** 번역이 원문과 사실상 같은지(공백 정규화) — 영어 원문에 EN 줄 중복 방지. */
+function sameText(a: string, b: string): boolean {
+  const norm = (v: string) => v.replace(/\s+/g, " ").trim().toLowerCase();
+  return norm(a) === norm(b);
+}
+
 interface Props {
   result: ReviewOutput;
   reviewedText: string;
@@ -196,16 +202,17 @@ export function AdPane({
                   />
                   {lineT && (
                     <div className="mt-0.5 mb-2 space-y-0.5 text-[12px] leading-relaxed text-ink-3">
-                      {lineT.en && (
+                      {/* 영어 메인: 원문이 이미 영어면 EN 줄은 중복이라 생략 */}
+                      {lineT.en && !sameText(lineT.en, line.text) && (
                         <div className="flex gap-1.5">
                           <span className="mt-0.5 shrink-0 rounded bg-surface-2 px-1 font-mono text-[9px] font-bold text-ink-4">EN</span>
                           <span>{lineT.en}</span>
                         </div>
                       )}
-                      {lineT.ko && (
+                      {lineT.sub && (
                         <div className="flex gap-1.5 break-keep">
-                          <span className="mt-0.5 shrink-0 rounded bg-surface-2 px-1 font-mono text-[9px] font-bold text-ink-4">KO</span>
-                          <span>{lineT.ko}</span>
+                          <span className="mt-0.5 shrink-0 rounded bg-surface-2 px-1 font-mono text-[9px] font-bold text-ink-4">{lineT.subLabel}</span>
+                          <span>{lineT.sub}</span>
                         </div>
                       )}
                     </div>
@@ -226,7 +233,7 @@ export function AdPane({
         </div>
         )}
 
-        {/* 문장별 참고 번역 — 원문 문장 바로 아래 EN·KO 병기 (표시 전용) */}
+        {/* 문장별 참고 번역 — 영어 메인 · 크메르어(KM) 서브 병기 (표시 전용) */}
         {mode === "original" && translations && (translations.sentences?.length ?? 0) > 0 && (
           <div className="mt-3 overflow-hidden rounded-lg border border-line bg-surface-2">
             <div className="border-b border-line px-3 py-2 text-xs font-bold text-ink-2">
@@ -242,16 +249,16 @@ export function AdPane({
                   <div className="text-[13px] leading-relaxed font-medium break-keep whitespace-pre-wrap text-ink">
                     {s.original}
                   </div>
-                  {s.en && (
+                  {s.en && !sameText(s.en, s.original) && (
                     <div className="mt-1 flex gap-1.5 text-[12px] leading-relaxed text-ink-2">
                       <span className="mt-0.5 shrink-0 rounded bg-surface px-1 font-mono text-[9.5px] font-bold text-ink-4">EN</span>
                       <span className="whitespace-pre-wrap">{s.en}</span>
                     </div>
                   )}
-                  {s.ko && (
+                  {(s.km ?? s.ko) && (
                     <div className="mt-1 flex gap-1.5 text-[12px] leading-relaxed break-keep text-ink-2">
-                      <span className="mt-0.5 shrink-0 rounded bg-surface px-1 font-mono text-[9.5px] font-bold text-ink-4">KO</span>
-                      <span className="whitespace-pre-wrap">{s.ko}</span>
+                      <span className="mt-0.5 shrink-0 rounded bg-surface px-1 font-mono text-[9.5px] font-bold text-ink-4">{s.km ? "KM" : "KO"}</span>
+                      <span className="whitespace-pre-wrap">{s.km ?? s.ko}</span>
                     </div>
                   )}
                 </div>
@@ -260,7 +267,7 @@ export function AdPane({
           </div>
         )}
 
-        {mode === "original" && translations && !(translations.sentences?.length) && (translations.en || translations.ko) && (
+        {mode === "original" && translations && !(translations.sentences?.length) && (translations.en || translations.km || translations.ko) && (
           <div className="mt-3 space-y-2">
             {translations.en && (
               <details className="rounded-lg border border-line bg-surface-2 px-3 py-2">
@@ -272,12 +279,12 @@ export function AdPane({
                 <div className="mt-1.5 text-[10.5px] text-ink-4">{translations.note ?? "참고용 번역 — 심사 근거는 원문 기준"}</div>
               </details>
             )}
-            {translations.ko && (
+            {(translations.km ?? translations.ko) && (
               <details className="rounded-lg border border-line bg-surface-2 px-3 py-2">
                 <summary className="cursor-pointer text-xs font-bold text-ink-2 select-none">
-                  한국어 (참고용 번역)
+                  {translations.km ? "ភាសាខ្មែរ · 크메르어 (참고용 번역)" : "한국어 (참고용 번역)"}
                 </summary>
-                <div className="mt-2 text-[13.5px] leading-relaxed break-keep whitespace-pre-wrap text-ink">{translations.ko}</div>
+                <div className="mt-2 text-[13.5px] leading-relaxed break-keep whitespace-pre-wrap text-ink">{translations.km ?? translations.ko}</div>
                 <div className="mt-1.5 text-[10.5px] text-ink-4">{translations.note ?? "참고용 번역 — 심사 근거는 원문 기준"}</div>
               </details>
             )}
