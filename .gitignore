@@ -23,3 +23,5 @@ eval/*_report*.json
 eval/report_*.json
 eval/retrieval_sweep_*.json
 outputs/ad_images/
+_workspace/
+_workspace_eval/

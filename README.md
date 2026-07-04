@@ -50,6 +50,9 @@ LOCAL_LLM_API_KEY=ollama
 
 ```bash
 export OPENAI_API_KEY="..."
+# Optional: choose `claude-*` in the console model dropdown or set per-step
+# CCG_*_MODEL values to route structured LLM calls through Anthropic Claude.
+export ANTHROPIC_API_KEY="..."
 export NEO4J_URI="neo4j+s://..."
 export NEO4J_USER="..."
 export NEO4J_PASSWORD="..."

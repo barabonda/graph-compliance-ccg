@@ -1,8 +1,10 @@
 from __future__ import annotations
 
+import logging
 import re
 import unicodedata
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 
@@ -28,7 +30,7 @@ from policy_compiler import validate_compiler_output
 from product_facts import ProductFactAnalyzer
 from prominence import build_prominence_artifacts
 from retriever import PolicyRetriever, candidate_allowed_for_anchor, candidate_from_row, with_legal_element_gate, with_scope_gate
-from revision import LLMRevisionSuggester
+from revision import DISCLOSURE_BLOCK_ANCHOR, LLMRevisionSuggester
 from router import build_output
 from schemas import (
     AnchorFeatureSet,
@@ -511,7 +513,16 @@ class FakeLLM(LLMGateway):
                 "closure_evidence_ids": [],
             }
         if name == "graphcompliance_revision_suggestions":
-            anchor_id = re.search(r"'anchor_id': '([^']+)'", user).group(1)
+            # Production now invokes revision even when there are no per-span risk
+            # rows — missing disclosures or a Track B overall-impression signal can
+            # trigger it on their own (see revision.py needs_revision). In that case
+            # the prompt's [risk_rows] block is empty, so there is no anchor to echo
+            # back; the LLM returns no per-span suggestion and production appends the
+            # disclosure block separately.
+            anchor_match = re.search(r"'anchor_id': '([^']+)'", user)
+            if anchor_match is None:
+                return {"suggestions": []}
+            anchor_id = anchor_match.group(1)
             return {
                 "suggestions": [
                     {
@@ -743,6 +754,28 @@ class UnknownHypernymLLM(FakeLLM):
                                 "why": "Not in vocabulary.",
                             }
                         ],
+                    }
+                ]
+            }
+        return super().structured(name=name, system=system, user=user, schema=schema)
+
+
+class AllUnusableAnchorLLM(FakeLLM):
+    """Normalization returns only malformed anchors (unknown claim_id), so every
+    item is dropped and no usable ContextAnchor survives — the all-bad case."""
+
+    def structured(self, *, name, system, user, schema, timeout_seconds=None, model=None):
+        if name == "graphcompliance_policy_normalization":
+            return {
+                "anchors": [
+                    {
+                        "anchor_type": "risk_anchor",
+                        "claim_id": "claim_not_in_input",
+                        "start": 0,
+                        "end": 3,
+                        "text": "ELS",
+                        "facts": ["ELS appears in ad"],
+                        "hypernyms": [],
                     }
                 ]
             }
@@ -1175,7 +1208,13 @@ def test_exception_override_effective_verdict_drives_output() -> None:
     assert output.effective_judgments[0]["verdict"] == "COMPLIANT"
     assert output.anchor_display[0]["display_verdict"] == "COMPLIANT"
     assert output.detected_issues == []
-    assert output.revision_suggestions == []
+    # Override to COMPLIANT clears the per-span violation revision; the only item
+    # that may remain is the separately-gated missing-disclosure block sentinel
+    # (there must be no anchor-specific violation suggestion).
+    assert all(
+        suggestion["anchor_id"] == DISCLOSURE_BLOCK_ANCHOR
+        for suggestion in output.revision_suggestions
+    )
 
 
 def test_actionable_anchor_keeps_retrieval_candidate_when_rerank_selects_none() -> None:
@@ -2078,10 +2117,72 @@ def test_legal_element_gate_excludes_unfair_sales_cu_without_coercion_context() 
     assert candidate_allowed_for_anchor(gated, anchor, product_group="deposit") is False
 
 
-def test_normalizer_rejects_unknown_policy_hypernym() -> None:
+def _normalizer_policy_context() -> dict[str, object]:
+    return {
+        "hypernyms": [
+            {
+                "hypernym_id": "policy_hypernym_derivative_linked_security",
+                "name": "파생결합증권",
+                "domain": "product",
+                "description": "ELS 등 파생결합증권",
+            }
+        ],
+        "premises": [],
+        "fragments": [],
+    }
+
+
+def test_normalizer_drops_unknown_policy_hypernym(caplog: pytest.LogCaptureFixture) -> None:
+    # Contract (commit 1450c98, PPCBank E2E stabilization): an individual out-of-
+    # vocabulary PolicyHypernym is no longer a hard failure. It is dropped with an
+    # audit-log warning while the owning anchor survives (partial tolerance).
     normalizer = PolicyGuidedNormalizer(UnknownHypernymLLM())
 
-    with pytest.raises(RuntimeError, match="unknown PolicyHypernym"):
+    with caplog.at_level(logging.WARNING, logger="normalizer"):
+        anchors = normalizer.normalize(
+            review_run_id="run_1",
+            claims=[
+                Claim(
+                    claim_id="claim_1",
+                    text="ELS",
+                    span=Span(start=0, end=3, text="ELS"),
+                    meaning="ELS mention",
+                    implicature="",
+                    consumer_effect="",
+                    risk_hypernym="",
+                    risk_severity="LOW",
+                )
+            ],
+            policy_context=_normalizer_policy_context(),
+        )
+
+    # The unknown hypernym is dropped, not surfaced on the anchor.
+    assert len(anchors) == 1
+    assert anchors[0].hypernyms == []
+    assert not any(
+        proposal.hypernym_id == "policy_hypernym_education"
+        for anchor in anchors
+        for proposal in anchor.hypernyms
+    )
+    # The drop is audited with an explicit reason so governance can trace it.
+    drop_logs = [
+        record.getMessage()
+        for record in caplog.records
+        if "normalizer.hypernym_dropped" in record.getMessage()
+    ]
+    assert any(
+        "reason=unknown_hypernym_id" in message and "policy_hypernym_education" in message
+        for message in drop_logs
+    )
+
+
+def test_normalizer_fails_when_all_anchors_are_unusable() -> None:
+    # Partial tolerance ends at total failure: if every anchor item is dropped and
+    # none survive, the old fail-fast contract still holds (governance must not get
+    # a silently empty normalization).
+    normalizer = PolicyGuidedNormalizer(AllUnusableAnchorLLM())
+
+    with pytest.raises(RuntimeError, match="no usable ContextAnchor"):
         normalizer.normalize(
             review_run_id="run_1",
             claims=[
@@ -2096,18 +2197,7 @@ def test_normalizer_rejects_unknown_policy_hypernym() -> None:
                     risk_severity="LOW",
                 )
             ],
-            policy_context={
-                "hypernyms": [
-                    {
-                        "hypernym_id": "policy_hypernym_derivative_linked_security",
-                        "name": "파생결합증권",
-                        "domain": "product",
-                        "description": "ELS 등 파생결합증권",
-                    }
-                ],
-                "premises": [],
-                "fragments": [],
-            },
+            policy_context=_normalizer_policy_context(),
         )
 
 
@@ -2125,6 +2215,46 @@ def test_llm_gateway_reads_model_from_environment(monkeypatch: pytest.MonkeyPatc
     gateway = LLMGateway(client=FakeOpenAIClient())
 
     assert gateway.model == "gpt-5.4-nano"
+
+
+def test_llm_gateway_routes_claude_model_to_anthropic_tool_use(monkeypatch: pytest.MonkeyPatch) -> None:
+    class FakeAnthropicClient:
+        def __init__(self, **_: object) -> None:
+            self.messages = self
+
+        def create(self, **kwargs: object) -> object:
+            tool_choice = kwargs["tool_choice"]
+            assert isinstance(tool_choice, dict)
+            return SimpleNamespace(
+                id="msg_test",
+                stop_reason="tool_use",
+                content=[
+                    SimpleNamespace(
+                        type="tool_use",
+                        name=tool_choice["name"],
+                        input={"ok": True},
+                    )
+                ],
+            )
+
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "test-anthropic-key")
+    monkeypatch.setattr("llm_gateway.Anthropic", FakeAnthropicClient)
+
+    gateway = LLMGateway(model="claude-sonnet-5")
+    parsed = gateway.structured(
+        name="graphcompliance_test",
+        system="Return JSON.",
+        user="{}",
+        schema={
+            "type": "object",
+            "additionalProperties": False,
+            "properties": {"ok": {"type": "boolean"}},
+            "required": ["ok"],
+        },
+    )
+
+    assert gateway.mode == "anthropic"
+    assert parsed == {"ok": True}
 
 
 def test_server_classifies_policy_normalization_runtime_error() -> None:

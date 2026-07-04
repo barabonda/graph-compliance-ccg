@@ -25,7 +25,7 @@
 | `CCG_MIN_HYPERNYM` / `CCG_MIN_PREMISE` (+ `CCG_MIN_*_<ws>`) | 정렬층 준비 게이트 임계값 workspace별 조정 | KR 기본 30/100 불변 |
 | `TEAM_NEO4J_URI` / `TEAM_NEO4J_USER` / `TEAM_NEO4J_PASSWORD` / `TEAM_NEO4J_WORKSPACES` | KR 코퍼스 **읽기**를 팀 Aura(`69f0e4a9`)로 라우팅 | 전부 기본 `NEO4J_*` DB 사용 |
 | `NEO4J_URI/USER(NAME)/PASSWORD/DATABASE` | KH 그래프 + 심사 산출물 저장소(kunwoo 샌드박스 `7349cbb2`) | — |
-| `ANTHROPIC_API_KEY` | **오프라인 상품사실 추출 전용**(`build_ppcbank_product_graph.py`) | 라이브 심사는 OpenAI만 사용, 불필요 |
+| `ANTHROPIC_API_KEY` | Claude 모델 사용 시 필요. 오프라인 상품사실 추출(`build_ppcbank_product_graph.py`) 및 라이브 심사에서 `claude-*` 모델 선택 시 사용 | Claude 모델을 선택하지 않으면 불필요 |
 | `WORKSPACE_ID`, `JB_PRODUCT_DISCLOSURE_ROOT`, `OPENAI_API_KEY` | 기존과 동일 의미 | — |
 
 **2-DB 아키텍처(팀 합의 반영)**: 팀 Aura에는 **새 노드/엣지를 만들지 않는다**는 합의에 따라, KR 코퍼스 *읽기*만 팀 DB로 라우팅(`retriever._session_for`, `legal_hierarchy`, copilot 조회)하고, **심사 산출물 쓰기(persistence/run_store)는 항상 샌드박스**에 저장합니다. 검증: KR 라이브 심사 전후 팀 DB 노드/엣지 수 완전 동일(77,702/151,908).
