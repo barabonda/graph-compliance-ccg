@@ -83,6 +83,16 @@ def _local_api_key() -> str:
     return os.environ.get("LOCAL_LLM_API_KEY") or os.environ.get("LLM_API_KEY") or "ollama"
 
 
+def _anthropic_client() -> Any:
+    if Anthropic is None:
+        raise RuntimeError(
+            "anthropic package is required for Claude review models. Install anthropic or choose an OpenAI/local model."
+        )
+    if not os.environ.get("ANTHROPIC_API_KEY"):
+        raise RuntimeError("ANTHROPIC_API_KEY is required for Claude review models; no fallback is available.")
+    return Anthropic(timeout=_anthropic_timeout_seconds(), max_retries=_anthropic_max_retries())
+
+
 def _canonical_model_name(model: str) -> str:
     return ANTHROPIC_MODEL_ALIASES.get(model.strip(), model.strip())
 
@@ -116,16 +126,7 @@ class LLMGateway:
             LOGGER.info("llm.gateway mode=chat base_url=%s model=%s", local_base, self.model)
 
         def _make_anthropic(target_model: str) -> None:
-            if Anthropic is None:
-                raise RuntimeError(
-                    "anthropic package is required for Claude review models. "
-                    "Install anthropic or choose an OpenAI/local model."
-                )
-            if not os.environ.get("ANTHROPIC_API_KEY"):
-                raise RuntimeError(
-                    "ANTHROPIC_API_KEY is required for Claude review models; no fallback is available."
-                )
-            self.client = Anthropic(timeout=_anthropic_timeout_seconds(), max_retries=_anthropic_max_retries())
+            self.client = _anthropic_client()
             self.mode = "anthropic"
             self.model = target_model
             LOGGER.info("llm.gateway mode=anthropic model=%s", self.model)
@@ -138,11 +139,11 @@ class LLMGateway:
         elif requested in LOCAL_MODELS:
             # 선택한 모델이 로컬 태그면 provider도 로컬로(클라우드 기본 모드여도).
             _make_local(requested)
+        elif provider == "anthropic" or _is_anthropic_model(requested):
+            _make_anthropic(requested or os.environ.get("ANTHROPIC_MODEL", DEFAULT_ANTHROPIC_MODEL))
         elif global_local:
             # 전역 로컬 토글(LLM_BASE_URL) — 모든 요청을 로컬로.
             _make_local(requested or os.environ.get("LLM_MODEL", DEFAULT_LOCAL_MODEL))
-        elif provider == "anthropic" or _is_anthropic_model(requested):
-            _make_anthropic(requested or os.environ.get("ANTHROPIC_MODEL", DEFAULT_ANTHROPIC_MODEL))
         else:
             if not os.environ.get("OPENAI_API_KEY"):
                 raise RuntimeError(
@@ -167,21 +168,26 @@ class LLMGateway:
         model: str | None = None,
     ) -> dict[str, Any]:
         request_started = time.perf_counter()
-        effective_model = model or self.model
+        effective_model = _canonical_model_name(model or self.model)
+        effective_mode = "anthropic" if _is_anthropic_model(effective_model) else self.mode
         LOGGER.info(
             "llm.structured.start name=%s mode=%s model=%s system_chars=%d user_chars=%d",
             name,
-            self.mode,
+            effective_mode,
             effective_model,
             len(system),
             len(user),
         )
-        client = self.client.with_options(timeout=timeout_seconds) if timeout_seconds else self.client
-        if self.mode == "chat":
+        if effective_mode == "anthropic" and self.mode != "anthropic":
+            client = _anthropic_client()
+        else:
+            client = self.client
+        client = client.with_options(timeout=timeout_seconds) if timeout_seconds else client
+        if effective_mode == "chat":
             output_text = self._chat_structured(client, name, system, user, schema, effective_model)
             status = "completed"
             response_id = None
-        elif self.mode == "anthropic":
+        elif effective_mode == "anthropic":
             response_id, status, output_text = self._anthropic_structured(client, name, system, user, schema, effective_model)
         else:
             response = client.responses.create(
@@ -297,21 +303,28 @@ class LLMGateway:
         """
 
         tool_name = _anthropic_tool_name(name)
-        response = client.messages.create(
-            model=effective_model,
-            max_tokens=_anthropic_max_output_tokens(),
-            temperature=0,
-            system=system,
-            messages=[{"role": "user", "content": user}],
-            tools=[
+        request: dict[str, Any] = {
+            "model": effective_model,
+            "max_tokens": _anthropic_max_output_tokens(),
+            "system": system,
+            "messages": [{"role": "user", "content": user}],
+            "tools": [
                 {
                     "name": tool_name,
                     "description": "Return the requested structured JSON object for the compliance workflow.",
                     "input_schema": schema,
                 }
             ],
-            tool_choice={"type": "tool", "name": tool_name},
-        )
+            "tool_choice": {"type": "tool", "name": tool_name},
+        }
+        # Claude 4.6+ 계열(Sonnet 5·Opus 4.7/4.8·Fable 5)은 temperature 등 샘플링
+        # 파라미터를 400으로 거부한다 — 보내지 않는다. 또한 Sonnet 5는 thinking이
+        # 기본 on인데 강제 tool_choice와 함께 쓸 수 없어 명시적으로 끈다.
+        # (Fable 5는 thinking을 끌 수 없어 disabled 자체가 400 — thinking을 생략한다.
+        #  Fable에서 강제 tool_choice가 거부되면 structured output 경로 재설계 필요.)
+        if not effective_model.startswith("claude-fable"):
+            request["thinking"] = {"type": "disabled"}
+        response = client.messages.create(**request)
         for block in getattr(response, "content", []) or []:
             if getattr(block, "type", None) == "tool_use" and getattr(block, "name", None) == tool_name:
                 return (
