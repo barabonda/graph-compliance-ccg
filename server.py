@@ -58,7 +58,14 @@ def intake_ad_image(payload: dict[str, Any]) -> dict[str, str] | None:
     if not image_b64:
         return None
     media_type = str(payload.get("image_media_type") or "image/png")
-    extracted = extract_ad_from_image(image_b64, media_type)
+    from utils import uses_korean_law_context
+
+    # 레이아웃 소견은 심사자 언어를 따른다 — KR 한국어, 비-KR(영어 우선) 영어.
+    extracted = extract_ad_from_image(
+        image_b64,
+        media_type,
+        korean=uses_korean_law_context(str(payload.get("workspace_id") or "")),
+    )
     if not str(payload.get("content_text") or "").strip():
         payload["content_text"] = extracted["content_text"]
     if not str(payload.get("title") or "").strip():

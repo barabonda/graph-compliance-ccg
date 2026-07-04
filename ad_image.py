@@ -50,9 +50,9 @@ IMAGE_EXTRACTION_SCHEMA: dict[str, Any] = {
         "layout_notes": {
             "type": "string",
             "description": (
-                "Compliance-relevant layout observations: which claims are headline-sized vs. "
-                "footnote-sized, benefit vs. disclosure prominence gap, imagery that implies "
-                "safety/guarantee, unreadable fine print, etc."
+                "Compliance-relevant layout observations, CONCISE (3-4 short sentences max): "
+                "which claims are headline-sized vs. footnote-sized, benefit vs. disclosure "
+                "prominence gap, imagery implying safety/guarantee, unreadable fine print."
             ),
         },
     },
@@ -68,9 +68,11 @@ def _image_model() -> str:
     return os.environ.get("CCG_IMAGE_MODEL", IMAGE_MODEL_DEFAULT)
 
 
-def extract_ad_from_image(image_b64: str, media_type: str) -> dict[str, str]:
+def extract_ad_from_image(image_b64: str, media_type: str, *, korean: bool = True) -> dict[str, str]:
     """이미지 광고에서 {title, content_text, layout_notes}를 추출한다.
 
+    content_text 는 원문 그대로(언어 불문 verbatim), layout_notes 는 심사자
+    언어를 따른다 — KR 워크스페이스는 한국어, 비-KR(영어 우선)은 영어.
     실패는 그대로 예외로 올린다(no fallback) — 이미지 접수 실패가 텍스트 없이
     빈 심사로 이어지면 안 된다.
     """
@@ -89,7 +91,13 @@ def extract_ad_from_image(image_b64: str, media_type: str) -> dict[str, str]:
         "system": (
             "You transcribe financial advertisement images for a compliance pre-review pipeline. "
             "Transcribe EVERY piece of visible ad copy verbatim (including fine print, rates, "
-            "conditions, review numbers) in reading order. Never invent text that is not in the image."
+            "conditions, review numbers) in reading order. Never invent text that is not in the image. "
+            + (
+                "Write layout_notes and title in KOREAN (한국어) — the reviewer is a Korean "
+                "compliance officer. Keep layout_notes to 3-4 short sentences."
+                if korean
+                else "Write layout_notes in ENGLISH, 3-4 short sentences."
+            )
         ),
         "messages": [
             {
