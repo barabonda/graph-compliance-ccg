@@ -64,6 +64,35 @@ function FanEdges({ n, invert }: { n: number; invert?: boolean }) {
   );
 }
 
+/** 연결 근거 원문 정제 — 그래프 노드 메타데이터(적재 일자 스탬프·플래그·중복
+ * 항 마커·번호 접두)를 걷어내 심사자가 읽을 문장만 남긴다. */
+function cleanEvidenceText(text: string): string {
+  return text
+    .replace(/\s+/g, " ")
+    .replace(/^\d+\s*조문\s*/, "") // "20 조문 " 적재 인덱스 접두
+    .replace(/\b20\d{6}\b/g, "") // 20260428 같은 적재 일자 스탬프
+    .replace(/\s[NY]\s/g, " ") // 플래그 컬럼 잔재
+    .replace(/^\d+\.\s*/, "") // "5. " 항목 번호 접두
+    .replace(/([①-⑮])\s*\1/g, "$1") // 중복 항 마커 "① ①"
+    .replace(/\s{2,}/g, " ")
+    .trim();
+}
+
+/** 정제 후 사실상 같은 문장(앞 40자 기준) 제거 — 같은 조문이 청크로 중복 적재된 경우. */
+function dedupeEvidence(texts: string[]): string[] {
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const raw of texts) {
+    const cleaned = cleanEvidenceText(raw);
+    if (!cleaned) continue;
+    const key = cleaned.slice(0, 40);
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push(cleaned);
+  }
+  return out;
+}
+
 /** 브랜치 내부 세로 커넥터(미니). */
 function BranchLink({ label }: { label?: string }) {
   return (
@@ -249,25 +278,30 @@ export function GraphView({ result, selectedAnchorId, onSelectAnchor }: Props) {
                           {abbreviateLawNames(item.source_article) || "근거 조문 확인 필요"}
                         </div>
                       )}
-                      {(item.evidence_texts?.length ?? 0) > 0 && (
-                        <details className="mt-2 border-t border-line pt-2">
-                          <summary className="cursor-pointer text-[11px] font-bold text-ink-3 select-none">
-                            연결 근거 {item.evidence_texts.length}건
-                            {judgment?.used_policy_evidence?.length ? ` · 판정 인용 ${judgment.used_policy_evidence.length}건` : ""}
-                            <span className="ml-1 font-normal text-ink-4">— 전부 판정 증거로 투입됨</span>
-                          </summary>
-                          <ul className="mt-1.5 space-y-1 pl-0.5">
-                            {item.evidence_texts.slice(0, 4).map((text, i) => (
-                              <li key={i} className="line-clamp-2 text-[11px] leading-relaxed text-ink-3" title={text}>
-                                · {abbreviateLawNames(text)}
-                              </li>
-                            ))}
-                            {item.evidence_texts.length > 4 && (
-                              <li className="text-[11px] text-ink-4">외 {item.evidence_texts.length - 4}건 — 판정 상세에서 확인</li>
-                            )}
-                          </ul>
-                        </details>
-                      )}
+                      {(() => {
+                        // 적재 메타데이터 정제 + 중복 청크 제거 후 표시.
+                        const evidence = dedupeEvidence(item.evidence_texts ?? []);
+                        if (evidence.length === 0) return null;
+                        return (
+                          <details className="mt-2 border-t border-line pt-2">
+                            <summary className="cursor-pointer text-[11px] font-bold text-ink-3 select-none">
+                              연결 근거 {evidence.length}건
+                              {judgment?.used_policy_evidence?.length ? ` · 판정 인용 ${judgment.used_policy_evidence.length}건` : ""}
+                              <span className="ml-1 font-normal text-ink-4">— 전부 판정 증거로 투입됨</span>
+                            </summary>
+                            <ul className="mt-1.5 space-y-1 pl-0.5">
+                              {evidence.slice(0, 4).map((text, i) => (
+                                <li key={i} className="line-clamp-2 text-[11px] leading-relaxed text-ink-3" title={text}>
+                                  · {abbreviateLawNames(text)}
+                                </li>
+                              ))}
+                              {evidence.length > 4 && (
+                                <li className="text-[11px] text-ink-4">외 {evidence.length - 4}건 — 판정 상세에서 확인</li>
+                              )}
+                            </ul>
+                          </details>
+                        );
+                      })()}
                     </div>
                     <BranchLink label="판정" />
                     {/* 이 CU 의 개별 판정 (ŷ, s) */}
