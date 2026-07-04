@@ -29,7 +29,7 @@ from prominence import build_prominence_artifacts
 from retriever import Neo4jPolicyRetriever, PolicyRetriever
 from revision import LLMRevisionSuggester
 from router import build_output
-from risk_context import track_c_extension_summary
+from track_c import run_track_c
 from schemas import PolicyCandidate, ReviewGraph, ReviewInput, ReviewOutput
 from utils import content_hash, stable_id, to_jsonable, uses_korean_law_context
 
@@ -507,6 +507,16 @@ class GraphComplianceCCGWorkflow:
         exception_reviews = [review for review in review_results if review is not None]
         yield workflow_event("step_completed", "Exception override", review_run_id=review_run_id, summary=f"{len(exception_reviews)} exception reviews", counts={"exception_reviews": len(exception_reviews)})
 
+        # Track C(표현·브랜드세이프티): 게이트(CCG_ENABLE_TRACK_C) OFF 면 정적 extension
+        # 요약(무회귀), ON 이면 로컬 리스크 코퍼스로 실판정. additive shape 이므로 기존
+        # 프론트 OverallTab 은 그대로 동작한다.
+        track_c_summary = run_track_c(
+            review_input=review_input,
+            sentences=[unit.text for unit in extraction.sentence_units],
+            retriever=self.retriever,
+            llm=self.llm,
+        )
+
         graph = ReviewGraph(
             review_run_id=review_run_id,
             ad_draft_id=ad_draft_id,
@@ -534,7 +544,7 @@ class GraphComplianceCCGWorkflow:
             disclosure_requirements=disclosure_requirements,
             policy_evidence_chains=policy_evidence_chains,
             overall_impression_judgment=overall_impression_judgment,
-            track_c_summary=track_c_extension_summary(),
+            track_c_summary=track_c_summary,
         )
         yield workflow_event("step_started", "Neo4j persistence", review_run_id=review_run_id, summary="Persist AdDraft, Context Graph, CUPlan, judgments, and evidence paths.")
         self.writer.save(review_input, graph)

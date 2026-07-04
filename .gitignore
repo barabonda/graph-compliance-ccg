@@ -25,3 +25,12 @@ eval/retrieval_sweep_*.json
 outputs/ad_images/
 _workspace/
 _workspace_eval/
+
+# Track C 시드 원본 데이터셋(UnSmile 등). CC-BY-NC-ND 등 라이선스 제약이 있어
+# 리포지토리에 재배포하지 않는다. 라이선스·출처는 그래프 노드 속성으로만 각인된다.
+# (load_risk_corpus.py 로 언제든 재취득·재적재 가능)
+data/risk_corpus/
+_workspace_prev_20260704_regression/
+_workspace_products/
+_workspace_trackc/
+~$*.pptx

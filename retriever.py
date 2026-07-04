@@ -422,6 +422,80 @@ class Neo4jPolicyRetriever:
             raise RuntimeError("No embedded Premise nodes found; run policy_compiler.py before review.")
         return rows
 
+    # -- Track C(표현·브랜드세이프티) 리스크 코퍼스 조회 -----------------------
+    # Track C 코퍼스는 CCG 소유 데이터로 **로컬 기본 DB**에 적재된다(load_risk_corpus.py).
+    # KR workspace 는 정책 코퍼스 읽기가 팀 Aura 로 라우팅되지만, Track C 는 로컬 DB 에만
+    # 있으므로 여기서는 _session_for(팀 라우팅)를 쓰지 않고 로컬 세션을 직접 연다.
+    def _local_session(self):
+        return self.driver.session(**self._session_kwargs())
+
+    def track_c_data_ready(self, *, workspace_id: str) -> dict[str, int]:
+        """Track C 코퍼스 적재 여부(로컬 DB). 미적재면 호출자가 명시적 에러를 낸다."""
+        with self._local_session() as session:
+            row = session.run(
+                """
+                MATCH (a:RiskAxis {workspace_id: $ws})
+                OPTIONAL MATCH (a)-[:HAS_PATTERN]->(p:RiskPattern)
+                WHERE p.embedding IS NOT NULL
+                OPTIONAL MATCH (a)-[:HAS_PRECEDENT]->(c:CasePrecedent)
+                RETURN count(DISTINCT a) AS axes, count(DISTINCT p) AS patterns,
+                       count(DISTINCT c) AS cases
+                """,
+                ws=workspace_id,
+            ).single()
+        return {
+            "axes": int(row["axes"]) if row else 0,
+            "patterns": int(row["patterns"]) if row else 0,
+            "cases": int(row["cases"]) if row else 0,
+        }
+
+    def track_c_patterns(self, *, workspace_id: str) -> list[dict[str, Any]]:
+        """축별 RiskPattern(임베딩 포함) + 키워드. 후보 게이팅에 사용."""
+        with self._local_session() as session:
+            return [
+                dict(record)
+                for record in session.run(
+                    """
+                    MATCH (a:RiskAxis {workspace_id: $ws})-[:HAS_PATTERN]->(p:RiskPattern)
+                    WHERE p.embedding IS NOT NULL
+                    RETURN a.id AS axis_id, a.label AS axis_label,
+                           a.keywords AS keywords, p.id AS pattern_id,
+                           p.text AS text, p.pattern_kind AS pattern_kind,
+                           p.embedding AS embedding
+                    """,
+                    ws=workspace_id,
+                )
+            ]
+
+    def track_c_precedents(self, *, workspace_id: str, axis_id: str, limit: int = 8) -> list[dict[str, Any]]:
+        """후보 축의 CasePrecedent 근거(판정에서 인용). 없으면 빈 리스트."""
+        with self._local_session() as session:
+            return [
+                dict(record)
+                for record in session.run(
+                    """
+                    MATCH (a:RiskAxis {id: $axis_id, workspace_id: $ws})-[:HAS_PRECEDENT]->(c:CasePrecedent)
+                    RETURN c.id AS id, c.text AS text, c.source_dataset AS source_dataset,
+                           c.license AS license, c.source_label AS source_label,
+                           c.source_url AS source_url, c.targets_individual AS targets_individual
+                    ORDER BY c.source_dataset, c.id
+                    LIMIT $limit
+                    """,
+                    ws=workspace_id, axis_id=axis_id, limit=limit,
+                )
+            ]
+
+    def track_c_mitigation(self, *, workspace_id: str, axis_id: str) -> str:
+        with self._local_session() as session:
+            row = session.run(
+                """
+                MATCH (a:RiskAxis {id: $axis_id, workspace_id: $ws})-[:HAS_MITIGATION]->(m:MitigationAdvice)
+                RETURN m.text AS text LIMIT 1
+                """,
+                ws=workspace_id, axis_id=axis_id,
+            ).single()
+        return str(row["text"]) if row else ""
+
 
 def candidate_from_row(
     row: dict[str, Any],

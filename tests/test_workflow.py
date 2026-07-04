@@ -2663,16 +2663,22 @@ def test_selected_base_product_name_resolves_from_csv_metadata(monkeypatch: pyte
     monkeypatch.delenv("NEO4J_USER", raising=False)
     monkeypatch.delenv("NEO4J_USERNAME", raising=False)
     monkeypatch.delenv("NEO4J_PASSWORD", raising=False)
+    # Pin the local metadata source to the repo-bundled demo CSV so the family
+    # resolution assertion is deterministic on any machine (no external dataset).
+    monkeypatch.setenv(
+        "JB_PRODUCT_METADATA_PATH",
+        str(jb_data_context_module.BUNDLED_PRODUCT_DISCLOSURE_META_PATH),
+    )
     jb_data_context_module.load_product_rows.cache_clear()
 
-    text = "JB시니어우대예금 특판 안내. 최고 연 5.0% 금리를 확정 제공하며 안정적으로 목돈을 관리할 수 있습니다."
+    text = "JB 골든에이지 예금 특판 안내. 최고 연 5.0% 금리를 확정 제공하며 안정적으로 목돈을 관리할 수 있습니다."
     review_input = ReviewInput(
         dataset_item_id="product_match_regression",
-        title="JB시니어우대예금",
+        title="JB 골든에이지 예금",
         content_text=text,
         channel="web_page",
         product_group="deposit",
-        selected_product_name="JB시니어우대예금",
+        selected_product_name="JB 골든에이지 예금",
         workspace_id="graphcompliance_mvp_jb_20260530",
     )
     claims = [
@@ -2694,5 +2700,6 @@ def test_selected_base_product_name_resolves_from_csv_metadata(monkeypatch: pyte
     first_product = product_context["matched_products"][0]
 
     assert first_product["match_basis"] == "selected_product"
-    assert first_product["product"] == "JB시니어우대예금(만기일시지급식)"
+    # Base name resolves to the bundled disclosure variant.
+    assert first_product["product"] == "JB 골든에이지 예금(월이자지급식)"
     assert first_product["document_count"] >= 1
