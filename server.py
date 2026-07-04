@@ -591,6 +591,78 @@ def run_detail(run_id: str) -> dict[str, Any]:
     return output
 
 
+EVAL_DIR = Path(__file__).resolve().parent / "eval"
+
+
+def _eval_report_summary(path: Path) -> dict[str, Any]:
+    """리포트 파일 요약 — 목록 카드용. metrics-shape JSON이면 핵심 지표만 추린다."""
+    stat = path.stat()
+    info: dict[str, Any] = {
+        "name": path.name,
+        "kind": "json" if path.suffix == ".json" else "md",
+        "size": stat.st_size,
+        "mtime": int(stat.st_mtime),
+    }
+    if path.suffix == ".json":
+        try:
+            data = json.loads(path.read_text(encoding="utf-8"))
+        except Exception:  # noqa: BLE001 — 손상 파일은 목록에서 요약만 생략.
+            return info
+        if isinstance(data, dict):
+            metrics = data.get("article_metrics") if isinstance(data.get("article_metrics"), dict) else None
+            info["record_count"] = data.get("record_count")
+            if isinstance(metrics, dict):
+                info["metrics"] = {
+                    key: metrics.get(key)
+                    for key in ("micro_f1", "macro_f1", "micro_f2", "macro_f2", "mcc")
+                    if metrics.get(key) is not None
+                }
+                counts = metrics.get("counts") if isinstance(metrics.get("counts"), dict) else None
+                if counts:
+                    info["counts"] = counts
+            # 로그형 배치 리포트(예: JB 실제 광고 라이브 심사)는 gold 없이 판정 분포를 카드에 노출.
+            for key in ("kind", "batch", "gold_available", "workspace_id"):
+                if data.get(key) is not None:
+                    info[key] = data.get(key)
+            if isinstance(data.get("verdict_counts"), dict):
+                info["verdict_counts"] = data.get("verdict_counts")
+            if isinstance(data.get("ccg_metrics"), dict):
+                info["ccg_metrics"] = {
+                    key: data["ccg_metrics"].get(key)
+                    for key in ("violation_precision", "violation_recall", "overblocking_rate", "clean_non_pass_rate")
+                    if data["ccg_metrics"].get(key) is not None
+                }
+    return info
+
+
+@app.get("/api/eval/reports")
+def eval_reports() -> dict[str, Any]:
+    """평가 리포트 목록(운영 대시보드 평가 로그 탭) — eval/*.json·*.md 최신순."""
+    if not EVAL_DIR.exists():
+        return {"reports": []}
+    files = [p for p in EVAL_DIR.iterdir() if p.is_file() and p.suffix in {".json", ".md"}]
+    files.sort(key=lambda p: p.stat().st_mtime, reverse=True)
+    return {"reports": [_eval_report_summary(p) for p in files]}
+
+
+@app.get("/api/eval/reports/{name}")
+def eval_report_detail(name: str):
+    """단일 평가 리포트 내용 — 파일명 화이트리스트(경로 탐색 차단)."""
+    import re as _re
+
+    if not _re.fullmatch(r"[A-Za-z0-9_.\-]+\.(json|md)", name):
+        raise HTTPException(status_code=400, detail={"error": "bad_request", "message": "invalid report name"})
+    path = (EVAL_DIR / name).resolve()
+    if EVAL_DIR.resolve() not in path.parents or not path.exists():
+        raise HTTPException(status_code=404, detail={"error": "not_found", "message": "report not found"})
+    if path.suffix == ".json":
+        try:
+            return {"name": name, "kind": "json", "content": json.loads(path.read_text(encoding="utf-8"))}
+        except Exception as exc:  # noqa: BLE001
+            raise HTTPException(status_code=422, detail={"error": "parse_error", "message": str(exc)[:200]}) from exc
+    return {"name": name, "kind": "md", "text": path.read_text(encoding="utf-8")}
+
+
 @app.post("/api/copilot")
 def copilot(payload: dict[str, Any]) -> dict[str, Any]:
     """심사 결과 설명 챗 (읽기 전용 도구만 호출 — 심사 실행/데이터 변경 불가).

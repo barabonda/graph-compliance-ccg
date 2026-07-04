@@ -6,6 +6,7 @@ import { principleColor, VERDICT_LABELS } from "@/lib/labels";
 import type { FinalVerdict, RunSummary } from "@/lib/types";
 import { Icon } from "../Icon";
 import { EmptyState } from "../ui";
+import { EvalPanel } from "./EvalPanel";
 
 interface Props {
   onOpenRun: (run: RunSummary) => void;
@@ -93,6 +94,8 @@ function formatTime(ts: number): string {
 export function DashboardTab({ onOpenRun, onEditRun }: Props) {
   const [runs, setRuns] = useState<RunSummary[] | null>(null);
   const [error, setError] = useState<string>("");
+  // 서브탭: 실행 기록(집계·심사 로그) vs 평가 로그(정밀도/재현율 리포트).
+  const [subTab, setSubTab] = useState<"runs" | "eval">("runs");
 
   const load = useCallback(async () => {
     setError("");
@@ -121,7 +124,52 @@ export function DashboardTab({ onOpenRun, onEditRun }: Props) {
     };
   }, []);
 
-  if (runs === null) return <EmptyState>실행 기록을 불러오는 중…</EmptyState>;
+  const subTabButton = (key: "runs" | "eval", label: string) => (
+    <button
+      type="button"
+      onClick={() => setSubTab(key)}
+      className={`rounded-md px-3 py-1.5 text-[12.5px] font-bold transition ${
+        subTab === key ? "bg-ink text-white" : "border border-line bg-surface text-ink-3 hover:border-brand hover:text-brand"
+      }`}
+    >
+      {label}
+    </button>
+  );
+
+  const header = (
+    <div className="flex items-start justify-between gap-3">
+      <div>
+        <h2 className="text-[18px] font-extrabold tracking-tight text-ink">운영 대시보드</h2>
+        <p className="mt-0.5 text-[12px] text-ink-3">
+          {subTab === "runs"
+            ? "실행 기록과 집계 · 행을 클릭하면 시점 데이터를 열고, 조건 불러오기로 수정 후 재실행합니다."
+            : "합성 데이터셋 평가 로그 · 유형별·조문별 정밀도/재현율을 리포트별로 확인합니다."}
+        </p>
+      </div>
+      <div className="flex shrink-0 items-center gap-1.5">
+        {subTabButton("runs", "실행 기록")}
+        {subTabButton("eval", "평가 로그")}
+      </div>
+    </div>
+  );
+
+  if (subTab === "eval") {
+    return (
+      <div className="space-y-4">
+        {header}
+        <EvalPanel />
+      </div>
+    );
+  }
+
+  if (runs === null) {
+    return (
+      <div className="space-y-4">
+        {header}
+        <EmptyState>실행 기록을 불러오는 중…</EmptyState>
+      </div>
+    );
+  }
 
   // 집계는 실제 실행만(데모 시드 제외). 표에는 데모도 표시하되 '데모' 배지로 구분.
   const realRuns = runs.filter((run) => !run.seed);
@@ -141,14 +189,12 @@ export function DashboardTab({ onOpenRun, onEditRun }: Props) {
 
   return (
     <div className="space-y-4">
+      {header}
+
       <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-[18px] font-extrabold tracking-tight text-ink">운영 대시보드</h2>
-          <p className="mt-0.5 text-[12px] text-ink-3">
-            실행 기록과 집계 · 행을 클릭하면 시점 데이터를 열고, 조건 불러오기로 수정 후 재실행합니다.
-            {demoCount ? ` (집계는 실제 실행 ${total}건만 · 데모 ${demoCount}건 제외)` : ""}
-          </p>
-        </div>
+        <p className="text-[12px] text-ink-3">
+          {demoCount ? `집계는 실제 실행 ${total}건만 · 데모 ${demoCount}건 제외` : `실제 실행 ${total}건 집계`}
+        </p>
         <button
           type="button"
           onClick={() => void load()}

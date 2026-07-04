@@ -313,6 +313,31 @@ export interface RunSummary {
   seed?: boolean;
 }
 
+/** 평가 리포트 요약(운영 대시보드 평가 로그 목록). */
+export interface EvalReportSummary {
+  name: string;
+  kind: "json" | "md";
+  size: number;
+  mtime: number;
+  record_count?: number;
+  metrics?: {
+    micro_f1?: number;
+    macro_f1?: number;
+    micro_f2?: number;
+    macro_f2?: number;
+    mcc?: number;
+  };
+  counts?: { tp?: number; fp?: number; fn?: number; tn?: number };
+}
+
+/** 단일 평가 리포트 상세 — JSON metrics 또는 마크다운 텍스트. */
+export interface EvalReportDetail {
+  name: string;
+  kind: "json" | "md";
+  content?: Record<string, unknown>;
+  text?: string;
+}
+
 export interface SystemReviewItem {
   anchor_id: string;
   risk_code?: string;

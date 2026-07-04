@@ -1,4 +1,12 @@
-import type { ProductSearchResult, ReviewOutput, ReviewRequest, RunSummary, StreamEvent } from "./types";
+import type {
+  EvalReportDetail,
+  EvalReportSummary,
+  ProductSearchResult,
+  ReviewOutput,
+  ReviewRequest,
+  RunSummary,
+  StreamEvent,
+} from "./types";
 
 export class ReviewApiError extends Error {
   readonly code: string;
@@ -98,6 +106,21 @@ export async function fetchRun(id: string): Promise<ReviewOutput> {
   const response = await fetch(`/api/runs/${encodeURIComponent(id)}`, { cache: "no-store" });
   if (!response.ok) throw await parseErrorResponse(response);
   return (await response.json()) as ReviewOutput;
+}
+
+/** 평가 리포트 목록(운영 대시보드 평가 로그 탭). */
+export async function fetchEvalReports(): Promise<EvalReportSummary[]> {
+  const response = await fetch("/api/eval/reports", { cache: "no-store" });
+  if (!response.ok) throw await parseErrorResponse(response);
+  const data = (await response.json()) as { reports?: EvalReportSummary[] };
+  return data.reports ?? [];
+}
+
+/** 단일 평가 리포트 내용(JSON metrics 또는 마크다운 텍스트). */
+export async function fetchEvalReport(name: string): Promise<EvalReportDetail> {
+  const response = await fetch(`/api/eval/reports/${encodeURIComponent(name)}`, { cache: "no-store" });
+  if (!response.ok) throw await parseErrorResponse(response);
+  return (await response.json()) as EvalReportDetail;
 }
 
 export async function searchProducts(
