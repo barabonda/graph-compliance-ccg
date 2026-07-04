@@ -291,7 +291,7 @@ def review_stream(payload: dict[str, Any]) -> StreamingResponse:
         def worker() -> None:
             try:
                 extracted_image = None
-                if str(payload.get("image_base64") or "").strip():
+                if payload_ad_images(payload):
                     event_queue.put(
                         {
                             "event": "step_started",
