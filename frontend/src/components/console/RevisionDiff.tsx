@@ -59,7 +59,7 @@ function DiffLine({
 
   return (
     <div
-      className={`group relative flex ${interactive ? "cursor-pointer" : ""}`}
+      className={`group/line relative flex ${interactive ? "cursor-pointer" : ""}`}
       style={{
         background: style.bg,
         boxShadow: selected ? "inset 3px 0 0 var(--brand)" : undefined,
@@ -83,8 +83,10 @@ function DiffLine({
       >
         <LineBody line={line} />
       </span>
+      {/* group/line 네임드 그룹 — 부모 details(.group)와의 중첩 호버 충돌 방지
+          (일반 group-hover 는 조상 group 호버에도 반응해 툴팁이 전부 떴다). */}
       {hasTooltip && (
-        <div className="pointer-events-none absolute top-full right-2 left-8 z-30 hidden group-hover:block">
+        <div className="pointer-events-none absolute top-full right-2 left-8 z-30 hidden group-hover/line:block">
           <div className="mt-0.5 rounded-[10px] border border-line bg-surface px-3 py-2 shadow-panel">
             <div className="text-[11px] font-bold tracking-wider text-ink-4">
               {line.type === "del" ? "위험 이유" : "수정 이유"}
