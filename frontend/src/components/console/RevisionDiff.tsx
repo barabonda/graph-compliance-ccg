@@ -208,7 +208,8 @@ export function RevisionDiff({
               <Icon name={copied ? "check" : "clause"} size={14} color="#fff" />
               {copied ? "복사됨" : "교정안 복사"}
             </button>
-            {result.ad_image?.available && (
+            {/* 첫 생성 CTA 는 아래 이미지 영역이 담당 — 배너 버튼은 재생성 전용 */}
+            {result.ad_image?.available && revisedImage && (
               <button
                 type="button"
                 onClick={() => void generateRevisedImage()}
@@ -216,16 +217,43 @@ export function RevisionDiff({
                 className="flex shrink-0 items-center gap-1.5 rounded-[10px] bg-white/16 px-3 py-2 text-[12.5px] font-bold text-white transition hover:bg-white/28 disabled:cursor-wait disabled:opacity-70"
               >
                 <Icon name="alert" size={14} color="#fff" />
-                {imageGenState === "loading" ? "가이드 생성 중…" : revisedImage ? "가이드 다시 생성" : "이미지 수정 가이드"}
+                {imageGenState === "loading" ? "가이드 생성 중…" : "가이드 다시 생성"}
               </button>
             )}
           </div>
         )}
       </div>
 
-      {/* 이미지 수정 가이드 — 원본 위에 교정 위치를 표시한 검수 마크업. 좁은 컬럼이라
-          세로 스택 전폭으로 크게 보여주고, 클릭하면 라이트박스로 확대한다. */}
-      {result.ad_image?.available && (imageGenState === "error" || revisedImage) && (
+      {/* 이미지 런의 수정안 = 이미지가 주인공. 원본 이미지 → 생성 이미지(가이드)
+          흐름을 먼저 보여주고, 추출 문안 diff는 아래 접이식 보조로 내린다. */}
+      {result.ad_image?.available && !revisedImage && (
+        <div className="border-b border-line bg-surface-2 px-4 py-4">
+          {imageGenState === "error" && (
+            <p className="mb-2 text-[12.5px] font-semibold text-reject">{imageGenError}</p>
+          )}
+          <figure>
+            <figcaption className="mb-1 text-[11px] font-bold text-ink-3">접수 원본 (이미지 광고)</figcaption>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={`/api/ad-image/${result.review_run_id}/original`}
+              alt="원본 광고 이미지"
+              className="w-full cursor-zoom-in rounded-md border border-line bg-white object-contain"
+              onClick={() =>
+                setZoomed({ src: `/api/ad-image/${result.review_run_id}/original`, caption: "접수 원본 광고 이미지" })
+              }
+            />
+          </figure>
+          <button
+            type="button"
+            onClick={() => void generateRevisedImage()}
+            disabled={imageGenState === "loading"}
+            className="mt-3 w-full rounded-[10px] bg-brand py-2.5 text-[13.5px] font-bold text-white transition hover:bg-brand/90 disabled:cursor-wait disabled:opacity-70"
+          >
+            {imageGenState === "loading" ? "이미지 수정 가이드 생성 중… (약 1분)" : "이미지 수정 가이드 생성 — 교정 위치를 원본 위에 표시"}
+          </button>
+        </div>
+      )}
+      {result.ad_image?.available && revisedImage && (
         <div className="border-b border-line bg-surface-2 px-4 py-3">
           {imageGenState === "error" && (
             <p className="text-[12.5px] font-semibold text-reject">{imageGenError}</p>
@@ -308,30 +336,64 @@ export function RevisionDiff({
         />
       )}
 
-      {/* diff 헤더 — GitHub 파일 헤더 오마주 */}
-      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 border-b border-line bg-surface-2 px-4 py-2.5">
-        <span className="font-mono text-[12px] font-bold text-ink-2">광고 문안</span>
-        <span className="font-mono text-[11.5px]">
-          <span className="font-bold text-reject">−{diff.changedCount}</span>{" "}
-          <span className="font-bold text-pass">+{diff.changedCount + diff.disclosureAddCount}</span>
-        </span>
-        <span className="ml-auto text-[11px] text-ink-4">
-          줄에 커서를 올리면 이유, 클릭하면 판정 상세
-        </span>
-      </div>
-      {hasChanges ? (
-        <div className="py-2">
-          {diff.lines.map((line, index) => (
-            <DiffLine
-              key={`${line.type}_${index}`}
-              line={line}
-              selected={Boolean(line.anchorId && line.anchorId === selectedAnchorId)}
-              onSelectAnchor={onSelectAnchor}
-            />
-          ))}
-        </div>
+      {/* 텍스트 diff — 텍스트 런에서는 본문(주인공), 이미지 런에서는 접이식 보조.
+          이미지 런의 수정본은 '생성 이미지'이고, diff 는 그 재료(추출 문안 교정)다. */}
+      {result.ad_image?.available ? (
+        <details className="group">
+          <summary className="flex cursor-pointer flex-wrap items-center gap-x-3 gap-y-1 border-b border-line bg-surface-2 px-4 py-2.5 select-none">
+            <span className="font-mono text-[12px] font-bold text-ink-2">추출 문안 교정 (diff)</span>
+            <span className="font-mono text-[11.5px]">
+              <span className="font-bold text-reject">−{diff.changedCount}</span>{" "}
+              <span className="font-bold text-pass">+{diff.changedCount + diff.disclosureAddCount}</span>
+            </span>
+            <span className="ml-auto text-[11px] text-ink-4">
+              <span className="group-open:hidden">펼치기 — 가이드에 반영된 문구 교정 내역</span>
+              <span className="hidden group-open:inline">줄에 커서를 올리면 이유, 클릭하면 판정 상세</span>
+            </span>
+          </summary>
+          {hasChanges ? (
+            <div className="py-2">
+              {diff.lines.map((line, index) => (
+                <DiffLine
+                  key={`${line.type}_${index}`}
+                  line={line}
+                  selected={Boolean(line.anchorId && line.anchorId === selectedAnchorId)}
+                  onSelectAnchor={onSelectAnchor}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="px-4 py-6 text-[13px] text-ink-4">수정이 필요한 표현이 없습니다 — 원문 그대로 게시 가능합니다.</div>
+          )}
+        </details>
       ) : (
-        <div className="px-4 py-6 text-[13px] text-ink-4">수정이 필요한 표현이 없습니다 — 원문 그대로 게시 가능합니다.</div>
+        <>
+          {/* diff 헤더 — GitHub 파일 헤더 오마주 */}
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 border-b border-line bg-surface-2 px-4 py-2.5">
+            <span className="font-mono text-[12px] font-bold text-ink-2">광고 문안</span>
+            <span className="font-mono text-[11.5px]">
+              <span className="font-bold text-reject">−{diff.changedCount}</span>{" "}
+              <span className="font-bold text-pass">+{diff.changedCount + diff.disclosureAddCount}</span>
+            </span>
+            <span className="ml-auto text-[11px] text-ink-4">
+              줄에 커서를 올리면 이유, 클릭하면 판정 상세
+            </span>
+          </div>
+          {hasChanges ? (
+            <div className="py-2">
+              {diff.lines.map((line, index) => (
+                <DiffLine
+                  key={`${line.type}_${index}`}
+                  line={line}
+                  selected={Boolean(line.anchorId && line.anchorId === selectedAnchorId)}
+                  onSelectAnchor={onSelectAnchor}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="px-4 py-6 text-[13px] text-ink-4">수정이 필요한 표현이 없습니다 — 원문 그대로 게시 가능합니다.</div>
+          )}
+        </>
       )}
     </div>
   );
