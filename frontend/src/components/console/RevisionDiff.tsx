@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { abbreviateLawNames } from "@/lib/labels";
 import { buildRevisionDiff, correctedTextFromDiff, type RevisionDiffLine } from "@/lib/revisionDiff";
 import type { ReviewOutput } from "@/lib/types";
@@ -129,6 +129,29 @@ export function RevisionDiff({
   const [zoomed, setZoomed] = useState<{ src: string; caption: string; downloadName?: string } | null>(null);
   // 개선 지시(반복 루프) — 직전 가이드를 베이스로 재편집.
   const [feedback, setFeedback] = useState("");
+
+  // 화면 전환·새로고침으로 컴포넌트가 언마운트되면 revisedImage 로컬 state가
+  // 사라진다. 서버는 가이드를 디스크에 보존하므로(/api/ad-image/{run}/revised),
+  // 접수 이미지가 있는 run 을 열면 마운트 시 존재 여부를 확인해 다시 노출한다.
+  // (직접 URL + 캐시버스트 — blob objectURL 누수 없이, 세션 내 재생성은
+  //  generateRevisedImage 가 새 data URL 로 덮으므로 stale 걱정 없음.)
+  useEffect(() => {
+    if (!result.ad_image?.available || !result.review_run_id) return;
+    let cancelled = false;
+    const url = `/api/ad-image/${result.review_run_id}/revised`;
+    fetch(url, { method: "GET", cache: "no-store" })
+      .then((res) => {
+        if (cancelled || !res.ok) return;
+        setRevisedImage(`${url}?t=${Date.now()}`);
+        setImageGenState("done");
+      })
+      .catch(() => {
+        /* 가이드가 아직 없으면 무시 — 생성 CTA 를 그대로 노출한다. */
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [result.review_run_id, result.ad_image?.available]);
 
   const generateRevisedImage = async (feedbackText?: string) => {
     if (imageGenState === "loading") return;
