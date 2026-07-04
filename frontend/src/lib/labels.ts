@@ -289,9 +289,14 @@ export function disclosureMeta(checkId: string): { desc: string; required: boole
 }
 
 // LLM 모델 선택. 빈 값 = .env 기본(클라우드/로컬은 LLM_BASE_URL이 결정).
-// 로컬(Ollama) 모델 태그는 그대로 전달된다.
+// claude-* 태그는 Anthropic provider, 로컬(Ollama) 모델 태그는 로컬 엔드포인트로 전달된다.
 export const LLM_MODELS = [
   { value: "", label: "GPT-5.4-nano · 클라우드 기본" },
+  { value: "claude-sonnet-5", label: "Claude Sonnet 5 · 정밀/균형" },
+  { value: "claude-fable-5", label: "Claude Fable 5 · 긴 문안/컨텍스트" },
+  { value: "claude-opus-4-8", label: "Claude Opus 4.8 · 최고 정밀" },
+  { value: "claude-opus-4-6", label: "Claude Opus 4.6 · 호환" },
+  { value: "claude-haiku-4-5-20251001", label: "Claude Haiku 4.5 · 빠름" },
   { value: "ax-4.0-light", label: "ax-4.0-light · 7.3B 빠름" },
   { value: "midm-2.0-base", label: "midm-2.0-base · 11.5B" },
   { value: "exaone4-32b", label: "exaone4-32b · 32B 정밀" },
@@ -410,5 +415,4 @@ export function trackBBadgeTone(verdict?: string, score?: number): "pass" | "rev
   if (verdict === "MEDIUM" || value >= 0.45) return "review";
   return "pass";
 }
-
 
