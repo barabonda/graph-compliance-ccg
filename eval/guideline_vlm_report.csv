@@ -1,0 +1,5 @@
+id,유형,판정,gold_verdict,pred_verdict,gold_articles,pred_article_families,matched_families,extra_detections,intent_matched,note
+reg_guideline_p16_case1_apt_loan_rate,이자율(필수고지),적중,violation,reject,금소법 제22조 | 은행 광고심의 기준 제16조,금소법_광고규제_위임사슬 | 표시광고공정화법_계열,금소법_광고규제_위임사슬,표시광고공정화법_계열,True,
+reg_guideline_p16_case2_universal_scope,적용범위/조건오인,적중,violation,revise,금소법 제22조 | 은행 광고심의 기준 제17조,금소법_광고규제_위임사슬,금소법_광고규제_위임사슬,,True,
+reg_guideline_p16_case3_savings_insurance_mislead,상품성격오인(보험),부분(needs_review),violation,needs_review,금소법 제22조,금소법_광고규제_위임사슬 | 표시광고공정화법_계열,금소법_광고규제_위임사슬,표시광고공정화법_계열,True,
+reg_guideline_p16_case4_fintech_child_savings,이자율/수익률오인,부분(needs_review),violation,needs_review,금소법 제22조 | 은행 광고심의 기준 제17조,금소법_광고규제_위임사슬 | 표시광고공정화법_계열,금소법_광고규제_위임사슬,표시광고공정화법_계열,True,
