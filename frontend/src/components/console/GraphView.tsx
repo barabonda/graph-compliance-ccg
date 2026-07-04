@@ -230,9 +230,17 @@ export function GraphView({ result, selectedAnchorId, onSelectAnchor }: Props) {
                         </div>
                       )}
                     </div>
-                    <BranchLink label="근거 · 위임 사슬" />
-                    {/* 이 CU 의 법령 위임 사슬 — 권위 계층 세로 위계 */}
+                    <BranchLink label="대표 근거 경로" />
+                    {/* 이 CU 의 법령 위임 사슬 — CU는 여러 조문·심의기준 원문과 연결되지만
+                        (전부 판정 증거창에 투입), 사슬 요약은 CU가 형식화된 모(母)조문
+                        기준의 대표 경로다. 나머지 연결 근거는 아래 접이식으로 공개. */}
                     <div className="flex-1 rounded-[11px] border border-line bg-surface px-3.5 py-3">
+                      <div
+                        className="mb-2 flex items-center gap-1 text-[11px] font-bold text-ink-4"
+                        title="이 CU가 형식화된 원천(모조문)을 뿌리로 한 위임 경로입니다. CU에 연결된 다른 조문·심의기준 원문도 판정 증거로 함께 투입됩니다."
+                      >
+                        대표 근거 경로 <span className="font-normal">· 모조문 기준</span>
+                      </div>
                       {deleg && deleg.steps.length > 0 ? (
                         <DelegationChain steps={deleg.steps} />
                       ) : (
@@ -240,6 +248,25 @@ export function GraphView({ result, selectedAnchorId, onSelectAnchor }: Props) {
                           <span className="mr-1.5 inline-block rounded bg-surface-3 px-1.5 py-0.5 text-[11px] font-bold text-ink-2">조문</span>
                           {abbreviateLawNames(item.source_article) || "근거 조문 확인 필요"}
                         </div>
+                      )}
+                      {(item.evidence_texts?.length ?? 0) > 0 && (
+                        <details className="mt-2 border-t border-line pt-2">
+                          <summary className="cursor-pointer text-[11px] font-bold text-ink-3 select-none">
+                            연결 근거 {item.evidence_texts.length}건
+                            {judgment?.used_policy_evidence?.length ? ` · 판정 인용 ${judgment.used_policy_evidence.length}건` : ""}
+                            <span className="ml-1 font-normal text-ink-4">— 전부 판정 증거로 투입됨</span>
+                          </summary>
+                          <ul className="mt-1.5 space-y-1 pl-0.5">
+                            {item.evidence_texts.slice(0, 4).map((text, i) => (
+                              <li key={i} className="line-clamp-2 text-[11px] leading-relaxed text-ink-3" title={text}>
+                                · {abbreviateLawNames(text)}
+                              </li>
+                            ))}
+                            {item.evidence_texts.length > 4 && (
+                              <li className="text-[11px] text-ink-4">외 {item.evidence_texts.length - 4}건 — 판정 상세에서 확인</li>
+                            )}
+                          </ul>
+                        </details>
                       )}
                     </div>
                     <BranchLink label="판정" />
