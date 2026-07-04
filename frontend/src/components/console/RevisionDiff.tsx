@@ -208,7 +208,7 @@ export function RevisionDiff({
                 className="flex shrink-0 items-center gap-1.5 rounded-[10px] bg-white/16 px-3 py-2 text-[12.5px] font-bold text-white transition hover:bg-white/28 disabled:cursor-wait disabled:opacity-70"
               >
                 <Icon name="alert" size={14} color="#fff" />
-                {imageGenState === "loading" ? "이미지 생성 중…" : revisedImage ? "이미지 다시 생성" : "이미지 수정안 생성"}
+                {imageGenState === "loading" ? "가이드 생성 중…" : revisedImage ? "가이드 다시 생성" : "이미지 수정 가이드"}
               </button>
             )}
           </div>
@@ -233,13 +233,13 @@ export function RevisionDiff({
                 />
               </figure>
               <figure>
-                <figcaption className="mb-1 text-[11px] font-bold text-pass">AFTER · AI 이미지 수정안</figcaption>
+                <figcaption className="mb-1 text-[11px] font-bold text-pass">AFTER · AI 수정 가이드</figcaption>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={revisedImage} alt="교정 문안이 반영된 이미지 수정안" className="w-full rounded-md border border-pass/50 bg-white object-contain" />
+                <img src={revisedImage} alt="교정 위치를 표시한 이미지 수정 가이드" className="w-full rounded-md border border-pass/50 bg-white object-contain" />
               </figure>
               <p className="md:col-span-2 text-[11px] leading-relaxed text-ink-4">
-                이미지 수정안은 교정 문안을 원본 레이아웃에 반영해 생성한 시안입니다 — 게시 전 문구·수치가 교정안과
-                일치하는지 심사자가 확인해야 합니다.
+                수정 가이드는 완성 시안이 아니라 어느 자리에 어떤 문구를 반영해야 하는지 표시한 검수 마크업입니다 —
+                실제 반영 문구는 좌측 교정안(diff)을 기준으로 디자이너가 적용합니다.
               </p>
             </div>
           )}

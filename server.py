@@ -29,7 +29,7 @@ except ImportError:  # pragma: no cover - optional provider.
     AnthropicAPIConnectionError = AnthropicAPIStatusError = AnthropicAuthenticationError = None  # type: ignore[assignment]
     AnthropicBadRequestError = AnthropicRateLimitError = None  # type: ignore[assignment]
 
-from ad_image import extract_ad_from_image, generate_revised_image
+from ad_image import extract_ad_from_image, generate_revision_guide_image
 from env_loader import load_local_env
 from jb_data_context import search_products
 from llm_gateway import LLMGateway
@@ -348,16 +348,42 @@ def revision_image(payload: dict[str, Any]) -> dict[str, Any]:
             status_code=404,
             detail={"error": "not_found", "message": "이 심사에는 저장된 원본 광고 이미지가 없습니다."},
         )
+    # 가이드 어노테이션 재료는 run 스냅샷의 수정안에서 직접 뽑는다 — 문구 교체
+    # (before→after), 추가할 표준 고지, 심사자 보완 항목을 구분해 전달한다.
     run_snapshot = load_run(run_id) or {}
-    layout_notes = str(((run_snapshot.get("result") or run_snapshot).get("ad_image") or {}).get("layout_notes") or "")
+    result_doc = run_snapshot.get("result") or run_snapshot
+    revisions: list[dict[str, str]] = []
+    disclosures: list[str] = []
+    reviewer_items: list[str] = []
+    for suggestion in result_doc.get("revision_suggestions") or []:
+        if not isinstance(suggestion, dict):
+            continue
+        block = suggestion.get("disclosure_block")
+        if block:
+            for item in block:
+                if not isinstance(item, dict):
+                    continue
+                if item.get("status") == "add" and item.get("text"):
+                    disclosures.append(str(item["text"]))
+                elif item.get("status") == "reviewer":
+                    # 과거 run 스냅샷은 label에 체크 ID가 저장돼 있을 수 있어 최신 라벨로 재매핑.
+                    from disclosure_catalog import readable_label
+
+                    label = readable_label(str(item.get("check_id") or "")) or str(item.get("label") or "")
+                    if label:
+                        reviewer_items.append(label)
+            continue
+        if str(suggestion.get("before") or "").strip() and str(suggestion.get("after") or "").strip():
+            revisions.append({"before": str(suggestion["before"]), "after": str(suggestion["after"])})
     media = "image/png" if original.suffix == ".png" else "image/jpeg"
     try:
-        revised = generate_revised_image(
+        revised = generate_revision_guide_image(
             original.read_bytes(),
             media,
-            corrected_text,
-            layout_notes=layout_notes,
-            disclosure_text=str(payload.get("disclosure_text") or ""),
+            revisions=revisions,
+            disclosures=disclosures,
+            reviewer_items=reviewer_items,
+            corrected_text=corrected_text,
         )
     except (BadRequestError, AuthenticationError, RateLimitError, APIConnectionError, APIStatusError) as exc:
         raise HTTPException(

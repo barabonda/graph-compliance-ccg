@@ -130,30 +130,70 @@ def extract_ad_from_image(image_b64: str, media_type: str) -> dict[str, str]:
     raise RuntimeError("Vision extraction returned no structured output for the ad image.")
 
 
-def generate_revised_image(
+def generate_revision_guide_image(
     original_bytes: bytes,
     media_type: str,
-    corrected_text: str,
     *,
-    layout_notes: str = "",
-    disclosure_text: str = "",
+    revisions: list[dict[str, str]] | None = None,
+    disclosures: list[str] | None = None,
+    reviewer_items: list[str] | None = None,
+    corrected_text: str = "",
 ) -> bytes:
-    """교정 문안을 반영한 수정 배너 이미지를 생성해 PNG bytes로 반환한다."""
+    """'수정 가이드' 마크업 이미지를 생성한다 — 완성 광고 재현이 아니라,
+    원본 배너 위에 디자인 검수 스타일의 콜아웃(①②③)으로 '어느 자리에 어떤
+    문구가 들어가야 하는지'를 표시한 어노테이션 이미지.
+
+    완성본 재현은 원문 요소(헤드라인 등)를 유실하거나 수치를 왜곡할 위험이
+    커서, 심사 실무에 맞는 '표시 위치 지시서'로 설계를 바꿨다.
+    """
     if not os.environ.get("OPENAI_API_KEY"):
-        raise RuntimeError("OPENAI_API_KEY is required for revised ad image generation.")
+        raise RuntimeError("OPENAI_API_KEY is required for revision guide image generation.")
+
+    callouts: list[str] = []
+    marker = 1
+    for row in (revisions or [])[:4]:
+        before = (row.get("before") or "").strip()
+        after = (row.get("after") or "").strip()
+        if not before or not after:
+            continue
+        callouts.append(
+            f"({marker}) Point a red callout at the exact spot where the original text \"{before[:80]}\" "
+            f"appears, cross that text out with a red strikethrough overlay, and show a green replacement "
+            f"box next to it containing EXACTLY this Korean copy: \"{after[:120]}\""
+        )
+        marker += 1
+    if disclosures:
+        lines = "\n".join(f"- {d}" for d in disclosures[:6])
+        callouts.append(
+            f"({marker}) Draw a green dashed rectangle over the bottom footer area labeled "
+            f"\"고지 영역 추가\" and list inside it, in small but clearly legible Korean text:\n{lines}"
+        )
+        marker += 1
+    if reviewer_items:
+        items = ", ".join(reviewer_items[:4])
+        callouts.append(
+            f"({marker}) Add an orange callout in a corner labeled \"심사자 보완\" noting these "
+            f"product-specific items must be filled in by the reviewer: {items}"
+        )
+        marker += 1
+    if not callouts and corrected_text.strip():
+        callouts.append(
+            "(1) Add a green annotation box beside the main copy containing EXACTLY this corrected "
+            f"Korean copy: \"{corrected_text.strip()[:400]}\""
+        )
+
     prompt = (
-        "Recreate this financial advertisement banner with COMPLIANT copy. Keep the same overall "
-        "layout, brand colors, logo placement, imagery style and language as the original image, "
-        "but REPLACE the advertising text with EXACTLY the following corrected copy (render it "
-        "verbatim, no additions, keep its language):\n\n"
-        f"{corrected_text.strip()}\n\n"
-        "Typography rules: the corrected claims must stay readable; any conditions/disclosure "
-        "lines must be clearly legible (not decorative micro-print)."
+        "You are producing a COMPLIANCE REVISION GUIDE (design-review markup), NOT a finished ad. "
+        "Keep the original banner fully visible and unmodified as the base layer — do NOT redraw, "
+        "remove or replace any original text or imagery. On top of it, add clean annotation graphics "
+        "in the style of a professional design review: numbered circular markers with thin leader "
+        "lines, red strikethrough overlays on problematic text, green suggestion boxes with the "
+        "replacement copy, and dashed zone rectangles. Render every annotation text VERBATIM as "
+        "given (Korean), in a clear legible sans-serif. Annotations:\n"
+        + "\n".join(callouts)
+        + "\nCanvas: if needed, extend margins around the original banner to fit the annotation "
+        "boxes without covering original content."
     )
-    if disclosure_text.strip():
-        prompt += f"\nAdd a clearly legible disclosure footer area with:\n{disclosure_text.strip()}"
-    if layout_notes.strip():
-        prompt += f"\nOriginal layout context: {layout_notes.strip()[:500]}"
     ext = "png" if "png" in media_type else "jpeg"
     client = OpenAI(timeout=float(os.environ.get("CCG_IMAGE_TIMEOUT_SECONDS", "180")), max_retries=1)
     result = client.images.edit(
@@ -164,5 +204,5 @@ def generate_revised_image(
     b64 = result.data[0].b64_json
     if not b64:
         raise RuntimeError("Image model returned no image data.")
-    LOGGER.info("ad_image.revised model=%s prompt_chars=%d", _image_model(), len(prompt))
+    LOGGER.info("ad_image.revision_guide model=%s callouts=%d prompt_chars=%d", _image_model(), len(callouts), len(prompt))
     return base64.b64decode(b64)
