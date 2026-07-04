@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import dataclasses
+import logging
 import unicodedata
 from collections.abc import Iterator
 from typing import Any
@@ -19,6 +20,7 @@ from legal_elements import attach_anchor_feature_sets
 from llm_gateway import LLMGateway
 from normalizer import PolicyGuidedNormalizer
 from overall_impression import LLMOverallImpressionJudge
+from parallel import ordered_parallel_map, worker_count
 from persistence import Neo4jReviewWriter, ReviewWriter
 from policy_evidence import build_policy_evidence_chains
 from planner import LLMCUPlanner
@@ -30,6 +32,9 @@ from router import build_output
 from risk_context import track_c_extension_summary
 from schemas import PolicyCandidate, ReviewGraph, ReviewInput, ReviewOutput
 from utils import content_hash, stable_id, to_jsonable, uses_korean_law_context
+
+
+LOGGER = logging.getLogger(__name__)
 
 
 class GraphComplianceCCGWorkflow:
@@ -277,15 +282,27 @@ class GraphComplianceCCGWorkflow:
         )
 
         yield workflow_event("step_started", "CU candidate retrieval", review_run_id=review_run_id, summary="Retrieve candidate CUs per anchor using PolicyHypernym overlap and CU embedding profiles.")
-        candidates_by_anchor = {
-            anchor.anchor_id: self.retriever.candidates_for_anchor(
+        # Per-anchor candidate retrieval is an independent read fan-out: each call
+        # opens its own Neo4j session (driver is thread-safe, sessions are not) and
+        # returns candidates keyed by anchor_id. Parallelizing the fan-out and
+        # rebuilding the dict in anchor order yields the identical candidate set and
+        # ordering as the previous sequential dict comprehension — judgment inputs
+        # are unchanged.
+        product_group_for_retrieval = product_context.get("product_group", review_input.product_group)
+        candidate_lists = ordered_parallel_map(
+            lambda anchor: self.retriever.candidates_for_anchor(
                 workspace_id=review_input.workspace_id,
                 anchor=anchor,
-                product_group=product_context.get("product_group", review_input.product_group),
+                product_group=product_group_for_retrieval,
                 channel=review_input.channel,
                 limit=12,
-            )
-            for anchor in anchors
+            ),
+            anchors,
+            workers=worker_count("CCG_PARALLEL_NEO4J_WORKERS", 6),
+            label="cu_candidate_retrieval",
+        )
+        candidates_by_anchor = {
+            anchor.anchor_id: candidate_lists[index] for index, anchor in enumerate(anchors)
         }
         yield workflow_event(
             "step_completed",
@@ -447,28 +464,47 @@ class GraphComplianceCCGWorkflow:
         )
 
         yield workflow_event("step_started", "Exception override", review_run_id=review_run_id, summary="For NON_COMPLIANT judgments only, retrieve reference/exception closure and ask whether it mitigates the verdict.")
-        exception_reviews = []
         plan_by_item_id = {item.plan_item_id: item for item in cu_plan}
-        for judgment in judgments:
-            if judgment.verdict != "NON_COMPLIANT":
-                continue
-            plan_item = plan_by_item_id.get(judgment.plan_item_id)
-            if not plan_item or not plan_item.legal_element_profile or not plan_item.legal_element_profile.exception_eligible:
-                continue
+        # Same eligibility filter as before (NON_COMPLIANT + exception_eligible),
+        # applied deterministically in judgment order so the parallel fan-out sees
+        # the identical candidate set.
+        eligible_judgments = [
+            judgment
+            for judgment in judgments
+            if judgment.verdict == "NON_COMPLIANT"
+            and (plan_item := plan_by_item_id.get(judgment.plan_item_id)) is not None
+            and plan_item.legal_element_profile is not None
+            and plan_item.legal_element_profile.exception_eligible
+        ]
+
+        def _review_exception(judgment: Any) -> Any:
+            # Each override is independent: closure retrieval opens its own Neo4j
+            # session and the LLM call uses only this judgment's closure. The
+            # mitigation-evidence gate is unchanged; items without mitigation
+            # evidence produce no review (None) exactly as the sequential loop
+            # skipped them.
             closure = self.retriever.exception_closure(
                 workspace_id=review_input.workspace_id,
                 cu_id=judgment.cu_id,
                 max_depth=4,
             )
             if not exception_closure_has_mitigation_evidence(closure):
-                continue
-            exception_reviews.append(
-                self.judge.review_exception(
-                    review_run_id=review_run_id,
-                    judgment=judgment,
-                    closure=closure,
-                )
+                return None
+            return self.judge.review_exception(
+                review_run_id=review_run_id,
+                judgment=judgment,
+                closure=closure,
             )
+
+        review_results = ordered_parallel_map(
+            _review_exception,
+            eligible_judgments,
+            workers=worker_count("CCG_PARALLEL_EXCEPTION_WORKERS", 4),
+            label="exception_override",
+        )
+        # Preserve judgment order and drop skipped (None) items — byte-identical to
+        # the sequential append order.
+        exception_reviews = [review for review in review_results if review is not None]
         yield workflow_event("step_completed", "Exception override", review_run_id=review_run_id, summary=f"{len(exception_reviews)} exception reviews", counts={"exception_reviews": len(exception_reviews)})
 
         graph = ReviewGraph(

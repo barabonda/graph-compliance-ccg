@@ -10,6 +10,7 @@ import time
 from typing import Any
 
 from llm_gateway import LLMGateway
+from parallel import ordered_parallel_map, worker_count
 from schemas import (
     Claim,
     ClaimQualifier,
@@ -422,7 +423,13 @@ class LLMContextExtractor:
         chunk_size = int(os.environ.get("CCG_CONTEXT_CLAIM_CHUNK_SENTENCES", "8"))
         claim_rows: list[dict[str, Any]] = []
         claim_stage_started = time.perf_counter()
-        for chunk_index, chunk in enumerate(chunked(sentence_units_payload, chunk_size)):
+        chunks = chunked(sentence_units_payload, chunk_size)
+
+        def _extract_claim_chunk(indexed_chunk: tuple[int, list[dict[str, Any]]]) -> list[dict[str, Any]]:
+            # Each chunk is a disjoint SentenceUnit set extracted with the same
+            # prompt and schema — the calls are independent. A per-chunk failure
+            # propagates (loud failure), matching the previous sequential loop.
+            chunk_index, chunk = indexed_chunk
             chunk_result = self.llm.structured(
                 name="graphcompliance_context_claims",
                 schema=CLAIM_CHUNK_SCHEMA,
@@ -450,7 +457,6 @@ class LLMContextExtractor:
                 model=model,
             )
             rows = claim_chunk_rows(chunk_result.get("claims", []), valid_sentence_indexes={int(item["index"]) for item in chunk})
-            claim_rows.extend(rows)
             LOGGER.info(
                 "context_extractor.claim_chunk_returned review_run_id=%s chunk_index=%d sentence_count=%d claim_count=%d",
                 review_run_id,
@@ -458,6 +464,19 @@ class LLMContextExtractor:
                 len(chunk),
                 len(rows),
             )
+            return rows
+
+        # Parallelize disjoint claim chunks, then reassemble claim_rows in
+        # chunk_index order so the concatenated result is byte-identical to the
+        # sequential extend() order.
+        chunk_row_lists = ordered_parallel_map(
+            _extract_claim_chunk,
+            list(enumerate(chunks)),
+            workers=worker_count("CCG_PARALLEL_CLAIM_WORKERS", 4),
+            label="claim_chunk_extraction",
+        )
+        for rows in chunk_row_lists:
+            claim_rows.extend(rows)
         LOGGER.info(
             "context_extractor.stage_claims_returned review_run_id=%s seconds=%.2f claim_count=%d",
             review_run_id,
