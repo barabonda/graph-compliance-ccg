@@ -399,7 +399,7 @@ class LLMGateway:
         if not effective_model.startswith("claude-fable"):
             request["thinking"] = {"type": "disabled"}
         try:
-            response = client.messages.create(**request)
+            response = _anthropic_stream_final(client, request)
         except AnthropicBadRequestError as exc:
             # 스키마가 크거나 복잡하면(예: 추출 단계) strict 문법 컴파일이 거부된다
             # ("grammar is too large" / "Schema is too complex for compilation" 등).
@@ -423,7 +423,7 @@ class LLMGateway:
                 + "(all required keys present, only allowed enum values):\n"
                 + json.dumps(schema, ensure_ascii=False)
             )
-            response = client.messages.create(**request)
+            response = _anthropic_stream_final(client, request)
         stop_reason = getattr(response, "stop_reason", None)
         if stop_reason == "max_tokens":
             # 잘린 tool input은 파싱은 되지만 필수 키/판정 항목이 유실된 채로
@@ -453,6 +453,18 @@ class LLMGateway:
             str(getattr(response, "stop_reason", "text") or "text"),
             _strip_json_fence("".join(text_parts)),
         )
+
+
+def _anthropic_stream_final(client: Any, request: dict[str, Any]) -> Any:
+    """스트리밍 호출로 최종 메시지를 얻는다.
+
+    cu_judgment 처럼 입력이 수십만 자인 요청을 non-streaming 으로 보내면
+    Anthropic 이 장시간 연결을 드랍한다(~10분 한계, 'Request timed out or
+    interrupted'). 스트리밍은 토큰이 계속 흐르는 동안 연결이 유지되므로
+    대형 판정 요청도 안정적으로 완료된다. 반환 Message 는 create() 와 동일.
+    """
+    with client.messages.stream(**request) as stream:
+        return stream.get_final_message()
 
 
 # Claude strict tool-use 가 지원하지 않는 JSON Schema 제약 키워드.
