@@ -368,6 +368,18 @@ export const EXAMPLES: ExamplePreset[] = [
     text: "",
     imageUrl: "/samples/jb_teukpan_banner.png",
   },
+  {
+    // 금융위·금감원 금융광고규제 가이드라인 '광고 위법여부 판단사례'(별첨 p.15)
+    // 실물 골드셋 이미지 — 최저금리(1.64%)를 대표 수치로 크게 쓰고 조건은 작게
+    // 표기한 담보대출 이벤트 배너.
+    label: "대출 · 가이드라인 판단사례",
+    product: "loan",
+    channel: "banner",
+    title: "아파트담보대출 얼리버드 이벤트",
+    selectedProduct: "",
+    text: "",
+    imageUrl: "/samples/guideline_loan_earlybird.jpg",
+  },
 ];
 
 export function verdictBadgeTone(verdict: string): "pass" | "review" | "revise" | "reject" {
