@@ -2,11 +2,13 @@
 
 from __future__ import annotations
 
+import dataclasses
 import unicodedata
 from collections.abc import Iterator
 from typing import Any
 from uuid import uuid4
 
+from ad_translation import translate_ad_for_display
 from applicability_gate import summarize_cu_gate
 from claim_modeling import fold_qualifier_anchors_into_parent_claims
 from context_extractor import LLMContextExtractor, build_context_triples
@@ -27,7 +29,7 @@ from revision import LLMRevisionSuggester
 from router import build_output
 from risk_context import track_c_extension_summary
 from schemas import PolicyCandidate, ReviewGraph, ReviewInput, ReviewOutput
-from utils import content_hash, stable_id, to_jsonable
+from utils import content_hash, stable_id, to_jsonable, uses_korean_law_context
 
 
 class GraphComplianceCCGWorkflow:
@@ -385,6 +387,7 @@ class GraphComplianceCCGWorkflow:
             cu_plan=cu_plan,
             disclosure_requirements=disclosure_requirements,
             product_context=product_context,
+            workspace_id=review_input.workspace_id,
         )
         yield workflow_event(
             "step_completed",
@@ -425,6 +428,7 @@ class GraphComplianceCCGWorkflow:
             plan=cu_plan,
             windows=evidence_windows,
             product_fact_signals=product_fact_signals_by_anchor(product_fact_context, claims, anchors),
+            workspace_id=review_input.workspace_id,
         )
         yield workflow_event(
             "step_completed",
@@ -504,6 +508,22 @@ class GraphComplianceCCGWorkflow:
         yield workflow_event("step_started", "Routing", review_run_id=review_run_id, summary="Aggregate effective judgments, Track B, CUPlan diagnostics, and disclosure context.")
         output = build_output(review_input, graph, revision_suggestions=revision_suggestions)
         yield workflow_event("step_completed", "Routing", review_run_id=review_run_id, summary=output.final_verdict, payload={"final_verdict": output.final_verdict, "routing": output.routing})
+
+        # 참고용 번역(표시 전용) — 비-KR workspace에서만. 판정은 이미 끝났으므로
+        # 파이프라인에 개입할 수 없고, 실패해도 심사 결과는 그대로 전달된다.
+        if not uses_korean_law_context(review_input.workspace_id):
+            yield workflow_event("step_started", "Reference translation", review_run_id=review_run_id, summary="Display-only EN/KO reference translation of the original ad text.")
+            translations = translate_ad_for_display(
+                self.llm,
+                review_input.content_text,
+                review_input.workspace_id,
+                # 파이프라인의 문장 분할(sentence_units) 그대로 — 콘솔이 문장별로
+                # 원문 바로 아래 EN/KO를 병기한다.
+                sentence_texts=[unit.text for unit in extraction.sentence_units],
+            )
+            output = dataclasses.replace(output, ad_translations=translations)
+            yield workflow_event("step_completed", "Reference translation", review_run_id=review_run_id, summary="reference translation attached" if translations and (translations.get("en") or translations.get("ko")) else "translation unavailable (review unaffected)")
+
         yield workflow_event("result", "Review result", review_run_id=review_run_id, summary=output.final_verdict, result=output)
 
 
@@ -521,6 +541,7 @@ def review_input_from_payload(payload: dict[str, Any]) -> ReviewInput:
         selected_product_id=str(payload.get("selected_product_id", "")),
         selected_product_name=str(payload.get("selected_product_name", "")),
         workspace_id=str(payload.get("workspace_id", "graphcompliance_mvp_jb_20260530")),
+        language=str(payload.get("language", "ko")),
     )
 
 

@@ -172,6 +172,48 @@ class ProductFactAnalyzer:
             )
 
         product = str(resolved.get("product") or "")
+
+        # 선적재 사실 우선 경로 — env CCG_PRELOADED_PRODUCT_FACTS_WORKSPACES에 등록된
+        # workspace(예: KH PoC)만 진입. Neo4j에 이미 ProductFact가 있으면 그것을 쓰고
+        # PDF 온디맨드 추출을 건너뛴다. KR은 env 미등록이라 이 분기에 절대 들어오지
+        # 않으므로 기존 경로가 그대로다.
+        preloaded = load_preloaded_product_facts(product=product, workspace_id=review_input.workspace_id)
+        if preloaded is not None:
+            product_facts, selected_documents = preloaded
+            try:
+                claim_facts, comparisons = self.compare_claims(
+                    review_input=review_input,
+                    claims=claims,
+                    product=product,
+                    product_facts=product_facts,
+                )
+            except Exception as exc:
+                return {
+                    **context_with_documents(
+                        status="COMPARISON_FAILED",
+                        matched_product=product,
+                        selected_documents=selected_documents,
+                        reason=str(exc),
+                    ),
+                    "product_facts": product_facts,
+                }
+            disclosure_checks = build_disclosure_checks(
+                review_input,
+                product_facts,
+                sentence_units=sentence_units,
+            )
+            return {
+                "matched_product": product,
+                "selected_documents": selected_documents,
+                "extraction_status": "PRELOADED",
+                "product_facts": product_facts,
+                "claim_facts": claim_facts,
+                "comparison_results": comparisons,
+                "disclosure_checks": disclosure_checks,
+                "applicability_gate": disclosure_gate_summary_from_checks(disclosure_checks),
+                "reason": "Neo4j에 선적재된 검증 ProductFact를 사용했습니다(문서 재추출 생략).",
+            }
+
         documents = select_product_documents(product)
         if not documents:
             return empty_product_fact_context(
@@ -761,6 +803,102 @@ def attach_product_doc_evidence(
         check["product_doc_evidence"] = evidence
         check["in_product_doc"] = bool(evidence)
     return checks
+
+
+def preloaded_facts_enabled(workspace_id: str) -> bool:
+    """Preloaded-ProductFact path is opt-in per workspace via env.
+
+    ``CCG_PRELOADED_PRODUCT_FACTS_WORKSPACES`` is a comma/space separated list.
+    Unset (the KR default) => always False => the legacy on-demand PDF
+    extraction path runs unchanged.
+    """
+    raw = os.environ.get("CCG_PRELOADED_PRODUCT_FACTS_WORKSPACES", "")
+    allowed = {token.strip() for token in raw.replace(",", " ").split() if token.strip()}
+    return workspace_id in allowed
+
+
+def load_preloaded_product_facts(
+    *, product: str, workspace_id: str
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]]] | None:
+    """Load pre-ingested ProductFacts (and their documents) from Neo4j.
+
+    Returns (product_facts, selected_documents) in exactly the shapes the
+    on-demand extractor produces, or None to fall through to the legacy path
+    (workspace not opted in, Neo4j unavailable, or no facts stored).
+    """
+    if not preloaded_facts_enabled(workspace_id):
+        return None
+    uri = os.environ.get("NEO4J_URI", "")
+    user = os.environ.get("NEO4J_USER") or os.environ.get("NEO4J_USERNAME", "")
+    password = os.environ.get("NEO4J_PASSWORD", "")
+    if not uri or not user or not password:
+        return None
+    try:
+        from neo4j import GraphDatabase
+
+        driver = GraphDatabase.driver(uri, auth=(user, password))
+        database = os.environ.get("NEO4J_DATABASE")
+        try:
+            with driver.session(database=database) if database else driver.session() as session:
+                records = [
+                    dict(record)
+                    for record in session.run(
+                        """
+                        MATCH (p:Product {name: $product, workspace_id: $ws})
+                              -[:HAS_PRODUCT_DOCUMENT]->(d:ProductDocument {workspace_id: $ws})
+                        OPTIONAL MATCH (d)-[:CONTAINS_FACT]->(f:ProductFact {workspace_id: $ws})
+                        // DISTINCT: 심사 영속화가 run마다 병렬 엣지를 MERGE하므로
+                        // (persistence.py:516,595 — 엣지 props에 review_run_id 포함)
+                        // 경로 곱으로 fact가 중복 수집되는 것을 막는다.
+                        RETURN DISTINCT d AS doc, collect(DISTINCT f) AS facts
+                        """,
+                        product=product,
+                        ws=workspace_id,
+                    )
+                ]
+        finally:
+            driver.close()
+    except Exception as exc:  # noqa: BLE001 — 실패 시 조용히 기존 경로로 폴백.
+        import logging
+
+        logging.getLogger(__name__).warning("preloaded product-fact lookup failed; falling back: %s", exc)
+        return None
+
+    documents: list[dict[str, Any]] = []
+    facts: list[dict[str, Any]] = []
+    for record in records:
+        doc = dict(record["doc"])
+        path = resolve_document_path(str(doc.get("relative_path") or ""))
+        documents.append(
+            {
+                "document_id": str(doc.get("id") or ""),
+                "product": product,
+                "label": str(doc.get("label") or ""),
+                "original_name": str(doc.get("original_name") or ""),
+                "file_name": str(doc.get("file_name") or ""),
+                "relative_path": str(doc.get("relative_path") or ""),
+                "file_path": str(path),
+                "exists": bool(doc.get("exists", path.exists())),
+            }
+        )
+        for node in record["facts"] or []:
+            fact = dict(node)
+            facts.append(
+                {
+                    "fact_id": str(fact.get("id") or ""),
+                    "fact_type": str(fact.get("fact_type") or ""),
+                    "value": str(fact.get("value") or ""),
+                    "unit": str(fact.get("unit") or ""),
+                    "condition": str(fact.get("condition") or ""),
+                    "source_document_id": str(fact.get("source_document_id") or ""),
+                    "page_or_chunk": str(fact.get("page_or_chunk") or ""),
+                    "evidence_text": str(fact.get("evidence_text") or ""),
+                    "confidence": float(fact.get("confidence") or 0.0),
+                }
+            )
+    if not facts:
+        return None
+    return facts, documents[:MAX_DOCUMENTS]
 
 
 def select_product_documents(product: str) -> list[dict[str, Any]]:

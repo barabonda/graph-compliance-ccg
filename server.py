@@ -12,7 +12,7 @@ from pathlib import Path
 from typing import Any
 
 from fastapi import FastAPI, HTTPException
-from fastapi.responses import FileResponse, StreamingResponse
+from fastapi.responses import FileResponse, RedirectResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from neo4j.exceptions import AuthError, ServiceUnavailable
 from openai import APIConnectionError, APIStatusError, AuthenticationError, BadRequestError, RateLimitError
@@ -76,6 +76,7 @@ def review(payload: dict[str, Any]) -> dict[str, Any]:
             content_text=str(payload.get("content_text") or ""),
             actor=str(payload.get("actor") or ""),
             workspace_id=str(payload.get("workspace_id") or ""),
+            language=str(payload.get("language") or "ko"),
         )
         return jsonable
     except ServiceUnavailable as exc:
@@ -142,6 +143,7 @@ def review_stream(payload: dict[str, Any]) -> StreamingResponse:
                             content_text=str(payload.get("content_text") or ""),
                             actor=str(payload.get("actor") or ""),
                             workspace_id=str(payload.get("workspace_id") or ""),
+                            language=str(payload.get("language") or "ko"),
                         )
             except Exception as exc:  # noqa: BLE001 - converted into a structured stream error below.
                 event_queue.put(stream_error_payload(exc))
@@ -173,42 +175,116 @@ def review_stream(payload: dict[str, Any]) -> StreamingResponse:
     return StreamingResponse(event_lines(), media_type="application/x-ndjson")
 
 
-@app.get("/api/product-doc/{document_id}")
-def product_doc(document_id: str) -> FileResponse:
-    """Serve a JB product disclosure PDF by its document id (source_id).
+def _product_document_node(document_id: str) -> dict[str, Any] | None:
+    """Look up a ProductDocument by id in the sandbox Neo4j (holds KH products).
 
-    The reviewer needs to verify the original document. We resolve the path
-    from the disclosure metadata (never from a client-supplied path) and
-    confirm the resolved file stays inside the disclosure root and is a PDF,
-    so this cannot be used for path traversal. The browser PDF viewer opens
-    inline; the caller appends `#page=N` to jump to the cited page.
+    Web-sourced products (PPCBank KH) live only in the graph, not in the KR
+    disclosure CSV, so the reviewer's "상품페이지 보기" needs this fallback.
+    Read-only; returns the node's properties or None."""
+    uri = os.environ.get("NEO4J_URI", "")
+    user = os.environ.get("NEO4J_USER") or os.environ.get("NEO4J_USERNAME", "")
+    password = os.environ.get("NEO4J_PASSWORD", "")
+    if not (uri and user and password):
+        return None
+    try:
+        from neo4j import GraphDatabase
+
+        driver = GraphDatabase.driver(uri, auth=(user, password))
+        database = os.environ.get("NEO4J_DATABASE")
+        try:
+            with (driver.session(database=database) if database else driver.session()) as session:
+                rec = session.run(
+                    "MATCH (d:ProductDocument {id: $id}) RETURN d ORDER BY d.updated_at DESC LIMIT 1",
+                    id=document_id,
+                ).single()
+                return dict(rec["d"]) if rec else None
+        finally:
+            driver.close()
+    except Exception:  # noqa: BLE001 — a lookup failure just means no fallback.
+        return None
+
+
+def _local_product_doc_path(relative_path: str):
+    """Resolve a KH product document's local snapshot under the crawl dir, safely.
+
+    Never uses a client-supplied path — ``relative_path`` comes from the graph
+    node. Confirms the resolved file stays inside an allowed root."""
+    from pathlib import Path as _Path
+
+    if not relative_path:
+        return None
+    import unicodedata
+
+    rel = relative_path.replace("\\", "/")
+    roots = [(_Path(__file__).resolve().parent / "data" / "cambodia" / "products").resolve()]
+    jb = os.environ.get("JB_PRODUCT_DISCLOSURE_ROOT")
+    if jb:
+        roots.append(_Path(jb).resolve())
+    names = [rel, unicodedata.normalize("NFC", rel), unicodedata.normalize("NFD", rel), _Path(rel).name]
+    for root in roots:
+        for name in names:
+            candidate = (root / name).resolve()
+            if candidate.exists() and (candidate == root or root in candidate.parents):
+                return candidate
+    return None
+
+
+@app.get("/api/product-doc/{document_id}")
+def product_doc(document_id: str):
+    """Serve/redirect to a product's source document by its document id.
+
+    KR products: a disclosure PDF resolved from the metadata CSV (never from a
+    client path) and confirmed to stay inside the disclosure root — served
+    inline; the caller appends ``#page=N`` to jump to the cited page. KH
+    (PPCBank) products are web-sourced and live only in the graph, so we fall
+    back to the ProductDocument node: redirect to its ``source_url`` (the live
+    product page), or serve the local crawl snapshot if there is no URL.
     """
     from pathlib import Path as _Path
+    from urllib.parse import quote
 
     from product_facts import load_disclosure_metadata, resolve_document_path
 
+    # 1) KR disclosure CSV (PDF) — unchanged behaviour.
     row = next(
         (item for item in load_disclosure_metadata() if str(item.get("source_id") or "") == document_id),
         None,
     )
-    if row is None:
+    if row is not None:
+        path = resolve_document_path(str(row.get("relative_path") or "")).resolve()
+        root = _Path(os.environ.get("JB_PRODUCT_DISCLOSURE_ROOT", "")).resolve() if os.environ.get(
+            "JB_PRODUCT_DISCLOSURE_ROOT"
+        ) else path.parents[2] if len(path.parents) >= 3 else path.parent
+        if path.suffix.lower() != ".pdf" or not path.exists():
+            raise HTTPException(status_code=404, detail={"error": "document_missing", "message": "PDF not available."})
+        if os.environ.get("JB_PRODUCT_DISCLOSURE_ROOT") and root not in path.parents:
+            raise HTTPException(status_code=403, detail={"error": "document_outside_root", "message": "Path not allowed."})
+        disposition = f"inline; filename*=UTF-8''{quote(str(row.get('file_name') or path.name))}"
+        return FileResponse(path, media_type="application/pdf", headers={"Content-Disposition": disposition})
+
+    # 2) Graph-backed product document (KH / web-sourced products).
+    doc = _product_document_node(document_id)
+    if doc is None:
         raise HTTPException(status_code=404, detail={"error": "document_not_found", "message": "Unknown document id."})
 
-    path = resolve_document_path(str(row.get("relative_path") or "")).resolve()
-    root = _Path(os.environ.get("JB_PRODUCT_DISCLOSURE_ROOT", "")).resolve() if os.environ.get(
-        "JB_PRODUCT_DISCLOSURE_ROOT"
-    ) else path.parents[2] if len(path.parents) >= 3 else path.parent
-    if path.suffix.lower() != ".pdf" or not path.exists():
-        raise HTTPException(status_code=404, detail={"error": "document_missing", "message": "PDF not available."})
-    if os.environ.get("JB_PRODUCT_DISCLOSURE_ROOT") and root not in path.parents:
-        raise HTTPException(status_code=403, detail={"error": "document_outside_root", "message": "Path not allowed."})
+    source_url = str(doc.get("source_url") or "").strip()
+    if source_url.startswith(("http://", "https://")):
+        # The "product page" for a web-sourced product is the live page itself.
+        return RedirectResponse(source_url, status_code=307)
 
-    # Korean filenames can't go in a latin-1 HTTP header; RFC 5987 encode them
-    # and keep the disposition inline so the browser PDF viewer opens it.
-    from urllib.parse import quote
+    local = _local_product_doc_path(str(doc.get("relative_path") or doc.get("file_name") or ""))
+    if local is not None:
+        ext = local.suffix.lower()
+        media = {".pdf": "application/pdf", ".html": "text/html; charset=utf-8", ".htm": "text/html; charset=utf-8"}.get(
+            ext, "text/plain; charset=utf-8"
+        )
+        disposition = f"inline; filename*=UTF-8''{quote(str(doc.get('file_name') or local.name))}"
+        return FileResponse(local, media_type=media, headers={"Content-Disposition": disposition})
 
-    disposition = f"inline; filename*=UTF-8''{quote(str(row.get('file_name') or path.name))}"
-    return FileResponse(path, media_type="application/pdf", headers={"Content-Disposition": disposition})
+    raise HTTPException(
+        status_code=404,
+        detail={"error": "document_missing", "message": "No source URL or local snapshot for this product document."},
+    )
 
 
 @app.get("/api/runs")
@@ -224,6 +300,32 @@ def run_detail(run_id: str) -> dict[str, Any]:
     if output is None:
         raise HTTPException(status_code=404, detail={"error": "run_not_found", "message": "Unknown review run id."})
     return output
+
+
+@app.post("/api/copilot")
+def copilot(payload: dict[str, Any]) -> dict[str, Any]:
+    """심사 결과 설명 챗 (읽기 전용 도구만 호출 — 심사 실행/데이터 변경 불가).
+
+    payload: {messages: [{role, content}], context?: {run_id, workspace_id}}
+    반환: {reply, tool_calls: [{name, arguments}]}
+    """
+    from copilot_tools import run_copilot_chat
+
+    messages = payload.get("messages") or []
+    if not isinstance(messages, list) or not messages:
+        raise HTTPException(status_code=400, detail={"error": "bad_request", "message": "messages is required."})
+    context = payload.get("context") if isinstance(payload.get("context"), dict) else None
+    try:
+        return run_copilot_chat(messages, context=context)
+    except AuthenticationError as exc:
+        raise HTTPException(status_code=401, detail=openai_error_detail("openai_auth_failed", exc)) from exc
+    except RateLimitError as exc:
+        raise HTTPException(status_code=429, detail=openai_error_detail("openai_rate_limited", exc)) from exc
+    except APIConnectionError as exc:
+        raise HTTPException(status_code=503, detail=openai_error_detail("openai_connection_failed", exc)) from exc
+    except RuntimeError as exc:
+        detail = runtime_error_detail(exc)
+        raise HTTPException(status_code=detail.pop("status_code"), detail=detail) from exc
 
 
 @app.get("/")

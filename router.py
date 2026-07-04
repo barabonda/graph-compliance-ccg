@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from legal_hierarchy import parent_articles_for
 from schemas import ExceptionReview, LLMJudgment, ReviewGraph, ReviewInput, ReviewOutput
-from utils import to_jsonable
+from utils import to_jsonable, uses_korean_law_context
 
 
 ACTIONABLE_ANCHOR_TYPES = {"claim_anchor", "risk_anchor"}
@@ -83,7 +83,9 @@ def build_output(
                 {
                     "risk_code": str(diagnostic.get("diagnostic_code") or ""),
                     "principle": "광고규제",
-                    "source_article": "금소법 제22조",
+                    # KR keeps the hardcoded parent statute; non-KR workspaces must not
+                    # have a Korean law injected into a prominence/disclosure finding.
+                    "source_article": "금소법 제22조" if uses_korean_law_context(review_input.workspace_id) else "",
                     "risk_title": "필수고지 현저성 또는 누락",
                     "subject": "고지 표시",
                     "constraint": "혜택과 불이익을 균형 있게 명확히 전달해야 합니다.",

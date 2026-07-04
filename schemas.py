@@ -45,6 +45,9 @@ class ReviewInput:
     product_group: str = "auto"
     selected_product_id: str = ""
     selected_product_name: str = ""
+    # 광고 원문 언어(메타데이터). 데이터 라우팅은 workspace_id가 담당하고 추출·정규화는
+    # 언어 분기 없이 동작하므로, 이 필드는 run 기록·향후 확장(번역 표시 등)용이다.
+    language: str = "ko"
 
 
 @dataclass(frozen=True)
@@ -401,3 +404,6 @@ class ReviewOutput:
     reference_paths_summary: list[dict[str, Any]]
     graph_paths: list[dict[str, Any]]
     highlight_spans: list[dict[str, Any]]
+    # 참고용 번역(표시 전용) — 비-KR workspace에서만 채워진다({en, ko, note}).
+    # 판정 파이프라인에는 절대 개입하지 않는다. KR 응답은 None(기존과 동일).
+    ad_translations: dict[str, Any] | None = None

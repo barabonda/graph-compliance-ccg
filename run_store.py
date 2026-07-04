@@ -87,6 +87,7 @@ def _summary(
     content_text: str,
     seed: bool,
     actor: str,
+    language: str = "",
 ) -> dict[str, Any]:
     issues = output.get("detected_issues") or []
     checks = ((output.get("product_fact_context") or {}).get("disclosure_checks")) or []
@@ -118,6 +119,7 @@ def _summary(
         "selected_product_id": selected_product_id,
         "source_type": source_type,
         "workspace_id": workspace_id,
+        "language": language,
         "model": model,
         "content_text": content_text,
         "seed": seed,
@@ -179,6 +181,7 @@ def record_run(
     seed: bool = False,
     actor: str = "",
     workspace_id: str = "",
+    language: str = "",
 ) -> None:
     """심사 결과 스냅샷을 파일 + Neo4j에 저장(best-effort). seed=True는 데모용 표시.
 
@@ -202,6 +205,7 @@ def record_run(
             content_text=content_text,
             seed=seed,
             actor=actor,
+            language=language,
         )
         _record_filesystem(output, summary, run_id)
         ws = workspace_id or str(output.get("workspace_id") or "") or DEFAULT_WORKSPACE

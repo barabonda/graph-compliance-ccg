@@ -10,7 +10,7 @@ from __future__ import annotations
 from typing import Any
 
 from schemas import CUPlanItem
-from utils import stable_id
+from utils import stable_id, uses_korean_law_context
 
 
 def build_policy_evidence_chains(
@@ -19,8 +19,9 @@ def build_policy_evidence_chains(
     cu_plan: list[CUPlanItem],
     disclosure_requirements: list[dict[str, Any]],
     product_context: dict[str, Any],
+    workspace_id: str = "",
 ) -> dict[str, list[dict[str, Any]]]:
-    legal_basis = [legal_basis_chain(review_run_id, item) for item in cu_plan]
+    legal_basis = [legal_basis_chain(review_run_id, item, workspace_id) for item in cu_plan]
     disclosures = [
         disclosure_chain(
             review_run_id,
@@ -44,7 +45,7 @@ def build_policy_evidence_chains(
     }
 
 
-def legal_basis_chain(review_run_id: str, item: CUPlanItem) -> dict[str, Any]:
+def legal_basis_chain(review_run_id: str, item: CUPlanItem, workspace_id: str = "") -> dict[str, Any]:
     nodes: list[dict[str, Any]] = []
     if item.source_article:
         nodes.append(
@@ -64,7 +65,7 @@ def legal_basis_chain(review_run_id: str, item: CUPlanItem) -> dict[str, Any]:
                 "role": "principle",
             }
         )
-    delegation_edges = delegation_edges_for(item)
+    delegation_edges = delegation_edges_for(item, workspace_id)
     nodes.extend(edge["target_node"] for edge in delegation_edges)
     status = "FOUND" if nodes else "INCOMPLETE"
     summary = (
@@ -85,7 +86,12 @@ def legal_basis_chain(review_run_id: str, item: CUPlanItem) -> dict[str, Any]:
     }
 
 
-def delegation_edges_for(item: CUPlanItem) -> list[dict[str, Any]]:
+def delegation_edges_for(item: CUPlanItem, workspace_id: str = "") -> list[dict[str, Any]]:
+    # Korean-law delegation (법률→시행령→감독규정→심의기준) only applies to Korean
+    # workspaces. Non-KR workspaces (e.g. the Cambodia PoC) must not have Korean
+    # statutes injected into their legal-basis chain / judgment rationale.
+    if not uses_korean_law_context(workspace_id):
+        return []
     text = " ".join([item.source_article, item.principle, item.subject, item.constraint, item.context, item.risk_title])
     if not any(token in text for token in ["광고", "금소법 제22조", "금융상품등에 관한 광고", "표시", "고지"]):
         return []

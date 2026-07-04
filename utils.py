@@ -3,9 +3,25 @@
 from __future__ import annotations
 
 import hashlib
+import os
 import re
 from dataclasses import asdict, is_dataclass
 from typing import Any
+
+
+def uses_korean_law_context(workspace_id: str) -> bool:
+    """Whether to inject hardcoded Korean-law examples/delegation into judgments.
+
+    Defaults to True for EVERY workspace, so KR (and every existing workspace)
+    keeps its exact current behavior — no regression. Workspaces listed in the
+    env var ``CCG_NON_KR_LAW_WORKSPACES`` (comma/space separated) return False,
+    so their judgment rationale cites only each CU's own ``source_article``
+    instead of hardcoded Korean statutes. This is a per-workspace branch, not a
+    copy of the shared judging code.
+    """
+    raw = os.environ.get("CCG_NON_KR_LAW_WORKSPACES", "")
+    non_kr = {token.strip() for token in raw.replace(",", " ").split() if token.strip()}
+    return workspace_id not in non_kr
 
 
 def stable_id(prefix: str, *parts: object, length: int = 16) -> str:
