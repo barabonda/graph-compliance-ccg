@@ -28,7 +28,7 @@ from product_facts import MAX_DOCUMENTS, extract_document_snippet, load_disclosu
 from schemas import ReviewInput
 
 
-DEFAULT_TAXONOMY_PATH = Path(__file__).resolve().parent / "eval" / "violation_taxonomy_v0_1.json"
+DEFAULT_TAXONOMY_PATH = Path(__file__).resolve().parent / "eval" / "violation_taxonomy_v0_2.json"
 DEFAULT_OUTPUT_PATH = Path(__file__).resolve().parent / "eval" / "synthetic_product_fact_seed.jsonl"
 DEFAULT_PRODUCTS = [
     "(26년 JUMP UP) 특판 예금",
@@ -148,6 +148,14 @@ def main() -> None:
     parser.add_argument("--channels", default=None, help="Comma-separated channels. Overrides --channel.")
     parser.add_argument("--max-products", type=int, default=2)
     parser.add_argument("--target-records", type=int, default=None, help="Stop after at least this many records.")
+    parser.add_argument(
+        "--codes-per-combo",
+        type=int,
+        default=None,
+        help="Max mutation/hard-case codes emitted per product+channel combo. "
+        "Deterministic rotation keeps pattern coverage balanced across products. "
+        "None (default) emits all applicable codes (v0.1 behavior).",
+    )
     args = parser.parse_args()
 
     products = resolve_generation_products(
@@ -160,6 +168,7 @@ def main() -> None:
     llm = LLMGateway()
     taxonomy = load_taxonomy(Path(args.taxonomy))
     records: list[dict[str, Any]] = []
+    combo_index = 0
     for product_name in products[: args.max_products]:
         for channel in channels:
             try:
@@ -171,7 +180,17 @@ def main() -> None:
                     llm=llm,
                 )
                 clean_ad = generate_clean_ad(bundle, llm=llm)
-                records.extend(build_records_from_product_facts(taxonomy, bundle, clean_ad, llm=llm))
+                records.extend(
+                    build_records_from_product_facts(
+                        taxonomy,
+                        bundle,
+                        clean_ad,
+                        llm=llm,
+                        codes_per_combo=args.codes_per_combo,
+                        combo_index=combo_index,
+                    )
+                )
+                combo_index += 1
             except Exception as exc:  # noqa: BLE001
                 LOGGER.warning("Skipping product/channel during synthetic generation: product=%s channel=%s error=%s", product_name, channel, exc)
                 continue
@@ -409,6 +428,22 @@ def build_product_fact_bundle(
         product_group=str(product_context.get("product_group") or product_group),
         snippets=snippets,
     )
+    # 데이터 위생: 추출 LLM이 존재하지 않는 source_document_id를 반환한 fact만 버린다
+    # (심사/판정 경로가 아닌 생성 경로의 데이터 정제 — 결정론 fallback이 아니다). 유효한
+    # fact가 하나도 남지 않으면 아래 validate에서 명시적으로 실패한다.
+    known_document_ids = {str(d.get("document_id") or "") for d in usable_documents if d.get("document_id")}
+    kept: list[dict[str, Any]] = []
+    for fact in product_facts:
+        if str(fact.get("source_document_id") or "") in known_document_ids:
+            kept.append(fact)
+        else:
+            LOGGER.warning(
+                "Dropping ProductFact with unknown source_document_id: product=%s fact=%s source=%s",
+                matched_product,
+                fact.get("fact_id"),
+                fact.get("source_document_id"),
+            )
+    product_facts = kept
     validate_product_facts(product_facts, usable_documents)
     if not product_facts:
         raise RuntimeError(f"No ProductFact extracted for {matched_product}")
@@ -546,25 +581,67 @@ def generate_clean_ad(bundle: dict[str, Any], *, llm: LLMGateway) -> dict[str, A
     return clean_ad
 
 
+def applicable_codes(taxonomy: dict[str, Any], bundle: dict[str, Any]) -> list[dict[str, Any]]:
+    """이 상품군·채널에 적용 가능한 코드(빈 product_groups=보험/투자 제외)를 스키마 순서대로."""
+    product_group = bundle["product_group"]
+    channel = bundle["channel"]
+    selected: list[dict[str, Any]] = []
+    for code in taxonomy.get("codes", []):
+        if product_group not in (code.get("product_groups") or []):
+            continue
+        allowed_channels = code.get("channels") or []
+        if allowed_channels and channel not in allowed_channels:
+            continue
+        selected.append(code)
+    return selected
+
+
+def select_codes_for_combo(
+    codes: list[dict[str, Any]], *, codes_per_combo: int | None, combo_index: int
+) -> list[dict[str, Any]]:
+    """조합당 코드 수 제한 시, combo_index로 결정론적 회전 선택 — 상품 간 패턴 커버리지 균형.
+
+    codes_per_combo가 None이면 전체(기존 v0_1 경로와 동일).
+    """
+    if not codes or codes_per_combo is None or codes_per_combo >= len(codes):
+        return codes
+    n = len(codes)
+    start = (combo_index * codes_per_combo) % n
+    return [codes[(start + offset) % n] for offset in range(codes_per_combo)]
+
+
 def build_records_from_product_facts(
     taxonomy: dict[str, Any],
     bundle: dict[str, Any],
     clean_ad: dict[str, Any],
     *,
     llm: LLMGateway | None = None,
+    codes_per_combo: int | None = None,
+    combo_index: int = 0,
 ) -> list[dict[str, Any]]:
     records = [clean_record(bundle, clean_ad)]
-    for code in taxonomy.get("codes", []):
-        product_group = bundle["product_group"]
-        if product_group not in code.get("product_groups", []):
+    codes = select_codes_for_combo(
+        applicable_codes(taxonomy, bundle),
+        codes_per_combo=codes_per_combo,
+        combo_index=combo_index,
+    )
+    for code in codes:
+        # 한 코드의 변이 생성 실패(예: span 미포함)가 상품 전체를 버리지 않도록 코드 단위로
+        # 격리한다. gold 무결성은 유지된다 — 검증 통과한 변이만 레코드로 남는다.
+        try:
+            if code.get("category") == "hard_case_compliant":
+                records.append(hard_case_record(bundle, clean_ad, code, llm=llm))
+            else:
+                records.append(mutated_record(bundle, clean_ad, code, llm=llm))
+        except Exception as exc:  # noqa: BLE001
+            LOGGER.warning(
+                "Skipping code during mutation: product=%s channel=%s code=%s error=%s",
+                bundle.get("product_name"),
+                bundle.get("channel"),
+                code.get("code"),
+                exc,
+            )
             continue
-        allowed_channels = code.get("channels") or []
-        if allowed_channels and bundle["channel"] not in allowed_channels:
-            continue
-        if code.get("category") == "hard_case_compliant":
-            records.append(hard_case_record(bundle, clean_ad, code, llm=llm))
-        else:
-            records.append(mutated_record(bundle, clean_ad, code, llm=llm))
     return records
 
 
@@ -699,6 +776,7 @@ def generate_mutated_ad(
     is_hard_case = code.get("category") == "hard_case_compliant"
     channel = str(bundle.get("channel") or "web_page")
     channel_profile = channel_profile_for(channel)
+    code = code_with_resolved_slots(code, bundle)
     result = llm.structured(
         name="graphcompliance_taxonomy_controlled_ad_mutation",
         schema=MUTATED_AD_SCHEMA,
@@ -802,6 +880,22 @@ def mutation_phrase(code: dict[str, Any], bundle: dict[str, Any]) -> str:
 def mutation_span(code: dict[str, Any], bundle: dict[str, Any], phrase: str) -> str:
     hint = str(code.get("gold_span_hint") or "")
     return hint.format(**fact_slots(bundle)) if hint else phrase
+
+
+def code_with_resolved_slots(code: dict[str, Any], bundle: dict[str, Any]) -> dict[str, Any]:
+    """LLM 페이로드용으로 mutation_phrase/gold_span_hint의 {rate}·{term} 등 슬롯을 실제
+    ProductFact 값으로 치환한 코드 복사본. 원시 플레이스홀더가 LLM에 새어 injected_span으로
+    그대로 반사되는 문제를 방지한다.
+    """
+    slots = fact_slots(bundle)
+    resolved = dict(code)
+    for key in ("mutation_phrase", "gold_span_hint"):
+        value = str(code.get(key) or "")
+        try:
+            resolved[key] = value.format(**slots)
+        except (KeyError, IndexError, ValueError):
+            resolved[key] = value
+    return resolved
 
 
 def fact_slots(bundle: dict[str, Any]) -> dict[str, str]:

@@ -1,0 +1,55 @@
+{
+  "record_count": 22,
+  "source_type_counts": {
+    "synthetic_product_fact_clean": 4,
+    "synthetic_product_fact_mutation": 18
+  },
+  "product_group_counts": {
+    "deposit": 10,
+    "loan": 12
+  },
+  "channel_counts": {
+    "web_page": 22
+  },
+  "violation_type_counts": {
+    "ALWAYS_COMPOUND_REGARDLESS_EARLY_TERMINATION": 1,
+    "BENEFIT_WITHOUT_DISADVANTAGE": 1,
+    "COMPARATIVE_SUPERIORITY_NO_BASIS": 1,
+    "COMPOUND_SIMPLE_UNDIFFERENTIATED": 1,
+    "EVENT_CONDITIONS_OMITTED": 2,
+    "LOAN_DAILY_INTEREST_MINIMIZE": 1,
+    "LOAN_EASY_APPROVAL_MISLEADING": 1,
+    "LOAN_PARTIAL_SALE_AS_ALL": 1,
+    "RATE_BEST_AMONG_ALL_FIRMS": 2,
+    "RATE_OVERSTATED_OR_STALE": 1,
+    "RATE_RELATIVE_SUPERIORITY_UNFOUNDED": 1,
+    "RATE_VARIABILITY_OMITTED": 1,
+    "SPECIAL_RATE_GIFT_MONEY_IMPLIED": 1,
+    "SUPERLATIVE_NO_BASIS": 1,
+    "TAX_BENEFIT_LIMIT_OMITTED": 1,
+    "UNIVERSAL_SCOPE_MISLEADING": 1
+  },
+  "risk_level_counts": {
+    "high": 9,
+    "low": 4,
+    "medium": 9
+  },
+  "expected_routing_counts": {
+    "pass_candidate": 4,
+    "reject": 4,
+    "revise": 14
+  },
+  "clean_count": 4,
+  "mutation_count": 18,
+  "hard_case_count": 0,
+  "product_fact_total": 823,
+  "source_document_total": 66,
+  "average_product_facts_per_record": 37.41,
+  "average_source_documents_per_record": 3.0,
+  "duplicate_ids": [],
+  "span_errors": [],
+  "product_fact_errors": [],
+  "label_errors": [],
+  "blocking_error_count": 0,
+  "blocking_errors": []
+}
