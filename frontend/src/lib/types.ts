@@ -611,6 +611,17 @@ export interface ReviewOutput {
   reference_paths_summary: ReferencePathRow[];
   graph_paths: Record<string, unknown>[];
   highlight_spans: HighlightSpanRow[];
+  /** 참고용 번역(표시 전용) — 비-KR workspace 심사에서만 채워짐. KR은 null/미포함. */
+  ad_translations?: AdTranslations | null;
+}
+
+/** 비-KR 심사용 참고 번역. 판정 파이프라인에는 개입하지 않는 표시 전용 데이터. */
+export interface AdTranslations {
+  en: string | null;
+  ko: string | null;
+  /** 문장별 정렬 번역(sentence_units 분할 그대로) — 원문 아래 문장 단위 병기용. */
+  sentences?: { original: string; en: string | null; ko: string | null }[] | null;
+  note?: string;
 }
 
 /** NDJSON event emitted by `POST /api/review/stream`. */
@@ -637,6 +648,8 @@ export interface ReviewRequest {
   product_group: string;
   selected_product_name?: string;
   workspace_id: string;
+  /** 광고 원문 언어(메타데이터). 라우팅은 workspace_id 담당 — 기록·번역 표시용. */
+  language?: string;
   /** 선택 LLM 모델(빈 값=.env 기본). 백엔드가 게이트웨이 모델을 오버라이드. */
   llm_model?: string;
   /** 실행자 가명(브라우저별). 실행 기록에 누가 돌렸는지 표시. */

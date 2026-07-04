@@ -3,7 +3,7 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { getActor } from "@/lib/actor";
 import { searchProducts } from "@/lib/api";
-import { CHANNELS, EXAMPLES, LLM_MODELS, PRODUCT_GROUPS, WORKSPACE_ID, type ExamplePreset } from "@/lib/labels";
+import { BANKS, CHANNELS, EXAMPLES, KH_WORKSPACE_ID, LLM_MODELS, PRODUCT_GROUPS, type BankValue, type ExamplePreset } from "@/lib/labels";
 import type { ProductSearchResult, ReviewRequest } from "@/lib/types";
 import { Icon } from "./Icon";
 
@@ -44,6 +44,10 @@ export function ReviewForm({ running, onSubmit, draftPreset, onLoadSample, onLoa
   const [productSearchError, setProductSearchError] = useState("");
   const [text, setText] = useState(draftPreset?.content_text ?? DEFAULT_EXAMPLE.text);
   const [llmModel, setLlmModel] = useState(draftPreset?.llm_model ?? "");
+  // 은행(심사 주체). 재실행 프리셋의 workspace_id가 KH면 프놈펜상업은행으로 복원.
+  const [bank, setBank] = useState<BankValue>(
+    draftPreset?.workspace_id === KH_WORKSPACE_ID ? "ppcbank" : "jeonbuk",
+  );
   const [draftQueue, setDraftQueue] = useState<ReviewRequest[]>([]);
   const [queueRunning, setQueueRunning] = useState(false);
 
@@ -90,17 +94,21 @@ export function ReviewForm({ running, onSubmit, draftPreset, onLoadSample, onLoa
     setProductOpen(true);
   };
 
-  const buildPayload = (): ReviewRequest => ({
+  const buildPayload = (): ReviewRequest => {
+    const selectedBank = BANKS.find((item) => item.value === bank) ?? BANKS[0];
+    return {
       dataset_item_id: `console_${Date.now()}`,
       title,
       content_text: text,
       channel,
       product_group: productGroup,
       selected_product_name: selectedProduct.trim(),
-      workspace_id: WORKSPACE_ID,
+      workspace_id: selectedBank.workspaceId,
+      language: selectedBank.language,
       llm_model: llmModel || undefined,
       actor: getActor(),
-    });
+    };
+  };
 
   const handleSubmit = (event: FormEvent) => {
     event.preventDefault();
@@ -185,6 +193,27 @@ export function ReviewForm({ running, onSubmit, draftPreset, onLoadSample, onLoa
           onChange={(event) => setTitle(event.target.value)}
           placeholder="예: 스텝다운 ELS 다이렉트 배너"
         />
+      </label>
+
+      <label className="block">
+        <span className="mb-1 block text-xs font-bold text-ink-3">은행</span>
+        <select
+          className={fieldClass}
+          value={bank}
+          onChange={(event) => setBank(event.target.value as BankValue)}
+        >
+          {BANKS.map((item) => (
+            <option key={item.value} value={item.value}>
+              {item.label}
+            </option>
+          ))}
+        </select>
+        {bank === "ppcbank" && (
+          <span className="mt-1 block text-[11px] leading-relaxed text-ink-3">
+            캄보디아 법령(소비자보호법·Sub-Decree 232 등) 기준으로 심사합니다. 원문 아래에 참고용
+            영어·한국어 번역이 함께 표시됩니다(심사 근거는 원문 기준).
+          </span>
+        )}
       </label>
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">

@@ -24,6 +24,46 @@ from schemas import ContextAnchor, PolicyCandidate
 ACTIONABLE_VECTOR_THRESHOLD = 0.68
 
 
+# Policy-alignment readiness thresholds. Defaults are calibrated for the full KR
+# corpus. Small workspaces (e.g. a jurisdiction PoC) may lower them via env:
+#   CCG_MIN_HYPERNYM / CCG_MIN_PREMISE                     -> global default override
+#   CCG_MIN_HYPERNYM_<workspace_id> / CCG_MIN_PREMISE_<ws> -> per-workspace override (wins)
+# The link-ratio quality gate (>= 0.80) is intentionally NOT configurable.
+# NOTE: the GLOBAL vars apply to EVERY workspace, including KR — setting them would
+# also lower KR's gate. To relax only a small corpus, use the per-workspace keys
+# (as .env does for the KH workspace) and leave the global vars unset.
+DEFAULT_MIN_HYPERNYM = 30
+DEFAULT_MIN_PREMISE = 100
+MIN_LINK_RATIO = 0.8
+
+
+def _readiness_env_int(name: str, default: int) -> int:
+    raw = os.environ.get(name)
+    if raw is None or raw.strip() == "":
+        return default
+    try:
+        value = int(raw)
+    except ValueError:
+        return default
+    # A readiness threshold below 1 would silently disable that part of the gate;
+    # treat a non-positive (e.g. typo'd 0 or negative) override as unset.
+    return value if value >= 1 else default
+
+
+def alignment_min_thresholds(workspace_id: str) -> tuple[int, int]:
+    """Return (min_hypernym, min_premise) for a workspace.
+
+    Precedence: per-workspace env override > global env override > KR-calibrated
+    defaults (30 / 100). KR keeps its exact defaults unless explicitly
+    overridden, so existing KR behavior is unchanged.
+    """
+    min_hypernym = _readiness_env_int("CCG_MIN_HYPERNYM", DEFAULT_MIN_HYPERNYM)
+    min_premise = _readiness_env_int("CCG_MIN_PREMISE", DEFAULT_MIN_PREMISE)
+    min_hypernym = _readiness_env_int(f"CCG_MIN_HYPERNYM_{workspace_id}", min_hypernym)
+    min_premise = _readiness_env_int(f"CCG_MIN_PREMISE_{workspace_id}", min_premise)
+    return min_hypernym, min_premise
+
+
 class PolicyRetriever(Protocol):
     def assert_policy_alignment_ready(self, *, workspace_id: str) -> None:
         ...
@@ -64,15 +104,49 @@ class Neo4jPolicyRetriever:
         self.driver = GraphDatabase.driver(self.uri, auth=(self.user, self.password))
         self.database = os.environ.get("NEO4J_DATABASE")
         self.embedder = embedder or EmbeddingGateway()
+        # 팀 공용 Aura(예: KR 법령 코퍼스) 읽기 전용 라우팅. TEAM_NEO4J_WORKSPACES에
+        # 등록된 workspace의 코퍼스 조회(retriever는 전부 읽기 쿼리)는 팀 DB로 보낸다.
+        # 심사 산출물 쓰기(persistence/run_store)는 여기와 무관하게 기본 DB에만 저장
+        # 되므로, "팀 DB에 새 노드/엣지 생성 금지" 합의가 지켜진다.
+        self._team_driver = None
+        self._team_database = os.environ.get("TEAM_NEO4J_DATABASE", "")
+
+    def _team_workspaces(self) -> set[str]:
+        raw = os.environ.get("TEAM_NEO4J_WORKSPACES", "")
+        return {token.strip() for token in raw.replace(",", " ").split() if token.strip()}
+
+    def _get_team_driver(self):
+        if self._team_driver is None:
+            from neo4j import GraphDatabase
+
+            uri = os.environ.get("TEAM_NEO4J_URI", "")
+            user = os.environ.get("TEAM_NEO4J_USER", "")
+            password = os.environ.get("TEAM_NEO4J_PASSWORD", "")
+            if not uri or not user or not password:
+                return None
+            self._team_driver = GraphDatabase.driver(uri, auth=(user, password))
+        return self._team_driver
+
+    def _session_for(self, workspace_id: str):
+        """workspace 기반 세션: 팀 workspace면 팀 DB(읽기 전용 용도), 그 외 기본 DB."""
+        if workspace_id in self._team_workspaces():
+            team = self._get_team_driver()
+            if team is not None:
+                # 팀 Aura는 DB 이름이 다르므로 기본 NEO4J_DATABASE를 쓰지 않는다.
+                return team.session(database=self._team_database) if self._team_database else team.session()
+        return self.driver.session(**self._session_kwargs())
 
     def close(self) -> None:
         self.driver.close()
+        if self._team_driver is not None:
+            self._team_driver.close()
 
     def _session_kwargs(self) -> dict[str, str]:
         return {"database": self.database} if self.database else {}
 
     def assert_policy_alignment_ready(self, *, workspace_id: str) -> None:
-        with self.driver.session(**self._session_kwargs()) as session:
+        min_hypernym, min_premise = alignment_min_thresholds(workspace_id)
+        with self._session_for(workspace_id) as session:
             row = session.run(
                 """
                 MATCH (h:PolicyHypernym {workspace_id: $workspace_id})
@@ -96,17 +170,18 @@ class Neo4jPolicyRetriever:
         active_cu_count = int(row["active_cu_count"])
         linked_active_cu_count = int(row["linked_active_cu_count"])
         linked_ratio = linked_active_cu_count / active_cu_count if active_cu_count else 0.0
-        if hypernym_count < 30 or premise_count < 100 or linked_ratio < 0.8:
+        if hypernym_count < min_hypernym or premise_count < min_premise or linked_ratio < MIN_LINK_RATIO:
             raise RuntimeError(
                 "Policy alignment graph is not ready: "
-                f"PolicyHypernym={hypernym_count}, Premise={premise_count}, "
-                f"active CU hypernym link ratio={linked_ratio:.2f}. "
+                f"PolicyHypernym={hypernym_count} (min {min_hypernym}), "
+                f"Premise={premise_count} (min {min_premise}), "
+                f"active CU hypernym link ratio={linked_ratio:.2f} (min {MIN_LINK_RATIO:.2f}). "
                 "Run policy_compiler.py and reload before review."
             )
 
     def policy_context_for_claims(self, *, workspace_id: str, query_text: str, limit: int = 80) -> dict[str, Any]:
         query_embedding = self.embedder.embed(query_text[:3000])
-        with self.driver.session(**self._session_kwargs()) as session:
+        with self._session_for(workspace_id) as session:
             hypernyms = [
                 dict(record)
                 for record in session.run(
@@ -166,7 +241,7 @@ class Neo4jPolicyRetriever:
             ]
         ).strip()
         anchor_embedding = self.embedder.embed(anchor_text[:3000])
-        with self.driver.session(**self._session_kwargs()) as session:
+        with self._session_for(workspace_id) as session:
             rows = [
                 dict(record)
                 for record in session.run(
@@ -304,7 +379,7 @@ class Neo4jPolicyRetriever:
                coalesce(node.statement, node.text, node.summary, node.label, node.constraint, node.title, node.article_title, '') AS text
         LIMIT 40
         """
-        with self.driver.session(**self._session_kwargs()) as session:
+        with self._session_for(workspace_id) as session:
             return [dict(record) for record in session.run(query, workspace_id=workspace_id, cu_id=cu_id)]
 
     def _similar_policy_fragments(

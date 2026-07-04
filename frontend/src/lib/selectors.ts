@@ -1687,3 +1687,39 @@ export function aggregationForAnchor(result: ReviewOutput, anchor: ContextAnchor
   );
   return [...articles, ...principles];
 }
+
+/** 문장별 참고 번역 매핑 — sentence_id → {en, ko}.
+ * ad_translations.sentences는 sentence_units와 같은 순서/개수로 생성된다(백엔드
+ * 계약). 개수가 다르면(과거 run 등) 빈 맵을 돌려 렌더를 생략한다. 표시 전용. */
+export function sentenceTranslationsById(
+  result: ReviewOutput,
+): Map<string, { en: string | null; ko: string | null }> {
+  const map = new Map<string, { en: string | null; ko: string | null }>();
+  const sentences = result.ad_translations?.sentences ?? null;
+  const units = result.sentence_units ?? [];
+  if (!sentences || sentences.length !== units.length) return map;
+  units.forEach((unit, index) => {
+    const row = sentences[index];
+    if (row && (row.en || row.ko)) map.set(unit.sentence_id, { en: row.en, ko: row.ko });
+  });
+  return map;
+}
+
+/** 인용문(quote, 말줄임 가능) → 그 문장이 속한 참고 번역 {en, ko}. 없으면 null. */
+export function translationForQuote(
+  result: ReviewOutput,
+  quote: string,
+): { en: string | null; ko: string | null } | null {
+  const sentences = result.ad_translations?.sentences ?? null;
+  if (!sentences?.length) return null;
+  const norm = (value: string) => value.replace(/\s+/g, " ").replace(/[…]+$|\.{3}$/g, "").trim();
+  const core = norm(quote);
+  if (!core) return null;
+  for (const row of sentences) {
+    const original = norm(row.original);
+    if (original.includes(core) || core.includes(original)) {
+      if (row.en || row.ko) return { en: row.en, ko: row.ko };
+    }
+  }
+  return null;
+}

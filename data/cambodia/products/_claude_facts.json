@@ -1,0 +1,2528 @@
+{
+  "fixed-deposit-account": {
+    "product": "PPCBank Fixed Deposit",
+    "group": "deposit",
+    "original_name": "Fixed Deposit Account — PPCBank Cambodia",
+    "source_url": "https://www.ppcbank.com.kh/personal-banking/deposit/fixed-deposit-account/",
+    "text_file": "ppcbank_fixed_deposit.md",
+    "is_extra_doc": false,
+    "attach_product": "PPCBank Fixed Deposit",
+    "facts": [
+      {
+        "fact_type": "promotional_rate",
+        "value": "up to 5.14% p.a.",
+        "unit": "% p.a",
+        "condition": "USD Fixed Deposit only; opened via PPCBank Mobile App or smartBiz; 'up to' (not guaranteed for all terms)",
+        "page_or_chunk": "Royal Celebration Promotion banner",
+        "evidence_text": "Customers can enjoy a special interest rate of up to 5.14% p.a. when opening a USD Fixed Deposit account via PPCBank Mobile App or smartBiz.",
+        "confidence": 0.98
+      },
+      {
+        "fact_type": "promotional_period",
+        "value": "May 1 – May 15, 2026",
+        "unit": "",
+        "condition": "Royal Celebration promotion only",
+        "page_or_chunk": "Royal Celebration Promotion banner",
+        "evidence_text": "Promotion Period:\nMay 1 – May 15, 2026",
+        "confidence": 0.98
+      },
+      {
+        "fact_type": "rate_term_dependency",
+        "value": "The longer you commit your money to being in the account, the higher the interest rate will be.",
+        "unit": "",
+        "condition": "rate depends on term; no single rate for everyone",
+        "page_or_chunk": "intro description",
+        "evidence_text": "The longer you commit your money to being in the account, the higher the interest rate will be.",
+        "confidence": 0.95
+      },
+      {
+        "fact_type": "interest_rate_by_term",
+        "value": "3m 2.50%; 6m 3.45%; 12m 4.20%; 18m 4.30%; 24m 4.40%; 36m 4.50%; 48m 4.60%; 60m 4.70%",
+        "unit": "% p.a",
+        "condition": "Standard Rate, USD, interest paid at maturity",
+        "page_or_chunk": "Fixed Deposit With Interest Payment At Maturity Rate table",
+        "evidence_text": "3 months\n2.50% p.a\n3.00% p.a\n2.50% p.a\n3.00% p.a",
+        "confidence": 0.96
+      },
+      {
+        "fact_type": "interest_rate_by_term",
+        "value": "3m 3.00%; 6m 3.95%; 12m 4.70%; 18m 4.80%; 24m 4.90%; 36m –; 48m –; 60m –",
+        "unit": "% p.a",
+        "condition": "Standard Rate, KHR, interest paid at maturity; KHR not offered for 36/48/60 months",
+        "page_or_chunk": "Fixed Deposit With Interest Payment At Maturity Rate table",
+        "evidence_text": "36 months\n4.50% p.a\n–\n4.70% p.a\n–",
+        "confidence": 0.95
+      },
+      {
+        "fact_type": "interest_rate_by_term",
+        "value": "3m 2.50%; 6m 3.65%; 12m 4.40%; 18m 4.50%; 24m 4.60%; 36m 4.70%; 48m 4.80%; 60m 4.90%",
+        "unit": "% p.a",
+        "condition": "Digital Channel, USD, interest paid at maturity",
+        "page_or_chunk": "Fixed Deposit With Interest Payment At Maturity Rate table",
+        "evidence_text": "60 months\n4.70% p.a\n–\n4.90% p.a\n–",
+        "confidence": 0.95
+      },
+      {
+        "fact_type": "rate_channel_dependency",
+        "value": "Digital Channel rates are higher than Standard Rate for most terms (e.g. 6m USD 3.65% digital vs 3.45% standard)",
+        "unit": "% p.a",
+        "condition": "rate varies by channel (standard vs digital); 3-month USD/KHR identical across channels",
+        "page_or_chunk": "rate tables",
+        "evidence_text": "6 months\n3.45% p.a\n3.95% p.a\n3.65% p.a\n4.15% p.a",
+        "confidence": 0.9
+      },
+      {
+        "fact_type": "interest_rate_by_term",
+        "value": "3m 2.25%; 6m 3.20%; 12m 4.00%; 18m 4.05%; 24m 4.15%; 36m 4.25%; 48m 4.35%; 60m 4.45%",
+        "unit": "% p.a",
+        "condition": "Standard Rate, USD, monthly interest payment (lower than at-maturity rates)",
+        "page_or_chunk": "Fixed Deposit With Monthly Interest Payment table",
+        "evidence_text": "3 months\n2.25% p.a\n2.75% p.a\n2.25% p.a\n2.75% p.a",
+        "confidence": 0.95
+      },
+      {
+        "fact_type": "rate_payment_frequency_dependency",
+        "value": "Monthly interest payment rates are lower than at-maturity rates (e.g. 12m USD standard: 4.00% monthly vs 4.20% at maturity)",
+        "unit": "% p.a",
+        "condition": "rate depends on payment frequency (at maturity vs monthly)",
+        "page_or_chunk": "both rate tables",
+        "evidence_text": "Fixed Deposit With Monthly Interest Payment",
+        "confidence": 0.9
+      },
+      {
+        "fact_type": "eligibility_requirements",
+        "value": "Cambodian: National ID Card or Valid Passport; Foreigner: Valid passport (Validity ≥ 90 days) plus employment certificate, contract or business certificate(s)",
+        "unit": "",
+        "condition": "documents vary by customer type (Cambodian, Foreigner, Business Entity, NGO/NPO)",
+        "page_or_chunk": "Requirements section",
+        "evidence_text": "Foreigner\nValid passport (Validity ≥ 90 days)\nEmployment certificate, contract or business certificate(s)",
+        "confidence": 0.95
+      },
+      {
+        "fact_type": "eligibility_requirements",
+        "value": "Business Entity requires Certificate of Incorporation, Business license(s) (Validity ≥ 30 days), MOA, Patent tax certificate/Tax registration letter, Board Resolution, and ID/passport of owners/directors",
+        "unit": "",
+        "condition": "business entity applicants",
+        "page_or_chunk": "Requirements section",
+        "evidence_text": "Certificate of Incorporation\nBusiness license(s) (Validity ≥ 30 days)\nMemorandum and Articles of Association",
+        "confidence": 0.9
+      },
+      {
+        "fact_type": "minimum_amount_disclosure",
+        "value": "No minimum or maximum deposit amount is stated on the page",
+        "unit": "",
+        "condition": "page publishes rate tables and requirements only; no opening balance disclosed",
+        "page_or_chunk": "whole page",
+        "evidence_text": "Requirements",
+        "confidence": 0.85
+      },
+      {
+        "fact_type": "early_withdrawal_disclosure",
+        "value": "No premature/early-withdrawal terms or penalty clause is published on the page",
+        "unit": "",
+        "condition": "page shows only at-maturity and monthly interest rate tables; no clause on breaking the term early",
+        "page_or_chunk": "whole page",
+        "evidence_text": "Fixed Deposit With Interest Payment At Maturity Rate",
+        "confidence": 0.85
+      },
+      {
+        "fact_type": "deposit_protection_disclosure",
+        "value": "No deposit insurance/protection or tax-on-interest basis is stated on the page",
+        "unit": "",
+        "condition": "page markets interest growth but omits deposit protection and withholding tax disclosure",
+        "page_or_chunk": "whole page",
+        "evidence_text": "Earn interest on the money you deposit.",
+        "confidence": 0.8
+      }
+    ]
+  },
+  "saving-account": {
+    "product": "PPCBank Savings Account",
+    "group": "deposit",
+    "original_name": "Savings Account — PPCBank Cambodia",
+    "source_url": "https://www.ppcbank.com.kh/personal-banking/deposit/saving-account/",
+    "text_file": "ppcbank_saving_account.txt",
+    "is_extra_doc": false,
+    "attach_product": "PPCBank Savings Account",
+    "facts": [
+      {
+        "fact_type": "interest_rate_by_currency",
+        "value": "0.50% p.a (USD); 1.50% p.a (KHR)",
+        "unit": "% p.a",
+        "condition": "rate varies by currency (USD vs KHR); no single rate for all accounts",
+        "page_or_chunk": "rate table",
+        "evidence_text": "INTEREST RATE | 0.50% p.a | 1.50% p.a",
+        "confidence": 0.98
+      },
+      {
+        "fact_type": "interest_crediting_frequency",
+        "value": "credited on a quarterly basis",
+        "unit": "",
+        "condition": "",
+        "page_or_chunk": "rate table note",
+        "evidence_text": "Note: Interests will be credited to the account on a quarterly\nbasis",
+        "confidence": 0.97
+      },
+      {
+        "fact_type": "minimum_amount",
+        "value": "Minimum Opening Balance 0.00 USD",
+        "unit": "USD",
+        "condition": "opening balance",
+        "page_or_chunk": "Saving Account heading",
+        "evidence_text": "Saving Account (Minimum Opening Balance 0.00 USD)",
+        "confidence": 0.97
+      },
+      {
+        "fact_type": "minimum_amount",
+        "value": "USD 5 / KHR 20,000 (Personal); USD 1,000 / KHR 4,000,000 (Corporate)",
+        "unit": "USD/KHR",
+        "condition": "minimum deposit differs by account type (Personal vs Corporate)",
+        "page_or_chunk": "Important information",
+        "evidence_text": "USD 5/ KHR 20,000 minimum deposit (Personal) and USD 1,000/KHR 4,000,000\nminimum deposit (Corporate)",
+        "confidence": 0.96
+      },
+      {
+        "fact_type": "fees",
+        "value": "no annual or maintenance fees; free passbook; free transfers within PPCBank accounts",
+        "unit": "",
+        "condition": "",
+        "page_or_chunk": "intro paragraph",
+        "evidence_text": "you won’t have to worry about annual or maintenance\nfees. You’ll also\nreceive a free passbook and will be able to make free transfers within PPCBank accounts",
+        "confidence": 0.9
+      },
+      {
+        "fact_type": "fees",
+        "value": "Free Visa debit card for the first year to all accounts",
+        "unit": "",
+        "condition": "first year only",
+        "page_or_chunk": "Important information",
+        "evidence_text": "Free charge of Visa debit card for the first year to all accounts",
+        "confidence": 0.95
+      },
+      {
+        "fact_type": "loan_amount_limit",
+        "value": "Visa debit card daily transaction limit up to USD 3,000/day",
+        "unit": "USD",
+        "condition": "per day, Visa debit card transactions",
+        "page_or_chunk": "Important information",
+        "evidence_text": "Daily limit for Visa debit card transactions is up to USD 3,000/day",
+        "confidence": 0.95
+      },
+      {
+        "fact_type": "eligibility_requirements",
+        "value": "Cambodia: National ID Card or Valid Passport; Foreigner: Valid passport (Validity ≥ 90 days) plus employment certificate, contract or business certificate(s); Business/NGO documents specified",
+        "unit": "",
+        "condition": "documents differ by applicant type (Cambodian / Foreigner / Business Entity / NGO)",
+        "page_or_chunk": "REQUIREMENTS section",
+        "evidence_text": "CAMBODIA\nNational ID Card or Valid Passport\nFOREIGNER\nValid passport (Validity ≥ 90 days)",
+        "confidence": 0.95
+      },
+      {
+        "fact_type": "deposit_protection_disclosure",
+        "value": "Page markets the account as 'safe and secure' but publishes no deposit insurance/guarantee scheme details",
+        "unit": "",
+        "condition": "",
+        "page_or_chunk": "headline / KEY BENEFITS",
+        "evidence_text": "YOUR MONEY IS SAFE AND SECURE",
+        "confidence": 0.85
+      },
+      {
+        "fact_type": "early_withdrawal_disclosure",
+        "value": "No withdrawal restriction or penalty clause published; page states balance can be checked and money added but does not disclose withdrawal terms",
+        "unit": "",
+        "condition": "",
+        "page_or_chunk": "KEY BENEFITS",
+        "evidence_text": "Add additional money to your account",
+        "confidence": 0.8
+      },
+      {
+        "fact_type": "interest_rate_disclosure",
+        "value": "Only a single flat rate per currency is published; no term dependency and no channel (branch vs E-banking) rate distinction stated",
+        "unit": "",
+        "condition": "",
+        "page_or_chunk": "rate table",
+        "evidence_text": "INTEREST RATE | 0.50% p.a | 1.50% p.a",
+        "confidence": 0.82
+      }
+    ]
+  },
+  "current-account": {
+    "product": "PPCBank Current Account",
+    "group": "deposit",
+    "original_name": "Current Account — PPCBank Cambodia",
+    "source_url": "https://www.ppcbank.com.kh/personal-banking/deposit/current-account/",
+    "text_file": "ppcbank_current_account.txt",
+    "is_extra_doc": false,
+    "attach_product": "PPCBank Current Account",
+    "facts": [
+      {
+        "fact_type": "fees",
+        "value": "No annual or maintenance fees",
+        "unit": "",
+        "condition": "current account",
+        "page_or_chunk": "web page intro",
+        "evidence_text": "you won’t have to worry about annual\nor maintenance fees",
+        "confidence": 0.95
+      },
+      {
+        "fact_type": "fees",
+        "value": "Free passbook and free transfers within PPCBank accounts",
+        "unit": "",
+        "condition": "intra-bank transfers",
+        "page_or_chunk": "web page intro",
+        "evidence_text": "receive a free\npassbook and will be able to make free transfers within PPCBank accounts",
+        "confidence": 0.9
+      },
+      {
+        "fact_type": "fees",
+        "value": "USD 5 per chequebook",
+        "unit": "USD",
+        "condition": "chequebook only available with current account",
+        "page_or_chunk": "What can you do section",
+        "evidence_text": "with fee charge only USD 5 per chequebook",
+        "confidence": 0.97
+      },
+      {
+        "fact_type": "fees",
+        "value": "Free for intra-bank transfers at PPCBank's Phnom Penh branch network",
+        "unit": "",
+        "condition": "intra-bank, Phnom Penh branch network",
+        "page_or_chunk": "Important information",
+        "evidence_text": "Free for intra-bank transfers at\nPPCBank’s Phnom penh branch network",
+        "confidence": 0.95
+      },
+      {
+        "fact_type": "fees",
+        "value": "Transfer ≤ USD 2,000 charges USD 2; > USD 2,000 charges 0.10%",
+        "unit": "USD / %",
+        "condition": "inter-bank transfers in Cambodia",
+        "page_or_chunk": "Important information",
+        "evidence_text": "Amount transfer ≤ USD 2,000 charges USD2\nor > USD 2,000 charges 0.10% for inter-bank transfers in Cambodia",
+        "confidence": 0.95
+      },
+      {
+        "fact_type": "loan_amount_limit",
+        "value": "Daily limit for Visa Debit transactions up to USD 5,000 per day",
+        "unit": "USD",
+        "condition": "Visa Debit transactions",
+        "page_or_chunk": "Important information",
+        "evidence_text": "Daily limit for Visa Debit transactions\nis up to USD 5,000 per day",
+        "confidence": 0.95
+      },
+      {
+        "fact_type": "minimum_amount",
+        "value": "USD 100 (Personal); USD 500 (Corporate)",
+        "unit": "USD",
+        "condition": "minimum deposit; varies by customer type",
+        "page_or_chunk": "Important information",
+        "evidence_text": "USD 100 minimum deposit (Personal) and\nUSD 500 minimum deposit (Corporate)",
+        "confidence": 0.96
+      },
+      {
+        "fact_type": "minimum_amount",
+        "value": "Freeze USD 50 (Personal); freeze USD 100 (Corporate)",
+        "unit": "USD",
+        "condition": "minimum ongoing/frozen balance; varies by customer type",
+        "page_or_chunk": "Important information",
+        "evidence_text": "Freeze USD 50 (Personal) and freeze USE\n100 (Corporate)",
+        "confidence": 0.9
+      },
+      {
+        "fact_type": "eligibility_requirements",
+        "value": "Cambodian: National ID Card or Valid Passport; Foreigner: Valid passport (Validity ≥ 90 days), employment certificate, contract or business certificate(s)",
+        "unit": "",
+        "condition": "individual applicants",
+        "page_or_chunk": "Requirements section",
+        "evidence_text": "Cambodian\nNational ID Card or Valid Passport\nForeigner\nValid passport (Validity ≥ 90 days)",
+        "confidence": 0.95
+      },
+      {
+        "fact_type": "eligibility_requirements",
+        "value": "Business entity: Certificate of Incorporation, business license(s) (Validity ≥ 30 days), Memorandum and Articles of Association, patent tax certificate/tax registration letter, board/directors' resolution, ID/passport of owners/directors/signatories",
+        "unit": "",
+        "condition": "business entity applicants",
+        "page_or_chunk": "Requirements section - Business Entity",
+        "evidence_text": "Certificate of Incorporation\nBusiness license(s) (Validity ≥ 30 days)",
+        "confidence": 0.92
+      },
+      {
+        "fact_type": "eligibility_requirements",
+        "value": "NGOs/NPOs: MOU or Authorization, Articles of Association and Organization, tax registration letter, board resolution, ID/passport of founders/directors/signatories",
+        "unit": "",
+        "condition": "NGO/NPO applicants",
+        "page_or_chunk": "Requirements section - NGOs/NPOs",
+        "evidence_text": "Memorandum of Understanding (MOU) or\nAuthorization",
+        "confidence": 0.9
+      },
+      {
+        "fact_type": "interest_rate_disclosure",
+        "value": "Page markets the current account as a deposit product but publishes no interest/deposit rate for the account",
+        "unit": "",
+        "condition": "no rate stated for current account balances",
+        "page_or_chunk": "whole page",
+        "evidence_text": "A current account is an easy way to purchase your daily goods and\nservices.",
+        "confidence": 0.85
+      },
+      {
+        "fact_type": "withdrawal_disclosure",
+        "value": "Withdrawals require a valid minimum ongoing balance but the page does not state the specific ongoing minimum balance figure beyond freeze amounts",
+        "unit": "",
+        "condition": "withdrawal subject to minimum ongoing balance",
+        "page_or_chunk": "What can you do section",
+        "evidence_text": "Withdraw funds from your account given that the\nminimum ongoing balance is valid",
+        "confidence": 0.8
+      },
+      {
+        "fact_type": "deposit_protection",
+        "value": "No deposit insurance/protection statement present on page",
+        "unit": "",
+        "condition": "not disclosed",
+        "page_or_chunk": "whole page",
+        "evidence_text": "About PPCBank",
+        "confidence": 0.75
+      }
+    ]
+  },
+  "installment-deposit-account": {
+    "product": "PPCBank Installment Deposit",
+    "group": "deposit",
+    "original_name": "Installment Deposit Account — PPCBank Cambodia",
+    "source_url": "https://www.ppcbank.com.kh/personal-banking/deposit/installment-deposit-account/",
+    "text_file": "ppcbank_installment_deposit_account.txt",
+    "is_extra_doc": false,
+    "attach_product": "PPCBank Installment Deposit",
+    "facts": [
+      {
+        "fact_type": "interest_rate_by_term",
+        "value": "6 months: 3.30%; 12 months: 4.25%; 24 months: 4.50%; 36 months: 4.60%",
+        "unit": "% p.a",
+        "condition": "Standard Installment Deposit Account, USD only; rate varies by term",
+        "page_or_chunk": "Installment Deposit Account rate table",
+        "evidence_text": "6 months | 3.30% p.a\n12 months | 4.25% p.a\n24 months | 4.50% p.a\n36 months | 4.60% p.a",
+        "confidence": 0.98
+      },
+      {
+        "fact_type": "interest_rate_by_term",
+        "value": "6 months: 3.50%; 12 months: 4.40%; 24 months: 4.65%; 36 months: 4.75%",
+        "unit": "% p.a",
+        "condition": "Premier Installment Deposit Account, USD only, requires higher minimum balance; rate varies by term",
+        "page_or_chunk": "Premier Installment Deposit Account rate table",
+        "evidence_text": "6 months | 3.50% p.a\n12 months | 4.40% p.a\n24 months | 4.65% p.a\n36 months | 4.75% p.a",
+        "confidence": 0.98
+      },
+      {
+        "fact_type": "rate_term_dependency",
+        "value": "Longer term yields higher interest rate; Premier tier yields higher rate than standard at each term",
+        "unit": "",
+        "condition": "no single rate for everyone; depends on term and account tier/minimum balance",
+        "page_or_chunk": "both rate tables",
+        "evidence_text": "6 months | 3.30% p.a\n12 months | 4.25% p.a\n24 months | 4.50% p.a\n36 months | 4.60% p.a",
+        "confidence": 0.9
+      },
+      {
+        "fact_type": "minimum_amount",
+        "value": "USD 10",
+        "unit": "USD",
+        "condition": "Standard Installment Deposit Account opening balance",
+        "page_or_chunk": "Installment Deposit Account header",
+        "evidence_text": "(MINIMUM OPENING BALANCE: USD 10)",
+        "confidence": 0.98
+      },
+      {
+        "fact_type": "minimum_amount",
+        "value": "USD 500",
+        "unit": "USD",
+        "condition": "Premier Installment Deposit Account opening balance",
+        "page_or_chunk": "Premier Installment Deposit Account header",
+        "evidence_text": "(MINIMUM OPENING BALANCE USD 500)",
+        "confidence": 0.98
+      },
+      {
+        "fact_type": "fees",
+        "value": "Free passbook; no annual or maintenance fees",
+        "unit": "",
+        "condition": "on opening installment deposit account",
+        "page_or_chunk": "intro section",
+        "evidence_text": "you will get a free passbook and have no annual or maintenance fees",
+        "confidence": 0.95
+      },
+      {
+        "fact_type": "eligibility_requirements",
+        "value": "Cambodian: National ID Card or Valid Passport; Foreigner: Valid passport (validity ≥ 90 days), employment certificate/contract or business certificate; NGOs/NPOs: MOU or Authorization, Article of Association, tax registration letter, Board/Directors' Resolution, proof source of funds",
+        "unit": "",
+        "condition": "varies by applicant type (Cambodian / Foreigner / NGO-NPO)",
+        "page_or_chunk": "Requirements section",
+        "evidence_text": "Cambodian\nNational ID Card or Valid Passport\nForeigner\nValid passport (Validity ≥ 90 days)",
+        "confidence": 0.95
+      },
+      {
+        "fact_type": "loan_term",
+        "value": "Terms offered: 6, 12, 24, 36 months",
+        "unit": "months",
+        "condition": "installment deposit tenor options",
+        "page_or_chunk": "rate tables",
+        "evidence_text": "TERM | INTEREST RATE (USD)\n6 months",
+        "confidence": 0.95
+      },
+      {
+        "fact_type": "currency_disclosure",
+        "value": "Rates published in USD only; no KHR rate table provided",
+        "unit": "",
+        "condition": "page shows only USD interest rate columns",
+        "page_or_chunk": "rate tables",
+        "evidence_text": "TERM | INTEREST RATE (USD)",
+        "confidence": 0.85
+      },
+      {
+        "fact_type": "early_withdrawal_disclosure",
+        "value": "No premature/early withdrawal clause or penalty stated; page only says principal and interest withdrawn once period is over",
+        "unit": "",
+        "condition": "commonly-expected early-withdrawal term is absent",
+        "page_or_chunk": "intro section",
+        "evidence_text": "Once the period is over, you withdraw the principal and interest together.",
+        "confidence": 0.8
+      },
+      {
+        "fact_type": "deposit_protection",
+        "value": "No deposit insurance/protection statement present on page",
+        "unit": "",
+        "condition": "expected deposit protection disclosure absent",
+        "page_or_chunk": "whole page",
+        "evidence_text": "have no annual or maintenance fees",
+        "confidence": 0.7
+      },
+      {
+        "fact_type": "terms_conditions_apply",
+        "value": "No explicit terms-and-conditions caveat or tax-on-interest basis stated",
+        "unit": "",
+        "condition": "expected T&C / tax disclosure absent",
+        "page_or_chunk": "whole page",
+        "evidence_text": "Once the period is over, you withdraw the principal and interest together.",
+        "confidence": 0.65
+      }
+    ]
+  },
+  "junior-savings-account": {
+    "product": "PPCBank Junior Savings Account",
+    "group": "deposit",
+    "original_name": "Junior Savings Account — PPCBank Cambodia",
+    "source_url": "https://www.ppcbank.com.kh/personal-banking/deposit/junior-savings-account/",
+    "text_file": "ppcbank_junior_savings_account.txt",
+    "is_extra_doc": false,
+    "attach_product": "PPCBank Junior Savings Account",
+    "facts": [
+      {
+        "fact_type": "interest_rate_by_currency",
+        "value": "0.5",
+        "unit": "% p.a",
+        "condition": "USD currency",
+        "page_or_chunk": "rate table",
+        "evidence_text": "CurrencyUSDKHRInterest Rate (p.a)0.5 %1.5 %",
+        "confidence": 0.97
+      },
+      {
+        "fact_type": "interest_rate_by_currency",
+        "value": "1.5",
+        "unit": "% p.a",
+        "condition": "KHR currency",
+        "page_or_chunk": "rate table",
+        "evidence_text": "CurrencyUSDKHRInterest Rate (p.a)0.5 %1.5 %",
+        "confidence": 0.97
+      },
+      {
+        "fact_type": "rate_currency_dependency",
+        "value": "Rate differs by currency: USD 0.5% p.a vs KHR 1.5% p.a; no single rate for all",
+        "unit": "% p.a",
+        "condition": "rate varies by currency",
+        "page_or_chunk": "rate table",
+        "evidence_text": "CurrencyUSDKHRInterest Rate (p.a)0.5 %1.5 %",
+        "confidence": 0.9
+      },
+      {
+        "fact_type": "transaction_limit",
+        "value": "1,000 (USD) / 4,000,000 (KHR)",
+        "unit": "USD/KHR",
+        "condition": "per transaction, by currency",
+        "page_or_chunk": "rate table",
+        "evidence_text": "Transaction Limit1,0004,000,000",
+        "confidence": 0.92
+      },
+      {
+        "fact_type": "daily_limit",
+        "value": "1,000 (USD) / 4,000,000 (KHR)",
+        "unit": "USD/KHR",
+        "condition": "daily, by currency",
+        "page_or_chunk": "rate table",
+        "evidence_text": "Daily Limit1,0004,000,000",
+        "confidence": 0.92
+      },
+      {
+        "fact_type": "minimum_amount",
+        "value": "No initial deposit",
+        "unit": "",
+        "condition": "",
+        "page_or_chunk": "Benefits section",
+        "evidence_text": "No initial deposit",
+        "confidence": 0.95
+      },
+      {
+        "fact_type": "interest_payment_terms",
+        "value": "Interest paid upon account closure",
+        "unit": "",
+        "condition": "interest only paid at account closure, not periodically",
+        "page_or_chunk": "Conditions section",
+        "evidence_text": "Interest PaymentUpon account closure",
+        "confidence": 0.95
+      },
+      {
+        "fact_type": "eligibility_requirements",
+        "value": "Parent must be a PPCBank customer, at least 18 years old; Junior aged under 17",
+        "unit": "",
+        "condition": "parent/guardian and child eligibility",
+        "page_or_chunk": "Requirements section",
+        "evidence_text": "Parent must be a PPCBank customerBe at least 18-years-old.",
+        "confidence": 0.95
+      },
+      {
+        "fact_type": "eligibility_requirements",
+        "value": "Valid ID Card, Passport and/or other documents indicating parent/guardian-child relationship",
+        "unit": "",
+        "condition": "required documents",
+        "page_or_chunk": "Requirements section",
+        "evidence_text": "Valid ID Card, Passport and/or other documents that indicate a relationship between the parent/guardian and the child.",
+        "confidence": 0.95
+      },
+      {
+        "fact_type": "channel_restriction",
+        "value": "Opening channel: Mobile Banking only",
+        "unit": "",
+        "condition": "account can only be opened via mobile banking",
+        "page_or_chunk": "Conditions section",
+        "evidence_text": "Openning ChannelMobile Banking only",
+        "confidence": 0.95
+      },
+      {
+        "fact_type": "fees",
+        "value": "Early Closure Free; Service Fees Free",
+        "unit": "",
+        "condition": "",
+        "page_or_chunk": "Conditions section",
+        "evidence_text": "Early ClosureFreeService FeesFree",
+        "confidence": 0.95
+      },
+      {
+        "fact_type": "eligibility_requirements",
+        "value": "Phone number must be new; existing PPCBank Mobile App number not allowed; one Junior Savings Account per Junior User ID",
+        "unit": "",
+        "condition": "account creation restrictions",
+        "page_or_chunk": "Important information section",
+        "evidence_text": "Phone number must be new to create the account for Junior. Existing phone number already registered with PPCBank Mobile App is not allowed.",
+        "confidence": 0.92
+      },
+      {
+        "fact_type": "account_control_terms",
+        "value": "Parent user is the only legal account owner with full control; child access limited to Top-Up, Pay by QR, Receive by QR, Request Money from Parents",
+        "unit": "",
+        "condition": "junior functions limited; parent controls closure/deactivation",
+        "page_or_chunk": "Conditions / Important information",
+        "evidence_text": "The Parent user is the only legal account owner, and has all rights to fully control and manage the Junior Savings Account.",
+        "confidence": 0.92
+      },
+      {
+        "fact_type": "promotional_rate_claim_disclosure",
+        "value": "Page claims 'Very competitive interest rates' and 'Best savings account for children' but publishes only fixed USD 0.5% / KHR 1.5% rates with no supporting comparison or benchmark",
+        "unit": "",
+        "condition": "superlative/comparative claims not substantiated on page",
+        "page_or_chunk": "Benefits section / header",
+        "evidence_text": "Very competitive interest rates",
+        "confidence": 0.8
+      },
+      {
+        "fact_type": "deposit_protection_disclosure",
+        "value": "No deposit insurance/protection statement is present; page lists interest, limits, fees and conditions only",
+        "unit": "",
+        "condition": "expected deposit protection disclosure absent",
+        "page_or_chunk": "whole page",
+        "evidence_text": "Interest PaymentUpon account closure",
+        "confidence": 0.6
+      },
+      {
+        "fact_type": "early_withdrawal_disclosure",
+        "value": "Interest is only paid upon account closure; no clause on interest treatment for partial withdrawals or premature closure beyond 'Early Closure Free'",
+        "unit": "",
+        "condition": "premature/partial withdrawal interest terms not detailed",
+        "page_or_chunk": "Conditions section",
+        "evidence_text": "Early ClosureFree",
+        "confidence": 0.65
+      }
+    ]
+  },
+  "vip-saving": {
+    "product": "PPCBank VIP Savings",
+    "group": "deposit",
+    "original_name": "VIP Savings — PPCBank Cambodia",
+    "source_url": "https://www.ppcbank.com.kh/personal-banking/deposit/vip-saving/",
+    "text_file": "ppcbank_vip_saving.txt",
+    "is_extra_doc": false,
+    "attach_product": "PPCBank VIP Savings",
+    "facts": [
+      {
+        "fact_type": "interest_rate_by_term",
+        "value": "1.50% p.a for balance 10,000 – 30,000; 1.00% p.a for more than 30,000",
+        "unit": "% p.a",
+        "condition": "rate depends on USD balance tier; higher balance (>30,000) gets lower rate (1.00%)",
+        "page_or_chunk": "rate table",
+        "evidence_text": "10,000 – 30,000 | 1.50% p.a\nMore than 30,000 | 1.00% p.a",
+        "confidence": 0.98
+      },
+      {
+        "fact_type": "interest_rate_by_term",
+        "value": "Interest credited quarterly",
+        "unit": "",
+        "condition": "USD balance only; no KHR rate published",
+        "page_or_chunk": "rate table note",
+        "evidence_text": "Interests will be credited to the account on a quarterly basis",
+        "confidence": 0.97
+      },
+      {
+        "fact_type": "eligibility_requirements",
+        "value": "Cambodian: National ID Card or Valid Passport; Foreigner: Valid passport (Validity ≥ 90 days) plus Employment certificate, contract or business certificate(s)",
+        "unit": "",
+        "condition": "requirements differ by nationality; foreigners need passport validity ≥ 90 days plus employment/business docs",
+        "page_or_chunk": "Requirements section",
+        "evidence_text": "Cambodian\nNational ID Card or Valid Passport\nForeigner\nValid passport (Validity ≥ 90 days)\nEmployment certificate, contract or\nbusiness certificate(s)",
+        "confidence": 0.97
+      },
+      {
+        "fact_type": "eligibility_requirements",
+        "value": "Positioned for affluent customers",
+        "unit": "",
+        "condition": "marketed to 'more affluent customer'; no explicit minimum balance to qualify as VIP stated",
+        "page_or_chunk": "web page intro",
+        "evidence_text": "If you are a more affluent customer, the VIP Savings Account is for\nyou.",
+        "confidence": 0.7
+      },
+      {
+        "fact_type": "fees",
+        "value": "No maintenance account fee; Account closing fee USD 10 (Free of charge over deposit period 1 year); Free passbook replacement; Free Balance confirmation",
+        "unit": "USD",
+        "condition": "closing fee waived only if deposit period exceeds 1 year",
+        "page_or_chunk": "Key Benefits section",
+        "evidence_text": "Fee of closing account USD 10 (Free of charge\nover deposit period 1 year)",
+        "confidence": 0.96
+      },
+      {
+        "fact_type": "fees",
+        "value": "Telegraphic Transfer Fee Rate (OTT): 0.11%; Local Transfer USD 2 flat; Bank Cheque or NBC Cheque issuing USD 2 flat; Free payroll service",
+        "unit": "USD / %",
+        "condition": "varies by transfer type",
+        "page_or_chunk": "Key Benefits section",
+        "evidence_text": "Telegraphic Transfer Fee Rate (OTT): 0.11%\nLocal Transfer USD 2 flat",
+        "confidence": 0.95
+      },
+      {
+        "fact_type": "fees",
+        "value": "OTT fee: ≤ USD10,000 = USD10 (swift fee) + USD15 (cable fee); more than USD10,000 = 0.11% (swift fee) + USD15 (cable fee). ITT fee: USD10 or 0.07% (minimum). Free of charge from intra-bank transfers for Phnom Penh Branches",
+        "unit": "USD / %",
+        "condition": "fee structure varies by transfer amount and direction; free intra-bank only for Phnom Penh Branches",
+        "page_or_chunk": "Important information section",
+        "evidence_text": "amount of ≤ USD10,000 = USD10(swift fee) + USD15 (cable fee); amount of more\nthan USD10,000 = 0.11%(swift fee) + USD15 (cable fee)",
+        "confidence": 0.95
+      },
+      {
+        "fact_type": "minimum_amount_disclosure",
+        "value": "No explicit minimum opening balance stated; lowest interest tier begins at USD 10,000",
+        "unit": "USD",
+        "condition": "page shows interest tiers starting at 10,000 but does not state a required minimum to open the account",
+        "page_or_chunk": "rate table",
+        "evidence_text": "10,000 – 30,000 | 1.50% p.a",
+        "confidence": 0.6
+      },
+      {
+        "fact_type": "early_withdrawal_disclosure",
+        "value": "No premature-withdrawal or early-withdrawal clause published; page shows only balance-tier interest table and quarterly crediting",
+        "unit": "",
+        "condition": "absence: savings account with interest tiers but no stated withdrawal restriction or penalty",
+        "page_or_chunk": "whole page",
+        "evidence_text": "Interests will be credited to the account on a quarterly basis",
+        "confidence": 0.55
+      },
+      {
+        "fact_type": "deposit_protection",
+        "value": "No deposit insurance or deposit protection statement published on the page",
+        "unit": "",
+        "condition": "absence: no guarantee/protection disclosure despite marketed deposit product",
+        "page_or_chunk": "whole page",
+        "evidence_text": "KEY BENEFITS",
+        "confidence": 0.5
+      },
+      {
+        "fact_type": "terms_conditions_apply",
+        "value": "No general terms-and-conditions caveat published on the page",
+        "unit": "",
+        "condition": "absence: no explicit 'terms and conditions apply' statement accompanying advertised rates and fees",
+        "page_or_chunk": "whole page",
+        "evidence_text": "Important information",
+        "confidence": 0.5
+      }
+    ]
+  },
+  "piggy-bank": {
+    "product": "PPCBank Piggy Bank",
+    "group": "deposit",
+    "original_name": "Piggy Bank — PPCBank Cambodia",
+    "source_url": "https://www.ppcbank.com.kh/personal-banking/deposit/piggy-bank/",
+    "text_file": "ppcbank_piggy_bank.txt",
+    "is_extra_doc": false,
+    "attach_product": "PPCBank Piggy Bank",
+    "facts": [
+      {
+        "fact_type": "interest_rate_by_term",
+        "value": "1 month 1.50%; 2 months 1.80%; 3 months 2.50%; 4 months 2.70%; 5 months 3.00%; 6 months 4.00%; 7 months 4.20%; 8 months 4.50%; 9 months 4.60%; 10 months 5.00%; 11 months 5.20%; 12 months 5.30%",
+        "unit": "% p.a",
+        "condition": "USD; rate varies by term",
+        "page_or_chunk": "Interest Rate table",
+        "evidence_text": "1 month | 1.50% | 2.00%",
+        "confidence": 0.97
+      },
+      {
+        "fact_type": "interest_rate_by_term",
+        "value": "1 month 2.00%; 2 months 2.50%; 3 months 3.50%; 4 months 4.00%; 5 months 4.50%; 6 months 5.50%; 7 months 5.70%; 8 months 5.80%; 9 months 5.90%; 10 months 6.00%; 11 months 6.20%; 12 months 6.30%",
+        "unit": "% p.a",
+        "condition": "KHR; rate varies by term",
+        "page_or_chunk": "Interest Rate table",
+        "evidence_text": "12 months | 5.30% | 6.30%",
+        "confidence": 0.97
+      },
+      {
+        "fact_type": "promotional_rate",
+        "value": "up to 6.30%",
+        "unit": "%",
+        "condition": "highest rate applies only to 12-month KHR term; not a single rate for all deposits/currencies",
+        "page_or_chunk": "Save anytime, anywhere section",
+        "evidence_text": "the assurance of safety and a high interest rate of up to 6.30%",
+        "confidence": 0.9
+      },
+      {
+        "fact_type": "rate_term_dependency",
+        "value": "Longer terms earn higher rates; rate depends on both term and currency",
+        "unit": "",
+        "condition": "term 1-12 months; USD vs KHR",
+        "page_or_chunk": "Interest Rate table",
+        "evidence_text": "Terms | Interest USD | Interest KHR",
+        "confidence": 0.95
+      },
+      {
+        "fact_type": "minimum_amount",
+        "value": "Initial Deposit Not required",
+        "unit": "",
+        "condition": "",
+        "page_or_chunk": "Conditions section",
+        "evidence_text": "Initial Deposit | Not required",
+        "confidence": 0.97
+      },
+      {
+        "fact_type": "loan_amount_limit",
+        "value": "Maximum Deposit USD 5,000 or equivalent",
+        "unit": "USD",
+        "condition": "maximum deposit cap",
+        "page_or_chunk": "Conditions section",
+        "evidence_text": "Maximum Deposit | USD 5,000 or equivalent",
+        "confidence": 0.96
+      },
+      {
+        "fact_type": "loan_term",
+        "value": "From 1 month to 12 months",
+        "unit": "months",
+        "condition": "",
+        "page_or_chunk": "Conditions section",
+        "evidence_text": "Terms | From 1 month to 12\nmonths",
+        "confidence": 0.97
+      },
+      {
+        "fact_type": "eligibility_requirements",
+        "value": "Must have a Demand Deposit Account (Current, Savings, or Fast Account); no additional documentation required; maximum of 3 accounts per CIF",
+        "unit": "",
+        "condition": "opening via Mobile Banking only",
+        "page_or_chunk": "Conditions section",
+        "evidence_text": "Have a Demand Deposit\nAccount (Current, Savings, or Fast Account)",
+        "confidence": 0.95
+      },
+      {
+        "fact_type": "channel_restriction",
+        "value": "Opening Channel Mobile Banking",
+        "unit": "",
+        "condition": "account can only be opened via Mobile Banking / PPCBank Mobile App",
+        "page_or_chunk": "Conditions section",
+        "evidence_text": "Opening Channel | Mobile Banking",
+        "confidence": 0.96
+      },
+      {
+        "fact_type": "tax_basis",
+        "value": "Withholding Tax: Resident 6%, Non-resident 14%",
+        "unit": "%",
+        "condition": "applies to interest earned; rate depends on resident status",
+        "page_or_chunk": "Conditions section",
+        "evidence_text": "Withholding Tax | Resident 6%\nNon-resident 14%",
+        "confidence": 0.95
+      },
+      {
+        "fact_type": "maturity_option",
+        "value": "Self-closing at maturity",
+        "unit": "",
+        "condition": "",
+        "page_or_chunk": "Conditions section",
+        "evidence_text": "Maturity Option | Self-closing at\nmaturity",
+        "confidence": 0.94
+      },
+      {
+        "fact_type": "early_withdrawal_disclosure",
+        "value": "Page publishes term-based interest tables and a 'Self-closing at maturity' option but does NOT state any premature/early-withdrawal terms, penalties, or interest forfeiture",
+        "unit": "",
+        "condition": "absence of premature withdrawal clause",
+        "page_or_chunk": "Conditions section",
+        "evidence_text": "Maturity Option | Self-closing at\nmaturity",
+        "confidence": 0.85
+      },
+      {
+        "fact_type": "deposit_protection_disclosure",
+        "value": "Page markets 'the assurance of safety' but publishes no deposit insurance/protection scheme or guarantor details",
+        "unit": "",
+        "condition": "absence of deposit protection statement despite safety claim",
+        "page_or_chunk": "Save anytime, anywhere section",
+        "evidence_text": "with the assurance of safety and a high interest rate",
+        "confidence": 0.8
+      },
+      {
+        "fact_type": "terms_conditions_apply",
+        "value": "Terms and conditions are subject to change at the Bank's discretion, without prior notice",
+        "unit": "",
+        "condition": "",
+        "page_or_chunk": "Note",
+        "evidence_text": "Terms and conditions are\nsubject to change at the Bank’s discretion, without prior notice to customers.",
+        "confidence": 0.96
+      }
+    ]
+  },
+  "buddy-bank": {
+    "product": "PPCBank Buddy Bank",
+    "group": "deposit",
+    "original_name": "Buddy Bank — PPCBank Cambodia",
+    "source_url": "https://www.ppcbank.com.kh/personal-banking/deposit/buddy-bank/",
+    "text_file": "ppcbank_buddy_bank.txt",
+    "is_extra_doc": false,
+    "attach_product": "PPCBank Buddy Bank",
+    "facts": [
+      {
+        "fact_type": "product_type",
+        "value": "Shared savings account for groups (families, friends, teams) inside PPCBank Mobile",
+        "unit": "",
+        "condition": "digital/app-only; managed inside PPCBank Mobile",
+        "page_or_chunk": "What is buddy bank? section",
+        "evidence_text": "Buddy Bank lets groups pool money into one secure savings account inside PPCBank Mobile.",
+        "confidence": 0.95
+      },
+      {
+        "fact_type": "eligibility_requirements",
+        "value": "Invited and approved members only; members join and leave via consent-based single tap",
+        "unit": "",
+        "condition": "membership by invitation and member approval only",
+        "page_or_chunk": "Key Features / Why Buddy Bank Is Safe",
+        "evidence_text": "Only invited members can join your buddy bank.",
+        "confidence": 0.9
+      },
+      {
+        "fact_type": "account_roles",
+        "value": "Buddy Master owns and manages the account; Buddy Members join, contribute, and request money take-out",
+        "unit": "",
+        "condition": "one owner (Buddy Master) per account; members have limited actions",
+        "page_or_chunk": "Buddy Master vs Buddy Member section",
+        "evidence_text": "Buddy Master: Creates the account and manages member activities",
+        "confidence": 0.9
+      },
+      {
+        "fact_type": "eligibility_requirements",
+        "value": "Requires PPCBank Mobile App; create group and invite members to start",
+        "unit": "",
+        "condition": "must have PPCBank Mobile App",
+        "page_or_chunk": "How to Get Started section",
+        "evidence_text": "Open PPCBank Mobile App",
+        "confidence": 0.9
+      },
+      {
+        "fact_type": "interest_rate_by_term_disclosure",
+        "value": "Page markets a 'savings account' but publishes NO interest rate, APR, term, or currency (USD/KHR) rate information",
+        "unit": "",
+        "condition": "no rate/term/currency disclosed despite being a savings product",
+        "page_or_chunk": "whole page",
+        "evidence_text": "Cambodia’s first-ever shared savings account",
+        "confidence": 0.9
+      },
+      {
+        "fact_type": "minimum_amount_disclosure",
+        "value": "No minimum or maximum deposit/balance amount is stated on the page",
+        "unit": "",
+        "condition": "amounts not disclosed",
+        "page_or_chunk": "whole page",
+        "evidence_text": "groups pool money into one secure savings account",
+        "confidence": 0.85
+      },
+      {
+        "fact_type": "fees_disclosure",
+        "value": "No account fees, charges, or penalties are disclosed; 'No paperwork. No hassle.' stated for joining/leaving only",
+        "unit": "",
+        "condition": "fees not disclosed",
+        "page_or_chunk": "Key Features section",
+        "evidence_text": "No paperwork. No hassle. Consent-based joining and leaving with a single tap.",
+        "confidence": 0.8
+      },
+      {
+        "fact_type": "deposit_protection_disclosure",
+        "value": "Page claims security via PPCBank infrastructure but does not state any deposit insurance/protection scheme",
+        "unit": "",
+        "condition": "security claimed generally; no formal deposit protection stated",
+        "page_or_chunk": "Why Buddy Bank Is Safe section",
+        "evidence_text": "Built on our proven banking infrastructure to ensure safety at every step.",
+        "confidence": 0.8
+      },
+      {
+        "fact_type": "terms_conditions_apply",
+        "value": "Withdrawals/collections require member/master approval (consent-based controls)",
+        "unit": "",
+        "condition": "transactions conditional on approval of collection/withdraw requests",
+        "page_or_chunk": "Why Buddy Bank Is Safe / roles table",
+        "evidence_text": "Every action, like joining, contributing, or withdrawing, requires member approval.",
+        "confidence": 0.85
+      },
+      {
+        "fact_type": "early_withdrawal_disclosure",
+        "value": "No premature-withdrawal or maturity/term terms published; only approval-based withdrawal process described",
+        "unit": "",
+        "condition": "no term or early-withdrawal clause disclosed",
+        "page_or_chunk": "roles table (Approve Withdraw Requests)",
+        "evidence_text": "Approve Withdraw Requests",
+        "confidence": 0.8
+      }
+    ]
+  },
+  "heng-heng-account": {
+    "product": "PPCBank Heng Heng Account",
+    "group": "deposit",
+    "original_name": "Heng Heng Account — PPCBank Cambodia",
+    "source_url": "https://www.ppcbank.com.kh/personal-banking/deposit/heng-heng-account/",
+    "text_file": "ppcbank_heng_heng_account.txt",
+    "is_extra_doc": false,
+    "attach_product": "PPCBank Heng Heng Account",
+    "facts": [
+      {
+        "fact_type": "rate_term_dependency",
+        "value": "Interest rates vary according to the amount in each tier; more interest earned based on the outstanding balance",
+        "unit": "",
+        "condition": "rate varies by daily ending balance tier and currency (USD/KHR); no single rate for all balances",
+        "page_or_chunk": "top note and product intro",
+        "evidence_text": "Interest rates vary according to the amount in each tier.",
+        "confidence": 0.98
+      },
+      {
+        "fact_type": "interest_rate_by_term",
+        "value": "USD: <100,000 = 0.00%; ≥100,000–250,000 = 1.00%; ≥250,000–2,000,000 = 2.00%; >2,000,000 = 0.50%",
+        "unit": "%",
+        "condition": "based on USD daily ending balance tier",
+        "page_or_chunk": "Daily Ending Balance rate table",
+        "evidence_text": "< 100,000\n0.00% | < 100 million | 0.00%",
+        "confidence": 0.9
+      },
+      {
+        "fact_type": "interest_rate_by_term",
+        "value": "KHR: <100 million = 0.00%; ≥100 million–1,000 million = 2.00%; ≥1,000 million–8,000 million = 3.00%; >800 million = 1.50%",
+        "unit": "%",
+        "condition": "based on KHR daily ending balance tier (note: page shows overlapping/inconsistent KHR tier boundaries)",
+        "page_or_chunk": "Daily Ending Balance rate table",
+        "evidence_text": "≥ 1,000 million – 8,000 million\n3.00%",
+        "confidence": 0.85
+      },
+      {
+        "fact_type": "rate_term_dependency",
+        "value": "Interest is accrued daily and paid on a quarterly basis",
+        "unit": "",
+        "condition": "accrual daily; credited quarterly",
+        "page_or_chunk": "product intro and Note",
+        "evidence_text": "The interest rate\nis accrued daily and paid on a quarterly basis.",
+        "confidence": 0.97
+      },
+      {
+        "fact_type": "minimum_amount",
+        "value": "Individual (Resident & Non-Resident): Initial opening balance USD 1,000 / KHR 4,000,000; Ongoing balance USD 500 / KHR 2,000,000",
+        "unit": "USD/KHR",
+        "condition": "for Individual account holders",
+        "page_or_chunk": "Product Features",
+        "evidence_text": "Initial opening balance: USD 1,000 /\nKHR\n4,000,000\nOngoing balance:USD 500 / KHR 2,000,000",
+        "confidence": 0.96
+      },
+      {
+        "fact_type": "minimum_amount",
+        "value": "Corporate, Bank, MFI & OFI (Resident & Non-Resident): Initial opening balance USD 5,000 / KHR 20,000,000; Ongoing balance USD 500 / KHR 2,000,000",
+        "unit": "USD/KHR",
+        "condition": "for Corporate, Bank, MFI & OFI account holders",
+        "page_or_chunk": "Product Features",
+        "evidence_text": "Initial opening balance: USD 5,000 /\nKHR\n20,000,000\nOngoing balance: USD 500 / KHR\n2,000,000",
+        "confidence": 0.96
+      },
+      {
+        "fact_type": "eligibility_requirements",
+        "value": "Cambodia: at least 18 years old; National ID Card / Passport / Family Book / Residence Book",
+        "unit": "",
+        "condition": "for Cambodian applicants",
+        "page_or_chunk": "Requirements section",
+        "evidence_text": "Be at least18 years old\nNational ID Card / Passport / Family\nBook /\nResidence Book",
+        "confidence": 0.95
+      },
+      {
+        "fact_type": "eligibility_requirements",
+        "value": "Foreigner: Valid passport; Employment Certificate / Employment Contract / Business Registration",
+        "unit": "",
+        "condition": "for foreign applicants",
+        "page_or_chunk": "Requirements section",
+        "evidence_text": "Valid passport\nEmployment Certificate / Employment\nContract / Business Registration",
+        "confidence": 0.95
+      },
+      {
+        "fact_type": "fees",
+        "value": "Cheque book Free; Bank statement Free; smartBiz Free",
+        "unit": "",
+        "condition": "",
+        "page_or_chunk": "Service Fees section",
+        "evidence_text": "Cheque bookFree\nBank statementFree\nsmartBizFree",
+        "confidence": 0.95
+      },
+      {
+        "fact_type": "fees",
+        "value": "Early account closure (less than 6 months): USD 50 or KHR 200,000; Dormant account: USD 50 or KHR 200,000",
+        "unit": "USD/KHR",
+        "condition": "early closure applies if account closed less than 6 months",
+        "page_or_chunk": "Service Fees section",
+        "evidence_text": "Early account closure\n(less than 6\nmonths)USD50 or KHR 200,000\nDormant accountUSD50 or KHR 200,000",
+        "confidence": 0.95
+      },
+      {
+        "fact_type": "terms_conditions_apply",
+        "value": "KHR rate tier boundaries as published are internally inconsistent/overlapping (e.g. '>800 million' after a '≥1,000 million–8,000 million' tier), which may mislead if advertised as a clean tier structure",
+        "unit": "",
+        "condition": "page text ambiguity a reviewer should verify against source data",
+        "page_or_chunk": "Daily Ending Balance rate table",
+        "evidence_text": "> 2,000,000\n0.50% | > 800 million | 1.50%",
+        "confidence": 0.7
+      },
+      {
+        "fact_type": "deposit_protection_disclosure",
+        "value": "Page markets 'financial security' but does not state any deposit insurance, guarantee, or protection scheme",
+        "unit": "",
+        "condition": "no deposit protection/guarantee disclosed despite security claim",
+        "page_or_chunk": "product intro heading",
+        "evidence_text": "Enjoy financial security and high interest rates",
+        "confidence": 0.8
+      }
+    ]
+  },
+  "songkhoem-installment": {
+    "product": "PPCBank Songkhoem Installment Deposit",
+    "group": "deposit",
+    "original_name": "Songkhoem Installment Deposit — PPCBank Cambodia",
+    "source_url": "https://www.ppcbank.com.kh/personal-banking/deposit/songkhoem-installment/",
+    "text_file": "ppcbank_songkhoem_installment.txt",
+    "is_extra_doc": false,
+    "attach_product": "PPCBank Songkhoem Installment Deposit",
+    "facts": [
+      {
+        "fact_type": "interest_rate_by_term",
+        "value": "USD full-term rates: 12–17m 5.50%; 18–23m 5.60%; 24–35m 5.60%; 36–47m 5.60%; 48–59m 5.80%; 60m 5.80%",
+        "unit": "% p.a",
+        "condition": "USD account, minimum balance USD 10; standard interest rate column; rate varies by savings period",
+        "page_or_chunk": "rate table",
+        "evidence_text": "Minimum Balance USD 10 | 12 – 17 months | 5.50% | 4.00% | – | – | – | –",
+        "confidence": 0.9
+      },
+      {
+        "fact_type": "interest_rate_by_term",
+        "value": "KHR full-term rates: 12–17m 6.50%; 18–23m 6.50%; 24–35m 6.60%; 36–47m 6.60%; 48–59m 6.80%; 60m 6.80%",
+        "unit": "% p.a",
+        "condition": "KHR account, minimum balance KHR 40,000; standard interest rate column; rate varies by savings period",
+        "page_or_chunk": "rate table",
+        "evidence_text": "Minimum Balance KHR 40,000 | 12 – 17 months | 6.50% | 4.50% | – | – | – | –",
+        "confidence": 0.9
+      },
+      {
+        "fact_type": "rate_term_dependency",
+        "value": "Higher standard rate requires longer term; highest USD 5.80% and KHR 6.80% only at 48–59 or 60 months",
+        "unit": "% p.a",
+        "condition": "top rate applies only to 48–59 months and 60 months terms; shorter terms earn lower rates",
+        "page_or_chunk": "rate table",
+        "evidence_text": "48 – 59 months | 5.80% | 4.00% | 4.50% | 4.80% | 5.00% | 5.20%",
+        "confidence": 0.85
+      },
+      {
+        "fact_type": "currency_channel_dependency",
+        "value": "Account available in KHR or USD via PPCBank Mobile App; rates differ by currency",
+        "unit": "",
+        "condition": "rate depends on currency (USD vs KHR); opened through PPCBank Mobile App",
+        "page_or_chunk": "web page",
+        "evidence_text": "You can easily open a Songkhoem Installment Account in KHR or USD through the PPCBank Mobile App.",
+        "confidence": 0.9
+      },
+      {
+        "fact_type": "promotional_rate",
+        "value": "Additional 0.10% for Junior Savings Account with at least one transaction; additional 0.10% for Demand Deposit Account with min balance USD 100; combined 0.20% for holding both",
+        "unit": "%",
+        "condition": "requires qualifying Junior Savings and/or Demand Deposit Account holdings; not applicable to all customers",
+        "page_or_chunk": "Special Benefits section",
+        "evidence_text": "Customers who hold both a Junior Savings Account and a Demand Deposit Account will receive an additional combined interest rate of 0.20%",
+        "confidence": 0.9
+      },
+      {
+        "fact_type": "minimum_amount",
+        "value": "USD 10 (USD account); KHR 40,000 (KHR account)",
+        "unit": "USD / KHR",
+        "condition": "minimum balance depends on currency",
+        "page_or_chunk": "rate table",
+        "evidence_text": "Minimum Balance USD 10",
+        "confidence": 0.9
+      },
+      {
+        "fact_type": "eligibility_requirements",
+        "value": "Must have a Demand Deposit Account (Current, Savings, or Fast Account) and PPCBank Mobile App or smartBiz; no additional documents required",
+        "unit": "",
+        "condition": "requires existing demand deposit account and mobile app/smartBiz",
+        "page_or_chunk": "Requirements section",
+        "evidence_text": "Have a Demand Deposit Account (Current, Savings, or Fast Account)",
+        "confidence": 0.95
+      },
+      {
+        "fact_type": "loan_term",
+        "value": "Savings periods range 12–17 up to 60 months",
+        "unit": "months",
+        "condition": "term selection determines applicable rate",
+        "page_or_chunk": "rate table",
+        "evidence_text": "12 – 17 months | 18 – 23 months | 24 – 35 months",
+        "confidence": 0.85
+      },
+      {
+        "fact_type": "early_withdrawal_disclosure",
+        "value": "Page references a 'Pre-maturity Period and Interest Rate' column showing reduced rates (e.g. 4.00% USD, 4.50% KHR) but does not fully explain premature withdrawal terms or penalties",
+        "unit": "",
+        "condition": "pre-maturity rates listed but withdrawal mechanics/penalties not clearly disclosed",
+        "page_or_chunk": "rate table header",
+        "evidence_text": "Standard Interest Rate | Pre-maturity Period and Interest Rate",
+        "confidence": 0.7
+      },
+      {
+        "fact_type": "terms_conditions_apply",
+        "value": "Interest rates and additional benefits are conditional on term, currency, minimum balance, and qualifying account holdings; no single rate applies to all",
+        "unit": "",
+        "condition": "rate varies by term/currency/channel/eligibility; no single rate for everyone",
+        "page_or_chunk": "web page",
+        "evidence_text": "attractive interest rates based on your savings period",
+        "confidence": 0.8
+      },
+      {
+        "fact_type": "deposit_protection",
+        "value": "No deposit insurance or protection statement present on the page",
+        "unit": "",
+        "condition": "commonly-expected deposit protection disclosure absent; page shows rate tables, Special Benefits and Requirements only",
+        "page_or_chunk": "web page",
+        "evidence_text": "No additional documents are required",
+        "confidence": 0.6
+      }
+    ]
+  },
+  "car-loan": {
+    "product": "PPCBank Car Loan",
+    "group": "loan",
+    "original_name": "Car Loan — PPCBank Cambodia",
+    "source_url": "https://www.ppcbank.com.kh/personal-banking/loan/car-loan/",
+    "text_file": "ppcbank_car_loan.md",
+    "is_extra_doc": false,
+    "attach_product": "PPCBank Car Loan",
+    "facts": [
+      {
+        "fact_type": "loan_amount_limit",
+        "value": "Up to 300,000 USD for personal; Up to 1,000,000 USD for companies",
+        "unit": "USD",
+        "condition": "limit varies by borrower type (personal vs companies)",
+        "page_or_chunk": "CONDITIONS table",
+        "evidence_text": "Up to 300,000 USD for personal\nUp to 1,000,000 USD for companies",
+        "confidence": 0.98
+      },
+      {
+        "fact_type": "loan_interest_rate",
+        "value": "From 8.80% / Year",
+        "unit": "% p.a",
+        "condition": "New Cars; 'from' rate only — no maximum rate stated",
+        "page_or_chunk": "CONDITIONS table (Interest Rate)",
+        "evidence_text": "From 8.80% / Year",
+        "confidence": 0.97
+      },
+      {
+        "fact_type": "loan_interest_rate",
+        "value": "From 10.90% / Year",
+        "unit": "% p.a",
+        "condition": "Used Cars; 'from' rate only — no maximum rate stated",
+        "page_or_chunk": "CONDITIONS table (Interest Rate)",
+        "evidence_text": "From 10.90% / Year",
+        "confidence": 0.97
+      },
+      {
+        "fact_type": "loan_to_value",
+        "value": "Up to 80% of Car Price",
+        "unit": "%",
+        "condition": "New Cars",
+        "page_or_chunk": "CONDITIONS table (Loan Ratio)",
+        "evidence_text": "Up to 80% of (Car Price)",
+        "confidence": 0.97
+      },
+      {
+        "fact_type": "loan_to_value",
+        "value": "Up to 70% of Car Price",
+        "unit": "%",
+        "condition": "Used Cars",
+        "page_or_chunk": "CONDITIONS table (Loan Ratio)",
+        "evidence_text": "Up to 70% of (Car Price)",
+        "confidence": 0.97
+      },
+      {
+        "fact_type": "loan_term",
+        "value": "Up to 108 months",
+        "unit": "months",
+        "condition": "New Cars",
+        "page_or_chunk": "CONDITIONS table (Loan Term)",
+        "evidence_text": "Up to 108 months",
+        "confidence": 0.97
+      },
+      {
+        "fact_type": "loan_term",
+        "value": "Up to 84 months",
+        "unit": "months",
+        "condition": "Used Cars",
+        "page_or_chunk": "CONDITIONS table (Loan Term)",
+        "evidence_text": "Up to 84 months",
+        "confidence": 0.97
+      },
+      {
+        "fact_type": "eligibility_requirements",
+        "value": "Employment ID, employment contract, bank statement, salary confirmation from bank or payroll list; be a resident with an address; Driver License",
+        "unit": "",
+        "condition": "all documents required to apply",
+        "page_or_chunk": "To Apply section",
+        "evidence_text": "You will need to have an\nemployment ID, employment contract, bank statement, salary confirmation from\nyour bank or payroll list",
+        "confidence": 0.95
+      },
+      {
+        "fact_type": "loan_interest_rate_maximum_disclosure",
+        "value": "No maximum interest rate published; only 'from' rates stated (8.80% new, 10.90% used)",
+        "unit": "",
+        "condition": "'From X%/Year' phrasing; ad claim of 'low competitive rates' not bounded by a stated ceiling",
+        "page_or_chunk": "CONDITIONS table (Interest Rate)",
+        "evidence_text": "From 8.80% / Year",
+        "confidence": 0.9
+      },
+      {
+        "fact_type": "fees",
+        "value": "No fees, penalties, or prepayment charges disclosed on page",
+        "unit": "",
+        "condition": "page lists Interest Rate/Loan Ratio/Loan Term/documents only; no fee or penalty section present",
+        "page_or_chunk": "whole page",
+        "evidence_text": "CONDITIONS",
+        "confidence": 0.82
+      },
+      {
+        "fact_type": "approval_conditions_disclosure",
+        "value": "Page markets 'quick and easy approval process' but does not state approval criteria beyond required documents",
+        "unit": "",
+        "condition": "no credit assessment or eligibility scoring terms published",
+        "page_or_chunk": "intro paragraph / To Apply section",
+        "evidence_text": "Enjoy a quick and easy approval process, flexible\nrepayment options",
+        "confidence": 0.85
+      }
+    ]
+  },
+  "home-loan": {
+    "product": "PPCBank Home Loan",
+    "group": "loan",
+    "original_name": "Home Loan — PPCBank Cambodia",
+    "source_url": "https://www.ppcbank.com.kh/personal-banking/loan/home-loan/",
+    "text_file": "ppcbank_home_loan.txt",
+    "is_extra_doc": false,
+    "attach_product": "PPCBank Home Loan",
+    "facts": [
+      {
+        "fact_type": "loan_interest_rate",
+        "value": "From 6.99%",
+        "unit": "% p.a",
+        "condition": "'From' rate only; based on loan term and loan ratio; no maximum rate published",
+        "page_or_chunk": "hero banner / CONDITIONS table",
+        "evidence_text": "From 6.99%/Year",
+        "confidence": 0.98
+      },
+      {
+        "fact_type": "rate_term_dependency",
+        "value": "Interest rate based on loan term and loan ratio",
+        "unit": "",
+        "condition": "rate varies by loan term and loan ratio; not a single rate for everyone",
+        "page_or_chunk": "footnote",
+        "evidence_text": "* Interest Rate:\nbased on loan term, and loan ratio.",
+        "confidence": 0.97
+      },
+      {
+        "fact_type": "promotional_rate",
+        "value": "Rate can be lower than the stated rate for buying from partner Borey/Condo",
+        "unit": "",
+        "condition": "only when buying a house from partner Borey/Condo; actual rate not published",
+        "page_or_chunk": "footnote",
+        "evidence_text": "For buying a house\nfrom our partner Borey\n/\nCondo, the interest\nrate can be lower than the above interest rate.",
+        "confidence": 0.95
+      },
+      {
+        "fact_type": "loan_amount_limit",
+        "value": "From USD 2,000 – 5,000,000",
+        "unit": "USD",
+        "condition": "",
+        "page_or_chunk": "CONDITIONS table",
+        "evidence_text": "Loan Amount | From USD 2,000 – 5,000,000",
+        "confidence": 0.98
+      },
+      {
+        "fact_type": "loan_term",
+        "value": "Up to 300 months (up to 25-year repayment term)",
+        "unit": "months",
+        "condition": "",
+        "page_or_chunk": "CONDITIONS table / body text",
+        "evidence_text": "Loan Term | Up to 300 months",
+        "confidence": 0.98
+      },
+      {
+        "fact_type": "loan_to_value",
+        "value": "Up to 80% of collateral value",
+        "unit": "%",
+        "condition": "of collateral/home value",
+        "page_or_chunk": "CONDITIONS table",
+        "evidence_text": "Loan Ratio | Up to 80% of collateral value",
+        "confidence": 0.98
+      },
+      {
+        "fact_type": "eligibility_requirements",
+        "value": "Steady salary or sufficient income; be a resident with an address; demonstrate ability to repay",
+        "unit": "",
+        "condition": "all conditions required to apply",
+        "page_or_chunk": "TO APPLY section",
+        "evidence_text": "You will need to have a steady\nsalary or\nsufficient income",
+        "confidence": 0.95
+      },
+      {
+        "fact_type": "collateral_requirements",
+        "value": "Purchased house (or substitute Property)",
+        "unit": "",
+        "condition": "collateral required",
+        "page_or_chunk": "CONDITIONS table",
+        "evidence_text": "Collateral | Purchased house (or substitute Property)",
+        "confidence": 0.96
+      },
+      {
+        "fact_type": "loan_interest_rate_disclosure",
+        "value": "Page advertises 'From 6.99%' and lower partner rates but never states a maximum rate or how the specific rate is determined per applicant",
+        "unit": "",
+        "condition": "no maximum rate or rate schedule published; only 'From' figure and term/ratio dependency",
+        "page_or_chunk": "hero banner / footnote",
+        "evidence_text": "Interest Rate* | From 6.99% per annum",
+        "confidence": 0.85
+      },
+      {
+        "fact_type": "fees_disclosure",
+        "value": "No fees, penalties, or prepayment terms disclosed on the page",
+        "unit": "",
+        "condition": "page markets fast approval and low rate but omits fee/penalty terms",
+        "page_or_chunk": "whole page",
+        "evidence_text": "Our loans offer a competitive interest rate and a fast approval process",
+        "confidence": 0.8
+      },
+      {
+        "fact_type": "approval_conditions_disclosure",
+        "value": "Advertises 'fast approval process' but states no approval timeline or credit-assessment detail",
+        "unit": "",
+        "condition": "General eligibility IS listed (steady income, residency, ability to repay); no timeframe given for the 'fast' approval claim",
+        "page_or_chunk": "hero / TO APPLY section",
+        "evidence_text": "a\nfast approval process so that you will be able to enjoy your new home easily",
+        "confidence": 0.82
+      }
+    ]
+  },
+  "home-improvement-loan": {
+    "product": "PPCBank Home Improvement Loan",
+    "group": "loan",
+    "original_name": "Home Improvement Loan — PPCBank Cambodia",
+    "source_url": "https://www.ppcbank.com.kh/personal-banking/loan/home-improvement-loan/",
+    "text_file": "ppcbank_home_improvement_loan.txt",
+    "is_extra_doc": false,
+    "attach_product": "PPCBank Home Improvement Loan",
+    "facts": [
+      {
+        "fact_type": "loan_amount_limit",
+        "value": "Up to USD 200,000",
+        "unit": "USD",
+        "condition": "maximum amount",
+        "page_or_chunk": "Condition table",
+        "evidence_text": "Loan Amount | Up to USD 200,000",
+        "confidence": 0.98
+      },
+      {
+        "fact_type": "loan_interest_rate",
+        "value": "From 9.40% per annum",
+        "unit": "% p.a",
+        "condition": "headline 'from' rate; actual rate varies by loan ratio and term",
+        "page_or_chunk": "Condition table",
+        "evidence_text": "Interest Rate* | From 9.40% per annum",
+        "confidence": 0.97
+      },
+      {
+        "fact_type": "loan_term",
+        "value": "Up to 240 months",
+        "unit": "months",
+        "condition": "maximum term",
+        "page_or_chunk": "Condition table",
+        "evidence_text": "Loan Term | Up to 240 months",
+        "confidence": 0.98
+      },
+      {
+        "fact_type": "loan_to_value",
+        "value": "Up to 80% of collateral value",
+        "unit": "%",
+        "condition": "maximum ratio; rate tables only publish up to 70%",
+        "page_or_chunk": "Condition table",
+        "evidence_text": "Loan Ratio | Up to 80% of collateral value",
+        "confidence": 0.95
+      },
+      {
+        "fact_type": "eligibility_requirements",
+        "value": "Hard Title Deed accepted as collateral",
+        "unit": "",
+        "condition": "collateral must have Hard Title Deed",
+        "page_or_chunk": "Condition table",
+        "evidence_text": "Accept Title Deed | Hard Title Deed",
+        "confidence": 0.95
+      },
+      {
+        "fact_type": "repayment_mode",
+        "value": "Amortization / Installment / Negotiable Principal",
+        "unit": "",
+        "condition": "",
+        "page_or_chunk": "Condition table",
+        "evidence_text": "Repayment Mode | Amortization / Installment / Negotiable Principal",
+        "confidence": 0.95
+      },
+      {
+        "fact_type": "rate_term_dependency",
+        "value": "Construction: ≤50% ratio: 9.40% (≤5y), 10.00% (≤10y), 10.50% (≤15y), 11.00% (≤20y)",
+        "unit": "% p.a",
+        "condition": "rate rises with longer term at fixed loan ratio (construction)",
+        "page_or_chunk": "Home Improvement Loan for Construction rate table",
+        "evidence_text": "≤50% | 9.40% | 10.00% | 10.50% | 11.00%",
+        "confidence": 0.96
+      },
+      {
+        "fact_type": "interest_rate_by_term",
+        "value": "Construction: ≤60% ratio: 10.50%-12.00%; ≤70% ratio: 11.50%-13.00% depending on term",
+        "unit": "% p.a",
+        "condition": "rate rises with higher loan ratio and longer term (construction)",
+        "page_or_chunk": "Home Improvement Loan for Construction rate table",
+        "evidence_text": "≤70% | 11.50% | 12.00% | 12.50% | 13.00%",
+        "confidence": 0.96
+      },
+      {
+        "fact_type": "interest_rate_by_term",
+        "value": "Renovation: ≤50% ratio: 10.00% (≤5y), 10.50% (≤10y); ≤60%: 11.00%-11.50%; ≤70%: 12.00%-12.50%",
+        "unit": "% p.a",
+        "condition": "renovation loans only offer up to ≤10 year terms; rate rises with ratio/term",
+        "page_or_chunk": "Home Improvement Loan for Renovation rate table",
+        "evidence_text": "≤50% | 10.00% | 10.50%",
+        "confidence": 0.96
+      },
+      {
+        "fact_type": "rate_term_dependency",
+        "value": "Minimum 9.40% only applies to construction loans at ≤50% ratio and ≤5 years; no single rate for all borrowers",
+        "unit": "% p.a",
+        "condition": "'From 9.40%' is the lowest cell; higher ratios/terms and renovation cost more",
+        "page_or_chunk": "rate tables",
+        "evidence_text": "≤50% | 9.40% | 10.00% | 10.50% | 11.00%",
+        "confidence": 0.9
+      },
+      {
+        "fact_type": "eligibility_requirements_disclosure",
+        "value": "Page markets loan up to USD 200,000 but does not publish borrower eligibility criteria, required documents, or approval conditions",
+        "unit": "",
+        "condition": "only collateral type and loan ratio are stated",
+        "page_or_chunk": "whole page",
+        "evidence_text": "PPCBank provides home improvement loans to customers who wish to renovate or beautify their residential construction.",
+        "confidence": 0.85
+      },
+      {
+        "fact_type": "fees_disclosure",
+        "value": "No fees, penalties, or prepayment charges are published on the page",
+        "unit": "",
+        "condition": "only interest rates and loan terms shown",
+        "page_or_chunk": "whole page",
+        "evidence_text": "Repayment Mode | Amortization / Installment / Negotiable Principal",
+        "confidence": 0.8
+      },
+      {
+        "fact_type": "loan_to_value_disclosure",
+        "value": "Condition table states up to 80% loan ratio, but rate tables only publish rates for ratios up to ≤70%; rate for 70-80% is not disclosed",
+        "unit": "%",
+        "condition": "gap between advertised max ratio and published rate coverage",
+        "page_or_chunk": "Condition table vs rate tables",
+        "evidence_text": "Loan Ratio | Up to 80% of collateral value",
+        "confidence": 0.88
+      },
+      {
+        "fact_type": "terms_conditions_apply",
+        "value": "Interest Rate marked with asterisk (*) indicating conditions apply",
+        "unit": "",
+        "condition": "asterisk footnote not fully explained on page",
+        "page_or_chunk": "Condition table",
+        "evidence_text": "Interest Rate* | From 9.40% per annum",
+        "confidence": 0.9
+      }
+    ]
+  },
+  "car-for-cash": {
+    "product": "PPCBank Car for Cash",
+    "group": "loan",
+    "original_name": "Car for Cash — PPCBank Cambodia",
+    "source_url": "https://www.ppcbank.com.kh/personal-banking/loan/car-for-cash/",
+    "text_file": "ppcbank_car_for_cash.txt",
+    "is_extra_doc": false,
+    "attach_product": "PPCBank Car for Cash",
+    "facts": [
+      {
+        "fact_type": "loan_interest_rate",
+        "value": "12.9%",
+        "unit": "%",
+        "condition": "single rate shown across all tiers; page does not state whether rate varies by tier, term, or profile",
+        "page_or_chunk": "rate table",
+        "evidence_text": "Interest Rate | 12.9%",
+        "confidence": 0.95
+      },
+      {
+        "fact_type": "loan_to_value",
+        "value": "Tier 1: 50%; Tier 2: 40%; Tier 3: 30%",
+        "unit": "%",
+        "condition": "loan limit depends on vehicle brand tier",
+        "page_or_chunk": "rate table",
+        "evidence_text": "Loan Limit (Based on Vehicle Value) | 50% | 40% | 30%",
+        "confidence": 0.97
+      },
+      {
+        "fact_type": "loan_to_value",
+        "value": "up to 50%",
+        "unit": "%",
+        "condition": "'up to' maximum; only Tier 1 brands qualify for 50%",
+        "page_or_chunk": "web page",
+        "evidence_text": "Borrow up to 50% of your vehicle’s value at a reasonable interest rate.",
+        "confidence": 0.95
+      },
+      {
+        "fact_type": "rate_tier_dependency",
+        "value": "Tier 1: Toyota, Lexus, Ford; Tier 2: Hyundai, Kia, Mazda, BYD, Chevrolet; Tier 3: Other Brands",
+        "unit": "",
+        "condition": "tiers determined by vehicle brand",
+        "page_or_chunk": "rate table",
+        "evidence_text": "Brand | Toyota, Lexus, Ford | Hyundai, Kia, Mazda, BYD, Chevrolet | Other Brands",
+        "confidence": 0.95
+      },
+      {
+        "fact_type": "loan_term",
+        "value": "12 to 60 months",
+        "unit": "months",
+        "condition": "",
+        "page_or_chunk": "rate table",
+        "evidence_text": "Tenor | 12 to 60 months",
+        "confidence": 0.97
+      },
+      {
+        "fact_type": "eligibility_requirements",
+        "value": "Cambodian citizenship; Valid income; Driving license; Car insurance; No existing car loan with other banks; Applicable for Phnom Penh area only",
+        "unit": "",
+        "condition": "all conditions required; geographic restriction to Phnom Penh",
+        "page_or_chunk": "Eligibility section",
+        "evidence_text": "Cambodian citizenship\nValid income\nDriving license\nCar insurance\nNo existing car loan with other banks\nApplicable for Phnom Penh area only",
+        "confidence": 0.96
+      },
+      {
+        "fact_type": "eligibility_requirements",
+        "value": "National ID card or passport; Resident book, family book, or residential certificate; Letter of employment confirmation; Pay slip; Bank statement; Proof of income; Property rental contract and/or other relevant documents; GPS installation required",
+        "unit": "",
+        "condition": "required documents to apply",
+        "page_or_chunk": "Requirements section",
+        "evidence_text": "National ID card or passport\nResident book, family book, or residential certificate\nLetter of employment confirmation\nPay slip\nBank statement\nProof of income\nProperty rental contract and/or other relevant documents\nGPS installation required",
+        "confidence": 0.96
+      },
+      {
+        "fact_type": "currency_disclosure",
+        "value": "Page does not state loan currency (USD/KHR)",
+        "unit": "",
+        "condition": "no currency specified for rate or loan amount",
+        "page_or_chunk": "web page",
+        "evidence_text": "Interest Rate | 12.9%",
+        "confidence": 0.7
+      },
+      {
+        "fact_type": "fees_disclosure",
+        "value": "No fees, penalties, or prepayment charges are published; only interest rate is shown",
+        "unit": "",
+        "condition": "page shows rate table and requirements only, no fee schedule",
+        "page_or_chunk": "web page",
+        "evidence_text": "Interest Rate | 12.9%",
+        "confidence": 0.75
+      },
+      {
+        "fact_type": "loan_interest_rate_disclosure",
+        "value": "Rate stated as flat 12.9% with no maximum, no APR, and no statement of whether it is fixed or variable or reducing/flat basis",
+        "unit": "",
+        "condition": "rate basis and approval conditions not disclosed",
+        "page_or_chunk": "rate table",
+        "evidence_text": "at a reasonable interest rate",
+        "confidence": 0.7
+      },
+      {
+        "fact_type": "loan_amount_limit_disclosure",
+        "value": "No minimum or maximum loan amount is stated; only a percentage of vehicle value is given",
+        "unit": "",
+        "condition": "loan limit expressed only as % of vehicle value",
+        "page_or_chunk": "rate table",
+        "evidence_text": "Loan Limit (Based on Vehicle Value) | 50% | 40% | 30%",
+        "confidence": 0.7
+      }
+    ]
+  },
+  "loan-against-deposit": {
+    "product": "PPCBank Loan Against Deposit",
+    "group": "loan",
+    "original_name": "Loan Against Deposit — PPCBank Cambodia",
+    "source_url": "https://www.ppcbank.com.kh/personal-banking/loan/loan-against-deposit/",
+    "text_file": "ppcbank_loan_against_deposit.txt",
+    "is_extra_doc": false,
+    "attach_product": "PPCBank Loan Against Deposit",
+    "facts": [
+      {
+        "fact_type": "loan_to_value",
+        "value": "up to 95% of the deposit amount",
+        "unit": "%",
+        "condition": "loan amount capped at 95% of the deposit amount",
+        "page_or_chunk": "intro and Key Benefits",
+        "evidence_text": "Loan amount of up to 95% of the deposit amount",
+        "confidence": 0.98
+      },
+      {
+        "fact_type": "deposit_interest_rate_by_channel",
+        "value": "3% p.a when opening account at a branch; 2% p.a when opening account via PPCBank Mobile App",
+        "unit": "% p.a",
+        "condition": "rate on deposit amount varies by channel (branch vs Mobile App)",
+        "page_or_chunk": "Key Benefits",
+        "evidence_text": "3% interest per annum on deposit amount when opening account at a branch, and 2% p.a when opening account via PPCBank Mobile App",
+        "confidence": 0.97
+      },
+      {
+        "fact_type": "loan_term",
+        "value": "based on the maturity date of Fixed Deposit",
+        "unit": "",
+        "condition": "loan term tied to Fixed Deposit maturity date; no fixed tenor stated",
+        "page_or_chunk": "Key Benefits",
+        "evidence_text": "Loan terms based on the maturity date of Fixed Deposit",
+        "confidence": 0.95
+      },
+      {
+        "fact_type": "fees",
+        "value": "No fees",
+        "unit": "",
+        "condition": "",
+        "page_or_chunk": "Key Benefits",
+        "evidence_text": "No fees",
+        "confidence": 0.9
+      },
+      {
+        "fact_type": "prepayment_terms",
+        "value": "No penalties for early loan repayment",
+        "unit": "",
+        "condition": "",
+        "page_or_chunk": "Key Benefits",
+        "evidence_text": "No penalties for early loan repayment",
+        "confidence": 0.95
+      },
+      {
+        "fact_type": "eligibility_requirements",
+        "value": "Personal: National ID Card or Valid Passport. Business: Certificate of Registration; Current Tax Patent/VAT Registration Certificate",
+        "unit": "",
+        "condition": "required documents differ for personal vs business applicants",
+        "page_or_chunk": "Requirements section",
+        "evidence_text": "National ID Card or Valid Passport ... Certificate of Registration ... Current Tax Patent/VAT Registration Certificate",
+        "confidence": 0.95
+      },
+      {
+        "fact_type": "channel_availability",
+        "value": "Loan can be applied for instantly on PPCBank Mobile App",
+        "unit": "",
+        "condition": "instant application described via Mobile App",
+        "page_or_chunk": "intro and How to get section",
+        "evidence_text": "You can apply for a loan instantly on PPCBank Mobile App without losing any accrued interest.",
+        "confidence": 0.9
+      },
+      {
+        "fact_type": "loan_interest_rate_disclosure",
+        "value": "Page states deposit interest rates (3% branch / 2% app) but does NOT state the interest rate charged on the loan itself, nor any APR or maximum loan rate",
+        "unit": "",
+        "condition": "loan borrowing cost not published; only deposit rates and LTV shown",
+        "page_or_chunk": "whole page",
+        "evidence_text": "3% interest per annum on deposit amount when opening account at a branch, and 2% p.a when opening account via PPCBank Mobile App",
+        "confidence": 0.85
+      },
+      {
+        "fact_type": "terms_conditions_apply",
+        "value": "Applicant must agree to Terms and Conditions during application",
+        "unit": "",
+        "condition": "Terms and Conditions apply",
+        "page_or_chunk": "How to get Loan Against Deposit section",
+        "evidence_text": "Tap “I AGREE”, to agree with Terms and Conditions",
+        "confidence": 0.9
+      }
+    ]
+  },
+  "songkhoem-loan": {
+    "product": "PPCBank Songkhoem Loan",
+    "group": "loan",
+    "original_name": "Songkhoem Loan — PPCBank Cambodia",
+    "source_url": "https://www.ppcbank.com.kh/personal-banking/loan/songkhoem-loan/",
+    "text_file": "ppcbank_songkhoem_loan.txt",
+    "is_extra_doc": false,
+    "attach_product": "PPCBank Songkhoem Loan",
+    "facts": [
+      {
+        "fact_type": "loan_amount_limit",
+        "value": "From USD 1,000 to USD 10,000",
+        "unit": "USD",
+        "condition": "Worker segment (to work in South Korea)",
+        "page_or_chunk": "For Worker features table",
+        "evidence_text": "Loan Amount | From USD 1,000 to USD 10,000",
+        "confidence": 0.98
+      },
+      {
+        "fact_type": "loan_amount_limit",
+        "value": "From USD 2,000 to USD 25,000",
+        "unit": "USD",
+        "condition": "Student segment (to study in South Korea)",
+        "page_or_chunk": "For Students features table",
+        "evidence_text": "Loan Amount | From USD 2,000 to USD 25,000",
+        "confidence": 0.98
+      },
+      {
+        "fact_type": "loan_term",
+        "value": "Up to 24 months",
+        "unit": "months",
+        "condition": "Worker segment",
+        "page_or_chunk": "For Worker features table",
+        "evidence_text": "Loan Term | Up to 24 months",
+        "confidence": 0.98
+      },
+      {
+        "fact_type": "loan_term",
+        "value": "Up to 36 months",
+        "unit": "months",
+        "condition": "Student segment",
+        "page_or_chunk": "For Students features table",
+        "evidence_text": "Loan Term | Up to 36 months",
+        "confidence": 0.98
+      },
+      {
+        "fact_type": "loan_interest_rate",
+        "value": "12.00% p.a (Collateral); 14.50% p.a (No Collateral)",
+        "unit": "% p.a",
+        "condition": "Worker segment; rate depends on collateral status",
+        "page_or_chunk": "For Worker features table",
+        "evidence_text": "Interest Rate | 12.00% p.a (Collateral)\n14.50% p.a (No Collateral)",
+        "confidence": 0.97
+      },
+      {
+        "fact_type": "loan_interest_rate",
+        "value": "From 14.50% p.a up",
+        "unit": "% p.a",
+        "condition": "Student segment; only a minimum stated, no maximum rate",
+        "page_or_chunk": "For Students features table",
+        "evidence_text": "Interest Rate | From 14.50% p.a up",
+        "confidence": 0.97
+      },
+      {
+        "fact_type": "loan_interest_rate_disclosure",
+        "value": "Student loan interest rate stated only as a floor ('From 14.50% p.a up'); no maximum rate or approval conditions determining the rate are published",
+        "unit": "",
+        "condition": "Student segment",
+        "page_or_chunk": "For Students features table",
+        "evidence_text": "Interest Rate | From 14.50% p.a up",
+        "confidence": 0.85
+      },
+      {
+        "fact_type": "grace_period",
+        "value": "6 months",
+        "unit": "months",
+        "condition": "Both Worker and Student segments",
+        "page_or_chunk": "features tables",
+        "evidence_text": "Grace period | 6 months",
+        "confidence": 0.95
+      },
+      {
+        "fact_type": "eligibility_requirements",
+        "value": "Be at least 18-years-old; National ID Card or Valid Passport; Family Book; Birth Certificate; Employment Certificate / Admission Certificate; Health Certificate; Guarantor Required",
+        "unit": "",
+        "condition": "Applies to loan approval",
+        "page_or_chunk": "Requirements section",
+        "evidence_text": "Be at least 18-years-old\nNational ID Card or Valid Passport\nFamily Book\nBirth Certificate\nEmployment Certificate / Admission Certificate\nHealth Certificate\nGuarantor Required",
+        "confidence": 0.98
+      },
+      {
+        "fact_type": "loan_amount_limit",
+        "value": "Amount up to USD 25,000",
+        "unit": "USD",
+        "condition": "Headline maximum; overall product (Worker capped at USD 10,000, Student at USD 25,000)",
+        "page_or_chunk": "hero banner",
+        "evidence_text": "Amount up to USD 25,000",
+        "confidence": 0.9
+      },
+      {
+        "fact_type": "advertised_amount_inconsistency_disclosure",
+        "value": "Worker section body text says 'up to $10,000' while features table caps Worker at USD 10,000 and hero banner advertises 'up to USD 25,000'",
+        "unit": "",
+        "condition": "Worker segment vs headline",
+        "page_or_chunk": "For Worker intro vs hero banner",
+        "evidence_text": "You can receive a loan of up to $10,000 with reasonable interest rates and fast approval.",
+        "confidence": 0.8
+      },
+      {
+        "fact_type": "repayment_schedule",
+        "value": "Monthly repayment amounts vary by loan amount, term (12/24/36 months) and grace-period option; e.g. USD 10,000 Worker no-grace 24m = 470.69",
+        "unit": "USD",
+        "condition": "Depends on amount, term and grace period; not a single fixed payment",
+        "page_or_chunk": "Repayment tables",
+        "evidence_text": "USD 10,000 | 1,725.46 | 609.77 | 888.47 | 470.69",
+        "confidence": 0.9
+      },
+      {
+        "fact_type": "fees",
+        "value": "No fees charged for money transfers from Jeonbuk Bank to PPCBank",
+        "unit": "",
+        "condition": "Transfers from Jeonbuk Bank of Korea to PPCBank only",
+        "page_or_chunk": "Key Benefits section",
+        "evidence_text": "No fees charged for money transfers from Jeonbuk Bank to PPCBank.",
+        "confidence": 0.92
+      },
+      {
+        "fact_type": "fees_disclosure",
+        "value": "Page does not publish loan processing/service fees, prepayment penalties, or late-payment charges; only states no transfer fees from Jeonbuk Bank",
+        "unit": "",
+        "condition": "Loan fees generally",
+        "page_or_chunk": "Key Benefits section",
+        "evidence_text": "No fees charged for money transfers from Jeonbuk Bank to PPCBank.",
+        "confidence": 0.75
+      },
+      {
+        "fact_type": "eligibility_requirements",
+        "value": "For individuals preparing to work in South Korea (Worker) or students pursuing higher education/professional studies in South Korea (Student)",
+        "unit": "",
+        "condition": "Purpose-restricted loan",
+        "page_or_chunk": "segment intro paragraphs",
+        "evidence_text": "This loan provides the necessary funds for individuals preparing to work in South Korea",
+        "confidence": 0.9
+      }
+    ]
+  },
+  "annatean-rohas": {
+    "product": "PPCBank Annatean Rohas Loan",
+    "group": "loan",
+    "original_name": "Annatean Rohas Loan — PPCBank Cambodia",
+    "source_url": "https://www.ppcbank.com.kh/personal-banking/loan/annatean-rohas/",
+    "text_file": "ppcbank_annatean_rohas.txt",
+    "is_extra_doc": false,
+    "attach_product": "PPCBank Annatean Rohas Loan",
+    "facts": [
+      {
+        "fact_type": "currency",
+        "value": "KHR",
+        "unit": "",
+        "condition": "product offered only in KHR",
+        "page_or_chunk": "Product Features table",
+        "evidence_text": "Currency | KHR",
+        "confidence": 0.98
+      },
+      {
+        "fact_type": "loan_amount_limit",
+        "value": "KHR 1,200,000 to KHR 4,000,000",
+        "unit": "KHR",
+        "condition": "range applies; minimum 1,200,000 and maximum 4,000,000",
+        "page_or_chunk": "Product Features table",
+        "evidence_text": "Loan Amount | KHR 1,200,000 to KHR 4,000,000",
+        "confidence": 0.98
+      },
+      {
+        "fact_type": "loan_term",
+        "value": "From 3 months to 12 months",
+        "unit": "months",
+        "condition": "term range applies",
+        "page_or_chunk": "Product Features table",
+        "evidence_text": "Loan Term | From 3 months to 12 months",
+        "confidence": 0.97
+      },
+      {
+        "fact_type": "channel",
+        "value": "By PPCBank Mobile App",
+        "unit": "",
+        "condition": "application only via mobile app; no branch application",
+        "page_or_chunk": "Product Features table",
+        "evidence_text": "How to apply for a loan | By PPCBank Mobile App",
+        "confidence": 0.96
+      },
+      {
+        "fact_type": "eligibility_requirements",
+        "value": "For Employees; National ID Card or Valid Passport; Family Book or Book of Residence; proof of income",
+        "unit": "",
+        "condition": "applicant must be an employee and provide listed documents",
+        "page_or_chunk": "Requirements section",
+        "evidence_text": "National ID Card or Valid Passport\nFamily Book or Book of Residence\nHave proof of income",
+        "confidence": 0.95
+      },
+      {
+        "fact_type": "repayment_mode",
+        "value": "Not Required",
+        "unit": "",
+        "condition": "as stated in features table",
+        "page_or_chunk": "Product Features table",
+        "evidence_text": "Repayment Mode | Not Required",
+        "confidence": 0.9
+      },
+      {
+        "fact_type": "loan_interest_rate_disclosure",
+        "value": "Page markets 'competitive interest rates' but publishes no actual rate, no minimum, and no maximum rate",
+        "unit": "",
+        "condition": "no numeric interest rate stated anywhere on page",
+        "page_or_chunk": "intro paragraph / Product Features table",
+        "evidence_text": "with competitive interest rates",
+        "confidence": 0.93
+      },
+      {
+        "fact_type": "fees_disclosure",
+        "value": "No fees, penalties, or prepayment charges disclosed on the page",
+        "unit": "",
+        "condition": "Product Features table lists only Currency, Loan Amount, Loan Term, How to apply, Repayment Mode",
+        "page_or_chunk": "Product Features table",
+        "evidence_text": "Repayment Mode | Not Required",
+        "confidence": 0.85
+      },
+      {
+        "fact_type": "terms_conditions_apply_disclosure",
+        "value": "No terms-and-conditions caveat or approval-conditions statement shown",
+        "unit": "",
+        "condition": "page presents optional additional documents but no approval criteria",
+        "page_or_chunk": "Requirements section",
+        "evidence_text": "Additional documents (Optional)",
+        "confidence": 0.8
+      }
+    ]
+  },
+  "visa-credit-card": {
+    "product": "PPCBank Visa Credit Card",
+    "group": "card",
+    "original_name": "Visa Credit Card — PPCBank Cambodia",
+    "source_url": "https://www.ppcbank.com.kh/personal-banking/card/visa-credit-card/",
+    "text_file": "ppcbank_visa_credit_card.txt",
+    "is_extra_doc": false,
+    "attach_product": "PPCBank Visa Credit Card",
+    "facts": [
+      {
+        "fact_type": "promotional_rate",
+        "value": "Welcome cash back up to 5%",
+        "unit": "%",
+        "condition": "cash back on all purchases cross currency (Oversea POS purchase Transaction); 'up to' cap, not flat",
+        "page_or_chunk": "Key Benefits section",
+        "evidence_text": "Welcome cash back up to 5%",
+        "confidence": 0.95
+      },
+      {
+        "fact_type": "promotional_terms_disclosure",
+        "value": "Cash back described as 'up to 5%' with no stated promotion period, minimum spend, maximum cash-back amount, or eligibility window",
+        "unit": "",
+        "condition": "page only states cross-currency Oversea POS purchase transactions qualify",
+        "page_or_chunk": "Key Benefits section",
+        "evidence_text": "Get cash back rewards on all purchases cross currency (Oversea POS purchase Transaction).",
+        "confidence": 0.8
+      },
+      {
+        "fact_type": "eligibility_requirements",
+        "value": "Applicant must have a savings or current account with PPCBank; valid ID card or Passport",
+        "unit": "",
+        "condition": "both required to apply",
+        "page_or_chunk": "Requirements section",
+        "evidence_text": "Application must have a savings or current\naccount with PPCBank",
+        "confidence": 0.95
+      },
+      {
+        "fact_type": "fees",
+        "value": "Annual Fee (Principal): Credit Classic USD 15; Credit Gold USD 30",
+        "unit": "USD",
+        "condition": "varies by card tier (Classic vs Gold)",
+        "page_or_chunk": "Standard Fees & Charges table",
+        "evidence_text": "Annual Fee (Principal) | USD 15 | USD 30",
+        "confidence": 0.98
+      },
+      {
+        "fact_type": "fees",
+        "value": "Annual Fee (Supplement): Credit Classic USD 10; Credit Gold USD 15",
+        "unit": "USD",
+        "condition": "varies by card tier (Classic vs Gold)",
+        "page_or_chunk": "Standard Fees & Charges table",
+        "evidence_text": "Annual Fee (Supplement) | USD 10 | USD 15",
+        "confidence": 0.98
+      },
+      {
+        "fact_type": "fees",
+        "value": "Issuing Fee: Free; Card Replacement: USD 10",
+        "unit": "USD",
+        "condition": "",
+        "page_or_chunk": "Standard Fees & Charges table",
+        "evidence_text": "Issuing Fee | Free",
+        "confidence": 0.95
+      },
+      {
+        "fact_type": "loan_interest_rate",
+        "value": "Purchase interest 1.5% per month; Cash Advance Interest 1.7% per month",
+        "unit": "% per month",
+        "condition": "rate differs for purchase vs cash advance; stated monthly (not annualized/APR)",
+        "page_or_chunk": "Standard Fees & Charges table",
+        "evidence_text": "Purchase interest | 1.5% per month",
+        "confidence": 0.97
+      },
+      {
+        "fact_type": "fees",
+        "value": "Late Payment Fee: Min USD 10 or 5% of Minimum Monthly Repayment",
+        "unit": "USD/%",
+        "condition": "greater of fixed minimum or percentage",
+        "page_or_chunk": "Standard Fees & Charges table",
+        "evidence_text": "Late Payment Fee | Min USD 10 or 5% of Minimum Monthly\nRepayment",
+        "confidence": 0.95
+      },
+      {
+        "fact_type": "fees",
+        "value": "Cash withdrawal at local/PPCBank/oversea bank ATMs: Min USD 5 or 2% of amount withdrawn per transaction",
+        "unit": "USD/%",
+        "condition": "greater of fixed minimum or percentage; oversea stated as Min USD 5 per transaction or 2%",
+        "page_or_chunk": "Standard Fees & Charges table",
+        "evidence_text": "Cash withdrawal at local bank ATMs | Min USD 5 or 2% of amount withdraw",
+        "confidence": 0.95
+      },
+      {
+        "fact_type": "fees",
+        "value": "Balance inquiry / transaction decline on insufficient fund at other bank ATMs: USD 0.50 per transaction",
+        "unit": "USD",
+        "condition": "at other bank ATMs",
+        "page_or_chunk": "Standard Fees & Charges table",
+        "evidence_text": "fund at\nother bank ATMs | USD 0.50 per transaction",
+        "confidence": 0.95
+      },
+      {
+        "fact_type": "annualized_rate_disclosure",
+        "value": "Interest rates published only as monthly percentages; no APR / annualized effective rate or interest-free grace period disclosed",
+        "unit": "",
+        "condition": "page shows only 'per month' rates",
+        "page_or_chunk": "Standard Fees & Charges table",
+        "evidence_text": "Purchase interest | 1.5% per month",
+        "confidence": 0.85
+      },
+      {
+        "fact_type": "terms_conditions_apply",
+        "value": "Term and condition apply",
+        "unit": "",
+        "condition": "general caveat on requirements/benefits",
+        "page_or_chunk": "Requirements section note",
+        "evidence_text": "Note: * Term and condition apply",
+        "confidence": 0.95
+      },
+      {
+        "fact_type": "eligibility_disclosure",
+        "value": "No credit limit range, minimum income, employment/business documentation, or approval criteria published for card issuance",
+        "unit": "",
+        "condition": "requirements only list account + ID/passport",
+        "page_or_chunk": "Requirements section",
+        "evidence_text": "Valid ID card or Passport",
+        "confidence": 0.75
+      }
+    ]
+  },
+  "visa-debit-card": {
+    "product": "PPCBank Visa Debit Card",
+    "group": "card",
+    "original_name": "Visa Debit Card — PPCBank Cambodia",
+    "source_url": "https://www.ppcbank.com.kh/personal-banking/card/visa-debit-card/",
+    "text_file": "ppcbank_visa_debit_card.txt",
+    "is_extra_doc": false,
+    "attach_product": "PPCBank Visa Debit Card",
+    "facts": [
+      {
+        "fact_type": "fees",
+        "value": "USD 5",
+        "unit": "USD",
+        "condition": "issuing fee",
+        "page_or_chunk": "Standard Fees & Charges table",
+        "evidence_text": "Issuing fee | USD 5",
+        "confidence": 1
+      },
+      {
+        "fact_type": "fees",
+        "value": "Free",
+        "unit": "",
+        "condition": "annual fee",
+        "page_or_chunk": "Standard Fees & Charges table",
+        "evidence_text": "Annual Fee | Free",
+        "confidence": 1
+      },
+      {
+        "fact_type": "fees",
+        "value": "USD 5",
+        "unit": "USD",
+        "condition": "card replacement",
+        "page_or_chunk": "Standard Fees & Charges table",
+        "evidence_text": "Card replacement | USD 5",
+        "confidence": 1
+      },
+      {
+        "fact_type": "fees",
+        "value": "Free",
+        "unit": "",
+        "condition": "cash withdrawal at PPCBank ATMs",
+        "page_or_chunk": "Standard Fees & Charges table",
+        "evidence_text": "Cash withdrawal at PPCBank ATMs | Free",
+        "confidence": 1
+      },
+      {
+        "fact_type": "fees",
+        "value": "USD 4 per transaction",
+        "unit": "USD",
+        "condition": "cash withdrawal at other bank ATMs (Domestic)",
+        "page_or_chunk": "Standard Fees & Charges table",
+        "evidence_text": "Cash withdrawal with other bank ATMs\n(Domestic) | USD 4 per transaction",
+        "confidence": 1
+      },
+      {
+        "fact_type": "fees",
+        "value": "Min USD 5 per transaction or 2% of amount withdrawn",
+        "unit": "USD / %",
+        "condition": "cash withdrawal at other bank ATMs (Overseas)",
+        "page_or_chunk": "Standard Fees & Charges table",
+        "evidence_text": "Cash withdrawal with other bank ATMs\n(Overseas) | Min USD 5 per transaction or 2% of amount\nwithdrawn",
+        "confidence": 1
+      },
+      {
+        "fact_type": "fees",
+        "value": "USD 0.50 per transaction",
+        "unit": "USD",
+        "condition": "balance inquiry / transaction decline on insufficient fund at other bank ATMs",
+        "page_or_chunk": "Standard Fees & Charges table",
+        "evidence_text": "Balance inquiry, transaction decline\non\ninsufficient fund at other bank ATMs | USD 0.50 per transaction",
+        "confidence": 1
+      },
+      {
+        "fact_type": "terms_conditions_apply",
+        "value": "Term and condition apply",
+        "unit": "",
+        "condition": "applies to fees & charges",
+        "page_or_chunk": "Note under fees table",
+        "evidence_text": "Note: * Term and condition apply",
+        "confidence": 1
+      },
+      {
+        "fact_type": "eligibility_requirements",
+        "value": "Visit the nearest branch; fill in card application form",
+        "unit": "",
+        "condition": "application in-branch only; no ID/document requirements stated",
+        "page_or_chunk": "HOW TO APPLY? section",
+        "evidence_text": "Visit the nearest branch\nFill in card application form",
+        "confidence": 0.9
+      },
+      {
+        "fact_type": "cashback_reward_disclosure",
+        "value": "Page advertises 'cash back rewards on all purchases cross currency' but does not state the cashback rate, cap, or eligibility conditions",
+        "unit": "",
+        "condition": "benefit claim without quantified rate/limit",
+        "page_or_chunk": "BENEFITS section",
+        "evidence_text": "Get cash back rewards on all purchases cross currency (Oversea POS purchase Transaction).",
+        "confidence": 0.85
+      },
+      {
+        "fact_type": "discount_offer_disclosure",
+        "value": "Page markets discount offers and promotions worldwide but does not list partners, amounts, or promotion period",
+        "unit": "",
+        "condition": "unquantified promotional benefit",
+        "page_or_chunk": "BENEFITS section",
+        "evidence_text": "Enjoy discount offers and promotions\nworldwide",
+        "confidence": 0.8
+      },
+      {
+        "fact_type": "security_features",
+        "value": "3-D Secure with OTP to confirm identity",
+        "unit": "",
+        "condition": "fraud/unauthorized use prevention",
+        "page_or_chunk": "intro paragraph",
+        "evidence_text": "our card is protected with an additional layer of\nsecurity (3-D Secure) with an OTP to confirm your\nidentity",
+        "confidence": 0.95
+      },
+      {
+        "fact_type": "liability_disclosure",
+        "value": "Cardholder is responsible if a card issue occurs",
+        "unit": "",
+        "condition": "customer bears liability for card issues",
+        "page_or_chunk": "Card Security section",
+        "evidence_text": "if\nissue\noccurs will\nresponse by cardholder",
+        "confidence": 0.8
+      }
+    ]
+  },
+  "css-card": {
+    "product": "PPCBank CSS Card",
+    "group": "card",
+    "original_name": "CSS Card — PPCBank Cambodia",
+    "source_url": "https://www.ppcbank.com.kh/personal-banking/card/css-card/",
+    "text_file": "ppcbank_css_card.txt",
+    "is_extra_doc": false,
+    "attach_product": "PPCBank CSS Card",
+    "facts": [
+      {
+        "fact_type": "card_scheme",
+        "value": "CSS is a local card scheme under the authority of the National Bank of Cambodia (NBC); usable at domestic ATMs and POS in KHR and/or USD",
+        "unit": "",
+        "condition": "domestic ATMs and POS only",
+        "page_or_chunk": "What is CSS section",
+        "evidence_text": "CSS is a local card scheme, under the authority of the National Bank of Cambodia (NBC). CSS cardholders can make transactions at domestic ATMs and POS in KHR and/or USD for a minimum fee nationwide.",
+        "confidence": 0.98
+      },
+      {
+        "fact_type": "transaction_limit",
+        "value": "Up to $3,000 for cash withdrawals and fund transfers",
+        "unit": "USD",
+        "condition": "cash withdrawals and fund transfers",
+        "page_or_chunk": "Why PPCBank CSS Card section",
+        "evidence_text": "Up to $3,000 for cash withdrawals and fund transfers.",
+        "confidence": 0.95
+      },
+      {
+        "fact_type": "eligibility_requirements",
+        "value": "Must have a savings or current account with PPCBank; valid ID card or Passport",
+        "unit": "",
+        "condition": "applicant must hold PPCBank savings/current account",
+        "page_or_chunk": "Requirements section",
+        "evidence_text": "Application must have a savings or current account with PPCBank\nValid ID card or Passport",
+        "confidence": 0.97
+      },
+      {
+        "fact_type": "fees",
+        "value": "Issuing Fee: USD 3",
+        "unit": "USD",
+        "condition": "",
+        "page_or_chunk": "Standard Fees & Charges table",
+        "evidence_text": "Issuing Fee | USD 3",
+        "confidence": 0.98
+      },
+      {
+        "fact_type": "fees",
+        "value": "Card Replacement: USD 3",
+        "unit": "USD",
+        "condition": "",
+        "page_or_chunk": "Standard Fees & Charges table",
+        "evidence_text": "Card Replacement | USD 3",
+        "confidence": 0.98
+      },
+      {
+        "fact_type": "fees",
+        "value": "Cash Withdrawal at PPCBank ATM: Free; Balance inquiry at PPCBank ATMs: Free",
+        "unit": "",
+        "condition": "at PPCBank ATMs only",
+        "page_or_chunk": "Standard Fees & Charges table",
+        "evidence_text": "Cash Withdrawal at PPCBank ATM | Free",
+        "confidence": 0.97
+      },
+      {
+        "fact_type": "fees",
+        "value": "Cash Withdrawal at other bank ATMs: Depending on CSS member banks (max. KHR 1,800)",
+        "unit": "KHR",
+        "condition": "at other bank ATMs; max cap valid until end of 2026",
+        "page_or_chunk": "Standard Fees & Charges table",
+        "evidence_text": "Cash Withdrawal at other bank ATMs | Depending on CSS member banks (max. KHR 1,800)*Valid until the end of 2026",
+        "confidence": 0.95
+      },
+      {
+        "fact_type": "promotional_period_disclosure",
+        "value": "The KHR 1,800 max other-bank ATM withdrawal fee cap is stated valid until end of 2026, implying fee may change afterward; no fee stated for period after 2026",
+        "unit": "",
+        "condition": "cap validity time-limited",
+        "page_or_chunk": "Standard Fees & Charges table",
+        "evidence_text": "*Valid until the end of 2026",
+        "confidence": 0.85
+      },
+      {
+        "fact_type": "benefit_claim",
+        "value": "Free notifications for each transaction; discounts from PPCBank partners",
+        "unit": "",
+        "condition": "discounts subject to PPCBank partners",
+        "page_or_chunk": "Why PPCBank CSS Card section",
+        "evidence_text": "Free notifications for each transaction\n\nEnjoy discounts from PPCBank partners",
+        "confidence": 0.9
+      },
+      {
+        "fact_type": "annual_fee_disclosure",
+        "value": "Page publishes issuing, replacement, withdrawal, and balance inquiry fees but does not state any annual/maintenance fee",
+        "unit": "",
+        "condition": "no annual fee disclosed",
+        "page_or_chunk": "Standard Fees & Charges table",
+        "evidence_text": "Issuing Fee | USD 3\nCash Withdrawal at PPCBank ATM | Free",
+        "confidence": 0.7
+      },
+      {
+        "fact_type": "terms_conditions_apply",
+        "value": "Discount and partner benefits offered without published list of participating partners or terms; application via branch visit with required documents",
+        "unit": "",
+        "condition": "in-branch application required",
+        "page_or_chunk": "Ready to have section",
+        "evidence_text": "Visit any PPCBank branch with required documents",
+        "confidence": 0.8
+      }
+    ]
+  },
+  "extra::ppcbank_rate_revision.md": {
+    "product": "PPCBank Fixed Deposit",
+    "group": "deposit",
+    "original_name": "Announcement on Revision of Interest Rates (effective 2026-04-01)",
+    "source_url": "https://www.ppcbank.com.kh/fixed-installment-deposit-rate-revision/",
+    "text_file": "ppcbank_rate_revision.md",
+    "is_extra_doc": true,
+    "attach_product": "PPCBank Fixed Deposit",
+    "facts": [
+      {
+        "fact_type": "promotional_rate",
+        "value": "Revised rates effective from April 1, 2026 onward; published March 2, 2026",
+        "unit": "",
+        "condition": "rates apply only from the effective date 2026-04-01; this is a revision announcement",
+        "page_or_chunk": "announcement header",
+        "evidence_text": "the interest rates for Fixed Deposit and Installment Deposit accounts will be revised, effective from April 1, 2026 onward",
+        "confidence": 0.98
+      },
+      {
+        "fact_type": "interest_rate_by_term",
+        "value": "3 months: 2.50%; 6 months: 3.45%; 12 months: 4.20%; 18 months: 4.30%; 24 months: 4.40%; 36 months: 4.50%; 48 months: 4.60%; 60 months: 4.70%",
+        "unit": "% p.a",
+        "condition": "USD, interest payment at maturity date; rate varies by term",
+        "page_or_chunk": "FIXED DEPOSITS rate table",
+        "evidence_text": "Interest payment at maturity date\nInterest USD\n3 months\n2.50% p.a",
+        "confidence": 0.95
+      },
+      {
+        "fact_type": "interest_rate_by_term",
+        "value": "3 months: 3.00%; 6 months: 3.95%; 12 months: 4.70%; 18 months: 4.80%; 24 months: 4.90%; 36-60 months: not offered (–)",
+        "unit": "% p.a",
+        "condition": "KHR, interest payment at maturity date; not available for 36/48/60 months",
+        "page_or_chunk": "FIXED DEPOSITS rate table",
+        "evidence_text": "Interest KHR\n3 months\n3.00% p.a\n36 months\n–",
+        "confidence": 0.95
+      },
+      {
+        "fact_type": "interest_rate_by_term",
+        "value": "3 months: 2.25%; 6 months: 3.20%; 12 months: 4.00%; 18 months: 4.05%; 24 months: 4.15%; 36 months: 4.25%; 48 months: 4.35%; 60 months: 4.45%",
+        "unit": "% p.a",
+        "condition": "USD, monthly interest payment; lower than at-maturity rate for same term",
+        "page_or_chunk": "FIXED DEPOSITS rate table",
+        "evidence_text": "Monthly interest payment\nInterest USD\n3 months\n2.25% p.a",
+        "confidence": 0.95
+      },
+      {
+        "fact_type": "interest_rate_by_term",
+        "value": "3 months: 2.75%; 6 months: 3.75%; 12 months: 4.40%; 18 months: 4.55%; 24 months: 4.70%; 36-60 months: not offered (–)",
+        "unit": "% p.a",
+        "condition": "KHR, monthly interest payment; not available for 36/48/60 months",
+        "page_or_chunk": "FIXED DEPOSITS rate table",
+        "evidence_text": "Monthly interest payment\nInterest KHR\n3 months\n2.75% p.a",
+        "confidence": 0.95
+      },
+      {
+        "fact_type": "rate_term_dependency",
+        "value": "Rate increases with longer term and differs by currency (KHR higher than USD) and by interest payment timing (at-maturity higher than monthly)",
+        "unit": "",
+        "condition": "no single rate for everyone; depends on term, currency USD/KHR, and payment frequency",
+        "page_or_chunk": "FIXED DEPOSITS rate table",
+        "evidence_text": "Interest payment at maturity date\nMonthly interest payment\nInterest USD\nInterest KHR",
+        "confidence": 0.9
+      },
+      {
+        "fact_type": "interest_rate_by_term",
+        "value": "Installment Deposit — 6 months: 3.30%; 12 months: 4.25%; 24 months: 4.50%; 36 months: 4.60%",
+        "unit": "% p.a",
+        "condition": "Installment Deposit Account, Standard Rate; varies by term",
+        "page_or_chunk": "INSTALLMENT DEPOSITS table",
+        "evidence_text": "Installment Deposit Account\n(Minimum Opening Balance: USD 10)\n6 months\n3.30% p.a",
+        "confidence": 0.95
+      },
+      {
+        "fact_type": "interest_rate_by_term",
+        "value": "Premier Installment Deposit — 6 months: 3.50%; 12 months: 4.40%; 24 months: 4.65%; 36 months: 4.75%",
+        "unit": "% p.a",
+        "condition": "Premier Installment Deposit Account, Standard Rate; requires higher minimum balance",
+        "page_or_chunk": "INSTALLMENT DEPOSITS table",
+        "evidence_text": "Premier Installment Deposit Account\n(Minimum Opening Balance: USD 500)\n6 months\n3.50% p.a",
+        "confidence": 0.95
+      },
+      {
+        "fact_type": "minimum_amount",
+        "value": "Installment Deposit Account: USD 10; Premier Installment Deposit Account: USD 500",
+        "unit": "USD",
+        "condition": "minimum opening balance differs by product tier",
+        "page_or_chunk": "INSTALLMENT DEPOSITS table",
+        "evidence_text": "(Minimum Opening Balance: USD 10)",
+        "confidence": 0.97
+      },
+      {
+        "fact_type": "terms_conditions_apply",
+        "value": "Terms and conditions apply",
+        "unit": "",
+        "condition": "unspecified additional terms and conditions govern the rates",
+        "page_or_chunk": "footnote",
+        "evidence_text": "*Terms and conditions apply",
+        "confidence": 0.98
+      },
+      {
+        "fact_type": "early_withdrawal_disclosure",
+        "value": "No premature/early-withdrawal clause or penalty is published; page shows only at-maturity and monthly interest rate tables",
+        "unit": "",
+        "condition": "absence: reviewer cannot verify early-withdrawal terms from this page",
+        "page_or_chunk": "FIXED DEPOSITS rate table",
+        "evidence_text": "Interest payment at maturity date\nMonthly interest payment",
+        "confidence": 0.85
+      },
+      {
+        "fact_type": "deposit_protection_disclosure",
+        "value": "No deposit insurance/protection or guarantee statement is published on this page",
+        "unit": "",
+        "condition": "absence: no deposit protection disclosure present alongside advertised rates",
+        "page_or_chunk": "web page",
+        "evidence_text": "*Terms and conditions apply",
+        "confidence": 0.8
+      },
+      {
+        "fact_type": "minimum_amount",
+        "value": "No minimum deposit amount is stated for Fixed Deposits (only Installment Deposit minimums are published)",
+        "unit": "",
+        "condition": "absence: Fixed Deposit minimum opening amount not disclosed",
+        "page_or_chunk": "FIXED DEPOSITS rate table",
+        "evidence_text": "(Minimum Opening Balance: USD 10)",
+        "confidence": 0.75
+      }
+    ]
+  }
+}

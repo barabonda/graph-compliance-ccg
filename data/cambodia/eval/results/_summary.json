@@ -1,0 +1,642 @@
+[
+  {
+    "id": "kh-eval-01",
+    "run": 1,
+    "verdict": "reject",
+    "fired_cus": [
+      "KH-CU-01",
+      "KH-CU-02",
+      "KH-CU-04",
+      "KH-CU-05",
+      "KH-CU-07",
+      "KH-CU-16"
+    ],
+    "judgments": [
+      [
+        "KH-CU-16",
+        "INSUFFICIENT"
+      ],
+      [
+        "KH-CU-01",
+        "NON_COMPLIANT"
+      ],
+      [
+        "KH-CU-04",
+        "NON_COMPLIANT"
+      ],
+      [
+        "KH-CU-07",
+        "NON_COMPLIANT"
+      ],
+      [
+        "KH-CU-02",
+        "NON_COMPLIANT"
+      ],
+      [
+        "KH-CU-05",
+        "INSUFFICIENT"
+      ],
+      [
+        "KH-CU-07",
+        "INSUFFICIENT"
+      ],
+      [
+        "KH-CU-04",
+        "INSUFFICIENT"
+      ]
+    ],
+    "kr_statute_citations": [],
+    "extraction_status": "PRELOADED",
+    "comparison_statuses": [
+      "CONDITION_MISSING",
+      "CONTRADICTED"
+    ],
+    "comparisons": 6,
+    "translations": {
+      "en": true,
+      "ko": true
+    },
+    "hypernym_mapping": [
+      [
+        "ប្រាក់បញ្ញើមានកាលកំណត់ PPCBank",
+        [
+          "광고의 상품·서비스 언어/설명에서의 필수정보 누락 금지"
+        ]
+      ],
+      [
+        "អត្រាការប្រាក់ខ្ពស់បំផុត",
+        [
+          "절대적·최상급 표현 사전 확인(허가) 필요",
+          "허위·기만적 광고표현(품질/가격/보장/혜택 등) 금지",
+          "광고 내용 진실성 및 오인·오도 금지"
+        ]
+      ],
+      [
+        "សម្រាប់គ្រប់គ្នា",
+        [
+          "광고의 상품·서비스 언어/설명에서의 필수정보 누락 금지",
+          "광고 내용 진실성 및 오인·오도 금지"
+        ]
+      ],
+      [
+        "ដោយគ្មានលក្ខខណ្ឌ",
+        [
+          "조건부(제한/한정/자격) 이익·금리·요건의 명확한 표시 의무",
+          "허위·기만적 광고표현(품질/가격/보장/혜택 등) 금지",
+          "광고 내용 진실성 및 오인·오도 금지"
+        ]
+      ],
+      [
+        "ដកប្រាក់បានគ្រប់ពេល",
+        [
+          "조건부(제한/한정/자격) 이익·금리·요건의 명확한 표시 의무",
+          "광고의 상품·서비스 언어/설명에서의 필수정보 누락 금지",
+          "허위·기만적 광고표현(품질/가격/보장/혜택 등) 금지"
+        ]
+      ],
+      [
+        "ការប្រាក់ពេញ",
+        [
+          "허위·기만적 광고표현(품질/가격/보장/혜택 등) 금지",
+          "광고 내용 진실성 및 오인·오도 금지",
+          "조건부(제한/한정/자격) 이익·금리·요건의 명확한 표시 의무"
+        ]
+      ]
+    ],
+    "track_b": "HIGH",
+    "seconds": 131
+  },
+  {
+    "id": "kh-eval-01",
+    "run": 2,
+    "verdict": "reject",
+    "fired_cus": [
+      "KH-CU-02",
+      "KH-CU-07",
+      "KH-CU-16"
+    ],
+    "judgments": [
+      [
+        "KH-CU-16",
+        "NON_COMPLIANT"
+      ],
+      [
+        "KH-CU-02",
+        "NON_COMPLIANT"
+      ],
+      [
+        "KH-CU-02",
+        "NON_COMPLIANT"
+      ],
+      [
+        "KH-CU-07",
+        "NON_COMPLIANT"
+      ],
+      [
+        "KH-CU-07",
+        "NON_COMPLIANT"
+      ]
+    ],
+    "kr_statute_citations": [],
+    "extraction_status": "PRELOADED",
+    "comparison_statuses": [
+      "CONTRADICTED"
+    ],
+    "comparisons": 5,
+    "translations": {
+      "en": true,
+      "ko": true
+    },
+    "hypernym_mapping": [
+      [
+        "ប្រាក់បញ្ញើមានកាលកំណត់ PPCBank — អត្រា",
+        [
+          "조건부(제한/한정/자격) 이익·금리·요건의 명확한 표시 의무",
+          "절대적·최상급 표현 사전 확인(허가) 필요",
+          "허위·기만적 광고표현(품질/가격/보장/혜택 등) 금지"
+        ]
+      ],
+      [
+        "ដកប្រាក់បានគ្រប់ពេល ជាមួយការប្រាក់ពេញ។",
+        [
+          "조건부(제한/한정/자격) 이익·금리·요건의 명확한 표시 의무",
+          "허위·기만적 광고표현(품질/가격/보장/혜택 등) 금지",
+          "광고 내용 진실성 및 오인·오도 금지"
+        ]
+      ]
+    ],
+    "track_b": "HIGH",
+    "seconds": 103
+  },
+  {
+    "id": "kh-eval-01",
+    "run": 3,
+    "verdict": "revise",
+    "fired_cus": [
+      "KH-CU-02",
+      "KH-CU-04",
+      "KH-CU-07",
+      "KH-CU-16"
+    ],
+    "judgments": [
+      [
+        "KH-CU-16",
+        "NON_COMPLIANT"
+      ],
+      [
+        "KH-CU-07",
+        "NON_COMPLIANT"
+      ],
+      [
+        "KH-CU-07",
+        "INSUFFICIENT"
+      ],
+      [
+        "KH-CU-04",
+        "NON_COMPLIANT"
+      ],
+      [
+        "KH-CU-02",
+        "INSUFFICIENT"
+      ],
+      [
+        "KH-CU-02",
+        "INSUFFICIENT"
+      ]
+    ],
+    "kr_statute_citations": [],
+    "extraction_status": "PRELOADED",
+    "comparison_statuses": [
+      "CONTRADICTED",
+      "NO_PRODUCT_FACT"
+    ],
+    "comparisons": 5,
+    "translations": {
+      "en": true,
+      "ko": true
+    },
+    "hypernym_mapping": [
+      [
+        "ប្រាក់បញ្ញើមានកាលកំណត់ PPCBank",
+        [
+          "광고 내용 진실성 및 오인·오도 금지"
+        ]
+      ],
+      [
+        "អត្រាការប្រាក់ខ្ពស់បំផុតសម្រាប់គ្រប់គ្",
+        [
+          "절대적·최상급 표현 사전 확인(허가) 필요",
+          "광고 내용 진실성 및 오인·오도 금지"
+        ]
+      ],
+      [
+        "ដោយគ្មានលក្ខខណ្ឌ!",
+        [
+          "조건부(제한/한정/자격) 이익·금리·요건의 명확한 표시 의무",
+          "광고 내용 진실성 및 오인·오도 금지"
+        ]
+      ],
+      [
+        "ដកប្រាក់បានគ្រប់ពេល",
+        [
+          "허위·기만적 광고표현(품질/가격/보장/혜택 등) 금지",
+          "기만적 판매(구매 시 오인) 금지"
+        ]
+      ],
+      [
+        "ជាមួយការប្រាក់ពេញ។",
+        [
+          "허위·기만적 광고표현(품질/가격/보장/혜택 등) 금지",
+          "광고 내용 진실성 및 오인·오도 금지"
+        ]
+      ]
+    ],
+    "track_b": "HIGH",
+    "seconds": 114
+  },
+  {
+    "id": "kh-eval-02",
+    "run": 1,
+    "verdict": "reject",
+    "fired_cus": [
+      "KH-CU-02",
+      "KH-CU-04",
+      "KH-CU-05",
+      "KH-CU-07",
+      "KH-CU-16"
+    ],
+    "judgments": [
+      [
+        "KH-CU-16",
+        "NON_COMPLIANT"
+      ],
+      [
+        "KH-CU-07",
+        "NON_COMPLIANT"
+      ],
+      [
+        "KH-CU-16",
+        "NON_COMPLIANT"
+      ],
+      [
+        "KH-CU-07",
+        "NON_COMPLIANT"
+      ],
+      [
+        "KH-CU-04",
+        "INSUFFICIENT"
+      ],
+      [
+        "KH-CU-05",
+        "INSUFFICIENT"
+      ],
+      [
+        "KH-CU-07",
+        "NON_COMPLIANT"
+      ],
+      [
+        "KH-CU-02",
+        "INSUFFICIENT"
+      ]
+    ],
+    "kr_statute_citations": [],
+    "extraction_status": "PRELOADED",
+    "comparison_statuses": [
+      "CONTRADICTED"
+    ],
+    "comparisons": 5,
+    "translations": {
+      "en": true,
+      "ko": true
+    },
+    "hypernym_mapping": [
+      [
+        "the highest rate",
+        [
+          "광고 내용 진실성 및 오인·오도 금지",
+          "절대적·최상급 표현 사전 확인(허가) 필요",
+          "허위·기만적 광고표현(품질/가격/보장/혜택 등) 금지"
+        ]
+      ],
+      [
+        "the highest rate",
+        [
+          "광고의 상품·서비스 언어/설명에서의 필수정보 누락 금지",
+          "허위·기만적 광고표현(품질/가격/보장/혜택 등) 금지"
+        ]
+      ],
+      [
+        "for everyone",
+        [
+          "광고 내용 진실성 및 오인·오도 금지",
+          "광고의 상품·서비스 언어/설명에서의 필수정보 누락 금지",
+          "기만적 판매(구매 시 오인) 금지"
+        ]
+      ],
+      [
+        "no conditions",
+        [
+          "조건부(제한/한정/자격) 이익·금리·요건의 명확한 표시 의무",
+          "허위·기만적 광고표현(품질/가격/보장/혜택 등) 금지",
+          "광고의 상품·서비스 언어/설명에서의 필수정보 누락 금지"
+        ]
+      ],
+      [
+        "Withdraw anytime",
+        [
+          "소비자 정보 표준 최소정보 고지 의무",
+          "광고의 상품·서비스 언어/설명에서의 필수정보 누락 금지",
+          "허위·기만적 광고표현(품질/가격/보장/혜택 등) 금지"
+        ]
+      ],
+      [
+        "with full interest!",
+        [
+          "조건부(제한/한정/자격) 이익·금리·요건의 명확한 표시 의무",
+          "허위·기만적 광고표현(품질/가격/보장/혜택 등) 금지",
+          "광고의 상품·서비스 언어/설명에서의 필수정보 누락 금지"
+        ]
+      ]
+    ],
+    "track_b": "HIGH",
+    "seconds": 118
+  },
+  {
+    "id": "kh-eval-03",
+    "run": 1,
+    "verdict": "revise",
+    "fired_cus": [
+      "KH-CU-03",
+      "KH-CU-04",
+      "KH-CU-05",
+      "KH-CU-07"
+    ],
+    "judgments": [
+      [
+        "KH-CU-03",
+        "NON_COMPLIANT"
+      ],
+      [
+        "KH-CU-04",
+        "NON_COMPLIANT"
+      ],
+      [
+        "KH-CU-07",
+        "INSUFFICIENT"
+      ],
+      [
+        "KH-CU-07",
+        "INSUFFICIENT"
+      ],
+      [
+        "KH-CU-05",
+        "NOT_APPLICABLE"
+      ],
+      [
+        "KH-CU-04",
+        "INSUFFICIENT"
+      ]
+    ],
+    "kr_statute_citations": [],
+    "extraction_status": "PRELOADED",
+    "comparison_statuses": [
+      "CONDITION_MISSING",
+      "NO_PRODUCT_FACT",
+      "SUPPORTED"
+    ],
+    "comparisons": 5,
+    "translations": {
+      "en": true,
+      "ko": true
+    },
+    "hypernym_mapping": [
+      [
+        "Earn interest on the money you deposit",
+        [
+          "광고 내용 진실성 및 오인·오도 금지",
+          "광고 필수 허가·인증·인가(라이선스/퍼밋) 선행"
+        ]
+      ],
+      [
+        "If you have savings that you don’t pla",
+        [
+          "조건부(제한/한정/자격) 이익·금리·요건의 명확한 표시 의무",
+          "광고의 상품·서비스 언어/설명에서의 필수정보 누락 금지",
+          "허위·기만적 광고표현(품질/가격/보장/혜택 등) 금지"
+        ]
+      ],
+      [
+        "The longer you commit your money to be",
+        [
+          "허위·기만적 광고표현(품질/가격/보장/혜택 등) 금지",
+          "광고의 상품·서비스 언어/설명에서의 필수정보 누락 금지",
+          "조건부(제한/한정/자격) 이익·금리·요건의 명확한 표시 의무"
+        ]
+      ],
+      [
+        "Open a fixed deposit account at PPCBan",
+        [
+          "광고 내용 진실성 및 오인·오도 금지",
+          "기만적 판매(구매 시 오인) 금지",
+          "광고 필수 허가·인증·인가(라이선스/퍼밋) 선행"
+        ]
+      ],
+      [
+        "Make your money work for you and let i",
+        [
+          "허위·기만적 광고표현(품질/가격/보장/혜택 등) 금지",
+          "광고의 상품·서비스 언어/설명에서의 필수정보 누락 금지"
+        ]
+      ]
+    ],
+    "track_b": "MEDIUM",
+    "seconds": 130
+  },
+  {
+    "id": "kh-eval-04",
+    "run": 1,
+    "verdict": "needs_review",
+    "fired_cus": [
+      "KH-CU-04",
+      "KH-CU-05",
+      "KH-CU-06",
+      "KH-CU-07"
+    ],
+    "judgments": [
+      [
+        "KH-CU-06",
+        "INSUFFICIENT"
+      ],
+      [
+        "KH-CU-04",
+        "INSUFFICIENT"
+      ],
+      [
+        "KH-CU-04",
+        "INSUFFICIENT"
+      ],
+      [
+        "KH-CU-05",
+        "NOT_APPLICABLE"
+      ],
+      [
+        "KH-CU-04",
+        "INSUFFICIENT"
+      ],
+      [
+        "KH-CU-05",
+        "NOT_APPLICABLE"
+      ],
+      [
+        "KH-CU-07",
+        "INSUFFICIENT"
+      ],
+      [
+        "KH-CU-05",
+        "INSUFFICIENT"
+      ],
+      [
+        "KH-CU-07",
+        "INSUFFICIENT"
+      ]
+    ],
+    "kr_statute_citations": [],
+    "extraction_status": "PRELOADED",
+    "comparison_statuses": [
+      "PROMINENCE_INSUFFICIENT",
+      "SUPPORTED"
+    ],
+    "comparisons": 3,
+    "translations": {
+      "en": true,
+      "ko": true
+    },
+    "hypernym_mapping": [
+      [
+        "Customers can enjoy a special interest",
+        [
+          "조건부(제한/한정/자격) 이익·금리·요건의 명확한 표시 의무",
+          "허위·기만적 광고표현(품질/가격/보장/혜택 등) 금지",
+          "광고의 상품·서비스 언어/설명에서의 필수정보 누락 금지"
+        ]
+      ],
+      [
+        "when opening a USD Fixed Deposit accou",
+        [
+          "조건부(제한/한정/자격) 이익·금리·요건의 명확한 표시 의무",
+          "광고의 상품·서비스 언어/설명에서의 필수정보 누락 금지"
+        ]
+      ],
+      [
+        "Promotion Period: May 1 – May 15, 2026",
+        [
+          "조건부(제한/한정/자격) 이익·금리·요건의 명확한 표시 의무",
+          "광고의 상품·서비스 언어/설명에서의 필수정보 누락 금지"
+        ]
+      ]
+    ],
+    "track_b": "MEDIUM",
+    "seconds": 125
+  },
+  {
+    "id": "kh-eval-05",
+    "run": 1,
+    "verdict": "needs_review",
+    "fired_cus": [
+      "KH-CU-02",
+      "KH-CU-04",
+      "KH-CU-07",
+      "KH-CU-16"
+    ],
+    "judgments": [
+      [
+        "KH-CU-07",
+        "INSUFFICIENT"
+      ],
+      [
+        "KH-CU-16",
+        "NOT_APPLICABLE"
+      ],
+      [
+        "KH-CU-02",
+        "INSUFFICIENT"
+      ],
+      [
+        "KH-CU-04",
+        "NOT_APPLICABLE"
+      ],
+      [
+        "KH-CU-07",
+        "INSUFFICIENT"
+      ]
+    ],
+    "kr_statute_citations": [],
+    "extraction_status": "NO_PRODUCT_DOCUMENT",
+    "comparison_statuses": [],
+    "comparisons": 0,
+    "translations": {
+      "en": true,
+      "ko": true
+    },
+    "hypernym_mapping": [
+      [
+        "PPCBank offers auto loans with low, co",
+        [
+          "허위·기만적 광고표현(품질/가격/보장/혜택 등) 금지",
+          "광고의 상품·서비스 언어/설명에서의 필수정보 누락 금지",
+          "광고 내용 진실성 및 오인·오도 금지"
+        ]
+      ],
+      [
+        "that help you get on the road faster",
+        [
+          "허위·기만적 광고표현(품질/가격/보장/혜택 등) 금지",
+          "광고 내용 진실성 및 오인·오도 금지",
+          "광고의 상품·서비스 언어/설명에서의 필수정보 누락 금지"
+        ]
+      ],
+      [
+        "Whether it’s brand new or gently used",
+        [
+          "광고의 상품·서비스 언어/설명에서의 필수정보 누락 금지",
+          "광고 내용 진실성 및 오인·오도 금지",
+          "허위·기만적 광고표현(품질/가격/보장/혜택 등) 금지"
+        ]
+      ],
+      [
+        "quick and easy approval process",
+        [
+          "허위·기만적 광고표현(품질/가격/보장/혜택 등) 금지",
+          "광고의 상품·서비스 언어/설명에서의 필수정보 누락 금지",
+          "광고 내용 진실성 및 오인·오도 금지"
+        ]
+      ],
+      [
+        "flexible repayment options",
+        [
+          "광고의 상품·서비스 언어/설명에서의 필수정보 누락 금지",
+          "광고 내용 진실성 및 오인·오도 금지",
+          "허위·기만적 광고표현(품질/가격/보장/혜택 등) 금지"
+        ]
+      ],
+      [
+        "trusted support every step of the way",
+        [
+          "광고 내용 진실성 및 오인·오도 금지",
+          "광고의 상품·서비스 언어/설명에서의 필수정보 누락 금지",
+          "허위·기만적 광고표현(품질/가격/보장/혜택 등) 금지"
+        ]
+      ],
+      [
+        "Drive Your Dream Car Sooner with a PPC",
+        [
+          "광고 내용 진실성 및 오인·오도 금지",
+          "광고의 상품·서비스 언어/설명에서의 필수정보 누락 금지",
+          "허위·기만적 광고표현(품질/가격/보장/혜택 등) 금지"
+        ]
+      ]
+    ],
+    "track_b": "MEDIUM",
+    "seconds": 110
+  }
+]

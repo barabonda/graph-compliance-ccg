@@ -9,7 +9,20 @@ from typing import Any
 
 from llm_gateway import LLMGateway
 from schemas import CUPlanItem, Claim, ContextAnchor, ContextFrame, ContextInfluence, EvidenceWindow, ExceptionReview, InterSentenceRelation, LLMJudgment, SentenceUnit
-from utils import normalize_space, stable_id, to_jsonable
+from utils import normalize_space, stable_id, to_jsonable, uses_korean_law_context
+
+
+# 비(非)한국 관할 워크스페이스에서만 judge 프롬프트에 덧붙이는 오버라이드.
+# 위 legal_basis 지침의 한국법 예시(금소법·시행령·감독규정·심의기준, 위임 사슬)를
+# 무효화하고, 각 항목의 실제 source_article(해당 관할 조문)만 인용하게 한다.
+# 한국 워크스페이스에서는 append되지 않으므로 프롬프트가 바이트 단위로 동일하다.
+NON_KR_LAW_OVERRIDE = (
+    "\n[관할 우선 규칙] 이 심사 대상은 한국이 아닌 관할의 워크스페이스입니다. legal_basis와 "
+    "conclusion에는 각 항목의 cu_plan_item.source_article에 명시된 해당 관할의 조문만 인용하세요. "
+    "위 1)에 예시로 든 한국 법령(금융소비자보호법·시행령·감독규정·금융광고 심의기준)과 "
+    "'법률→시행령→감독규정→심의기준' 위임 사슬은 이 관할에 적용되지 않으므로 절대 인용하지 마세요. "
+    "evidence에 제시되지 않은 외부 법령을 만들어내지 마세요."
+)
 
 
 # 규칙기반 행위요건(positive_feature) 코드 → 심사원이 읽는 한국어 요건명.
@@ -202,6 +215,7 @@ class LLMComplianceJudge:
         plan: list[CUPlanItem],
         windows: list[EvidenceWindow],
         product_fact_signals: dict[str, list[dict[str, Any]]] | None = None,
+        workspace_id: str = "",
     ) -> list[LLMJudgment]:
         if not plan:
             return []
@@ -276,8 +290,11 @@ class LLMComplianceJudge:
                 "대신 '근거 자료', '해당 문구', '심의 항목', '상품설명서 사실', '근거 조문'과 '위반/근거 부족/적합' "
                 "같은 한국어로 쓴다. 또한 광고 채널과 무관한 표현요소(웹 텍스트 광고에 '음성 속도' 등)를 예시로 "
                 "끌어오지 말고, 실제 매체에 맞는 근거만 든다."
-                + regulator_precedents_block()
-            ),
+                # KR 전용 꼬리: 규제당국 판단사례 few-shot 은 금소법 인용이라 비-KR 관할에선
+                # 제외하고, 대신 관할 우선 규칙(NON_KR_LAW_OVERRIDE)을 붙인다.
+                + (regulator_precedents_block() if uses_korean_law_context(workspace_id) else "")
+            )
+            + ("" if uses_korean_law_context(workspace_id) else NON_KR_LAW_OVERRIDE),
             user=f"[judgment_payload]\n{{'judgment_items': {judgment_items}}}",
         )
         seen_plan_ids: set[str] = set()

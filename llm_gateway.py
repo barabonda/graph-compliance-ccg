@@ -4,8 +4,9 @@ This module intentionally has no deterministic fallback. If the LLM environment
 is not configured, the review run should fail fast instead of silently replacing
 policy-guided context engineering with rules.
 
-Two routes, switchable by env (no hardcoding):
+Three routes, switchable by env/model (no hardcoding):
 - Cloud (default): OpenAI Responses API with strict json_schema structured output.
+- Anthropic: Claude Messages API with forced tool-use structured output.
 - Local: any OpenAI-compatible Chat Completions endpoint (e.g. Ollama on a
   Tailscale host). Set LLM_BASE_URL / LLM_API_KEY / LLM_MODEL to enable. Ollama
   only supports /v1/chat/completions, so this route uses Chat Completions with
@@ -17,19 +18,41 @@ from __future__ import annotations
 import json
 import logging
 import os
+import re
 import time
 from typing import Any
 
-from openai import BadRequestError, OpenAI
+from openai import BadRequestError as OpenAIBadRequestError
+from openai import OpenAI
+
+try:  # Optional runtime provider. Keep OpenAI/local installs working without it.
+    from anthropic import Anthropic
+except ImportError:  # pragma: no cover - exercised by runtime error path.
+    Anthropic = None  # type: ignore[assignment]
 
 
 DEFAULT_MODEL = "gpt-5.4-nano"
+DEFAULT_ANTHROPIC_MODEL = "claude-sonnet-5"
 DEFAULT_LOCAL_MODEL = "ax-4.0-light"
 LOGGER = logging.getLogger(__name__)
 
 # 로컬(Ollama) 모델 태그. 이 중 하나가 선택되면 OpenAI가 아니라 로컬 엔드포인트로
 # 보낸다 — 클라우드 기본 모드에서도 모델 드롭다운으로 로컬 모델을 쓸 수 있게.
 LOCAL_MODELS = {"ax-4.0-light", "midm-2.0-base", "exaone4-32b", "qwen3.5:9b", "gemma4"}
+ANTHROPIC_MODELS = {
+    "claude-fable-5",
+    "claude-opus-4-8",
+    "claude-opus-4-6",
+    "claude-sonnet-5",
+    "claude-haiku-4-5-20251001",
+}
+ANTHROPIC_MODEL_ALIASES = {
+    "fable-5": "claude-fable-5",
+    "opus-4.8": "claude-opus-4-8",
+    "opus-4.6": "claude-opus-4-6",
+    "sonnet-5": "claude-sonnet-5",
+    "haiku-4.5": "claude-haiku-4-5-20251001",
+}
 
 
 def _timeout_seconds() -> float:
@@ -40,6 +63,18 @@ def _max_retries() -> int:
     return int(os.environ.get("CCG_OPENAI_MAX_RETRIES", "1"))
 
 
+def _anthropic_timeout_seconds() -> float:
+    return float(os.environ.get("CCG_ANTHROPIC_TIMEOUT_SECONDS", os.environ.get("CCG_OPENAI_TIMEOUT_SECONDS", "120")))
+
+
+def _anthropic_max_retries() -> int:
+    return int(os.environ.get("CCG_ANTHROPIC_MAX_RETRIES", os.environ.get("CCG_OPENAI_MAX_RETRIES", "1")))
+
+
+def _anthropic_max_output_tokens() -> int:
+    return int(os.environ.get("CCG_ANTHROPIC_MAX_OUTPUT_TOKENS", "20000"))
+
+
 def _local_base_url() -> str:
     return (os.environ.get("LOCAL_LLM_BASE_URL") or os.environ.get("LLM_BASE_URL") or "").strip()
 
@@ -48,11 +83,21 @@ def _local_api_key() -> str:
     return os.environ.get("LOCAL_LLM_API_KEY") or os.environ.get("LLM_API_KEY") or "ollama"
 
 
+def _canonical_model_name(model: str) -> str:
+    return ANTHROPIC_MODEL_ALIASES.get(model.strip(), model.strip())
+
+
+def _is_anthropic_model(model: str) -> bool:
+    canonical = _canonical_model_name(model)
+    return canonical.startswith("claude-") or canonical in ANTHROPIC_MODELS
+
+
 class LLMGateway:
     def __init__(self, *, model: str | None = None, client: Any | None = None) -> None:
-        requested = (model or "").strip()
+        requested = _canonical_model_name(model or "")
         global_local = (os.environ.get("LLM_BASE_URL") or "").strip()
         local_base = _local_base_url()
+        provider = (os.environ.get("LLM_PROVIDER") or "").strip().lower()
 
         def _make_local(target_model: str) -> None:
             if not local_base:
@@ -70,6 +115,21 @@ class LLMGateway:
             self.model = target_model
             LOGGER.info("llm.gateway mode=chat base_url=%s model=%s", local_base, self.model)
 
+        def _make_anthropic(target_model: str) -> None:
+            if Anthropic is None:
+                raise RuntimeError(
+                    "anthropic package is required for Claude review models. "
+                    "Install anthropic or choose an OpenAI/local model."
+                )
+            if not os.environ.get("ANTHROPIC_API_KEY"):
+                raise RuntimeError(
+                    "ANTHROPIC_API_KEY is required for Claude review models; no fallback is available."
+                )
+            self.client = Anthropic(timeout=_anthropic_timeout_seconds(), max_retries=_anthropic_max_retries())
+            self.mode = "anthropic"
+            self.model = target_model
+            LOGGER.info("llm.gateway mode=anthropic model=%s", self.model)
+
         if client is not None:
             # Injected client (tests / custom): keep the Responses contract as-is.
             self.client = client
@@ -81,6 +141,8 @@ class LLMGateway:
         elif global_local:
             # 전역 로컬 토글(LLM_BASE_URL) — 모든 요청을 로컬로.
             _make_local(requested or os.environ.get("LLM_MODEL", DEFAULT_LOCAL_MODEL))
+        elif provider == "anthropic" or _is_anthropic_model(requested):
+            _make_anthropic(requested or os.environ.get("ANTHROPIC_MODEL", DEFAULT_ANTHROPIC_MODEL))
         else:
             if not os.environ.get("OPENAI_API_KEY"):
                 raise RuntimeError(
@@ -119,6 +181,8 @@ class LLMGateway:
             output_text = self._chat_structured(client, name, system, user, schema, effective_model)
             status = "completed"
             response_id = None
+        elif self.mode == "anthropic":
+            response_id, status, output_text = self._anthropic_structured(client, name, system, user, schema, effective_model)
         else:
             response = client.responses.create(
                 model=effective_model,
@@ -197,7 +261,7 @@ class LLMGateway:
                     "json_schema": {"name": name, "schema": schema, "strict": True},
                 },
             )
-        except BadRequestError:
+        except OpenAIBadRequestError:
             LOGGER.warning("llm.chat json_schema unsupported; falling back to json_object name=%s", name)
             messages[0] = {
                 "role": "system",
@@ -214,6 +278,64 @@ class LLMGateway:
             )
         content = response.choices[0].message.content or ""
         return _strip_json_fence(content)
+
+    def _anthropic_structured(
+        self,
+        client: Any,
+        name: str,
+        system: str,
+        user: str,
+        schema: dict[str, Any],
+        effective_model: str,
+    ) -> tuple[str | None, str, str]:
+        """Return JSON text from Claude forced tool-use.
+
+        Anthropic Messages does not use OpenAI's `response_format`, so we expose
+        the same JSON Schema as a single forced tool input. Claude must populate
+        the tool input; if a model unexpectedly returns text, we still parse it
+        as strict JSON instead of silently falling back to another model.
+        """
+
+        tool_name = _anthropic_tool_name(name)
+        response = client.messages.create(
+            model=effective_model,
+            max_tokens=_anthropic_max_output_tokens(),
+            temperature=0,
+            system=system,
+            messages=[{"role": "user", "content": user}],
+            tools=[
+                {
+                    "name": tool_name,
+                    "description": "Return the requested structured JSON object for the compliance workflow.",
+                    "input_schema": schema,
+                }
+            ],
+            tool_choice={"type": "tool", "name": tool_name},
+        )
+        for block in getattr(response, "content", []) or []:
+            if getattr(block, "type", None) == "tool_use" and getattr(block, "name", None) == tool_name:
+                return (
+                    getattr(response, "id", None),
+                    str(getattr(response, "stop_reason", "tool_use") or "tool_use"),
+                    json.dumps(getattr(block, "input", {}), ensure_ascii=False),
+                )
+        text_parts = [
+            getattr(block, "text", "")
+            for block in getattr(response, "content", []) or []
+            if getattr(block, "type", None) == "text"
+        ]
+        if not text_parts:
+            raise RuntimeError(f"Claude response did not contain tool_use output for {tool_name}.")
+        return (
+            getattr(response, "id", None),
+            str(getattr(response, "stop_reason", "text") or "text"),
+            _strip_json_fence("".join(text_parts)),
+        )
+
+
+def _anthropic_tool_name(name: str) -> str:
+    cleaned = re.sub(r"[^a-zA-Z0-9_-]+", "_", name).strip("_")
+    return (cleaned or "structured_output")[:64]
 
 
 def _strip_json_fence(text: str) -> str:

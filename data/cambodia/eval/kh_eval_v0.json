@@ -1,0 +1,145 @@
+{
+  "meta": {
+    "name": "kh_eval_v0",
+    "workspace_id": "graphcompliance_cambodia_ppcbank_20260630",
+    "created": "2026-07-02",
+    "note": "KH PoC eval set. Clean-ad texts are VERBATIM excerpts from saved real PPCBank pages (source_url + source_file recorded per item) — nothing invented. PoC: not reviewed by a Cambodian lawyer. Facebook real-ad item deferred (2순위).",
+    "stability_protocol": "flagship item kh-eval-01 runs 3x; expect same verdict 3/3"
+  },
+  "items": [
+    {
+      "id": "kh-eval-01",
+      "label": "khmer_violation_flagship",
+      "language": "km",
+      "title": "PPCBank Fixed Deposit (Khmer)",
+      "product_group": "deposit",
+      "selected_product_name": "PPCBank Fixed Deposit",
+      "content_text": "ប្រាក់បញ្ញើមានកាលកំណត់ PPCBank — អត្រាការប្រាក់ខ្ពស់បំផុតសម្រាប់គ្រប់គ្នា ដោយគ្មានលក្ខខណ្ឌ! ដកប្រាក់បានគ្រប់ពេល ជាមួយការប្រាក់ពេញ។",
+      "provenance": "Synthetic violation ad (Khmer), used in CC-5 E2E. Meaning: 'highest rate for everyone, no conditions! withdraw anytime with full interest.'",
+      "expected": {
+        "verdict": "reject",
+        "fired_cus_any_of": [
+          "KH-CU-16",
+          "KH-CU-07",
+          "KH-CU-02",
+          "KH-CU-04",
+          "KH-CU-01"
+        ],
+        "non_compliant_expected": true,
+        "articles_cambodia_only": true,
+        "product_comparison": "PRELOADED + CONTRADICTED (rate-by-term / eligibility / T&C / at-maturity)",
+        "ad_translations": "en + ko present"
+      },
+      "repeat": 3
+    },
+    {
+      "id": "kh-eval-02",
+      "label": "english_violation",
+      "language": "en",
+      "title": "PPCBank Fixed Deposit — Special Offer",
+      "product_group": "deposit",
+      "selected_product_name": "PPCBank Fixed Deposit",
+      "content_text": "PPCBank Fixed Deposit — the highest rate for everyone, no conditions. Withdraw anytime with full interest!",
+      "provenance": "Synthetic violation ad (English), used in CC-3/CC-6 E2E.",
+      "expected": {
+        "verdict": "reject",
+        "fired_cus_any_of": [
+          "KH-CU-16",
+          "KH-CU-04",
+          "KH-CU-07",
+          "KH-CU-02"
+        ],
+        "non_compliant_expected": true,
+        "articles_cambodia_only": true,
+        "product_comparison": "PRELOADED + CONTRADICTED (5/5 in CC-6 run)",
+        "ad_translations": "en + ko present"
+      },
+      "repeat": 1
+    },
+    {
+      "id": "kh-eval-03",
+      "label": "clean_real_page_copy",
+      "language": "en",
+      "title": "PPCBank Fixed Deposit",
+      "product_group": "deposit",
+      "selected_product_name": "PPCBank Fixed Deposit",
+      "content_text": "Earn interest on the money you deposit. If you have savings that you don’t plan to use anytime soon, a fixed deposit account will allow your money to grow with a specific interest rate depending. The longer you commit your money to being in the account, the higher the interest rate will be. Open a fixed deposit account at PPCBank today, it’s easy. Make your money work for you and let it grow.",
+      "provenance": "VERBATIM from PPCBank's real product page (data/cambodia/products/ppcbank_fixed_deposit.md lines 14-16). Source: https://www.ppcbank.com.kh/personal-banking/deposit/fixed-deposit-account/",
+      "expected": {
+        "verdict": "pass_candidate",
+        "fired_cus_any_of": [],
+        "non_compliant_expected": false,
+        "articles_cambodia_only": true,
+        "product_comparison": "PRELOADED; no CONTRADICTED (copy discloses term-dependent rates)",
+        "ad_translations": "en + ko present",
+        "note": "실광고이므로 위반 판정이 나오면 근거와 함께 그대로 보고 (숨기지 않음)"
+      },
+      "repeat": 1
+    },
+    {
+      "id": "kh-eval-03b",
+      "label": "clean_real_page_fulltext_with_rate_tables",
+      "language": "en",
+      "title": "PPCBank Fixed Deposit",
+      "product_group": "deposit",
+      "selected_product_name": "PPCBank Fixed Deposit",
+      "content_text": "Earn interest on the money you deposit.\nIf you have savings that you don’t plan to use anytime soon, a fixed deposit account will allow your money to grow with a specific interest rate depending. The longer you commit your money to being in the account, the higher the interest rate will be.\nOpen a fixed deposit account at PPCBank today, it’s easy. Make your money work for you and let it grow.\nFixed Deposit With Interest Payment At Maturity Rate\nTerms\nStandard Rate\nDigital Channel\nInterest USD\nInterest KHR\nInterest USD\nInterest KHR\n3 months\n2.50% p.a\n3.00% p.a\n2.50% p.a\n3.00% p.a\n6 months\n3.45% p.a\n3.95% p.a\n3.65% p.a\n4.15% p.a\n12 months\n4.20% p.a\n4.70% p.a\n4.40% p.a\n4.90% p.a\n18 months\n4.30% p.a\n4.80% p.a\n4.50% p.a\n5.00% p.a\n24 months\n4.40% p.a\n4.90% p.a\n4.60% p.a\n5.10% p.a\n36 months\n4.50% p.a\n–\n4.70% p.a\n–\n48 months\n4.60% p.a\n–\n4.80% p.a\n–\n60 months\n4.70% p.a\n–\n4.90% p.a\n–\nFixed Deposit With Monthly Interest Payment\nTerms\nStandard Rate\nDigital Channel\nInterest USD\nInterest KHR\nInterest USD\nInterest KHR\n3 months\n2.25% p.a\n2.75% p.a\n2.25% p.a\n2.75% p.a\n6 months\n3.20% p.a\n3.75% p.a\n3.40% p.a\n3.95% p.a\n12 months\n4.00% p.a\n4.40% p.a\n4.20% p.a\n4.60% p.a\n18 months\n4.05% p.a\n4.55% p.a\n4.25% p.a\n4.75% p.a\n24 months\n4.15% p.a\n4.70% p.a\n4.35% p.a\n4.90% p.a\n36 months\n4.25% p.a\n–\n4.45% p.a\n–\n48 months\n4.35% p.a\n–\n4.55% p.a\n–\n60 months\n4.45% p.a\n–\n4.65% p.a\n–\nRequirements\nCambodian\nNational ID Card or Valid Passport\nForeigner\nValid passport (Validity ≥ 90 days)\nEmployment certificate, contract or business certificate(s)\nBusiness Entity\nCertificate of Incorporation\nBusiness license(s) (Validity ≥ 30 days)\nMemorandum and Articles of Association\nPatent tax certificate/Tax registration letter\nBoard of directors or Directors’ Resolution\nNational ID Card or passport of owner(s), shareholders or director(s), and authorized signatories\nNGOs / NPOs\nMemorandum of Understanding (MOU) or Authorization\nArticles of Association and Organization\nTax registration letter\nBoard of Directors or Directors’ Resolution\nNational ID card or passport of founders, board of directors, or director(s) and authorized signatories",
+      "provenance": "kh-eval-03의 (b)안 후속: 같은 페이지의 금리표(기간·통화·채널, 만기/월지급)와 자격요건(Requirements)까지 포함한 전문. VERBATIM from data/cambodia/products/ppcbank_fixed_deposit.md. Source: https://www.ppcbank.com.kh/personal-banking/deposit/fixed-deposit-account/",
+      "expected": {
+        "verdict": "needs_review",
+        "fired_cus_any_of": [
+          "KH-CU-04",
+          "KH-CU-05",
+          "KH-CU-07",
+          "KH-CU-02"
+        ],
+        "non_compliant_expected": false,
+        "articles_cambodia_only": true,
+        "product_comparison": "PRELOADED; SUPPORTED 위주, NON_COMPLIANT 0건",
+        "ad_translations": "en + ko present",
+        "note": "2026-07-02 관찰값 기반 기대치: 조건 공시 포함 시 위반 단정이 사라지고 회부로 완화됨(revise→needs_review). pass_candidate는 미달 — 데모 ⑤는 (a)안(kh-eval-04 회부 내러티브) 채택"
+      },
+      "repeat": 1
+    },
+    {
+      "id": "kh-eval-04",
+      "label": "clean_real_promotion",
+      "language": "en",
+      "title": "PPCBank Royal Celebration Promotion",
+      "product_group": "deposit",
+      "selected_product_name": "PPCBank Fixed Deposit",
+      "content_text": "PPCBank is pleased to launch the “Royal Celebration” promotion. Customers can enjoy a special interest rate of up to 5.14% p.a. when opening a USD Fixed Deposit account via PPCBank Mobile App or smartBiz. Promotion Period: May 1 – May 15, 2026.",
+      "provenance": "VERBATIM from PPCBank's real product page (data/cambodia/products/ppcbank_fixed_deposit.md line 10-12). Source: https://www.ppcbank.com.kh/personal-banking/deposit/fixed-deposit-account/",
+      "expected": {
+        "verdict": "pass_candidate",
+        "fired_cus_any_of": [],
+        "non_compliant_expected": false,
+        "articles_cambodia_only": true,
+        "product_comparison": "PRELOADED; promotional_rate fact should SUPPORT ('up to 5.14%' + channel + period disclosed)",
+        "ad_translations": "en + ko present",
+        "note": "실광고이므로 위반 판정이 나오면 근거와 함께 그대로 보고"
+      },
+      "repeat": 1
+    },
+    {
+      "id": "kh-eval-05",
+      "label": "car_loan_real_copy_optional",
+      "language": "en",
+      "title": "PPCBank Auto Loan",
+      "product_group": "loan",
+      "selected_product_name": "PPCBank Car Loan",
+      "content_text": "Drive Your Dream Car Sooner with a PPCBank Auto Loan. Whether it’s brand new or gently used, PPCBank offers auto loans with low, competitive interest rates that help you get on the road faster. Enjoy a quick and easy approval process, flexible repayment options, and trusted support every step of the way.",
+      "provenance": "VERBATIM from PPCBank's real car-loan page (data/cambodia/products/ppcbank_car_loan.md lines 8-13). Source: https://www.ppcbank.com.kh/personal-banking/loan/car-loan/",
+      "expected": {
+        "verdict": "pass_candidate",
+        "fired_cus_any_of": [],
+        "non_compliant_expected": false,
+        "articles_cambodia_only": true,
+        "product_comparison": "no preloaded facts for Car Loan → legacy path → NO_PRODUCT_DOCUMENT (문서 대조 생략)",
+        "ad_translations": "en + ko present",
+        "note": "'low, competitive / easy approval' 수준의 마케팅 표현 — needs_review 가능성 있음, 결과 그대로 보고. NBC 금리상한(KH-CU-05)은 placeholder라 대출 금리 주제는 데모에서 피할 것"
+      },
+      "repeat": 1
+    }
+  ]
+}

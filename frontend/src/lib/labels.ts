@@ -1,6 +1,17 @@
 import type { FinalVerdict } from "./types";
 
 export const WORKSPACE_ID = "graphcompliance_mvp_jb_20260530";
+export const KH_WORKSPACE_ID = "graphcompliance_cambodia_ppcbank_20260630";
+
+// 은행(심사 주체) 선택 — JB금융그룹 계열사 단위. workspace_id가 정책 그래프 라우팅을
+// 담당하고(백엔드 CC-4 배선), language는 기록·참고 번역 표시용 메타데이터다.
+// 전북·광주은행은 한국 관할(금소법 체계), 프놈펜상업은행(PPCBank)은 캄보디아 관할.
+export const BANKS = [
+  { value: "jeonbuk", label: "전북은행", workspaceId: WORKSPACE_ID, language: "ko", jurisdiction: "KR" },
+  { value: "kwangju", label: "광주은행", workspaceId: WORKSPACE_ID, language: "ko", jurisdiction: "KR" },
+  { value: "ppcbank", label: "프놈펜상업은행 (PPCBank)", workspaceId: KH_WORKSPACE_ID, language: "en", jurisdiction: "KH" },
+] as const;
+export type BankValue = (typeof BANKS)[number]["value"];
 
 // 원칙(심의 카테고리)별 색 — 의미별로 구분되게(레퍼런스: 설명의무=보라/부당권유=
 // 빨강/광고규제=파랑). 변형 표기('부당권유행위 금지' 등)도 포함 매칭으로 잡는다.

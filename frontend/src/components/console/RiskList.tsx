@@ -1,7 +1,13 @@
 "use client";
 
 import { abbreviateLawNames, AUTHORITY_GROUP, principleColor, REVIEW_LAYER } from "@/lib/labels";
-import { buildIssueCards, planItemsForAnchor, type HighlightTone, type IssueCardModel } from "@/lib/selectors";
+import {
+  buildIssueCards,
+  planItemsForAnchor,
+  translationForQuote,
+  type HighlightTone,
+  type IssueCardModel,
+} from "@/lib/selectors";
 import type { ReviewOutput } from "@/lib/types";
 import { Icon } from "../Icon";
 import { EmptyState, Tag } from "../ui";
@@ -60,6 +66,8 @@ function IssueCard({
   // 심각도를 테두리·배경·pill로 중복 인코딩하면 목록 전체가 경보가 되어
   // 정작 봐야 할 카드가 묻힌다(alert fatigue). tier 구분은 그룹 헤더가 담당.
   const statusColor = isGuideline ? "var(--revise)" : color;
+  // 인용 문장의 참고 번역(비-KR 심사에서만 존재). 표시 전용.
+  const quoteTranslation = translationForQuote(result, card.quote);
   return (
     <button
       type="button"
@@ -112,6 +120,23 @@ function IssueCard({
       >
         “{card.quote}”
       </div>
+      {/* 인용 문장의 참고 번역 — 심사 근거는 원문 기준 */}
+      {quoteTranslation && (
+        <div className="mt-1 space-y-0.5 text-[11px] leading-relaxed text-ink-3">
+          {quoteTranslation.en && (
+            <div className="flex gap-1.5">
+              <span className="mt-0.5 shrink-0 rounded bg-surface-2 px-1 font-mono text-[8.5px] font-bold text-ink-4">EN</span>
+              <span>{quoteTranslation.en}</span>
+            </div>
+          )}
+          {quoteTranslation.ko && (
+            <div className="flex gap-1.5 break-keep">
+              <span className="mt-0.5 shrink-0 rounded bg-surface-2 px-1 font-mono text-[8.5px] font-bold text-ink-4">KO</span>
+              <span>{quoteTranslation.ko}</span>
+            </div>
+          )}
+        </div>
+      )}
       {/* 위반 유형 + 요건 요약 */}
       <div className="mt-0.5 flex items-baseline gap-2 text-[12.5px] text-ink-3">
         <span>{card.label}</span>

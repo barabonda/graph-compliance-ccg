@@ -5,7 +5,7 @@ from __future__ import annotations
 from disclosure_catalog import PROMINENCE_BALANCE_BASIS, disclosure_profile, resolve_representative_basis
 from legal_hierarchy import parent_articles_for
 from schemas import ExceptionReview, LLMJudgment, ReviewGraph, ReviewInput, ReviewOutput
-from utils import to_jsonable
+from utils import to_jsonable, uses_korean_law_context
 
 
 ACTIONABLE_ANCHOR_TYPES = {"claim_anchor", "risk_anchor"}
@@ -96,7 +96,11 @@ def build_output(
                     situation="missing",
                 )
                 if not basis["representative_basis"]:
-                    basis = {"representative_basis": "금소법 제22조", "authority_tier": "law", "co_basis": "", "tier_note": ""}
+                    # KR 폴백만 모법 하드코딩 — 비-KR 관할에 한국법을 주입하지 않는다.
+                    if uses_korean_law_context(review_input.workspace_id):
+                        basis = {"representative_basis": "금소법 제22조", "authority_tier": "law", "co_basis": "", "tier_note": ""}
+                    else:
+                        basis = {"representative_basis": "", "authority_tier": "", "co_basis": "", "tier_note": ""}
             rationale = str(diagnostic.get("message") or "")
             if basis.get("tier_note"):
                 rationale = f"{basis['tier_note']} {rationale}".strip()

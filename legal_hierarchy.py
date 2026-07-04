@@ -40,13 +40,27 @@ def normalize_key(text: str) -> str:
     return "".join(str(text or "").split())
 
 
+def _creds_for_workspace(workspace_id: str) -> tuple[str, str, str]:
+    """팀 공용 Aura(KR 코퍼스) 읽기 전용 라우팅 — retriever/copilot_tools와 동일 규칙."""
+    team = {t.strip() for t in os.environ.get("TEAM_NEO4J_WORKSPACES", "").replace(",", " ").split() if t.strip()}
+    if workspace_id in team:
+        uri = os.environ.get("TEAM_NEO4J_URI", "")
+        user = os.environ.get("TEAM_NEO4J_USER", "")
+        password = os.environ.get("TEAM_NEO4J_PASSWORD", "")
+        if uri and user and password:
+            return uri, user, password
+    return (
+        os.environ.get("NEO4J_URI", ""),
+        os.environ.get("NEO4J_USER") or "",
+        os.environ.get("NEO4J_PASSWORD", ""),
+    )
+
+
 @lru_cache(maxsize=4)
 def load_parent_map(workspace_id: str) -> dict[tuple[str, str], tuple[str, ...]]:
     """(정규화된 법령명, 제N조) → 병기할 모법 조문 목록. 실패 시 빈 dict."""
     load_local_env()
-    uri = os.environ.get("NEO4J_URI")
-    user = os.environ.get("NEO4J_USER")
-    password = os.environ.get("NEO4J_PASSWORD")
+    uri, user, password = _creds_for_workspace(workspace_id)
     if not uri or not user or not password:
         logger.info("legal_hierarchy: NEO4J env not set; parent-article enrichment disabled")
         return {}
