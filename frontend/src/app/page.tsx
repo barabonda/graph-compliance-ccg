@@ -1,7 +1,7 @@
 "use client";
 
 import { CopilotKit } from "@copilotkit/react-core/v2";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { AdPane } from "@/components/console/AdPane";
 import { ReviewCopilot } from "@/components/copilot/ReviewCopilot";
 import { DetailPane } from "@/components/console/DetailPane";
@@ -41,6 +41,23 @@ export default function Page() {
   const [decision, setDecision] = useState<DecisionKey | null>(null);
   const [toast, setToast] = useState<string | null>(null);
   const [draftPreset, setDraftPreset] = useState<Partial<ReviewRequest> | null>(null);
+  // 발표용 화면 포커스 — 심사 콘솔에서 한 페인만 전폭으로 확대(정보량 조절).
+  const [consoleFocus, setConsoleFocus] = useState<"all" | "ad" | "risk" | "detail">("all");
+
+  // 발표 단축키: 1(원문) 2(위험 카드) 3(판정 상세) 0·ESC(전체). 입력 중에는 무시.
+  useEffect(() => {
+    if (view !== "review") return;
+    const onKey = (event: KeyboardEvent) => {
+      const target = event.target as HTMLElement | null;
+      if (target && (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable)) return;
+      if (event.key === "1") setConsoleFocus("ad");
+      else if (event.key === "2") setConsoleFocus("risk");
+      else if (event.key === "3") setConsoleFocus("detail");
+      else if (event.key === "0" || event.key === "Escape") setConsoleFocus("all");
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [view]);
 
   const handleSubmit = useCallback(
     async (payload: ReviewRequest, options?: { stayOnNew?: boolean }): Promise<boolean> => {
@@ -267,38 +284,74 @@ export default function Page() {
             (result ? (
               <div className="flex h-full min-h-0 flex-col gap-3.5">
                 <ExecSummary result={result} resolved={resolved} />
+                {/* 발표용 화면 포커스 — 한 페인만 전폭으로. 단축키 1·2·3, ESC 복귀 */}
+                <div className="flex items-center justify-end gap-1 text-[11.5px]">
+                  <span className="mr-1 font-bold text-ink-4">화면</span>
+                  {(
+                    [
+                      { key: "all", label: "전체" },
+                      { key: "ad", label: "원문 ¹" },
+                      { key: "risk", label: "위험 카드 ²" },
+                      { key: "detail", label: "판정 상세 ³" },
+                    ] as const
+                  ).map((option) => (
+                    <button
+                      key={option.key}
+                      type="button"
+                      onClick={() => setConsoleFocus(option.key)}
+                      className={`rounded-md px-2.5 py-1 font-bold transition ${
+                        consoleFocus === option.key
+                          ? "bg-ink text-white"
+                          : "border border-line bg-surface text-ink-3 hover:border-brand hover:text-brand"
+                      }`}
+                    >
+                      {option.label}
+                    </button>
+                  ))}
+                </div>
                 <div
                   className="grid min-h-0 flex-1 overflow-hidden rounded-[14px] border border-line bg-surface shadow-panel"
                   style={{
-                    gridTemplateColumns: "minmax(300px,1.12fr) minmax(244px,.8fr) minmax(310px,1.1fr)",
+                    gridTemplateColumns:
+                      consoleFocus === "all"
+                        ? "minmax(300px,1.12fr) minmax(244px,.8fr) minmax(310px,1.1fr)"
+                        : "minmax(0,1fr)",
                     // 암시적 행이 auto로 내용만큼 늘어나면 페인 내부 스크롤이 죽는다 —
                     // 행 트랙을 컨테이너 높이에 고정해 각 페인이 독립 스크롤되게 한다.
                     gridTemplateRows: "minmax(0, 1fr)",
+                    // 발표 포커스: 페인 하나만 남으면 실제 글자도 커져야 한다.
+                    ...(consoleFocus !== "all" ? { zoom: 1.2 } : {}),
                   }}
                 >
-                  <AdPane
-                    result={result}
-                    reviewedText={state.reviewedText}
-                    reviewTitle={meta.title}
-                    channelLabel={meta.channelLabel}
-                    selectedAnchorId={state.selectedAnchorId}
-                    resolved={resolved}
-                    onSelectAnchor={selectAnchor}
-                    onToggleResolve={handleToggleResolve}
-                  />
-                  <RiskList
-                    result={result}
-                    selectedAnchorId={state.selectedAnchorId}
-                    resolved={resolved}
-                    onSelectAnchor={selectAnchor}
-                  />
-                  <DetailPane
-                    result={result}
-                    selectedAnchorId={state.selectedAnchorId}
-                    resolved={resolved}
-                    onToggleResolve={handleToggleResolve}
-                    onGotoGraph={() => setView("graph")}
-                  />
+                  {(consoleFocus === "all" || consoleFocus === "ad") && (
+                    <AdPane
+                      result={result}
+                      reviewedText={state.reviewedText}
+                      reviewTitle={meta.title}
+                      channelLabel={meta.channelLabel}
+                      selectedAnchorId={state.selectedAnchorId}
+                      resolved={resolved}
+                      onSelectAnchor={selectAnchor}
+                      onToggleResolve={handleToggleResolve}
+                    />
+                  )}
+                  {(consoleFocus === "all" || consoleFocus === "risk") && (
+                    <RiskList
+                      result={result}
+                      selectedAnchorId={state.selectedAnchorId}
+                      resolved={resolved}
+                      onSelectAnchor={selectAnchor}
+                    />
+                  )}
+                  {(consoleFocus === "all" || consoleFocus === "detail") && (
+                    <DetailPane
+                      result={result}
+                      selectedAnchorId={state.selectedAnchorId}
+                      resolved={resolved}
+                      onToggleResolve={handleToggleResolve}
+                      onGotoGraph={() => setView("graph")}
+                    />
+                  )}
                 </div>
               </div>
             ) : (
