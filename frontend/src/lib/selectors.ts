@@ -1346,6 +1346,14 @@ export interface DisclosureItem {
   onMissing: string;
   gateStatus: string;
   gateReason: string;
+  /** 대표 근거 조문(tier 규칙 적용) — 없으면 카탈로그 source. */
+  basis: string;
+  /** 병기 근거(다른 tier 쪽 조문). */
+  coBasis: string;
+  /** "law"(법령 위반 근거) | "guideline"(심의기준 미흡) | "". */
+  authorityTier: string;
+  /** guideline tier 안내("법령 위반이 아닌 심의기준 미흡입니다."). */
+  tierNote: string;
 }
 
 const DISCLOSURE_SATISFIED_STATUSES = new Set(["PRESENT"]);
@@ -1446,7 +1454,8 @@ export function buildDisclosureItems(result: ReviewOutput): DisclosureItem[] {
     const status = disclosureStatus(check);
     return {
       id: check.check_id,
-      label: check.label,
+      // 과거 run 스냅샷은 label에 체크 ID가 그대로 저장돼 있을 수 있음 — 매핑 폴백.
+      label: check.label && check.label !== check.check_id ? check.label : (DISCLOSURE_LABELS[check.check_id] ?? check.label),
       desc: meta.desc,
       required: disclosureCountsAsRequired(check, meta.required),
       present: disclosureIsSatisfied(check),
@@ -1457,6 +1466,10 @@ export function buildDisclosureItems(result: ReviewOutput): DisclosureItem[] {
       onMissing: String(check.on_missing ?? ""),
       gateStatus: String(check.gate_status ?? ""),
       gateReason: String(check.gate_reason ?? ""),
+      basis: String(check.representative_basis || check.source || ""),
+      coBasis: String(check.co_basis ?? ""),
+      authorityTier: String(check.authority_tier ?? ""),
+      tierNote: String(check.tier_note ?? ""),
     };
   });
 }

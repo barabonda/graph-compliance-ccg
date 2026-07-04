@@ -183,6 +183,7 @@ export const DISCLOSURE_LABELS: Record<string, string> = {
   disc_seller_name: "판매업자 명칭",
   disc_economic_interest_notice: "경제적 이해관계",
   disc_direct_seller_confirmation: "직접판매업자 확인",
+  disc_loan_rate_basis: "이자율 범위·산출기준",
   disc_loan_conditions: "대출 조건",
   disc_overdue_interest_rate: "연체이자율",
   disc_early_repayment_fee: "중도상환수수료",
