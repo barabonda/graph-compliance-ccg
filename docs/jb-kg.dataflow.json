@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "diagram_type": "dataflow",
+  "meta": {
+    "title": "정책 지식그래프 파이프라인",
+    "subtitle": "JB Compliance — 법령이 심의 근거가 되기까지",
+    "output": "jb-kg-dataflow.html",
+    "viewBox": [940, 720]
+  },
+  "stages": [
+    { "label": "원천" },
+    { "label": "구조화" },
+    { "label": "그래프 적재" },
+    { "label": "심의 소비" }
+  ],
+  "nodes": [
+    { "id": "laws", "type": "external", "label": "법령·규정", "sublabel": "금소법·자본시장법", "stage": 0, "row": 0 },
+    { "id": "guides", "type": "external", "label": "협회 가이드라인", "sublabel": "광고 심의 기준", "stage": 0, "row": 1 },
+    { "id": "products", "type": "external", "label": "상품 정보", "sublabel": "예금·대출·투자", "stage": 0, "row": 2 },
+    { "id": "parser", "type": "backend", "label": "조항 파서", "sublabel": "조문 단위 분해", "stage": 1, "row": 0 },
+    { "id": "extractor", "type": "backend", "label": "관계 추출", "sublabel": "LLM 구조화", "stage": 1, "row": 2 },
+    { "id": "kg", "type": "database", "label": "Neo4j Aura", "sublabel": "80,921 nodes", "stage": 2, "row": 1, "tag": "17 분류체계" },
+    { "id": "matcher", "type": "backend", "label": "조항 매칭", "sublabel": "템플릿 + T2C", "stage": 3, "row": 0 },
+    { "id": "judge", "type": "security", "label": "LLM Judge", "sublabel": "위반 판정", "stage": 3, "row": 2 },
+    { "id": "ontology", "type": "frontend", "label": "온톨로지 탐색기", "sublabel": "/ontology", "stage": 3, "row": 4 }
+  ],
+  "flows": [
+    { "from": "laws", "to": "parser", "label": "조문 텍스트", "variant": "emphasis" },
+    { "from": "guides", "to": "parser", "label": "심의 기준 항목" },
+    { "from": "products", "to": "extractor", "label": "상품 속성" },
+    { "from": "parser", "to": "extractor", "label": "조문 구조", "variant": "emphasis" },
+    { "from": "extractor", "to": "kg", "label": "노드·관계", "classification": "배치 컴파일", "variant": "emphasis" },
+    { "from": "kg", "to": "matcher", "label": "후보 조항", "classification": "읽기 전용", "variant": "emphasis" },
+    { "from": "kg", "to": "judge", "label": "조항 원문·근거", "classification": "읽기 전용" },
+    { "from": "kg", "to": "ontology", "label": "스키마 스냅샷", "classification": "배치", "variant": "dashed" }
+  ],
+  "cards": [
+    { "dot": "cyan", "title": "규모", "items": ["80,921 노드 · 116 메타관계 · 17 분류체계", "워크스페이스별 언어 게이트 (KO / KM·EN)"] },
+    { "dot": "emerald", "title": "갱신", "items": ["법령 개정 시 배치 재컴파일", "심의 경로는 항상 읽기 전용 — 심의가 그래프를 오염시키지 않음"] }
+  ]
+}

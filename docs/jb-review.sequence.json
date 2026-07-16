@@ -1,0 +1,54 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "광고 심의 요청 시퀀스",
+    "subtitle": "JB Compliance — 광고 1건이 위험카드가 되기까지",
+    "output": "jb-review-sequence.html",
+    "viewBox": [820, 800]
+  },
+  "participants": [
+    { "id": "officer", "type": "external", "label": "담당자", "sublabel": "준법감시" },
+    { "id": "web", "type": "frontend", "label": "Next.js", "sublabel": "워크스페이스" },
+    { "id": "api", "type": "backend", "label": "FastAPI", "sublabel": "심의 API" },
+    { "id": "kg", "type": "database", "label": "Neo4j", "sublabel": "정책 KG" },
+    { "id": "judge", "type": "security", "label": "Judge", "sublabel": "위반 판정" },
+    { "id": "llm", "type": "cloud", "label": "OpenAI", "sublabel": "GPT" }
+  ],
+  "segments": [
+    { "from": 150, "to": 243, "label": "01 / 접수" },
+    { "from": 253, "to": 320, "label": "02 / 맥락 추출" },
+    { "from": 333, "to": 400, "label": "03 / 조항 매칭" },
+    { "from": 413, "to": 548, "label": "04 / 판정" },
+    { "from": 561, "to": 700, "label": "05 / 번역·응답" }
+  ],
+  "messages": [
+    { "from": "officer", "to": "web", "y": 188, "label": "광고 등록" },
+    { "from": "web", "to": "api", "y": 226, "label": "POST /review", "variant": "emphasis" },
+    { "from": "api", "to": "llm", "y": 270, "label": "계층적 맥락 추출" },
+    { "from": "llm", "to": "api", "y": 305, "label": "클레임·문맥", "variant": "return" },
+    { "from": "api", "to": "kg", "y": 350, "label": "조항 매칭 Cypher", "variant": "emphasis" },
+    { "from": "kg", "to": "api", "y": 385, "label": "후보 조항", "variant": "return" },
+    { "from": "api", "to": "judge", "y": 430, "label": "판정 요청", "variant": "emphasis" },
+    { "from": "judge", "to": "llm", "y": 465, "label": "위반 판정·수정문", "variant": "security" },
+    { "from": "llm", "to": "judge", "y": 500, "label": "판정 결과", "variant": "return" },
+    { "from": "judge", "to": "api", "y": 535, "label": "위험카드", "variant": "return" },
+    { "from": "api", "to": "llm", "y": 580, "label": "KM/EN/KO 번역", "variant": "dashed" },
+    { "from": "llm", "to": "api", "y": 612, "label": "3언어 문안", "variant": "return" },
+    { "from": "api", "to": "web", "y": 652, "label": "위험카드·수정문", "variant": "return" },
+    { "from": "web", "to": "officer", "y": 686, "label": "심의 결과 표시", "variant": "return" }
+  ],
+  "activations": [
+    { "participant": "web", "from": 220, "to": 692, "type": "frontend" },
+    { "participant": "api", "from": 226, "to": 658, "type": "backend" },
+    { "participant": "kg", "from": 345, "to": 392, "type": "database" },
+    { "participant": "judge", "from": 425, "to": 542, "type": "security" },
+    { "participant": "llm", "from": 265, "to": 310, "type": "cloud" },
+    { "participant": "llm", "from": 460, "to": 505, "type": "cloud" },
+    { "participant": "llm", "from": 575, "to": 618, "type": "cloud" }
+  ],
+  "cards": [
+    { "dot": "emerald", "title": "메인 경로", "items": ["추출 → 매칭 → 판정 → 번역, 한 요청에 LLM 3회 호출", "조항 매칭은 템플릿 쿼리 우선, 실패 시 Text2Cypher 폴백"] },
+    { "dot": "rose", "title": "가드", "items": ["KG 접근은 읽기 전용 · 워크스페이스 언어 게이트 적용", "판정·수정문은 근거 조항 ID를 반드시 인용"] }
+  ]
+}

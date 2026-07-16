@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "JB Compliance",
+    "subtitle": "금융광고 사전심의 AI — 정책 지식그래프 기반 아키텍처",
+    "output": "jb-compliance-architecture.html"
+  },
+  "components": [
+    { "id": "users", "type": "external", "label": "준법감시 담당자", "sublabel": "Browser", "pos": [40, 300], "size": [150, 60] },
+    { "id": "nextjs", "type": "frontend", "label": "Next.js 워크스페이스", "sublabel": "심의 UI · KM/EN/KO", "pos": [250, 300], "size": [170, 60] },
+    { "id": "fastapi", "type": "backend", "label": "FastAPI 심의 API", "sublabel": ":8770", "pos": [490, 300], "size": [150, 60] },
+    { "id": "extraction", "type": "backend", "label": "맥락 추출", "sublabel": "계층적 컨텍스트 (LLM)", "pos": [720, 140], "size": [170, 60] },
+    { "id": "matching", "type": "backend", "label": "조항 매칭", "sublabel": "템플릿 + Text2Cypher", "pos": [720, 300], "size": [170, 60] },
+    { "id": "judge", "type": "security", "label": "LLM Judge", "sublabel": "위반 판정 · 수정문", "pos": [720, 460], "size": [170, 60] },
+    { "id": "neo4j", "type": "database", "label": "Neo4j Aura", "sublabel": "정책 KG 80,921 nodes", "pos": [990, 300], "size": [180, 60] },
+    { "id": "openai", "type": "cloud", "label": "OpenAI API", "sublabel": "GPT + gpt-image", "pos": [720, 640], "size": [170, 60] },
+    { "id": "sources", "type": "external", "label": "법령·가이드라인", "sublabel": "금소법 · 자본시장법 등", "pos": [990, 640], "size": [180, 60] }
+  ],
+  "boundaries": [
+    { "kind": "region", "label": "심의 파이프라인 (FastAPI 서버)", "wraps": ["fastapi", "extraction", "matching", "judge"] },
+    { "kind": "security-group", "label": "정책 지식그래프 (읽기 전용)", "wraps": ["neo4j"] }
+  ],
+  "connections": [
+    { "from": "users", "to": "nextjs", "label": "HTTPS", "variant": "emphasis" },
+    { "from": "nextjs", "to": "fastapi", "label": "REST", "variant": "emphasis" },
+    { "from": "fastapi", "to": "extraction", "label": "광고 원문", "variant": "emphasis", "fromSide": "top", "toSide": "left", "route": "orthogonal-v" },
+    { "from": "extraction", "to": "matching", "variant": "emphasis", "fromSide": "bottom", "toSide": "top" },
+    { "from": "matching", "to": "judge", "variant": "emphasis", "fromSide": "bottom", "toSide": "top" },
+    { "from": "matching", "to": "neo4j", "label": "Cypher", "variant": "emphasis" },
+    { "from": "judge", "to": "openai", "label": "판정·생성 호출", "variant": "dashed", "fromSide": "bottom", "toSide": "top", "labelDy": 60 },
+    { "from": "sources", "to": "neo4j", "label": "KG 컴파일 (배치)", "variant": "dashed", "fromSide": "top", "toSide": "bottom", "labelDy": -60 }
+  ],
+  "cards": [
+    { "dot": "cyan", "title": "산출물", "items": ["위험카드 · 원문 · 수정문 — KM/EN/KO 3언어 병기", "이미지 수정 가이드 (이미지 원문 보존 필터)"] },
+    { "dot": "emerald", "title": "쿼리 전략", "items": ["템플릿 쿼리 우선, Text2Cypher 폴백", "읽기 전용 가드 · 워크스페이스 언어 게이트"] },
+    { "dot": "rose", "title": "지식그래프", "items": ["80,921 노드 · 116 메타관계 · 17 분류체계", "법령 · 감독규정 · 협회 가이드라인을 배치 컴파일"] }
+  ]
+}
